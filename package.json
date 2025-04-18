@@ -1,0 +1,53 @@
+{
+    "name": "@yehezkieldio/artemis",
+    "version": "0.0.0",
+    "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
+    "author": "Yehezkiel Dio Sinolungan <yehezkieldio@proton.me>",
+    "license": "MIT",
+    "type": "module",
+    "module": "./dist/index.js",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "bin": {
+        "artemis": "./bin/artemis.js"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "start:debug": "bun run src/cli.ts",
+        "lint": "biome check .",
+        "lint:fix": "biome check . --fix --unsafe",
+        "format": "biome format . --write",
+        "typecheck": "tsc --noEmit",
+        "build": "bun run scripts/build.ts"
+    },
+    "dependencies": {
+        "c12": "^3.0.3",
+        "commander": "^13.1.0",
+        "consola": "^3.4.2",
+        "conventional-recommended-bump": "^11.0.0",
+        "neverthrow": "^8.2.0",
+        "semver": "^7.7.1"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.0.0-beta.1",
+        "@types/bun": "^1.2.10",
+        "@types/node": "^22.14.1",
+        "@types/semver": "^7.7.0",
+        "dets": "^0.16.8",
+        "typescript": "^5.8.3"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "dist",
+        "bin"
+    ],
+    "homepage": "https://github.com/yehezkieldio/artemis#readme",
+    "repository": "github:yehezkieldio/artemis"
+}
