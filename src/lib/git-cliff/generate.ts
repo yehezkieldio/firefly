@@ -14,6 +14,7 @@ export function generateChangelog(context: ArtemisContext): ResultAsync<ArtemisC
 
     return initialStep
         .andThen((): ResultAsync<GitCliffOptions, Error> => createGitCliffOptions(context))
+        .andTee((): void => logger.verbose("Generating changelog..."))
         .andThen((options: GitCliffOptions): ResultAsync<string, Error> => executeGitCliff(options))
         .andThen((content: string): ResultAsync<ArtemisContext, Error> => {
             return updateChangelogInContext(context, content).andTee((): void =>
@@ -34,7 +35,6 @@ function executeGitCliff(options: GitCliffOptions): ResultAsync<string, Error> {
 }
 
 function handleFileCreation(context: ArtemisContext): ResultAsync<boolean, Error> {
-    // No need to check dryRun here as it's handled in generateChangelog
     return fs.createIfNotExists(context.config.changelogPath || "CHANGELOG.md").mapErr((error: Error): Error => {
         logger.error("Error creating changelog file:", error);
         return error;
