@@ -1,0 +1,81 @@
+import { okAsync, ResultAsync } from "neverthrow";
+import { updateVersionInContext } from "#/context";
+import { logger } from "#/lib/logger";
+import { generateAutomaticVersion } from "#/lib/semver/automatic";
+import { generateManualVersion } from "#/lib/semver/manual";
+import { createErrorFromUnknown } from "#/lib/utils";
+import type { ArtemisContext, BumpStrategy, PromptSelectChoice } from "#/types";
+
+const strategies: PromptSelectChoice[] = [
+    {
+        label: "Automatic Bump",
+        value: "auto",
+        hint: "Automatically determine the version bump using conventional commits"
+    },
+    {
+        label: "Manual Bump",
+        value: "manual",
+        hint: "Manually select the version bump"
+    }
+];
+
+type StrategyHandler = (context: ArtemisContext) => ResultAsync<ArtemisContext, Error>;
+type StrategyHandlers = Record<BumpStrategy, StrategyHandler>;
+
+export function generateVersion(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
+    if (context.options.skipBump) {
+        return okAsync(context);
+    }
+
+    return selectBumpStrategy(context);
+}
+
+function selectBumpStrategy(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
+    function executeStrategy(context: ArtemisContext, strategy: BumpStrategy): ResultAsync<ArtemisContext, Error> {
+        const handlers: StrategyHandlers = getStrategyHandlers();
+        return handlers[strategy](context);
+    }
+
+    if (context.options.bumpStrategy) {
+        return executeStrategy(context, context.options.bumpStrategy as BumpStrategy);
+    }
+
+    function promptStrategy(): ResultAsync<BumpStrategy, Error> {
+        return ResultAsync.fromPromise(
+            logger.prompt("Pick a version strategy", {
+                type: "select",
+                options: strategies,
+                initial: strategies[1]!.value,
+                cancel: "reject"
+            }) as Promise<BumpStrategy>,
+            (e: unknown): Error => createErrorFromUnknown(e, "Failed to prompt for version strategy")
+        );
+    }
+
+    return promptStrategy().andThen(
+        (strategy: BumpStrategy): ResultAsync<ArtemisContext, Error> => executeStrategy(context, strategy)
+    );
+}
+
+function getStrategyHandlers(): StrategyHandlers {
+    function createManualVersionHandler(): StrategyHandler {
+        return (context: ArtemisContext): ResultAsync<ArtemisContext, Error> => {
+            return generateManualVersion(context).andThen((version: string): ResultAsync<ArtemisContext, Error> => {
+                return updateVersionInContext(context, version);
+            });
+        };
+    }
+
+    function createAutomaticVersionHandler(): StrategyHandler {
+        return (context: ArtemisContext): ResultAsync<ArtemisContext, Error> => {
+            return generateAutomaticVersion(context).andThen((version: string): ResultAsync<ArtemisContext, Error> => {
+                return updateVersionInContext(context, version);
+            });
+        };
+    }
+
+    return {
+        auto: createAutomaticVersionHandler(),
+        manual: createManualVersionHandler()
+    };
+}
