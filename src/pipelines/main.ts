@@ -1,10 +1,11 @@
 import { LogLevels } from "consola";
 import { colors } from "consola/utils";
-import { type ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { createContext } from "#/context";
 import { getFileConfiguration } from "#/lib/config";
 import { CWD_PACKAGE_PATH } from "#/lib/constants";
 import { fs } from "#/lib/fs";
+import { extractRepository, getRepository, getRepositoryUsingGitHubCLI, type Repository } from "#/lib/git";
 import { logger } from "#/lib/logger";
 import { type PackageJson, pkgJson } from "#/lib/package-json";
 import { createRollbackStack, executeWithRollback, type RollbackOperation } from "#/lib/rollback";
@@ -69,6 +70,40 @@ export function createPipeline(options: ArtemisOptions): ResultAsync<void, Error
 function createContextFromOptions(options: ArtemisOptions): ResultAsync<ArtemisContext, Error> {
     if (options.verbose) logger.level = LogLevels.verbose;
 
+    function checkRepositoryConfiguration(
+        configuration: ArtemisConfiguration
+    ): ResultAsync<ArtemisConfiguration, Error> {
+        const repoPattern = /^[^/]+\/[^/]+$/;
+
+        if (!configuration.repository || configuration.repository.trim() === "") {
+            logger.verbose("Repository not configured, attempting to detect from git");
+            return getRepository()
+                .orElse(() => {
+                    logger.verbose("Failed to get repository from git, trying GitHub CLI");
+                    return getRepositoryUsingGitHubCLI().andThen((url: string): ResultAsync<Repository, Error> => {
+                        const result = extractRepository(url);
+                        if (result.isOk()) {
+                            const ownerRepo = `${result.value.owner}/${result.value.repo}` as Repository;
+                            return okAsync(ownerRepo);
+                        }
+                        return errAsync(result.error);
+                    });
+                })
+                .map(
+                    (repository: Repository): ArtemisConfiguration => ({
+                        ...configuration,
+                        repository
+                    })
+                );
+        }
+
+        if (!repoPattern.test(configuration.repository)) {
+            return errAsync(new Error("Repository in configuration file must be in the format of <owner>/<repo>"));
+        }
+
+        return okAsync(configuration);
+    }
+
     function enrichWithVersion(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
         function getVersion(): ResultAsync<string, Error> {
             return fs.getJsonFromFile<PackageJson>(CWD_PACKAGE_PATH).andThen(pkgJson.getPackageVersion);
@@ -83,6 +118,7 @@ function createContextFromOptions(options: ArtemisOptions): ResultAsync<ArtemisC
     }
 
     return getFileConfiguration()
+        .andThen(checkRepositoryConfiguration)
         .andThen((configuration: ArtemisConfiguration): ResultAsync<ArtemisContext, Error> => {
             return createContext(options, configuration);
         })

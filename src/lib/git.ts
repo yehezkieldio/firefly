@@ -83,7 +83,7 @@ export function isGitHubAuthenticated(): ResultAsync<boolean, Error> {
         });
 }
 
-export function getRepositoryUsingGitHubCli(): ResultAsync<string, Error> {
+export function getRepositoryUsingGitHubCLI(): ResultAsync<string, Error> {
     return executeGitHubCLI(["repo", "view", "--json", "url"])
         .map((result: string): string => {
             const json: { url: string } = JSON.parse(result);
@@ -111,7 +111,7 @@ export function getRepository(): ResultAsync<Repository, Error> {
     });
 }
 
-function extractRepository(url: string): Result<RepositoryObject, Error> {
+export function extractRepository(url: string): Result<RepositoryObject, Error> {
     const cleanUrl: string = url.trim().replace(/\.git$/, "");
 
     const sshMatch: RegExpMatchArray | null = cleanUrl.match(/^git@github\.com:([^/]+)\/(.+)$/);
