@@ -26,6 +26,8 @@
         "build": "bun run scripts/build.ts"
     },
     "dependencies": {
+        "@octokit/auth-token": "^5.1.2",
+        "@octokit/core": "^6.1.5",
         "c12": "^3.0.3",
         "commander": "^13.1.0",
         "consola": "^3.4.2",
