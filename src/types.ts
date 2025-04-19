@@ -89,6 +89,36 @@ export interface ArtemisConfiguration {
      * @example "my-org/my-repo"
      */
     repository?: string;
+
+    /**
+     * The path to the changelog file.
+     * @default "CHANGELOG.md"
+     */
+    changelogPath?: string;
+
+    /**
+     * The commit message format for the release.
+     * @default "chore(release): release {{name}}@{{version}}"
+     */
+    commitMessage?: string;
+
+    /**
+     * The tag name format for the release.
+     * @default "v{{version}}"
+     */
+    tagName?: string;
+
+    /**
+     * The tag annotation format for the release.
+     * @default "{{name}}@{{version}}"
+     */
+    tagAnnotation?: string;
+
+    /**
+     * The title format for the GitHub release.
+     * @default "{{name}}@{{version}}"
+     */
+    gitHubReleaseTitle?: string;
 }
 
 export interface ArtemisContext {

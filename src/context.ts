@@ -64,7 +64,12 @@ export function createDefaultConfiguration(): Readonly<ArtemisConfiguration> {
         name: "",
         base: "",
         scope: "",
-        repository: ""
+        repository: "",
+        changelogPath: "CHANGELOG.md",
+        commitMessage: "chore(release): release {{name}}@{{version}}",
+        tagName: "v{{version}}",
+        tagAnnotation: "{{name}}@{{version}}",
+        gitHubReleaseTitle: "{{name}}@{{version}}"
     });
 }
 

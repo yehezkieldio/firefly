@@ -5,7 +5,7 @@ import { extractRepository, getRepository, type Repository } from "#/lib/git";
 import { getRepositoryUsingGitHubCLI } from "#/lib/github";
 import { logger } from "#/lib/logger";
 import { createErrorFromUnknown } from "#/lib/utils";
-import type { ArtemisConfiguration } from "#/types";
+import type { ArtemisConfiguration, ArtemisContext } from "#/types";
 
 export function getFileConfiguration(): ResultAsync<ArtemisConfiguration, Error> {
     return ResultAsync.fromPromise(
@@ -53,4 +53,71 @@ export function checkRepositoryConfiguration(
     }
 
     return okAsync(configuration);
+}
+
+export function getFullPackageName(configuration: ArtemisConfiguration): string {
+    if (configuration.base) {
+        return `${configuration.base}/${configuration.name!}`;
+    }
+
+    return configuration.name!;
+}
+
+export function resolveCommitMessage(context: ArtemisContext): string {
+    let message: string = context.config.commitMessage!;
+    const name: string = getFullPackageName(context.config);
+
+    if (message.includes("{{version}}")) {
+        message = message.replace("{{version}}", context.nextVersion || "");
+    }
+
+    if (message.includes("{{name}}")) {
+        message = message.replace("{{name}}", name);
+    }
+
+    return message;
+}
+
+export function resolveTagName(context: ArtemisContext): string {
+    let tagName: string = context.config.tagName!;
+    const name: string = getFullPackageName(context.config);
+
+    if (tagName.includes("{{version}}")) {
+        tagName = tagName.replace("{{version}}", context.nextVersion || "");
+    }
+
+    if (tagName.includes("{{name}}")) {
+        tagName = tagName.replace("{{name}}", name);
+    }
+
+    return tagName;
+}
+
+export function resolveTagNameAnnotation(context: ArtemisContext): string {
+    let tagAnnotation: string = context.config.tagAnnotation!;
+    const name: string = getFullPackageName(context.config);
+
+    if (tagAnnotation.includes("{{version}}")) {
+        tagAnnotation = tagAnnotation.replace("{{version}}", context.nextVersion || "");
+    }
+
+    if (tagAnnotation.includes("{{name}}")) {
+        tagAnnotation = tagAnnotation.replace("{{name}}", name);
+    }
+    return tagAnnotation;
+}
+
+export function resolveReleaseTitle(context: ArtemisContext): string {
+    let title: string = context.config.gitHubReleaseTitle!;
+    const name: string = getFullPackageName(context.config);
+
+    if (title.includes("{{version}}")) {
+        title = title.replace("{{version}}", context.nextVersion || "");
+    }
+
+    if (title.includes("{{name}}")) {
+        title = title.replace("{{name}}", name);
+    }
+
+    return title;
 }
