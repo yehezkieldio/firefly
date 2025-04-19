@@ -77,6 +77,27 @@ export interface ArtemisOptions {
      * @flag --skip-github-release
      */
     skipGitHubRelease: boolean;
+
+    /**
+     * Whether to skip the commit step.
+     * @default false
+     * @flag --skip-commit
+     */
+    skipCommit: boolean;
+
+    /**
+     * Whether to skip the tag creation step.
+     * @default false
+     * @flag --skip-tag
+     */
+    skipTag: boolean;
+
+    /**
+     * Whether to skip the push step.
+     * @default false
+     * @flag --skip-push
+     */
+    skipPush: boolean;
 }
 
 export interface ArtemisConfiguration {

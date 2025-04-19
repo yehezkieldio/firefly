@@ -7,8 +7,12 @@ import { checkRepositoryConfiguration, getFileConfiguration } from "#/lib/config
 import { logger } from "#/lib/logger";
 import { createRollbackStack, executeWithRollback, type RollbackOperation } from "#/lib/rollback";
 import { bumpVersionPipeline } from "#/pipelines/bump-version";
+import { createCommitPipeline } from "#/pipelines/create-commit";
+import { createGitHubReleasePipeline } from "#/pipelines/create-github-release";
+import { createVersionTagPipeline } from "#/pipelines/create-version-tag";
 import { generateChangelogPipeline } from "#/pipelines/generate-changelog";
 import { promptVersionPipeline } from "#/pipelines/prompt-version";
+import { pushChangesPipeline } from "#/pipelines/push-changes";
 import type { ArtemisConfiguration, ArtemisContext, ArtemisOptions } from "#/types";
 
 interface PipelineStep {
@@ -40,6 +44,34 @@ const pipelineSteps: PipelineStep[] = [
         operation: generateChangelogPipeline,
         rollback: null,
         shouldSkip: (context: ArtemisContext): boolean => context.options.skipChangelog
+    },
+    {
+        name: "createCommit",
+        description: "Creating the commit",
+        operation: createCommitPipeline,
+        rollback: null,
+        shouldSkip: (context: ArtemisContext): boolean => context.options.skipCommit
+    },
+    {
+        name: "createVersionTag",
+        description: "Creating the version tag and the tag annotation",
+        operation: createVersionTagPipeline,
+        rollback: null,
+        shouldSkip: (context: ArtemisContext): boolean => context.options.skipTag
+    },
+    {
+        name: "pushChanges",
+        description: "Pushing changes to the remote repository",
+        operation: pushChangesPipeline,
+        rollback: null,
+        shouldSkip: (context: ArtemisContext): boolean => context.options.skipPush
+    },
+    {
+        name: "createGitHubRelease",
+        description: "Creating the GitHub release",
+        operation: createGitHubReleasePipeline,
+        rollback: null,
+        shouldSkip: (context: ArtemisContext): boolean => context.options.skipGitHubRelease
     }
 ];
 
