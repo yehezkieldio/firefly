@@ -1,5 +1,6 @@
+import { colors } from "consola/utils";
 import { type Options as GitCliffOptions, runGitCliff } from "git-cliff";
-import { ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
 import { updateChangelogInContext } from "#/context";
 import { fs } from "#/lib/fs";
 import { createGitCliffOptions } from "#/lib/git-cliff/cliff-options";
@@ -8,12 +9,15 @@ import { createErrorFromUnknown } from "#/lib/utils";
 import type { ArtemisContext } from "#/types";
 
 export function generateChangelog(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
-    return handleFileCreation(context)
+    const dryRunIndicator = context.options.dryRun ? colors.yellow(" (dry run)") : "";
+    const initialStep = context.options.dryRun ? okAsync(true) : handleFileCreation(context);
+
+    return initialStep
         .andThen((): ResultAsync<GitCliffOptions, Error> => createGitCliffOptions(context))
         .andThen((options: GitCliffOptions): ResultAsync<string, Error> => executeGitCliff(options))
         .andThen((content: string): ResultAsync<ArtemisContext, Error> => {
             return updateChangelogInContext(context, content).andTee((): void =>
-                logger.info("Changelog generated and updated")
+                logger.info(`Changelog ${colors.dim("generated")} and ${colors.dim("updated")}${dryRunIndicator}`)
             );
         })
         .mapErr((error: unknown): Error => {
@@ -30,6 +34,7 @@ function executeGitCliff(options: GitCliffOptions): ResultAsync<string, Error> {
 }
 
 function handleFileCreation(context: ArtemisContext): ResultAsync<boolean, Error> {
+    // No need to check dryRun here as it's handled in generateChangelog
     return fs.createIfNotExists(context.config.changelogPath || "CHANGELOG.md").mapErr((error: Error): Error => {
         logger.error("Error creating changelog file:", error);
         return error;
