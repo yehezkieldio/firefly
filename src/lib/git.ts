@@ -41,6 +41,22 @@ export function getToken(context: ArtemisContext): ResultAsync<string, Error> {
     );
 }
 
+export function getGitRootDirection(): ResultAsync<string, Error> {
+    return executeGit(["rev-parse", "--show-prefix"])
+        .map((path: string): string => path.trim())
+        .map((path: string): string => {
+            if (path === "") {
+                return ".";
+            }
+            return path
+                ?.split("/")
+                .map((i) => i.trim())
+                .filter(Boolean)
+                .map(() => "..")
+                .join("/");
+        });
+}
+
 export function getRepositoryUrl(): ResultAsync<string, Error> {
     return executeGit(["remote", "get-url", "origin"]).map((url: string): string => url.trim());
 }
