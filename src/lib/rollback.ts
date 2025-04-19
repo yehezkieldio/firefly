@@ -16,8 +16,15 @@ export function executeWithRollback<T>(
     rollbackOp: ((context: ArtemisContext) => ResultAsync<void, Error>) | null,
     description: string,
     context: T,
-    rollbackStack: RollbackOperation[]
+    rollbackStack: RollbackOperation[],
+    shouldSkip?: (context: T) => boolean
 ): ResultAsync<T, Error> {
+    if (shouldSkip?.(context)) {
+        logger.verbose(`Skipping step: ${description}`);
+        return okAsync(context);
+    }
+
+    logger.verbose(`Executing step: ${description}`);
     return operation(context).map((result: T): T => {
         if (rollbackOp) {
             addRollbackOperation(rollbackStack, rollbackOp, description);

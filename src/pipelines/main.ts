@@ -42,7 +42,14 @@ export function createPipeline(options: ArtemisOptions): ResultAsync<void, Error
 
     for (const step of pipelineSteps) {
         pipelineResult = pipelineResult.andThen((context: ArtemisContext): ResultAsync<ArtemisContext, Error> => {
-            return executeWithRollback(step.operation, step.rollback, step.description, context, rollbackStack);
+            return executeWithRollback(
+                step.operation,
+                step.rollback,
+                step.description,
+                context,
+                rollbackStack,
+                step.shouldSkip
+            );
         });
     }
 
