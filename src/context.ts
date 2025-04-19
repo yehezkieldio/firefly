@@ -1,7 +1,7 @@
 import { okAsync, ResultAsync } from "neverthrow";
 import type { ArtemisConfiguration, ArtemisContext, ArtemisOptions } from "#/types";
 
-let globalContext: Readonly<ArtemisContext> = Object.freeze(createDefaultContext());
+let globalContext: Readonly<ArtemisContext> = Object.freeze<ArtemisContext>(createDefaultContext());
 
 export function useGlobalContext(): Readonly<ArtemisContext> {
     return globalContext;
@@ -11,7 +11,7 @@ export function createContext(
     options: Readonly<Partial<ArtemisOptions>>,
     configuration: Readonly<Partial<ArtemisConfiguration>>
 ): ResultAsync<Readonly<ArtemisContext>, Error> {
-    const context: ArtemisContext = Object.freeze({
+    const context: ArtemisContext = Object.freeze<ArtemisContext>({
         ...createDefaultContext(),
         options: Object.freeze({ ...createDefaultOptions(), ...options }),
         config: Object.freeze({ ...createDefaultConfiguration(), ...configuration })
@@ -24,7 +24,7 @@ export function updateVersionInContext(
     context: Readonly<ArtemisContext>,
     newVersion: string
 ): ResultAsync<Readonly<ArtemisContext>, Error> {
-    const updatedContext: ArtemisContext = Object.freeze({
+    const updatedContext: ArtemisContext = Object.freeze<ArtemisContext>({
         ...context,
         nextVersion: newVersion
     });
@@ -36,7 +36,7 @@ export function updateChangelogInContext(
     context: Readonly<ArtemisContext>,
     content: string
 ): ResultAsync<Readonly<ArtemisContext>, Error> {
-    const updatedContext: ArtemisContext = Object.freeze({
+    const updatedContext: ArtemisContext = Object.freeze<ArtemisContext>({
         ...context,
         changelogContent: content
     });
@@ -45,7 +45,7 @@ export function updateChangelogInContext(
 }
 
 export function updateGlobalContext(context: Readonly<ArtemisContext>): ResultAsync<Readonly<ArtemisContext>, Error> {
-    globalContext = Object.freeze({ ...context });
+    globalContext = Object.freeze<ArtemisContext>({ ...context });
     return okAsync(globalContext);
 }
 
@@ -60,15 +60,16 @@ export function createDefaultContext(): Readonly<ArtemisContext> {
 }
 
 export function createDefaultConfiguration(): Readonly<ArtemisConfiguration> {
-    return Object.freeze({
+    return Object.freeze<ArtemisConfiguration>({
         name: "",
         base: "",
-        scope: ""
+        scope: "",
+        repository: ""
     });
 }
 
 export function createDefaultOptions(): Readonly<ArtemisOptions> {
-    return Object.freeze({
+    return Object.freeze<ArtemisOptions>({
         verbose: false,
         dryRun: false,
         bumpStrategy: "",
