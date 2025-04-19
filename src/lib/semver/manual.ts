@@ -2,6 +2,7 @@ import { okAsync, ResultAsync } from "neverthrow";
 import semver, { type ReleaseType } from "semver";
 import { logger } from "#/lib/logger";
 import { incrementVersion } from "#/lib/semver/increment-version";
+import { createErrorFromUnknown } from "#/lib/utils";
 import type { ArtemisContext, PromptSelectChoice } from "#/types";
 
 const VERSION_TYPES = {
@@ -44,7 +45,7 @@ export function promptManualVersion(context: ArtemisContext): ResultAsync<string
         cancel: "reject"
     });
 
-    return ResultAsync.fromPromise(prompt, (e): Error => new Error(`Failed to prompt for version bump: ${e}`));
+    return ResultAsync.fromPromise(prompt, (error: unknown): Error => createErrorFromUnknown(error));
 }
 
 function generateVersionChoices(context: ArtemisContext): PromptSelectChoice[] {

@@ -48,7 +48,7 @@ function selectBumpStrategy(context: ArtemisContext): ResultAsync<ArtemisContext
                 initial: strategies[1]!.value,
                 cancel: "reject"
             }) as Promise<BumpStrategy>,
-            (e: unknown): Error => createErrorFromUnknown(e, "Failed to prompt for version strategy")
+            (error: unknown): Error => createErrorFromUnknown(error)
         );
     }
 

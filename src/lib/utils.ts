@@ -1,11 +1,9 @@
 import { InvalidOptionArgumentError } from "commander";
 import type { BumpStrategy, OptionalBumpStrategy, OptionalReleaseType } from "#/types";
 
-export function createErrorFromUnknown(error: unknown, errorMessage: string): Error {
-    if (error instanceof Error) {
-        return new Error(`${errorMessage}: ${error.message}`);
-    }
-    return new Error(`${errorMessage}: ${error}`);
+export function createErrorFromUnknown(error: unknown, errorMessage?: string): Error {
+    const message: string = error instanceof Error ? error.message : String(error);
+    return errorMessage ? new Error(`${errorMessage}: ${message}`) : new Error(message);
 }
 
 export const validateBumpStrategy = (strategy: string): OptionalBumpStrategy =>
