@@ -10,6 +10,11 @@ function fileExists(path: string): ResultAsync<boolean, Error> {
 }
 
 function createIfNotExists(path: string): ResultAsync<boolean, Error> {
+    const context = useGlobalContext();
+    if (context.options.dryRun) {
+        return okAsync(true);
+    }
+
     return fileExists(path).andThen((exists: boolean): ResultAsync<boolean, Error> => {
         if (exists) return okAsync(true);
 
