@@ -63,6 +63,20 @@ export interface ArtemisOptions {
      * @flag --skip-bump
      */
     skipBump: boolean;
+
+    /**
+     * Whether to skip the changelog generation step.
+     * @default false
+     * @flag --skip-changelog
+     */
+    skipChangelog: boolean;
+
+    /**
+     * Whether to skip the GitHub release step.
+     * @default false
+     * @flag --skip-github-release
+     */
+    skipGitHubRelease: boolean;
 }
 
 export interface ArtemisConfiguration {

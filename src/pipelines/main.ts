@@ -7,6 +7,7 @@ import { checkRepositoryConfiguration, getFileConfiguration } from "#/lib/config
 import { logger } from "#/lib/logger";
 import { createRollbackStack, executeWithRollback, type RollbackOperation } from "#/lib/rollback";
 import { bumpVersionPipeline } from "#/pipelines/bump-version";
+import { generateChangelogPipeline } from "#/pipelines/generate-changelog";
 import { promptVersionPipeline } from "#/pipelines/prompt-version";
 import type { ArtemisConfiguration, ArtemisContext, ArtemisOptions } from "#/types";
 
@@ -32,6 +33,13 @@ const pipelineSteps: PipelineStep[] = [
         operation: bumpVersionPipeline,
         rollback: null,
         shouldSkip: (context: ArtemisContext): boolean => context.options.skipBump
+    },
+    {
+        name: "generateChangelog",
+        description: "Generating the changelog",
+        operation: generateChangelogPipeline,
+        rollback: null,
+        shouldSkip: (context: ArtemisContext): boolean => context.options.skipChangelog
     }
 ];
 

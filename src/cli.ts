@@ -22,6 +22,7 @@ cli.name("artemis")
     .option("-p, --pre-release-id [id]", "Specify the pre-release identifier", "")
     .option("-B, --pre-release-base [base]", "Specify the pre-release base version", "")
     .option("--skip-bump", "Skip the version bump in the changelog", false)
+    .option("--skip-changelog", "Skip the changelog generation step", false)
     .option("--skip-github-release", "Skip the GitHub release step", false)
     .action((options: ArtemisOptions): Promise<void> => {
         logger.log(`${colors.magenta("artemis")} ${colors.dim(`v${pkg.version}`)}`);
