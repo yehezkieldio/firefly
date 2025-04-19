@@ -1,4 +1,5 @@
 import { okAsync, ResultAsync } from "neverthrow";
+import { useGlobalContext } from "#/context";
 import { createErrorFromUnknown } from "#/lib/utils";
 
 function fileExists(path: string): ResultAsync<boolean, Error> {
@@ -34,6 +35,14 @@ function getJsonFromFile<T>(path: string): ResultAsync<T, Error> {
 }
 
 function writeContentToFile(path: string, updatedContent: string): ResultAsync<number, Error> {
+    const context = useGlobalContext();
+    if (context.options.dryRun) {
+        return ResultAsync.fromPromise(
+            Promise.resolve(updatedContent.length),
+            (error: unknown): Error => createErrorFromUnknown(error, "Unable to write file")
+        );
+    }
+
     return ResultAsync.fromPromise(
         Bun.write(path, updatedContent),
         (error: unknown): Error => createErrorFromUnknown(error, "Unable to write file")

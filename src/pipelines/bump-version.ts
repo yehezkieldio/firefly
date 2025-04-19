@@ -20,7 +20,10 @@ function writePackageJson(context: ArtemisContext): ResultAsync<ArtemisContext, 
         if (packageExists) {
             return pkgJson
                 .updatePackageVersion(CWD_PACKAGE_PATH, context.nextVersion)
-                .andTee((): void => logger.info(`Bumped package.json version to ${colors.dim(context.nextVersion)}`))
+                .andTee((): void => {
+                    const dryRunIndicator = context.options.dryRun ? colors.yellow(" (dry run)") : "";
+                    logger.info(`Bumped package.json version to ${colors.dim(context.nextVersion)}${dryRunIndicator}`);
+                })
                 .map((): ArtemisContext => context);
         }
 
