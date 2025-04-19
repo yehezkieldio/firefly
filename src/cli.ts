@@ -24,7 +24,7 @@ cli.name("artemis")
     .option("--skip-bump", "Skip the version bump in the changelog", false)
     .option("--skip-github-release", "Skip the GitHub release step", false)
     .action((options: ArtemisOptions): Promise<void> => {
-        logger.info(`${colors.magenta("artemis")} ${colors.dim(`v${pkg.version}`)}`);
+        logger.log(`${colors.magenta("artemis")} ${colors.dim(`v${pkg.version}`)}`);
         return new Promise<void>((): ResultAsync<void, Error> => createPipeline(options));
     })
     .configureOutput({
