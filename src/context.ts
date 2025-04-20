@@ -81,6 +81,11 @@ export function createDefaultOptions(): Readonly<ArtemisOptions> {
         releaseType: "",
         preReleaseBase: "0",
         preReleaseId: "",
-        skipBump: false
+        skipBump: false,
+        skipChangelog: false,
+        skipCommit: false,
+        skipGitHubRelease: false,
+        skipPush: false,
+        skipTag: false
     });
 }

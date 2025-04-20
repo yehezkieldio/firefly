@@ -1,5 +1,6 @@
 import { err, ok, type Result, type ResultAsync } from "neverthrow";
 import { fs } from "#/lib/fs";
+import { createErrorFromUnknown } from "#/lib/utils";
 
 export interface PackageJson {
     name: string;
@@ -8,8 +9,35 @@ export interface PackageJson {
     homepage: string;
 }
 
+function readPackageJson(filePath: string): ResultAsync<PackageJson, Error> {
+    return fs
+        .getTextFromFile(filePath)
+        .map((content: string): PackageJson => JSON.parse(content))
+        .mapErr(
+            (e: unknown): Error => createErrorFromUnknown(e, `Failed to read or parse package.json at ${filePath}`)
+        );
+}
+
 function getPackageName(pkg: PackageJson): Result<string, Error> {
     return pkg.name ? ok(pkg.name) : err(new Error("Name field not found in package.json"));
+}
+
+function getPackageNameWithScope(pkg: PackageJson): Result<{ name: string; scope: string }, Error> {
+    const name = pkg.name;
+    if (!name) {
+        return err(new Error("Name field not found in package.json"));
+    }
+
+    const scope: string | undefined = name?.startsWith("@") ? name?.split("/")[0]?.slice(1) : "";
+    if (!scope) {
+        return err(new Error("Scope not found in package.json"));
+    }
+    const packageName: string | undefined = name.startsWith("@") ? name.split("/")[1] : name;
+    if (!packageName) {
+        return err(new Error("Package name not found in package.json"));
+    }
+
+    return ok({ name: packageName, scope });
 }
 
 function getPackageVersion(pkg: PackageJson): Result<string, Error> {
@@ -36,7 +64,9 @@ function updatePackageVersion(path: string, newVersion: string): ResultAsync<voi
 }
 
 export const pkgJson = {
+    readPackageJson,
     getPackageName,
+    getPackageNameWithScope,
     getPackageVersion,
     updatePackageVersion
 };

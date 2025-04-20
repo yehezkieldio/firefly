@@ -3,7 +3,7 @@ import { colors } from "consola/utils";
 import { ResultAsync } from "neverthrow";
 import { createContext } from "#/context";
 import { enrichWithVersion } from "#/context-enrichment";
-import { checkRepositoryConfiguration, getFileConfiguration } from "#/lib/config";
+import { checkNameAndScopeConfiguration, checkRepositoryConfiguration, getFileConfiguration } from "#/lib/config";
 import { logger } from "#/lib/logger";
 import { createRollbackStack, executeWithRollback, type RollbackOperation } from "#/lib/rollback";
 import { bumpVersionPipeline, rollbackVersionPipeline } from "#/pipelines/bump-version";
@@ -109,6 +109,7 @@ function createContextFromOptions(options: ArtemisOptions): ResultAsync<ArtemisC
 
     return getFileConfiguration()
         .andThen(checkRepositoryConfiguration)
+        .andThen(checkNameAndScopeConfiguration)
         .andThen((configuration: ArtemisConfiguration): ResultAsync<ArtemisContext, Error> => {
             return createContext(options, configuration);
         })

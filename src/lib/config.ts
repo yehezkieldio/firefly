@@ -1,9 +1,11 @@
 import { type ConfigLayerMeta, loadConfig, type ResolvedConfig } from "c12";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { createDefaultConfiguration } from "#/context";
+import { CWD_PACKAGE_PATH } from "#/lib/constants";
 import { extractRepository, getRepository, type Repository } from "#/lib/git";
 import { getRepositoryUsingGitHubCLI } from "#/lib/github";
 import { logger } from "#/lib/logger";
+import { type PackageJson, pkgJson } from "#/lib/package-json";
 import { createErrorFromUnknown } from "#/lib/utils";
 import type { ArtemisConfiguration, ArtemisContext } from "#/types";
 
@@ -53,6 +55,45 @@ export function checkRepositoryConfiguration(
     }
 
     return okAsync(configuration);
+}
+
+export function checkNameAndScopeConfiguration(
+    configuration: ArtemisConfiguration
+): ResultAsync<ArtemisConfiguration, Error> {
+    if (configuration.name || configuration.scope) {
+        return okAsync(configuration);
+    }
+
+    logger.verbose("Name and scope not configured, attempting to detect from package.json");
+
+    return pkgJson
+        .readPackageJson(CWD_PACKAGE_PATH)
+        .orElse((readError: Error) => {
+            logger.warn(`Could not read package.json at ${CWD_PACKAGE_PATH}: ${readError.message}`);
+            return okAsync(null);
+        })
+        .andThen((pkg: PackageJson | null): ResultAsync<ArtemisConfiguration, Error> => {
+            if (!pkg) {
+                return okAsync(configuration);
+            }
+
+            const scopeResult = pkgJson.getPackageNameWithScope(pkg);
+            if (scopeResult.isOk()) {
+                const { name, scope } = scopeResult.value;
+                logger.verbose(`Detected scoped package: ${scope}/${name}`);
+                return okAsync({ ...configuration, name, scope });
+            }
+
+            const nameResult = pkgJson.getPackageName(pkg);
+            if (nameResult.isOk()) {
+                const name = nameResult.value;
+                logger.verbose(`Detected package name: ${name}`);
+                return okAsync({ ...configuration, name });
+            }
+
+            logger.warn("Could not determine package name or scope from package.json");
+            return okAsync(configuration);
+        });
 }
 
 export function getFullPackageName(configuration: ArtemisConfiguration): string {
