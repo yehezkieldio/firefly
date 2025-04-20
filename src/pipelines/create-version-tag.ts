@@ -6,22 +6,14 @@ import { logger } from "#/lib/logger";
 import type { ArtemisContext } from "#/types";
 
 export function createVersionTagPipeline(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
-    return createTag(context)
-        .andThen((): ResultAsync<ArtemisContext, Error> => {
-            if (context.options.dryRun) {
-                logger.info("Would create tag", context.config.tagName);
-                return okAsync(context);
-            }
-            return okAsync(context);
-        })
-        .map((): ArtemisContext => {
-            return context;
-        });
+    return createTag(context).map((): ArtemisContext => {
+        return context;
+    });
 }
 
 export function rollbackVersionTagPipeline(context: ArtemisContext): ResultAsync<void, Error> {
     if (context.options.dryRun) {
-        logger.info(`Would rollback tag ${context.config.tagName} ${colors.yellow(" (dry run)")}`);
+        logger.info(`Would rollback tag ${colors.dim(resolveTagName(context))} ${colors.yellow(" (dry run)")}`);
         return okAsync(undefined);
     }
 
@@ -29,7 +21,7 @@ export function rollbackVersionTagPipeline(context: ArtemisContext): ResultAsync
 
     return executeGit(["tag", "-d", tagName])
         .andTee((): void => {
-            logger.info("Rolled back tag", tagName);
+            logger.info(`Rolled back tag ${colors.dim(tagName)}`);
         })
         .map((): void => undefined);
 }
@@ -37,6 +29,11 @@ export function rollbackVersionTagPipeline(context: ArtemisContext): ResultAsync
 function createTag(context: ArtemisContext) {
     const tagName: string = resolveTagName(context);
     const tagMessage: string = resolveTagNameAnnotation(context);
+
+    if (context.options.dryRun) {
+        logger.info(`Would create tag ${colors.dim(tagName)} ${colors.yellow("(dry run)")}`);
+        return okAsync(context);
+    }
 
     return canSignGitTag()
         .map((canSign: boolean): string[] => {
