@@ -77,9 +77,14 @@ const pipelineSteps: PipelineStep[] = [
 ];
 
 export function createPipeline(options: ArtemisOptions): ResultAsync<void, Error> {
+    preflightPipeline()
+        .map((): void => logger.log(colors.green("Preflight checks completed successfully")))
+        .mapErr((error: Error): Promise<Error> => {
+            logger.error(error.message);
+            process.exit(1);
+        });
     const rollbackStack: RollbackOperation[] = createRollbackStack();
-    let pipelineResult: ResultAsync<ArtemisContext, Error> =
-        createContextFromOptions(options).andThen(preflightPipeline);
+    let pipelineResult: ResultAsync<ArtemisContext, Error> = createContextFromOptions(options);
 
     if (options.dryRun) {
         logger.warn(colors.yellow("Running in dry run mode - no changes will be made"));
