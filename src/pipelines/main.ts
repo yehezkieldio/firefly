@@ -8,7 +8,7 @@ import { logger } from "#/lib/logger";
 import { createRollbackStack, executeWithRollback, type RollbackOperation } from "#/lib/rollback";
 import { bumpVersionPipeline, rollbackVersionPipeline } from "#/pipelines/bump-version";
 import { createCommitPipeline, rollbackCommitPipeline } from "#/pipelines/create-commit";
-import { createGitHubReleasePipeline } from "#/pipelines/create-github-release";
+import { createGitHubReleasePipeline, rollbackGitHubReleasePipeline } from "#/pipelines/create-github-release";
 import { createVersionTagPipeline, rollbackVersionTagPipeline } from "#/pipelines/create-version-tag";
 import { generateChangelogPipeline, rollbackChangelogPipeline } from "#/pipelines/generate-changelog";
 import { promptVersionPipeline } from "#/pipelines/prompt-version";
@@ -70,7 +70,7 @@ const pipelineSteps: PipelineStep[] = [
         name: "createGitHubRelease",
         description: "Creating the GitHub release",
         operation: createGitHubReleasePipeline,
-        rollback: null,
+        rollback: rollbackGitHubReleasePipeline,
         shouldSkip: (context: ArtemisContext): boolean => context.options.skipGitHubRelease
     }
 ];
