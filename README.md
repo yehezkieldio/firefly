@@ -17,7 +17,7 @@
 
 ## Installation
 
-**NOTE:** Artemis is made exclusively for [Bun](https://bun.sh/)!
+**NOTE:** Artemis is made exclusively for [Bun](https://bun.sh/) and may not work with [Node.js](https://nodejs.org/) or other runtimes.
 
 ```bash
 bun add -d @yehezkieldio/artemis # or as a global package via bun add -g @yehezkieldio/artemis
