@@ -37,7 +37,7 @@
     ],
     "github.copilot.chat.commitMessageGeneration.instructions": [
         {
-            "text": "Generate a concise, first-person singular present-tense conventional commit message in the format <type>(<optional scope>): <commit message>, starting with a lowercase letter, max 72 characters, and output only the message with no extra text."
+            "file": ".github/prompts/commit-message.md"
         }
     ],
     "github.copilot.enable": {
