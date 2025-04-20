@@ -1,5 +1,5 @@
 import { colors } from "consola/utils";
-import { okAsync, type ResultAsync } from "neverthrow";
+import { errAsync, okAsync, type ResultAsync } from "neverthrow";
 import { resolveTagName, resolveTagNameAnnotation } from "#/lib/config";
 import { executeGit } from "#/lib/git";
 import { logger } from "#/lib/logger";
@@ -35,13 +35,20 @@ function createTag(context: ArtemisContext) {
         return okAsync(context);
     }
 
-    return canSignGitTag()
-        .map((canSign: boolean): string[] => {
-            logger.verbose("Can sign tag:", canSign);
-            const baseArgs: string[] = ["tag", "-a", tagName, "-m", tagMessage];
-            return canSign ? [...baseArgs, "-s"] : baseArgs;
+    return checkIfTagExists(tagName)
+        .andThen((exists: boolean): ResultAsync<ArtemisContext, Error> => {
+            if (exists) {
+                return errAsync(new Error(`Tag ${tagName} already exists`));
+            }
+            return canSignGitTag()
+                .andThen((canSign: boolean) => {
+                    logger.verbose("Can sign tag:", canSign);
+                    const baseArgs: string[] = ["tag", "-a", tagName, "-m", tagMessage];
+                    const args: string[] = canSign ? [...baseArgs, "-s"] : baseArgs;
+                    return executeGit(args);
+                })
+                .map((): ArtemisContext => context);
         })
-        .andThen((args: string[]): ResultAsync<string, Error> => executeGit(args))
         .andTee((): void => logger.info(`Created tag ${colors.dim(tagName)}`));
 }
 
@@ -51,5 +58,11 @@ function canSignGitTag(): ResultAsync<boolean, Error> {
             return false;
         }
         return true;
+    });
+}
+
+function checkIfTagExists(tagName: string): ResultAsync<boolean, Error> {
+    return executeGit(["tag", "-l", tagName]).map((output: string): boolean => {
+        return output.trim() !== "";
     });
 }

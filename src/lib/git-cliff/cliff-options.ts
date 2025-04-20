@@ -2,7 +2,6 @@ import { type Options as GitCliffOptions } from "git-cliff";
 import { okAsync, type ResultAsync } from "neverthrow";
 import { resolveTagName } from "#/lib/config";
 import { getGitRootDirection, getToken } from "#/lib/git";
-import { logger } from "#/lib/logger";
 import type { ArtemisContext } from "#/types";
 
 export function createGitCliffOptions(context: ArtemisContext): ResultAsync<GitCliffOptions, Error> {
