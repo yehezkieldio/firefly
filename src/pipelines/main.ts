@@ -7,7 +7,7 @@ import { checkNameAndScopeConfiguration, checkRepositoryConfiguration, getFileCo
 import { logger } from "#/lib/logger";
 import { createRollbackStack, executeWithRollback, type RollbackOperation } from "#/lib/rollback";
 import { bumpVersionPipeline, rollbackVersionPipeline } from "#/pipelines/bump-version";
-import { createCommitPipeline } from "#/pipelines/create-commit";
+import { createCommitPipeline, rollbackCommitPipeline } from "#/pipelines/create-commit";
 import { createGitHubReleasePipeline } from "#/pipelines/create-github-release";
 import { createVersionTagPipeline } from "#/pipelines/create-version-tag";
 import { generateChangelogPipeline } from "#/pipelines/generate-changelog";
@@ -49,7 +49,7 @@ const pipelineSteps: PipelineStep[] = [
         name: "createCommit",
         description: "Creating the commit",
         operation: createCommitPipeline,
-        rollback: null,
+        rollback: rollbackCommitPipeline,
         shouldSkip: (context: ArtemisContext): boolean => context.options.skipCommit
     },
     {
