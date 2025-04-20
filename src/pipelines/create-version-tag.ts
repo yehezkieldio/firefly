@@ -31,7 +31,7 @@ function createTag(context: ArtemisContext) {
     const tagMessage: string = resolveTagNameAnnotation(context);
 
     if (context.options.dryRun) {
-        logger.info(`Would create tag ${colors.dim(tagName)} ${colors.yellow("(dry run)")}`);
+        logger.info(`Create tag ${colors.dim(tagName)} ${colors.yellow("(dry run)")}`);
         return okAsync(context);
     }
 
