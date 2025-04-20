@@ -87,6 +87,9 @@ export function createDefaultOptions(): Readonly<ArtemisOptions> {
         skipCommit: false,
         skipGitHubRelease: false,
         skipPush: false,
-        skipTag: false
+        skipTag: false,
+        githubReleaseDraft: false,
+        githubReleaseLatest: false,
+        githubReleasePrerelease: false
     });
 }

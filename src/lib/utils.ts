@@ -6,6 +6,14 @@ export function createErrorFromUnknown(error: unknown, errorMessage?: string): E
     return errorMessage ? new Error(`${errorMessage}: ${message}`) : new Error(message);
 }
 
+export function flattenMultilineText(text: string): string {
+    return text
+        .split("\n")
+        .map((line: string): string => line.trim())
+        .filter((line: string): boolean => line.length > 0)
+        .join("\\n");
+}
+
 export const validateBumpStrategy = (strategy: string): OptionalBumpStrategy =>
     strategy === "" || ["auto", "manual"].includes(strategy as BumpStrategy)
         ? (strategy as OptionalBumpStrategy)

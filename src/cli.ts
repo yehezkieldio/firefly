@@ -27,6 +27,9 @@ cli.name("artemis")
     .option("--skip-commit", "Skip the commit creation step", false)
     .option("--skip-tag", "Skip the version tag creation step", false)
     .option("--skip-push", "Skip the push step", false)
+    .option("--github-release-draft", "Create a draft GitHub release", false)
+    .option("--github-release-prerelease", "Create a pre-release GitHub release", false)
+    .option("--github-release-latest", "Create a latest GitHub release", true)
     .action((options: ArtemisOptions): Promise<void> => {
         logger.log(`${colors.magenta("artemis")} ${colors.dim(`v${pkg.version}`)}`);
         return new Promise<void>((): ResultAsync<void, Error> => createPipeline(options));

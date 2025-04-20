@@ -98,6 +98,27 @@ export interface ArtemisOptions {
      * @flag --skip-push
      */
     skipPush: boolean;
+
+    /**
+     * Release as a draft on GitHub.
+     * @default false
+     * @flag --github-release-draft
+     */
+    githubReleaseDraft: boolean;
+
+    /**
+     * Release as a pre-release on GitHub.
+     * @default false
+     * @flag --github-release-prerelease
+     */
+    githubReleasePrerelease: boolean;
+
+    /**
+     * Make the release the latest on GitHub.
+     * @default true
+     * @flag --github-release-latest
+     */
+    githubReleaseLatest: boolean;
 }
 
 export interface ArtemisConfiguration {
