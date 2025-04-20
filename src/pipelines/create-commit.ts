@@ -7,7 +7,10 @@ import type { ArtemisContext } from "#/types";
 
 export function createCommitPipeline(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
     if (context.options.dryRun) {
-        logger.info(`Would create commit with files ${colors.yellow(" (dry run)")}`);
+        logger.info(`Staged all ${colors.dim("files")} for commit${colors.yellow(" (dry run)")}`);
+        logger.info(
+            `Created commit with message: ${colors.dim(resolveCommitMessage(context))} ${colors.yellow(" (dry run)")}`
+        );
         return okAsync(context);
     }
     return stageFiles(context).andThen(createCommit);
@@ -39,6 +42,6 @@ function createCommit(context: ArtemisContext): ResultAsync<ArtemisContext, Erro
 function stageFiles(context: ArtemisContext) {
     const dryRunIndicator: string = context.options.dryRun ? colors.yellow(" (dry run)") : "";
     return executeGit(["add", "."])
-        .andTee((): void => logger.info(`Staged all files for commit${dryRunIndicator}`))
+        .andTee((): void => logger.info(`Staged all ${colors.dim("files")} for commit${dryRunIndicator}`))
         .map((): ArtemisContext => context);
 }
