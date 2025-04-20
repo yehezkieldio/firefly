@@ -70,7 +70,7 @@ export function createOctoKitGitHubRelease(context: ArtemisContext): ResultAsync
                 ).map((): void => undefined);
             })
             .andTee((): void => {
-                logger.info(`${colors.dim("GitHub")} release created successfully${dryRunIndicator}`);
+                logger.info(`GitHub ${colors.dim("release")} created successfully${dryRunIndicator}`);
             });
     }
 
@@ -128,7 +128,7 @@ export function createCliGitHubRelease(context: ArtemisContext): ResultAsync<Art
         )
             .map((): void => undefined)
             .andTee((): void => {
-                logger.info(`${colors.dim("GitHub")} release created successfully using CLI!${dryRunIndicator}`);
+                logger.info(`GitHub ${colors.dim("release")} created successfully using CLI!${dryRunIndicator}`);
             });
     }
 
@@ -196,7 +196,7 @@ export function createFetchGitHubRelease(context: ArtemisContext): ResultAsync<A
                     return okAsync(undefined);
                 })
                 .andTee((): void => {
-                    logger.info(`${colors.dim("GitHub")} release created successfully using fetch${dryRunIndicator}`);
+                    logger.info(`GitHub ${colors.dim("release")} created successfully using fetch${dryRunIndicator}`);
                 });
         });
     }
