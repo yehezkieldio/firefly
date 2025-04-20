@@ -3,6 +3,7 @@ import { okAsync, type ResultAsync } from "neverthrow";
 import { resolveTagName } from "#/lib/config";
 import { CWD_GIT_CLIFF_PATH } from "#/lib/constants";
 import { getGitRootDirection, getToken } from "#/lib/git";
+import { logger } from "#/lib/logger";
 import type { ArtemisContext } from "#/types";
 
 export function createGitCliffOptions(
@@ -36,6 +37,10 @@ function addGithubRepositoryToOptions(
     options: GitCliffOptions
 ): ResultAsync<GitCliffOptions, Error> {
     return getGitRootDirection().andThen((direction: string): ResultAsync<GitCliffOptions, Error> => {
+        logger.verbose(
+            `Adding GitHub repository to options: ${context.config.repository} with direction: ${direction} and included path: ${context.config.base}`
+        );
+
         if (direction && direction !== ".") {
             return okAsync({
                 ...options,

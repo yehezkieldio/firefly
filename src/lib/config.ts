@@ -99,8 +99,8 @@ export function checkNameAndScopeConfiguration(
 }
 
 export function getFullPackageName(configuration: ArtemisConfiguration): string {
-    if (configuration.base) {
-        return `${configuration.base}/${configuration.name!}`;
+    if (configuration.scope) {
+        return `@${configuration.scope}/${configuration.name!}`;
     }
 
     return configuration.name!;

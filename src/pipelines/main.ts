@@ -79,20 +79,20 @@ export function createPipeline(options: ArtemisOptions): ResultAsync<void, Error
     const rollbackStack: RollbackOperation[] = createRollbackStack();
     let pipelineResult: ResultAsync<ArtemisContext, Error> = createContextFromOptions(options);
 
-    if (process.env.ARTEMIS_DEBUG) {
-        logger.log(colors.dim("options"));
-        logger.log(colors.dim(JSON.stringify(options, null, 2)));
-
-        logger.log(colors.dim("configuration"));
-        logger.log(colors.dim(JSON.stringify(useGlobalContext(), null, 2)));
-    }
-
     if (options.dryRun) {
         logger.warn(colors.yellow("Running in dry run mode - no changes will be made"));
     }
 
     for (const step of pipelineSteps) {
         pipelineResult = pipelineResult.andThen((context: ArtemisContext): ResultAsync<ArtemisContext, Error> => {
+            if (process.env.ARTEMIS_DEBUG) {
+                logger.log(colors.dim("options"));
+                logger.log(colors.dim(JSON.stringify(options, null, 2)));
+
+                logger.log(colors.dim("configuration"));
+                logger.log(colors.dim(JSON.stringify(context, null, 2)));
+            }
+
             return executeWithRollback(
                 step.operation,
                 step.rollback,
