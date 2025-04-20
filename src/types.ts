@@ -154,6 +154,12 @@ export interface ArtemisConfiguration {
      * @default "{{name}}@{{version}}"
      */
     gitHubReleaseTitle?: string;
+
+    /**
+     * The branch to push the changes to.
+     * @default "master"
+     */
+    branch?: string;
 }
 
 export interface ArtemisContext {

@@ -69,7 +69,8 @@ export function createDefaultConfiguration(): Readonly<ArtemisConfiguration> {
         commitMessage: "chore(release): release {{name}}@{{version}}",
         tagName: "v{{version}}",
         tagAnnotation: "{{name}}@{{version}}",
-        gitHubReleaseTitle: "{{name}}@{{version}}"
+        gitHubReleaseTitle: "{{name}}@{{version}}",
+        branch: "master"
     });
 }
 
