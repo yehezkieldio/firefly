@@ -22,7 +22,7 @@ export function rollbackPushChangesPipeline(context: ArtemisContext): ResultAsyn
 
 function pushChanges(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
     if (context.options.dryRun) {
-        logger.info(`Would push commits to remote ${colors.yellow("(dry run)")}`);
+        logger.info(`Pushed commits to remote ${colors.yellow("(dry run)")}`);
         return okAsync(context);
     }
 
@@ -37,7 +37,7 @@ function pushChanges(context: ArtemisContext): ResultAsync<ArtemisContext, Error
 
 function pushTags(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
     if (context.options.dryRun) {
-        logger.info(`Would push tags to remote ${colors.yellow("(dry run)")}`);
+        logger.info(`Pushed tags to ${colors.yellow("(dry run)")}`);
         return okAsync(context);
     }
 
@@ -51,7 +51,7 @@ function pushTags(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
 }
 
 function rollbackPushedTags(context: ArtemisContext): ResultAsync<void, Error> {
-    const tagName = resolveTagName(context);
+    const tagName: string = resolveTagName(context);
 
     logger.info(`Rolling back pushed tag ${colors.dim(tagName)}`);
 
