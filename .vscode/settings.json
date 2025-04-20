@@ -39,11 +39,5 @@
         {
             "file": ".github/prompts/commit-message.md"
         }
-    ],
-    "github.copilot.enable": {
-        "*": true,
-        "plaintext": false,
-        "markdown": true,
-        "scminput": false
-    }
+    ]
 }
