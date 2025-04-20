@@ -27,10 +27,10 @@ export function checkRepositoryConfiguration(
     const repoPattern = /^[^/]+\/[^/]+$/;
 
     function attemptAutoDetectRepository(): ResultAsync<ArtemisConfiguration, Error> {
-        logger.verbose("Repository not configured, attempting to detect from git");
+        logger.verbose("FileConfiguration: Repository not configured, attempting to detect from git");
         return getRepository()
             .orElse(() => {
-                logger.verbose("Failed to get repository from git, trying GitHub CLI");
+                logger.verbose("FileConfiguration: Failed to get repository from git, trying GitHub CLI");
                 return getRepositoryUsingGitHubCLI().andThen((url: string): ResultAsync<Repository, Error> => {
                     const result = extractRepository(url);
                     if (result.isOk()) {
@@ -66,7 +66,7 @@ export function checkNameAndScopeConfiguration(
         return okAsync(configuration);
     }
 
-    logger.verbose("Name and scope not configured, attempting to detect from package.json");
+    logger.verbose("FileConfiguration: Name and scope not configured, attempting to detect from package.json");
 
     return pkgJson
         .readPackageJson(CWD_PACKAGE_PATH)
@@ -82,14 +82,14 @@ export function checkNameAndScopeConfiguration(
             const scopeResult = pkgJson.getPackageNameWithScope(pkg);
             if (scopeResult.isOk()) {
                 const { name, scope } = scopeResult.value;
-                logger.verbose(`Detected scoped package: ${scope}/${name}`);
+                logger.verbose(`FileConfiguration: Detected scoped package: ${scope}/${name}`);
                 return okAsync({ ...configuration, name, scope });
             }
 
             const nameResult = pkgJson.getPackageName(pkg);
             if (nameResult.isOk()) {
                 const name = nameResult.value;
-                logger.verbose(`Detected package name: ${name}`);
+                logger.verbose(`FileConfiguration: Detected package name: ${name}`);
                 return okAsync({ ...configuration, name });
             }
 

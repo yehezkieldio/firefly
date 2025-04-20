@@ -1,7 +1,7 @@
 import { LogLevels } from "consola";
 import { colors } from "consola/utils";
 import { ResultAsync } from "neverthrow";
-import { createContext, useGlobalContext } from "#/context";
+import { createContext } from "#/context";
 import { enrichWithVersion } from "#/context-enrichment";
 import { checkNameAndScopeConfiguration, checkRepositoryConfiguration, getFileConfiguration } from "#/lib/config";
 import { logger } from "#/lib/logger";

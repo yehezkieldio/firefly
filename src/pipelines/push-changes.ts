@@ -69,7 +69,12 @@ function rollbackPushedCommit(context: ArtemisContext): ResultAsync<void, Error>
         .andThen((previousCommit: string): ResultAsync<string, Error> => {
             const trimmedCommit: string = previousCommit.trim();
             logger.verbose(`Rolling back to previous commit: ${colors.dim(trimmedCommit)}`);
-            return executeGit(["push", "--force", "origin", `${trimmedCommit}:${context.config.branch! || "main"}`]);
+            return executeGit(["rev-parse", "--abbrev-ref", "HEAD"]).andThen(
+                (currentBranch: string): ResultAsync<string, Error> => {
+                    const branch = context.config.branch || "main" || currentBranch.trim();
+                    return executeGit(["push", "--force", "origin", `${trimmedCommit}:${branch}`]);
+                }
+            );
         })
         .andTee((): void => {
             logger.info(`Force pushed to previous commit state`);
