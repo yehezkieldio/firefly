@@ -72,6 +72,15 @@ export function removeHeaderFromChangelog(content: string): ResultAsync<string, 
         }
 
         const headerIndex: number = content.indexOf(header);
-        return headerIndex !== -1 ? okAsync(content.slice(headerIndex + header.length)) : okAsync(content);
+        if (headerIndex === -1) {
+            return okAsync(content);
+        }
+
+        let processedContent = content.slice(headerIndex + header.length);
+
+        const versionHeadingRegex = /^#\s+\[.+?\]\(.+?\)\s+\(\d{4}-\d{2}-\d{2}\)\n/m;
+        processedContent = processedContent.replace(versionHeadingRegex, "");
+
+        return okAsync(processedContent);
     });
 }

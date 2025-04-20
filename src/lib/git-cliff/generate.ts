@@ -13,8 +13,9 @@ export function generateChangelog(context: ArtemisContext): ResultAsync<ArtemisC
     const initialStep = context.options.dryRun ? okAsync(true) : handleFileCreation(context);
 
     return initialStep
-        .andThen((): ResultAsync<GitCliffOptions, Error> => createGitCliffOptions(context))
         .andTee((): void => logger.verbose("Generating changelog..."))
+        .andThen((): ResultAsync<GitCliffOptions, Error> => createGitCliffOptions(context))
+        .andTee((options: GitCliffOptions): void => logger.verbose(options))
         .andThen((options: GitCliffOptions): ResultAsync<string, Error> => executeGitCliff(options))
         .andThen((content: string): ResultAsync<ArtemisContext, Error> => {
             return updateChangelogInContext(context, content).andTee((): void =>

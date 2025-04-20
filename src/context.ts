@@ -67,7 +67,7 @@ export function createDefaultConfiguration(): Readonly<ArtemisConfiguration> {
         repository: "",
         changelogPath: "CHANGELOG.md",
         commitMessage: "chore(release): release {{name}}@{{version}}",
-        tagName: "v{{version}}",
+        tagName: "{{name}}@{{version}}",
         tagAnnotation: "{{name}}@{{version}}",
         gitHubReleaseTitle: "{{name}}@{{version}}",
         branch: "master"

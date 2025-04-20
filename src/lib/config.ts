@@ -133,6 +133,7 @@ export function resolveTagName(context: ArtemisContext): string {
         tagName = tagName.replace("{{name}}", name);
     }
 
+    logger.verbose("Resolved tag name:", tagName);
     return tagName;
 }
 
