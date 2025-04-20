@@ -11,6 +11,7 @@ import { createCommitPipeline, rollbackCommitPipeline } from "#/pipelines/create
 import { createGitHubReleasePipeline, rollbackGitHubReleasePipeline } from "#/pipelines/create-github-release";
 import { createVersionTagPipeline, rollbackVersionTagPipeline } from "#/pipelines/create-version-tag";
 import { generateChangelogPipeline, rollbackChangelogPipeline } from "#/pipelines/generate-changelog";
+import { preflightPipeline } from "#/pipelines/preflight";
 import { promptVersionPipeline } from "#/pipelines/prompt-version";
 import { pushChangesPipeline } from "#/pipelines/push-changes";
 import type { ArtemisConfiguration, ArtemisContext, ArtemisOptions } from "#/types";
@@ -77,7 +78,8 @@ const pipelineSteps: PipelineStep[] = [
 
 export function createPipeline(options: ArtemisOptions): ResultAsync<void, Error> {
     const rollbackStack: RollbackOperation[] = createRollbackStack();
-    let pipelineResult: ResultAsync<ArtemisContext, Error> = createContextFromOptions(options);
+    let pipelineResult: ResultAsync<ArtemisContext, Error> =
+        createContextFromOptions(options).andThen(preflightPipeline);
 
     if (options.dryRun) {
         logger.warn(colors.yellow("Running in dry run mode - no changes will be made"));
