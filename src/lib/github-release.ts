@@ -1,5 +1,6 @@
 import type { Octokit } from "@octokit/core";
 import type { RequestParameters } from "@octokit/core/types";
+import { colors } from "consola/utils";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { resolveReleaseTitle, resolveTagName } from "#/lib/config";
 import { getToken, type Repository } from "#/lib/git";
@@ -45,6 +46,8 @@ function createReleaseParams(context: ArtemisContext, repository: Repository, co
 }
 
 export function createOctoKitGitHubRelease(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
+    const dryRunIndicator = context.options.dryRun ? colors.yellow(" (dry run)") : "";
+
     function publishRelease(repository: Repository, content: string): ResultAsync<void, Error> {
         return getToken(context)
             .andThen(createOctokit)
@@ -52,13 +55,17 @@ export function createOctoKitGitHubRelease(context: ArtemisContext): ResultAsync
                 const params: ReleaseParams = createReleaseParams(context, repository, content);
                 logger.verbose(`Creating GitHub release with params: ${flattenMultilineText(JSON.stringify(params))}`);
 
+                if (context.options.dryRun) {
+                    return okAsync(undefined);
+                }
+
                 return ResultAsync.fromPromise(
                     octokit.request("POST /repos/{owner}/{repo}/releases", params),
                     (error: unknown): Error => createErrorFromUnknown(error, "Failed to create GitHub release")
                 ).map((): void => undefined);
             })
             .andTee((): void => {
-                logger.info("GitHub release created successfully!");
+                logger.info(`${colors.dim("GitHub")} release created successfully${dryRunIndicator}`);
             });
     }
 
@@ -75,6 +82,8 @@ export function createOctoKitGitHubRelease(context: ArtemisContext): ResultAsync
 }
 
 export function createCliGitHubRelease(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
+    const dryRunIndicator = context.options.dryRun ? colors.yellow(" (dry run)") : "";
+
     function publishRelease(repository: Repository, content: string): ResultAsync<void, Error> {
         const { githubReleaseDraft, githubReleasePrerelease, githubReleaseLatest } = context.options;
         const tagName = resolveTagName(context);
@@ -88,7 +97,13 @@ export function createCliGitHubRelease(context: ArtemisContext): ResultAsync<Art
         if (content === "") cliArgs.push("--generate-notes");
         if (repository) cliArgs.push("--repo", repository);
 
-        logger.verbose(`Creating GitHub release using CLI with args: ${flattenMultilineText(JSON.stringify(cliArgs))}`);
+        logger.verbose(
+            `Creating ${colors.dim("GitHub")} release using CLI with args: ${flattenMultilineText(JSON.stringify(cliArgs))}`
+        );
+
+        if (context.options.dryRun) {
+            return okAsync(undefined);
+        }
 
         return ResultAsync.fromPromise(
             new Response(
@@ -101,7 +116,7 @@ export function createCliGitHubRelease(context: ArtemisContext): ResultAsync<Art
         )
             .map((): void => undefined)
             .andTee((): void => {
-                logger.info("GitHub release created successfully using CLI!");
+                logger.info(`${colors.dim("GitHub")} release created successfully using CLI!${dryRunIndicator}`);
             });
     }
 
@@ -118,14 +133,20 @@ export function createCliGitHubRelease(context: ArtemisContext): ResultAsync<Art
 }
 
 export function createFetchGitHubRelease(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
+    const dryRunIndicator = context.options.dryRun ? colors.yellow(" (dry run)") : "";
+
     function publishRelease(repository: Repository, content: string): ResultAsync<void, Error> {
         return getToken(context).andThen((token: string): ResultAsync<void, Error> => {
             const params = createReleaseParams(context, repository, content);
             const [owner, repo] = repository.split("/");
 
             logger.verbose(
-                `Creating GitHub release using fetch with params: ${flattenMultilineText(JSON.stringify(params))}`
+                `Creating ${colors.dim("GitHub")} release using fetch with params: ${flattenMultilineText(JSON.stringify(params))}`
             );
+
+            if (context.options.dryRun) {
+                return okAsync(undefined);
+            }
 
             return ResultAsync.fromPromise(
                 fetch(`https://api.github.com/repos/${owner}/${repo}/releases`, {
@@ -159,7 +180,7 @@ export function createFetchGitHubRelease(context: ArtemisContext): ResultAsync<A
                     return okAsync(undefined);
                 })
                 .andTee((): void => {
-                    logger.info("GitHub release created successfully using fetch!");
+                    logger.info(`${colors.dim("GitHub")} release created successfully using fetch${dryRunIndicator}`);
                 });
         });
     }

@@ -7,11 +7,6 @@ import { logger } from "#/lib/logger";
 import type { ArtemisContext } from "#/types";
 
 export function createGitHubReleasePipeline(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
-    if (context.options.dryRun) {
-        logger.info(`Created GitHub release ${colors.yellow("(dry run)")}`);
-        return okAsync(context);
-    }
-
     return createGitHubRelease(context);
 }
 
