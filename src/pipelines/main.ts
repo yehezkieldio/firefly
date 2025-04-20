@@ -6,7 +6,7 @@ import { enrichWithVersion } from "#/context-enrichment";
 import { checkRepositoryConfiguration, getFileConfiguration } from "#/lib/config";
 import { logger } from "#/lib/logger";
 import { createRollbackStack, executeWithRollback, type RollbackOperation } from "#/lib/rollback";
-import { bumpVersionPipeline } from "#/pipelines/bump-version";
+import { bumpVersionPipeline, rollbackVersionPipeline } from "#/pipelines/bump-version";
 import { createCommitPipeline } from "#/pipelines/create-commit";
 import { createGitHubReleasePipeline } from "#/pipelines/create-github-release";
 import { createVersionTagPipeline } from "#/pipelines/create-version-tag";
@@ -35,7 +35,7 @@ const pipelineSteps: PipelineStep[] = [
         name: "bumpVersion",
         description: "Bumping the version",
         operation: bumpVersionPipeline,
-        rollback: null,
+        rollback: rollbackVersionPipeline,
         shouldSkip: (context: ArtemisContext): boolean => context.options.skipBump
     },
     {
