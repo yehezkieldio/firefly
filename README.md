@@ -14,14 +14,13 @@
 *   **Changelog Generation:** Creates or updates a `CHANGELOG.md` using [`git-cliff`](https://github.com/orhun/git-cliff).
 *   **Git Operations:** Creates commits for version bumps/changelog updates, tags the release, and pushes changes to the remote repository.
 *   **GitHub Releases:** Creates GitHub releases with generated changelog notes.
-*   **Configurable:** Use CLI flags with a configuration file (`artemis.config.ts`).
 
 ## Installation
 
 **NOTE:** Artemis is made exclusively for [Bun](https://bun.sh/)!
 
 ```bash
-bun add -g @yehezkieldio/artemis
+bun add -d @yehezkieldio/artemis # or as a global package via bun add -g @yehezkieldio/artemis
 ```
 
 ## Usage
