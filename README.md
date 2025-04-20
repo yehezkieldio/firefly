@@ -1,7 +1,7 @@
 <div align="center">
 
 <h3>Artemis</h3>
-<p>CLI orchestrator for semantic versioning, changelog generation, and creating releases based on conventional commits.<p>
+<p>CLI for semantic versioning, changelog generation, and creating releases based on conventional commits.<p>
 
 [![Built for](https://img.shields.io/badge/Built_for-Bun-fbf0df?style=flat&logo=bun)](https://bun.sh/)
 [![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev)
