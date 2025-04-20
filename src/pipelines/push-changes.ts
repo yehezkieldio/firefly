@@ -28,7 +28,7 @@ function pushChanges(context: ArtemisContext): ResultAsync<ArtemisContext, Error
 
     return executeGit(["push"])
         .andTee((): void => {
-            logger.info(`Pushed commits to remote`);
+            logger.info(`Pushed ${colors.dim("commits")} to remote`);
         })
         .map((): ArtemisContext => {
             return context;
@@ -43,7 +43,7 @@ function pushTags(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
 
     return executeGit(["push", "--tags"])
         .andTee((): void => {
-            logger.info(`Pushed tags to remote`);
+            logger.info(`Pushed ${colors.dim("tags")} to remote`);
         })
         .map((): ArtemisContext => {
             return context;

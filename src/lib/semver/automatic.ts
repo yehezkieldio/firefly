@@ -55,6 +55,7 @@ export function generateAutomaticVersion(context: ArtemisContext): ResultAsync<s
         : basePipeline.andTee((): void => console.log(" "));
 
     return pipelineWithSpacing
+        .andTee((recommendation: BumperRecommendation): void => logger.info(recommendation.reason))
         .andThen((recommendation: BumperRecommendation): Ok<string, never> => determineVersion(context, recommendation))
         .andTee((version: string): void => logger.verbose(`Selected version bump: ${version}`))
         .mapErr((e: Error): Error => new Error(`Failed to generate automatic version: ${e.message}`));

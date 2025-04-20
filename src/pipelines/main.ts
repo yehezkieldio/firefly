@@ -85,6 +85,8 @@ export function createPipeline(options: ArtemisOptions): ResultAsync<void, Error
         logger.warn(colors.yellow("Running in dry run mode - no changes will be made"));
     }
 
+    logger.log(colors.green("Starting pipeline..."));
+
     for (const step of pipelineSteps) {
         pipelineResult = pipelineResult.andThen((context: ArtemisContext): ResultAsync<ArtemisContext, Error> => {
             if (process.env.ARTEMIS_DEBUG) {
@@ -108,6 +110,7 @@ export function createPipeline(options: ArtemisOptions): ResultAsync<void, Error
 
     return pipelineResult
         .map((): void => undefined)
+        .andTee((): void => logger.log(colors.green("\nPipeline completed successfully")))
         .mapErr((error: Error): Promise<Error> => {
             logger.error(error.message);
             process.exit(1);

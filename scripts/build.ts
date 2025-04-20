@@ -5,7 +5,16 @@ const startTime: number = performance.now();
 
 await Bun.$`rm -rf dist`;
 await Bun.build({
-    entrypoints: ["./src/index.ts", "./src/cli.ts"],
+    entrypoints: ["./src/cli.ts"],
+    root: "src",
+    outdir: "dist",
+    minify: true,
+    target: "bun",
+    external: Object.keys(pkg.dependencies),
+    format: "esm"
+});
+await Bun.build({
+    entrypoints: ["./src/index.ts"],
     root: "src",
     outdir: "dist",
     minify: false,

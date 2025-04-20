@@ -5,8 +5,8 @@
     "author": "Yehezkiel Dio Sinolungan <yehezkieldio@proton.me>",
     "license": "MIT",
     "type": "module",
-    "module": "./dist/index.js",
-    "main": "./dist/index.js",
+    "module": "./bin/artemis.js",
+    "main": "./bin/artemis.js",
     "types": "./dist/index.d.ts",
     "bin": {
         "artemis": "./bin/artemis.js"
