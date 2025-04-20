@@ -10,7 +10,7 @@ import { bumpVersionPipeline, rollbackVersionPipeline } from "#/pipelines/bump-v
 import { createCommitPipeline, rollbackCommitPipeline } from "#/pipelines/create-commit";
 import { createGitHubReleasePipeline } from "#/pipelines/create-github-release";
 import { createVersionTagPipeline } from "#/pipelines/create-version-tag";
-import { generateChangelogPipeline } from "#/pipelines/generate-changelog";
+import { generateChangelogPipeline, rollbackChangelogPipeline } from "#/pipelines/generate-changelog";
 import { promptVersionPipeline } from "#/pipelines/prompt-version";
 import { pushChangesPipeline } from "#/pipelines/push-changes";
 import type { ArtemisConfiguration, ArtemisContext, ArtemisOptions } from "#/types";
@@ -42,7 +42,7 @@ const pipelineSteps: PipelineStep[] = [
         name: "generateChangelog",
         description: "Generating the changelog",
         operation: generateChangelogPipeline,
-        rollback: null,
+        rollback: rollbackChangelogPipeline,
         shouldSkip: (context: ArtemisContext): boolean => context.options.skipChangelog
     },
     {
