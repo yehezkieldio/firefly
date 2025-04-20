@@ -53,7 +53,12 @@ export function createOctoKitGitHubRelease(context: ArtemisContext): ResultAsync
             .andThen(createOctokit)
             .andThen((octokit: Octokit): ResultAsync<void, Error> => {
                 const params: ReleaseParams = createReleaseParams(context, repository, content);
-                logger.verbose(`Creating GitHub release with params: ${flattenMultilineText(JSON.stringify(params))}`);
+                const logParams = { ...params };
+                logParams.body = content.length > 100 ? content.slice(0, 100) + "..." : content;
+
+                logger.verbose(
+                    `Creating GitHub release with params: ${colors.dim(flattenMultilineText(JSON.stringify(logParams)))}`
+                );
 
                 if (context.options.dryRun) {
                     return okAsync(undefined);
@@ -97,8 +102,15 @@ export function createCliGitHubRelease(context: ArtemisContext): ResultAsync<Art
         if (content === "") cliArgs.push("--generate-notes");
         if (repository) cliArgs.push("--repo", repository);
 
+        const logArgs = [...cliArgs];
+        const notesIndex = logArgs.indexOf("--notes") + 1;
+        if (notesIndex > 0 && logArgs[notesIndex]) {
+            logArgs[notesIndex] =
+                logArgs[notesIndex].length > 100 ? logArgs[notesIndex].slice(0, 100) + "..." : logArgs[notesIndex];
+        }
+
         logger.verbose(
-            `Creating ${colors.dim("GitHub")} release using CLI with args: ${flattenMultilineText(JSON.stringify(cliArgs))}`
+            `Creating ${colors.dim("GitHub")} release using CLI with args: ${colors.dim(flattenMultilineText(JSON.stringify(logArgs)))}`
         );
 
         if (context.options.dryRun) {
@@ -139,9 +151,13 @@ export function createFetchGitHubRelease(context: ArtemisContext): ResultAsync<A
         return getToken(context).andThen((token: string): ResultAsync<void, Error> => {
             const params = createReleaseParams(context, repository, content);
             const [owner, repo] = repository.split("/");
+            const logParams = {
+                ...params,
+                body: params.body.length > 100 ? params.body.slice(0, 100) + "..." : params.body
+            };
 
             logger.verbose(
-                `Creating ${colors.dim("GitHub")} release using fetch with params: ${flattenMultilineText(JSON.stringify(params))}`
+                `Creating ${colors.dim("GitHub")} release using fetch with params: ${colors.dim(flattenMultilineText(JSON.stringify(logParams)))}`
             );
 
             if (context.options.dryRun) {
