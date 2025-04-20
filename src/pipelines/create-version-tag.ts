@@ -15,7 +15,6 @@ export function createVersionTagPipeline(context: ArtemisContext): ResultAsync<A
             return okAsync(context);
         })
         .map((): ArtemisContext => {
-            logger.info("Created tag", context.config.tagName);
             return context;
         });
 }
@@ -45,7 +44,8 @@ function createTag(context: ArtemisContext) {
             const baseArgs: string[] = ["tag", "-a", tagName, "-m", tagMessage];
             return canSign ? [...baseArgs, "-s"] : baseArgs;
         })
-        .andThen((args: string[]): ResultAsync<string, Error> => executeGit(args));
+        .andThen((args: string[]): ResultAsync<string, Error> => executeGit(args))
+        .andTee((): void => logger.info(`Created tag ${colors.dim(tagName)}`));
 }
 
 function canSignGitTag(): ResultAsync<boolean, Error> {
