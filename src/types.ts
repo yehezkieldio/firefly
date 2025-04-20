@@ -160,7 +160,7 @@ export interface ArtemisConfiguration {
 
     /**
      * The tag name format for the release.
-     * @default "v{{version}}"
+     * @default "{{name}}@{{version}}"
      */
     tagName?: string;
 
