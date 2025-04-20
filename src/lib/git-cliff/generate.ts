@@ -15,7 +15,6 @@ export function generateChangelog(context: ArtemisContext): ResultAsync<ArtemisC
     return initialStep
         .andTee((): void => logger.verbose("Generating changelog..."))
         .andThen((): ResultAsync<GitCliffOptions, Error> => createGitCliffOptions(context))
-        .andTee((options: GitCliffOptions): void => logger.verbose(options))
         .andThen((options: GitCliffOptions): ResultAsync<string, Error> => executeGitCliff(options))
         .andThen((content: string): ResultAsync<ArtemisContext, Error> => {
             return updateChangelogInContext(context, content).andTee((): void =>

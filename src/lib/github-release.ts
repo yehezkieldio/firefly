@@ -47,8 +47,6 @@ function createReleaseParams(context: ArtemisContext, repository: Repository, co
 
 export function createOctoKitGitHubRelease(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
     const dryRunIndicator = context.options.dryRun ? colors.yellow(" (dry run)") : "";
-    const content = context.changelogContent;
-    logger.verbose(`Changelog content: ${colors.dim(flattenMultilineText(content))}`);
 
     function publishRelease(repository: Repository, content: string): ResultAsync<void, Error> {
         return getToken(context)

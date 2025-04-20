@@ -32,10 +32,6 @@ function addGithubRepositoryToOptions(
     options: GitCliffOptions
 ): ResultAsync<GitCliffOptions, Error> {
     return getGitRootDirection().andThen((direction: string): ResultAsync<GitCliffOptions, Error> => {
-        logger.verbose(
-            `Adding GitHub repository to options: ${context.config.repository} with direction: ${direction} and included path: ${context.config.base}`
-        );
-
         if (direction && direction !== ".") {
             return okAsync({
                 ...options,
