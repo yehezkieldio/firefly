@@ -9,7 +9,7 @@ import { createRollbackStack, executeWithRollback, type RollbackOperation } from
 import { bumpVersionPipeline, rollbackVersionPipeline } from "#/pipelines/bump-version";
 import { createCommitPipeline, rollbackCommitPipeline } from "#/pipelines/create-commit";
 import { createGitHubReleasePipeline } from "#/pipelines/create-github-release";
-import { createVersionTagPipeline } from "#/pipelines/create-version-tag";
+import { createVersionTagPipeline, rollbackVersionTagPipeline } from "#/pipelines/create-version-tag";
 import { generateChangelogPipeline, rollbackChangelogPipeline } from "#/pipelines/generate-changelog";
 import { promptVersionPipeline } from "#/pipelines/prompt-version";
 import { pushChangesPipeline } from "#/pipelines/push-changes";
@@ -56,7 +56,7 @@ const pipelineSteps: PipelineStep[] = [
         name: "createVersionTag",
         description: "Creating the version tag and the tag annotation",
         operation: createVersionTagPipeline,
-        rollback: null,
+        rollback: rollbackVersionTagPipeline,
         shouldSkip: (context: ArtemisContext): boolean => context.options.skipTag
     },
     {
