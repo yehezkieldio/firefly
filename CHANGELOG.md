@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+# [artemis@0.1.2](https://github.com/yehezkieldio/artemis/compare/artemis@0.1.1...artemis@0.1.2) (2025-04-20)
+
+## <!-- 4 -->Refactor
+
+- **pipeline:** Extract preflight checks ([f95f18f](https://github.com/yehezkieldio/artemis/commit/f95f18ff2effc29bcbba89332afd74a78ed339b3))
+
+## <!-- 7 -->Miscellaneous Tasks
+
+- Add commit message generation instructions ([d142fd5](https://github.com/yehezkieldio/artemis/commit/d142fd5da00192ea72980149743c6833bc7249e2))
+
 # [artemis@0.1.1](https://github.com/yehezkieldio/artemis/compare/artemis@0.1.0...artemis@0.1.1) (2025-04-20)
 
 ## <!-- 7 -->Miscellaneous Tasks
