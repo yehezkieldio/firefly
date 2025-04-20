@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+# [artemis@0.1.1](https://github.com/yehezkieldio/artemis/compare/artemis@0.1.0...artemis@0.1.1) (2025-04-20)
+
+## <!-- 7 -->Miscellaneous Tasks
+
+- Update continuous delivery workflow to publish to npmjs ([f09c8b4](https://github.com/yehezkieldio/artemis/commit/f09c8b423155c9fb65555a8cd5dc4532f16f94b0))
+- **renovate:** Format file ([d9b2dbc](https://github.com/yehezkieldio/artemis/commit/d9b2dbc576b484dce3a42852940b49272c589ebc))
+
 # [artemis@0.1.0](https://github.com/yehezkieldio/artemis/tree/artemis@0.1.0) (2025-04-20)
 
 ## <!-- 0 -->Features
