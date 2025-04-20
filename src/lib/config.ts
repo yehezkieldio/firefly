@@ -1,7 +1,7 @@
 import { type ConfigLayerMeta, loadConfig, type ResolvedConfig } from "c12";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { createDefaultConfiguration } from "#/context";
-import { CWD_PACKAGE_PATH } from "#/lib/constants";
+import { CWD, CWD_PACKAGE_PATH } from "#/lib/constants";
 import { extractRepository, getRepository, type Repository } from "#/lib/git";
 import { getRepositoryUsingGitHubCLI } from "#/lib/github";
 import { logger } from "#/lib/logger";
@@ -13,7 +13,9 @@ export function getFileConfiguration(): ResultAsync<ArtemisConfiguration, Error>
     return ResultAsync.fromPromise(
         loadConfig<ArtemisConfiguration>({
             name: "artemis",
-            defaults: createDefaultConfiguration()
+            cwd: CWD,
+            rcFile: false,
+            defaultConfig: createDefaultConfiguration()
         }),
         (e: unknown): Error => createErrorFromUnknown(e, "Failed to load configuration")
     ).map((config: ResolvedConfig<ArtemisConfiguration, ConfigLayerMeta>): ArtemisConfiguration => config.config);

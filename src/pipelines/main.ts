@@ -1,7 +1,7 @@
 import { LogLevels } from "consola";
 import { colors } from "consola/utils";
 import { ResultAsync } from "neverthrow";
-import { createContext } from "#/context";
+import { createContext, useGlobalContext } from "#/context";
 import { enrichWithVersion } from "#/context-enrichment";
 import { checkNameAndScopeConfiguration, checkRepositoryConfiguration, getFileConfiguration } from "#/lib/config";
 import { logger } from "#/lib/logger";
@@ -78,6 +78,14 @@ const pipelineSteps: PipelineStep[] = [
 export function createPipeline(options: ArtemisOptions): ResultAsync<void, Error> {
     const rollbackStack: RollbackOperation[] = createRollbackStack();
     let pipelineResult: ResultAsync<ArtemisContext, Error> = createContextFromOptions(options);
+
+    if (process.env.ARTEMIS_DEBUG) {
+        logger.log(colors.dim("options"));
+        logger.log(colors.dim(JSON.stringify(options, null, 2)));
+
+        logger.log(colors.dim("configuration"));
+        logger.log(colors.dim(JSON.stringify(useGlobalContext(), null, 2)));
+    }
 
     if (options.dryRun) {
         logger.warn(colors.yellow("Running in dry run mode - no changes will be made"));

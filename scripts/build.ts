@@ -8,7 +8,7 @@ await Bun.build({
     entrypoints: ["./src/index.ts", "./src/cli.ts"],
     root: "src",
     outdir: "dist",
-    minify: true,
+    minify: false,
     target: "bun",
     external: Object.keys(pkg.dependencies),
     format: "esm"
