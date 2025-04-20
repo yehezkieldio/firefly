@@ -1,6 +1,6 @@
-<div align="center">
+<div align="left">
 
-<h3>Artemis</h3>
+<h1>Artemis</h1>
 <p>CLI for semantic versioning, changelog generation, and creating releases based on conventional commits.<p>
 
 [![Built for](https://img.shields.io/badge/Built_for-Bun-fbf0df?style=flat&logo=bun)](https://bun.sh/)
