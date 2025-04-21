@@ -1,8 +1,7 @@
 import { LogLevels } from "consola";
 import { colors } from "consola/utils";
 import { ResultAsync } from "neverthrow";
-import { createContext } from "#/context";
-import { enrichWithVersion } from "#/context-enrichment";
+import { createContext, enrichWithVersion } from "#/context";
 import { checkNameAndScopeConfiguration, checkRepositoryConfiguration, getFileConfiguration } from "#/lib/config";
 import { logger } from "#/lib/logger";
 import { createRollbackStack, executeWithRollback, type RollbackOperation } from "#/lib/rollback";
