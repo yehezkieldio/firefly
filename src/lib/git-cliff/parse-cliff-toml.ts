@@ -67,20 +67,22 @@ function parseCliffConfig(): ResultAsync<CliffToml, Error> {
 export function removeHeaderFromChangelog(content: string): ResultAsync<string, Error> {
     return parseCliffConfig().andThen((config: CliffToml): ResultAsync<string, Error> => {
         const header: string | undefined = config.changelog?.header;
-        if (!header) {
+        const bodyTemplate: string | undefined = config.changelog?.body;
+
+        if (!header || !bodyTemplate) {
             return okAsync(content);
         }
 
-        const headerIndex: number = content.indexOf(header);
+        const headerIndex = content.indexOf(header);
         if (headerIndex === -1) {
             return okAsync(content);
         }
 
-        let processedContent = content.slice(headerIndex + header.length);
+        let processedContent: string = content.slice(headerIndex + header.length);
 
-        const versionHeadingRegex = /^#\s+\[.+?\]\(.+?\)\s+\(\d{4}-\d{2}-\d{2}\)\n/m;
-        processedContent = processedContent.replace(versionHeadingRegex, "");
+        const versionBlockRegex = /^## 📦 .*?\n(?:.*?\n)*?(🔍|🔗).*?\n+/m;
+        processedContent = processedContent.replace(versionBlockRegex, "");
 
-        return okAsync(processedContent);
+        return okAsync(processedContent.trimStart());
     });
 }
