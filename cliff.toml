@@ -8,18 +8,13 @@ body = """
     https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
   {%- endmacro -%}
   {% if version %}
-  ## 📦 {{ version | trim_start_matches(pat="v") }}
-    📅 {{ timestamp | date(format="%B %d, %Y") | replace(from=" 0", to=" ") }} \
-    {% if previous and previous.version -%}
-    🔍 [Compare changes]({{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }})
-    {%- else %}
-    🔗 [View source]({{ self::remote_url() }}/tree/{{ version }})
-    {%- endif %}
+  ## 📦 {{ version | trim_start_matches(pat="v") }} ({{ timestamp | date(format="%B %d, %Y") | replace(from=" 0", to=" ") }})
   {% else %}
   ## 🚧 Unreleased
   {% endif %}
   {% if message %}
-    {{ message }}
+    ### 📝 Release Notes
+    {{ message | safe }}
   {% endif %}\
   {% for group, commits in commits | group_by(attribute="group") %}
     ### 🔹 {{ group | replace(from="<!-- \\d+ -->", to="") | trim | upper_first }}
@@ -35,6 +30,13 @@ body = """
         {% endif %}\
     {% endfor %}
   {% endfor %}
+  {% if previous and previous.version -%}
+  [[Compare Changes]]({{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}) \
+   · \
+  [[View Source]]({{ self::remote_url() }}/tree/{{ version }})\
+  {%- else %}
+  [[View Source]]({{ self::remote_url() }}/tree/{{ version }})
+  {%- endif %}
 """
 footer = ""
 trim = true

@@ -58,6 +58,13 @@ export interface ArtemisOptions {
     preReleaseBase: PreReleaseBase;
 
     /**
+     * Specify the release notes for the version bump.
+     * @default ""
+     * @flag --release-notes
+     */
+    releaseNotes: string;
+
+    /**
      * Whether to skip the version bump in the changelog.
      * @default false
      * @flag --skip-bump

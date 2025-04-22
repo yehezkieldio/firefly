@@ -85,6 +85,7 @@ export function createDefaultOptions(): Readonly<ArtemisOptions> {
         releaseType: "",
         preReleaseBase: "0",
         preReleaseId: "",
+        releaseNotes: "",
         skipBump: false,
         skipChangelog: false,
         skipCommit: false,

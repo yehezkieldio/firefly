@@ -23,6 +23,10 @@ function enhanceGitCliffOptions(
         .andThen(
             (optionsWithRepo: GitCliffOptions): ResultAsync<GitCliffOptions, Error> =>
                 addPrependPathIfNeeded(context, optionsWithRepo)
+        )
+        .andThen(
+            (optionsWithPrepend: GitCliffOptions): ResultAsync<GitCliffOptions, Error> =>
+                addReleaseNotes(context, optionsWithPrepend)
         );
 }
 
@@ -57,6 +61,17 @@ function addPrependPathIfNeeded(
             prepend: context.config.changelogPath
         });
     }
+    return okAsync(options);
+}
+
+function addReleaseNotes(context: ArtemisContext, options: GitCliffOptions): ResultAsync<GitCliffOptions, Error> {
+    if (context.options.releaseNotes && context.options.releaseNotes !== "") {
+        return okAsync({
+            ...options,
+            withTagMessage: context.options.releaseNotes.replace(/\\n/g, "\n")
+        });
+    }
+
     return okAsync(options);
 }
 
