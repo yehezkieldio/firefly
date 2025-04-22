@@ -1,6 +1,6 @@
 import { colors } from "consola/utils";
 import { errAsync, okAsync, type ResultAsync } from "neverthrow";
-import { resolveTagName, resolveTagNameAnnotation } from "#/lib/config";
+import { resolveTagName } from "#/lib/config";
 import { executeGit } from "#/lib/git";
 import { logger } from "#/lib/logger";
 import type { ArtemisContext } from "#/types";
@@ -28,7 +28,6 @@ export function rollbackVersionTagPipeline(context: ArtemisContext): ResultAsync
 
 function createTag(context: ArtemisContext) {
     const tagName: string = resolveTagName(context);
-    const tagMessage: string = resolveTagNameAnnotation(context);
 
     if (context.options.dryRun) {
         logger.info(`Create tag ${colors.dim(tagName)} ${colors.yellow("(dry run)")}`);
@@ -43,7 +42,7 @@ function createTag(context: ArtemisContext) {
             return canSignGitTag()
                 .andThen((canSign: boolean) => {
                     logger.verbose("Can sign tag:", canSign);
-                    const baseArgs: string[] = ["tag", "-a", tagName, "-m", tagMessage];
+                    const baseArgs: string[] = ["tag", "-a", tagName];
                     const args: string[] = canSign ? [...baseArgs, "-s"] : baseArgs;
                     return executeGit(args);
                 })

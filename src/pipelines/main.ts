@@ -54,7 +54,7 @@ const pipelineSteps: PipelineStep[] = [
     },
     {
         name: "createVersionTag",
-        description: "Creating the version tag and the tag annotation",
+        description: "Creating the version tag",
         operation: createVersionTagPipeline,
         rollback: rollbackVersionTagPipeline,
         shouldSkip: (context: ArtemisContext): boolean => context.options.skipTag

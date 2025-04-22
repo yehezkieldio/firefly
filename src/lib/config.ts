@@ -137,20 +137,6 @@ export function resolveTagName(context: ArtemisContext): string {
     return tagName;
 }
 
-export function resolveTagNameAnnotation(context: ArtemisContext): string {
-    let tagAnnotation: string = context.config.tagAnnotation!;
-    const name: string = getFullPackageName(context.config);
-
-    if (tagAnnotation.includes("{{version}}")) {
-        tagAnnotation = tagAnnotation.replace("{{version}}", context.nextVersion || "");
-    }
-
-    if (tagAnnotation.includes("{{name}}")) {
-        tagAnnotation = tagAnnotation.replace("{{name}}", name);
-    }
-    return tagAnnotation;
-}
-
 export function resolveReleaseTitle(context: ArtemisContext): string {
     let title: string = context.config.gitHubReleaseTitle!;
     const name: string = getFullPackageName(context.config);

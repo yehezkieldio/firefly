@@ -172,12 +172,6 @@ export interface ArtemisConfiguration {
     tagName?: string;
 
     /**
-     * The tag annotation format for the release.
-     * @default "{{name}}@{{version}}"
-     */
-    tagAnnotation?: string;
-
-    /**
      * The title format for the GitHub release.
      * @default "{{name}}@{{version}}"
      */
