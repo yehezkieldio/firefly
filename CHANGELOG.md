@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 📦 artemis@0.2.1
+📅 April 22, 2025 🔍 [Compare changes](https://github.com/yehezkieldio/artemis/compare/artemis@0.2.0...artemis@0.2.1)
+
+
+### 🔹 <!-- 3 -->New Features
+
+- **preflight:** Add debug option to skip preflight checks ([`6424e44`](https://github.com/yehezkieldio/artemis/commit/6424e449fc5515ae76cc99d5d80268be517901f4))
+
+### 🔹 <!-- 7 -->Code Refactoring
+
+- **changelog:** Remove additional metadata before changes ([`c413374`](https://github.com/yehezkieldio/artemis/commit/c413374bad74d82333bbed23044d2f2640b774ea))
+
 ## 📦 artemis@0.2.0
 📅 April 22, 2025 🔍 [Compare changes](https://github.com/yehezkieldio/artemis/compare/artemis@0.1.2...artemis@0.2.0)
 
