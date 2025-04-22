@@ -1,42 +1,37 @@
 [changelog]
 header = """
 # Changelog\n
-All notable changes to this project will be documented in this file.\n
+All notable changes to this project will be documented in this file.
 """
 body = """
-{%- macro remote_url() -%}
-  https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
-{%- endmacro -%}
-{% if version %}\
-    # [{{ version | trim_start_matches(pat="v") }}]\
-    {% if previous %}\
-        {% if previous.version %}\
-            ({{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }})\
-        {% else %}\
-            ({{ self::remote_url() }}/tree/{{ version }})\
-        {% endif %}\
-    {% endif %} \
-    ({{ timestamp | date(format="%Y-%m-%d") }})
-{% else %}\
-    # [unreleased]
-{% endif %}\
-{% for group, commits in commits | group_by(attribute="group") %}
-    ## {{ group | upper_first }}
+  {%- macro remote_url() -%}
+    https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
+  {%- endmacro -%}
+  {% if version %}
+  ## 📦 {{ version | trim_start_matches(pat="v") }}
+    📅 {{ timestamp | date(format="%B %d, %Y") | replace(from=" 0", to=" ") }} \
+    {% if previous and previous.version -%}
+    🔍 [Compare changes]({{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }})
+    {%- else %}
+    🔗 [View source]({{ self::remote_url() }}/tree/{{ version }})
+    {%- endif %}
+  {% else %}
+  ## 🚧 Unreleased
+  {% endif %}
+  {% for group, commits in commits | group_by(attribute="group") %}
+    ### 🔹 {{ group | replace(from="<!-- \\d+ -->", to="") | trim | upper_first }}
     {% for commit in commits %}
-        - {% if commit.scope %}\
-            **{{commit.scope}}:** \
-          {% endif %}\
-            {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}]({{ self::remote_url() }}/commit/{{ commit.id }}))\
-            {% if commit.remote.pr_number %} (\
-                [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}) by @{{ commit.remote.username }}) \
-            {%- endif %}\
+      - {% if commit.scope %}**{{ commit.scope }}:**{% endif %} {{ commit.message | upper_first }} ([`{{ commit.id | truncate(length=7, end="") }}`]({{ self::remote_url() }}/commit/{{ commit.id }}))\
+        {% if commit.remote.pr_number %} (\
+          [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}) by @{{ commit.remote.username }})\
+        {%- endif %}\
         {% if commit.breaking %}\
-            {% for breakingChange in commit.footers %}\
-                \n{% raw %}  {% endraw %}- **{{ breakingChange.token }}{{ breakingChange.separator }}** {{ breakingChange.value }}\
-            {% endfor %}\
+          {% for breakingChange in commit.footers %}\
+            \n{% raw %}  {% endraw %} - 💥 **{{ breakingChange.token }}{{ breakingChange.separator }}** {{ breakingChange.value }}\
+          {% endfor %}\
         {% endif %}\
     {% endfor %}
-{% endfor %}\n
+  {% endfor %}
 """
 footer = ""
 trim = true
@@ -44,27 +39,37 @@ postprocessors = []
 
 [git]
 conventional_commits = true
-filter_unconventional = true
-commit_preprocessors = []
-commit_parsers = [
-  { message = "^fix\\(deps\\)", group = "<!-- 8 -->Dependencies" },
-  { message = "^chore\\(deps\\)", group = "<!-- 8 -->Dependencies" },
-  { message = "^feat", group = "<!-- 0 -->Features" },
-  { message = "^fix", group = "<!-- 1 -->Bug Fixes" },
-  { message = "^doc", group = "<!-- 2 -->Documentation" },
-  { message = "^perf", group = "<!-- 3 -->Performance" },
-  { message = "^refactor", group = "<!-- 4 -->Refactor" },
-  { message = "^style", group = "<!-- 5 -->Styling" },
-  { message = "^test", group = "<!-- 6 -->Testing" },
-  { message = "^chore\\(release\\): prepare for", skip = true },
-  { message = "^chore\\(pr\\)", skip = true },
-  { message = "^chore\\(pull\\)", skip = true },
-  { message = "^chore|^ci", group = "<!-- 7 -->Miscellaneous Tasks" },
-  { body = ".*security", group = "<!-- 8 -->Security" },
-  { message = "^revert", group = "<!-- 9 -->Revert" },
-  { message = ".*", group = "<!-- 10 -->Other" },
+filter_unconventional = false
+commit_preprocessors = [
+  { pattern = "\\(#([0-9]+)\\)", replace = "([#${1}](https://github.com/yehezkieldio/imperia/issues/${1}))"}
 ]
-filter_commits = true
+commit_parsers = [
+  { message = "^chore\\(release\\): release", group = "<!-- 0 -->Release Versioning" },
+  { message = "^fix\\(deps\\)", group = "<!-- 1 -->Dependencies Updates" },
+  { message = "^chore\\(deps\\)", group = "<!-- 2 -->Dependencies Updates" },
+  { message = "^feat", group = "<!-- 3 -->New Features" },
+  { message = "^fix", group = "<!-- 4 -->Bug Fixes" },
+  { message = "^docs", group = "<!-- 5 -->Documentation Updates" },
+  { message = "^perf", group = "<!-- 6 -->Performance Improvements" },
+  { message = "^refactor", group = "<!-- 7 -->Code Refactoring" },
+  { message = "^style\\(deps\\)", group = "<!-- 8 -->Dependencies Updates" },
+  { message = "^style\\(.*\\)", group = "<!-- 9 -->Code Styling" },
+  { message = "^style", group = "<!-- 9 -->Code Styling" },
+  { message = "^test", group = "<!-- 10 -->Test Updates" },
+  { message = "^chore", group = "<!-- 11 -->Project Maintenance" },
+  { message = "^security", group = "<!-- 12 -->Security Updates" },
+  { message = "^compat", group = "<!-- 13 -->Compatibility Changes" },
+  { message = "^revert", group = "<!-- 14 -->Reverts" },
+  { message = "^i18n", group = "<!-- 15 -->Internationalization" },
+  { message = "^ci", group = "<!-- 16 -->CI/CD Configuration" },
+  { message = ".*", group = "<!-- 17 -->Miscellaneous Changes" },
+  { message = ".*deprecated", body = ".*deprecated", group = "Deprecation" }
+]
+filter_commits = false
 ignore_tags = ""
 topo_order = false
 sort_commits = "newest"
+
+[remote.github]
+owner = "yehezkieldio"
+repo = "artemis"
