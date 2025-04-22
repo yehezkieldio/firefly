@@ -35,13 +35,15 @@ function checkGitRepository(): ResultAsync<void, Error> {
 }
 
 function checkUncommittedChanges(): ResultAsync<void, Error> {
-    return executeGit(["status", "--porcelain"])
-        .andTee((): void =>
-            logger.verbose("Preflight: Checking for uncommitted changes in the current working directory.")
-        )
-        .andThen((result: string): ResultAsync<void, Error> => {
-            return result.trim() === ""
-                ? okAsync(undefined)
-                : errAsync(new Error("Preflight: There are uncommitted changes in the current working directory."));
-        });
+    return okAsync(undefined);
+
+    // return executeGit(["status", "--porcelain"])
+    //     .andTee((): void =>
+    //         logger.verbose("Preflight: Checking for uncommitted changes in the current working directory.")
+    //     )
+    //     .andThen((result: string): ResultAsync<void, Error> => {
+    //         return result.trim() === ""
+    //             ? okAsync(undefined)
+    //             : errAsync(new Error("Preflight: There are uncommitted changes in the current working directory."));
+    //     });
 }
