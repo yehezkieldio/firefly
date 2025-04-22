@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## 📦 artemis@0.2.0
+📅 April 22, 2025 🔍 [Compare changes](https://github.com/yehezkieldio/artemis/compare/artemis@0.1.2...artemis@0.2.0)
+
+
+### 🔹 <!-- 11 -->Project Maintenance
+
+-  Remove renovate config ([`e3116d2`](https://github.com/yehezkieldio/artemis/commit/e3116d2fcf42470a4b4c86d8a763045d2b177f72))
+-  Remove github copilot settings ([`8985720`](https://github.com/yehezkieldio/artemis/commit/8985720ac367ee82a8686e1d9c66819ae27d24f4))
+
+### 🔹 <!-- 5 -->Documentation Updates
+
+-  Update commit message guidelines and formatting instructions ([`8c3b81e`](https://github.com/yehezkieldio/artemis/commit/8c3b81e5ad461c45fbe08b2bb0be4a9d73994aca))
+
+### 🔹 <!-- 7 -->Code Refactoring
+
+- **changelog:** Improve header and body template checks ([`50bba21`](https://github.com/yehezkieldio/artemis/commit/50bba21b219b691c6c727fbeb6247944a5b03963))
+- **context:** Move enrichWithVersion to context.ts ([`85e3345`](https://github.com/yehezkieldio/artemis/commit/85e3345e8e2a85952cb67ed71369a119b3b7a1ac))
+
 # [artemis@0.1.2](https://github.com/yehezkieldio/artemis/compare/artemis@0.1.1...artemis@0.1.2) (2025-04-20)
 
 ## <!-- 4 -->Refactor
