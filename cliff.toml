@@ -18,6 +18,9 @@ body = """
   {% else %}
   ## 🚧 Unreleased
   {% endif %}
+  {% if message %}
+    {{ message }}
+  {% endif %}\
   {% for group, commits in commits | group_by(attribute="group") %}
     ### 🔹 {{ group | replace(from="<!-- \\d+ -->", to="") | trim | upper_first }}
     {% for commit in commits %}
