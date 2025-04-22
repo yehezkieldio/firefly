@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 📦 artemis@0.2.2 (April 22, 2025)
+
+
+### 🔹 <!-- 3 -->New Features
+
+- **cli:** Add option to specify release notes in CLI ([`895be1a`](https://github.com/yehezkieldio/artemis/commit/895be1aea44cdde3da2bed242b30e193619ff55b))
+
+### 🔹 <!-- 5 -->Documentation Updates
+
+- **changelog:** Update changelog format and structure for clarity ([`081a23a`](https://github.com/yehezkieldio/artemis/commit/081a23a91f3fa670a904cf7644a5aa4954e90c68))
+
+### 🔹 <!-- 7 -->Code Refactoring
+
+- **config:** Remove tag annotation from configuration ([`bb70fcf`](https://github.com/yehezkieldio/artemis/commit/bb70fcf255538dc5fbfcd9d568522fb85628119f))
+- **changelog:** Include message in changelog body template ([`f968d29`](https://github.com/yehezkieldio/artemis/commit/f968d29d261678405e7fd5ac20e836e64beb0a34))
+
+[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.2.1...artemis@0.2.2) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.2.2)
 ## 📦 artemis@0.2.1 (April 22, 2025)
 
 ### 🔹 <!-- 0 -->Release Versioning
