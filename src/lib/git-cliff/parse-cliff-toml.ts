@@ -2,6 +2,7 @@ import { errAsync, okAsync, type ResultAsync } from "neverthrow";
 import { parse, type TomlPrimitive } from "smol-toml";
 import { CWD_GIT_CLIFF_PATH } from "#/lib/constants";
 import { fs } from "#/lib/fs";
+import { logger } from "#/lib/logger";
 import { createErrorFromUnknown } from "#/lib/utils";
 
 interface ChangelogConfig {
@@ -73,15 +74,16 @@ export function removeHeaderFromChangelog(content: string): ResultAsync<string, 
             return okAsync(content);
         }
 
-        const headerIndex = content.indexOf(header);
-        if (headerIndex === -1) {
+        const changesStartIndex: number = content.indexOf("###");
+        if (changesStartIndex === -1) {
             return okAsync(content);
         }
 
-        let processedContent: string = content.slice(headerIndex + header.length);
+        const processedContent: string = content.slice(changesStartIndex);
 
-        const versionBlockRegex = /^## 📦 .*?\n(?:.*?\n)*?(🔍|🔗).*?\n+/m;
-        processedContent = processedContent.replace(versionBlockRegex, "");
+        if (process.env.ARTEMIS_DEBUG) {
+            logger.log(processedContent);
+        }
 
         return okAsync(processedContent.trimStart());
     });
