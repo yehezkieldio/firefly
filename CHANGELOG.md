@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 📦 artemis@0.2.3 (April 22, 2025)
+
+
+### 🔹 <!-- 7 -->Code Refactoring
+
+- **preflight:** Remove uncommitted changes check from pipeline ([`e94e049`](https://github.com/yehezkieldio/artemis/commit/e94e049c6a163767692d62731b725fae0c376568))
+
+[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.2.2...artemis@0.2.3) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.2.3)
 ## 📦 artemis@0.2.2 (April 22, 2025)
 
 
