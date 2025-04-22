@@ -5,6 +5,9 @@ import { executeGit } from "#/lib/git";
 import { logger } from "#/lib/logger";
 
 export function preflightPipeline(): ResultAsync<void, Error> {
+    if (process.env.ARTEMIS_DEBUG) {
+        return okAsync(undefined).andTee((): void => logger.log("Preflight: Skipping preflight checks"));
+    }
     return checkGitRepository().andThen(checkUncommittedChanges).andThen(checkGitCliffConfig);
 }
 
