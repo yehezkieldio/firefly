@@ -54,7 +54,13 @@ function writeContentToFile(path: string, updatedContent: string): ResultAsync<n
     );
 }
 
-export const fs = {
+export const fs: {
+    fileExists: typeof fileExists;
+    createIfNotExists: typeof createIfNotExists;
+    getTextFromFile: typeof getTextFromFile;
+    getJsonFromFile: typeof getJsonFromFile;
+    writeContentToFile: typeof writeContentToFile;
+} = {
     fileExists,
     createIfNotExists,
     getTextFromFile,

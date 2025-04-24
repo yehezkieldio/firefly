@@ -63,7 +63,13 @@ function updatePackageVersion(path: string, newVersion: string): ResultAsync<voi
         .map((): void => undefined);
 }
 
-export const pkgJson = {
+export const pkgJson: {
+    readPackageJson: typeof readPackageJson;
+    getPackageName: typeof getPackageName;
+    getPackageNameWithScope: typeof getPackageNameWithScope;
+    getPackageVersion: typeof getPackageVersion;
+    updatePackageVersion: typeof updatePackageVersion;
+} = {
     readPackageJson,
     getPackageName,
     getPackageNameWithScope,
