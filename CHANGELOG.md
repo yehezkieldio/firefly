@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## 📦 artemis@0.2.4 (April 24, 2025)
+
+
+### 🔹 <!-- 11 -->Build System
+
+-  Replace build script with tsdown ([`ab7ff09`](https://github.com/yehezkieldio/artemis/commit/ab7ff09ec273a475f7aa98906e55d5b636e76bed))
+
+### 🔹 <!-- 14 -->Compatibility Changes
+
+- **types:** Add type annotations for exported constants ([`e535c69`](https://github.com/yehezkieldio/artemis/commit/e535c6912a48aa69757a433e046b97e6cf7e1c66))
+
+### 🔹 <!-- 2 -->Dependencies Updates
+
+- **deps:** Update bun.lock file with latest package versions ([`0ca9776`](https://github.com/yehezkieldio/artemis/commit/0ca9776bb8e32c06e8d348c38664bd2e10f51cd2))
+
+### 🔹 <!-- 7 -->Code Refactoring
+
+- **git-cliff:** Reorganize commit message groups ([`5945868`](https://github.com/yehezkieldio/artemis/commit/59458680769164b5f4ed48408ab01f234b926bf8))
+
+### 🔹 <!-- 9 -->Code Styling
+
+- **biome:** Update includes pattern for better file matching ([`f289885`](https://github.com/yehezkieldio/artemis/commit/f28988565dc9d140df539dfa3e58519c38e92563))
+
+[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.2.3...artemis@0.2.4) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.2.4)
 ## 📦 artemis@0.2.3 (April 22, 2025)
 
 
