@@ -23,7 +23,7 @@
         "lint:fix": "biome check . --fix --unsafe",
         "format": "biome format . --write",
         "typecheck": "tsc --noEmit",
-        "build": "bun run scripts/build.ts"
+        "build": "tsdown"
     },
     "dependencies": {
         "@octokit/auth-token": "^5.1.2",
@@ -42,7 +42,7 @@
         "@types/bun": "^1.2.10",
         "@types/node": "^22.14.1",
         "@types/semver": "^7.7.0",
-        "dets": "^0.16.8",
+        "tsdown": "^0.9.6",
         "typescript": "^5.8.3"
     },
     "publishConfig": {
