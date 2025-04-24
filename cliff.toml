@@ -61,13 +61,14 @@ commit_parsers = [
   { message = "^style\\(.*\\)", group = "<!-- 9 -->Code Styling" },
   { message = "^style", group = "<!-- 9 -->Code Styling" },
   { message = "^test", group = "<!-- 10 -->Test Updates" },
-  { message = "^chore", group = "<!-- 11 -->Project Maintenance" },
-  { message = "^security", group = "<!-- 12 -->Security Updates" },
-  { message = "^compat", group = "<!-- 13 -->Compatibility Changes" },
-  { message = "^revert", group = "<!-- 14 -->Reverts" },
-  { message = "^i18n", group = "<!-- 15 -->Internationalization" },
-  { message = "^ci", group = "<!-- 16 -->CI/CD Configuration" },
-  { message = ".*", group = "<!-- 17 -->Miscellaneous Changes" },
+  { message = "^build", group = "<!-- 11 -->Build System" },
+  { message = "^chore", group = "<!-- 12 -->Project Maintenance" },
+  { message = "^security", group = "<!-- 13 -->Security Updates" },
+  { message = "^compat", group = "<!-- 14 -->Compatibility Changes" },
+  { message = "^revert", group = "<!-- 15 -->Reverts" },
+  { message = "^i18n", group = "<!-- 16 -->Internationalization" },
+  { message = "^ci", group = "<!-- 17 -->CI/CD Configuration" },
+  { message = ".*", group = "<!-- 18 -->Miscellaneous Changes" },
   { message = ".*deprecated", body = ".*deprecated", group = "Deprecation" }
 ]
 filter_commits = false
