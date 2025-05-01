@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 📦 artemis@0.2.5 (May 1, 2025)
+
+
+### 🔹 <!-- 12 -->Project Maintenance
+
+- **tsdown:** Improve type annotations for config ([`5137a96`](https://github.com/yehezkieldio/artemis/commit/5137a96877ed14ee25fad83364efd5745b6a807f))
+
+### 🔹 <!-- 18 -->Miscellaneous Changes
+
+-  Merge pull request #3 from yehezkieldio/renovate/tsdown-0.x ([`76e3280`](https://github.com/yehezkieldio/artemis/commit/76e32801ed2deb491448a4796e4cc1d6c58abc5d)) ([#3](https://github.com/yehezkieldio/artemis/pull/3) by @yehezkieldio)
+
+### 🔹 <!-- 2 -->Dependencies Updates
+
+- **deps:** Update dependency biome to beta 2 ([`fd93270`](https://github.com/yehezkieldio/artemis/commit/fd93270f6fbf23554f94fe545502438a5f45da33))
+- **deps:** Update dependency tsdown to ^0.10.0 ([`1370c61`](https://github.com/yehezkieldio/artemis/commit/1370c615a82cfc00d6f8dbfc667650925c6337f9))
+
+[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.2.4...artemis@0.2.5) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.2.5)
 ## 📦 artemis@0.2.4 (April 24, 2025)
 
 
