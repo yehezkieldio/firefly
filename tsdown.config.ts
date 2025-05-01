@@ -1,7 +1,7 @@
-import { defineConfig } from "tsdown/config";
+import { defineConfig, type UserConfig } from "tsdown/config";
 import pkg from "./package.json" with { type: "json" };
 
-const config: Array<ReturnType<typeof defineConfig>> = [
+const config: UserConfig[] = [
     defineConfig({
         entry: "./src/index.ts",
         platform: "neutral",

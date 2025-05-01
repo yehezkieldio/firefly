@@ -26,4 +26,7 @@ Choose the commit type that most accurately reflects the intent of the changes i
 - compat: Compatibility changes — ensures compatibility with other systems, libraries, or platforms
 - i18n: Internationalization and localization changes — includes translations, locale-specific adjustments, or language support
 
+Caveats:
+- Do not use the file name or path as the commit message.
+
 Generate the commit message that best reflects the current diff and fits within the guidelines above.
