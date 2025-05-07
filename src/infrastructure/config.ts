@@ -1,4 +1,10 @@
-import { ok, Result } from "neverthrow";
+import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
+import type { ArtemisContext } from "#/application/context";
+import { CWD_PACKAGE_PATH } from "#/infrastructure/constants";
+import { type PackageJson, pkgJson } from "#/infrastructure/fs";
+import { extractRepository, getRepository, type Repository } from "#/infrastructure/git";
+import { getRepositoryUsingGitHubCLI } from "#/infrastructure/hosting/github";
+import { logger } from "#/infrastructure/logging";
 import type { OptionalBumpStrategy, OptionalReleaseType, PreReleaseBase } from "#/types";
 
 export interface ArtemisOptions {
@@ -240,4 +246,131 @@ export function mergeOptions(
     }
 
     return ok(merged);
+}
+
+export function handleRepositoryOption(config: ArtemisOptions): ResultAsync<ArtemisOptions, Error> {
+    const repoPattern = /^[^/]+\/[^/]+$/;
+
+    function attemptAutoDetectRepository(): ResultAsync<ArtemisOptions, Error> {
+        logger.verbose("FileConfiguration: Repository not configured, attempting to detect from git");
+        return getRepository()
+            .orElse(() => {
+                logger.verbose("FileConfiguration: Failed to get repository from git, trying GitHub CLI");
+                return getRepositoryUsingGitHubCLI().andThen((url: string): ResultAsync<Repository, Error> => {
+                    const result = extractRepository(url);
+                    if (result.isOk()) {
+                        const ownerRepo = `${result.value.owner}/${result.value.repo}` as Repository;
+                        return okAsync(ownerRepo);
+                    }
+                    return errAsync(result.error);
+                });
+            })
+            .map(
+                (repository: Repository): ArtemisOptions => ({
+                    ...config,
+                    repository
+                })
+            );
+    }
+
+    if (!config.repository || config.repository.trim() === "") {
+        return attemptAutoDetectRepository();
+    }
+
+    if (!repoPattern.test(config.repository)) {
+        return errAsync(new Error("Repository in configuration file must be in the format of <owner>/<repo>"));
+    }
+
+    return okAsync(config);
+}
+
+export function handleNameAndScopeConfiguration(config: ArtemisOptions): ResultAsync<ArtemisOptions, Error> {
+    if (config.name || config.scope) {
+        return okAsync(config);
+    }
+
+    logger.verbose("FileConfiguration: Name and scope not configured, attempting to detect from package.json");
+
+    return pkgJson
+        .readPackageJson(CWD_PACKAGE_PATH)
+        .orElse((readError: Error) => {
+            logger.warn(`Could not read package.json at ${CWD_PACKAGE_PATH}: ${readError.message}`);
+            return okAsync(null);
+        })
+        .andThen((pkg: PackageJson | null): ResultAsync<ArtemisOptions, Error> => {
+            if (!pkg) {
+                return okAsync(config);
+            }
+
+            const scopeResult = pkgJson.getPackageNameWithScope(pkg);
+            if (scopeResult.isOk()) {
+                const { name, scope } = scopeResult.value;
+                logger.verbose(`FileConfiguration: Detected scoped package: ${scope}/${name}`);
+                return okAsync({ ...config, name, scope });
+            }
+
+            const nameResult = pkgJson.getPackageName(pkg);
+            if (nameResult.isOk()) {
+                const name = nameResult.value;
+                logger.verbose(`FileConfiguration: Detected package name: ${name}`);
+                return okAsync({ ...config, name });
+            }
+
+            logger.warn("Could not determine package name or scope from package.json");
+            return okAsync(config);
+        });
+}
+
+export function getFullPackageName(config: ArtemisOptions): string {
+    if (config.scope) {
+        return `@${config.scope}/${config.name!}`;
+    }
+
+    return config.name!;
+}
+
+export function resolveCommitMessage(context: ArtemisContext): string {
+    let message: string = context.options.commitMessage!;
+    const name: string = getFullPackageName(context.options);
+
+    if (message.includes("{{version}}")) {
+        message = message.replace("{{version}}", context.nextVersion || "");
+    }
+
+    if (message.includes("{{name}}")) {
+        message = message.replace("{{name}}", name);
+    }
+
+    return message;
+}
+
+export function resolveTagName(context: ArtemisContext): string {
+    let tagName: string = context.options.tagName!;
+    const name: string = getFullPackageName(context.options);
+
+    if (tagName.includes("{{version}}")) {
+        tagName = tagName.replace("{{version}}", context.nextVersion || "");
+    }
+
+    if (tagName.includes("{{name}}")) {
+        tagName = tagName.replace("{{name}}", name);
+    }
+
+    logger.verbose("Resolved tag name:", tagName);
+    return tagName;
+}
+
+export function resolveReleaseTitle(context: ArtemisContext): string {
+    let title: string = context.options.releaseTitle!;
+    const name: string = getFullPackageName(context.options);
+
+    if (title.includes("{{version}}")) {
+        title = title.replace("{{version}}", context.nextVersion || "");
+    }
+
+    if (title.includes("{{name}}")) {
+        title = title.replace("{{name}}", name);
+    }
+
+    return title;
 }
