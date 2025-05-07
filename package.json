@@ -50,6 +50,7 @@
         "build": "tsdown"
     },
     "dependencies": {
+        "@gitbeaker/rest": "^42.5.0",
         "@octokit/auth-token": "^5.1.2",
         "@octokit/core": "^6.1.5",
         "c12": "^3.0.3",
