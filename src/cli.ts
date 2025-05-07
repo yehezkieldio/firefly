@@ -1,8 +1,9 @@
 #!/usr/bin/env bun
 
 import { colors } from "consola/utils";
-import { okAsync, Result, type ResultAsync } from "neverthrow";
+import { Result, ResultAsync } from "neverthrow";
 import { createContext } from "#/application/context";
+import { ReleaseOrchestrator } from "#/application/services/release-orchestrator";
 import { createFileConfig } from "#/infrastructure/c12";
 import { cli } from "#/infrastructure/commander";
 import { type ArtemisOptions, mergeOptions } from "#/infrastructure/config";
@@ -23,9 +24,13 @@ export async function main(): Promise<void> {
             return logger.error(options.error.message);
         }
 
-        const initialContext = createContext(options.value);
+        const initialContext = await createContext(options.value);
+        if (initialContext.isErr()) {
+            return logger.error(initialContext.error.message);
+        }
 
-        return new Promise<void>((): ResultAsync<void, Error> => okAsync(undefined));
+        const orchestrator = new ReleaseOrchestrator();
+        return new Promise<void>((): ResultAsync<void, Error> => orchestrator.run(initialContext.value));
     });
 
     cli.configureOutput({
