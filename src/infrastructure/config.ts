@@ -181,3 +181,62 @@ export interface ArtemisOptions {
      */
     releaseDraft: boolean;
 }
+
+export const defaultArtemisOptions: ArtemisOptions = {
+    name: "",
+    scope: "",
+    base: "",
+    repository: "",
+    changelogPath: "CHANGELOG.md",
+    verbose: false,
+    dryRun: false,
+    bumpStrategy: "",
+    releaseType: "",
+    preReleaseBase: "0",
+    preReleaseId: "",
+    releaseNotes: "",
+    commitMessage: "chore(release): release {{name}}@{{version}}",
+    tagName: "{{name}}@{{version}}",
+    skipBump: false,
+    skipChangelog: false,
+    skipCommit: false,
+    skipGitHubRelease: false,
+    skipGitLabRelease: true,
+    skipPush: false,
+    skipTag: false,
+    releaseTitle: "{{name}}@{{version}}",
+    releaseLatest: true,
+    releaseDraft: false,
+    releasePreRelease: false
+};
+
+export function mergeOptions(
+    cliOptions: Partial<ArtemisOptions>,
+    fileOptions: Partial<ArtemisOptions>
+): ArtemisOptions {
+    const merged: ArtemisOptions = { ...defaultArtemisOptions };
+
+    for (const key of Object.keys(defaultArtemisOptions) as Array<keyof ArtemisOptions>) {
+        if (fileOptions[key] !== undefined) {
+            (merged[key] as unknown as string | boolean) = fileOptions[key];
+        }
+    }
+
+    for (const key of Object.keys(defaultArtemisOptions) as Array<keyof ArtemisOptions>) {
+        const cliValue = cliOptions[key];
+
+        if (cliValue !== undefined) {
+            if (typeof cliValue === "string" && cliValue === "") {
+                const currentMergedValue = merged[key];
+                if (typeof currentMergedValue === "string" && currentMergedValue !== "") {
+                } else {
+                    (merged[key] as unknown as string | boolean) = cliValue;
+                }
+            } else {
+                (merged[key] as unknown as string | boolean) = cliValue;
+            }
+        }
+    }
+
+    return merged;
+}

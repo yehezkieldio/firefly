@@ -1,5 +1,5 @@
 import { okAsync, ResultAsync } from "neverthrow";
-import type { ArtemisOptions } from "#/infrastructure/config";
+import { type ArtemisOptions, defaultArtemisOptions } from "#/infrastructure/config";
 
 export interface ArtemisContext {
     /**
@@ -79,31 +79,5 @@ export function createDefaultContext(): Readonly<ArtemisContext> {
 }
 
 export function createDefaultOptions(): Readonly<ArtemisOptions> {
-    return Object.freeze<ArtemisOptions>({
-        name: "",
-        scope: "",
-        base: "",
-        repository: "",
-        changelogPath: "CHANGELOG.md",
-        verbose: false,
-        dryRun: false,
-        bumpStrategy: "",
-        releaseType: "",
-        preReleaseBase: "0",
-        preReleaseId: "",
-        releaseNotes: "",
-        commitMessage: "chore(release): release {{name}}@{{version}}",
-        tagName: "{{name}}@{{version}}",
-        skipBump: false,
-        skipChangelog: false,
-        skipCommit: false,
-        skipGitHubRelease: false,
-        skipGitLabRelease: true,
-        skipPush: false,
-        skipTag: false,
-        releaseTitle: "{{name}}@{{version}}",
-        releaseLatest: true,
-        releaseDraft: false,
-        releasePreRelease: false
-    });
+    return Object.freeze<ArtemisOptions>(defaultArtemisOptions);
 }
