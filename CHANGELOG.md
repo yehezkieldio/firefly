@@ -2,6 +2,73 @@
 
 All notable changes to this project will be documented in this file.
 
+## 📦 artemis@1.0.0 (May 7, 2025)
+
+
+### 🔹 <!-- 12 -->Project Maintenance
+
+-  Add changelog file to document project updates ([`2ed469f`](https://github.com/yehezkieldio/artemis/commit/2ed469fb291754782d9bd2cd5e43430b6d6ba1ef))
+-  Update changelog configuration for better commit parsing ([`d1937b3`](https://github.com/yehezkieldio/artemis/commit/d1937b39f5842dea23acafad1180c5d0b346cb97))
+- **git-cliff:** Remove unnecessary footer definition in changelog template ([`f0a6b4c`](https://github.com/yehezkieldio/artemis/commit/f0a6b4cb140548c275344356bd881e9d8a87edbd))
+
+### 🔹 <!-- 17 -->CI/CD Configuration
+
+-  Update condition for next job in continuous delivery workflow ([`289ef75`](https://github.com/yehezkieldio/artemis/commit/289ef757c44b78f047af47cf62f319704158bc33))
+-  Update continuous delivery workflow for branch handling ([`97d202a`](https://github.com/yehezkieldio/artemis/commit/97d202a325d8ab6f0d1ebce0c4fd173ef2173e65))
+
+### 🔹 <!-- 18 -->Miscellaneous Changes
+
+-  Merge pull request #5 from yehezkieldio/rewrite/phoenix ([`4bf860a`](https://github.com/yehezkieldio/artemis/commit/4bf860a394e662f26a9ede98b2d99238c9cd3527)) ([#5](https://github.com/yehezkieldio/artemis/pull/5) by @yehezkieldio)
+-  Merge pull request #4 from yehezkieldio/renovate/tsdown-0.x ([`56b9c25`](https://github.com/yehezkieldio/artemis/commit/56b9c259422c6c0df2f36746a8b830f760bfc62c)) ([#4](https://github.com/yehezkieldio/artemis/pull/4) by @yehezkieldio)
+
+### 🔹 <!-- 2 -->Dependencies Updates
+
+- **deps:** Update dependency tsdown to ^0.11.0 ([`3b17c9a`](https://github.com/yehezkieldio/artemis/commit/3b17c9aa31df658356d8bcc4af1f3b8e50e99871))
+
+### 🔹 <!-- 3 -->New Features
+
+- **preflight:** Implement preflight checks for git repository and config ([`5825ce4`](https://github.com/yehezkieldio/artemis/commit/5825ce421ac6994f74289ca4a50c37a8b91aa71b))
+- **release:** Add support for GitLab release creation and rollback ([`2ebf76d`](https://github.com/yehezkieldio/artemis/commit/2ebf76d806ae2dd0519a163f97485a5650c7996c))
+- **push:** Implement push and rollback functionality for commits and tags ([`5d98b2f`](https://github.com/yehezkieldio/artemis/commit/5d98b2fb65139648f9d37221e58a51b77eab30cb))
+- **commander:** Add branch option for release configuration ([`d62456e`](https://github.com/yehezkieldio/artemis/commit/d62456ebdbfbdc6cbb4a780e2db46abfdc30796e))
+- **config:** Add branch option for release configuration ([`dfcc9a2`](https://github.com/yehezkieldio/artemis/commit/dfcc9a260811fdce837349bd2413fcecb191a680))
+- **tag:** Implement create and rollback version tag functionality ([`20bc1fd`](https://github.com/yehezkieldio/artemis/commit/20bc1fd33611ceddb03cbd6b8bf5faa2db17527c))
+- **commit:** Implement create and rollback commit functionality ([`c42cc97`](https://github.com/yehezkieldio/artemis/commit/c42cc9775553ccc44d2beceaa5ea830cc99455d3))
+- **changelog:** Implement changelog generation and rollback functionality ([`760fa2f`](https://github.com/yehezkieldio/artemis/commit/760fa2f5da3a64a9884e23d8d9d2d01e3f97053e))
+- **bump-version:** Implement version bumping and rollback functionality ([`b2284cd`](https://github.com/yehezkieldio/artemis/commit/b2284cd300814c981b4856ba1828fc173b4874b4))
+- **pipeline:** Update promptVersionPipeline to generate version ([`b91fe1f`](https://github.com/yehezkieldio/artemis/commit/b91fe1fae9b39abd46cca29bd636d06749d74498))
+- **git:** Enhance token retrieval and repository URL extraction ([`8554fc4`](https://github.com/yehezkieldio/artemis/commit/8554fc4998682589c9cc74c06eddd7051bed5a2f))
+- **gitlab:** Add GitLab release creation functionality ([`f3a977f`](https://github.com/yehezkieldio/artemis/commit/f3a977fa126318b3529d29c3174d7d4d8c4254f6))
+- **github:** Implement GitHub release creation with parameters handling ([`bb8ed89`](https://github.com/yehezkieldio/artemis/commit/bb8ed891934555fe7d184e64e45c8329e35a3674))
+- **changelog:** Implement changelog generation and update functionality ([`0a6c543`](https://github.com/yehezkieldio/artemis/commit/0a6c5435948f7613fe548fcf4e4818adc0a3d7c7))
+- **versioning:** Implement automatic and manual version bump strategies ([`0a56f03`](https://github.com/yehezkieldio/artemis/commit/0a56f03406873ce57718c595c62e50b41756a1d0))
+-  Add context enrichment and options sanitization functions ([`350d0e8`](https://github.com/yehezkieldio/artemis/commit/350d0e8a73bc6ffaff95adaa6fcbed746d5c498c))
+-  Implement repository and package configuration handling ([`edfa875`](https://github.com/yehezkieldio/artemis/commit/edfa87544fd22dca6956d6291e1c9daeb84345fe))
+-  Add preflight checks to ReleaseOrchestrator run method ([`6acb58e`](https://github.com/yehezkieldio/artemis/commit/6acb58eda364c38446095172e26e3906087b672d))
+-  Implement rollback functions to return void instead of context ([`5212c37`](https://github.com/yehezkieldio/artemis/commit/5212c37de9feb62f92a6f805b2e4f78f77461d0c))
+-  Implement pipelines for version bumping, commits, and releases ([`4211a56`](https://github.com/yehezkieldio/artemis/commit/4211a56f43dcfaa5122a667ec54d01c96538ac1d))
+-  Implement ReleaseOrchestrator and integrate with CLI context ([`7f1595b`](https://github.com/yehezkieldio/artemis/commit/7f1595b3d78d20699a1e62cd03873351065d702c))
+-  Add default options and merge function for ArtemisOptions ([`1db6f76`](https://github.com/yehezkieldio/artemis/commit/1db6f7607a2974ad2d306bb48c7c9a868de23376))
+-  Implement CLI command structure and validation functions ([`36e3c4d`](https://github.com/yehezkieldio/artemis/commit/36e3c4d1374e592f9aca56e23e5a1f743380c168))
+-  Implement ArtemisContext and related context management functions ([`240f25f`](https://github.com/yehezkieldio/artemis/commit/240f25f72c792be1c6ca6ffe7fbcd106c42b6491))
+-  Add ArtemisOptions interface and versioning files for release process ([`d2056d9`](https://github.com/yehezkieldio/artemis/commit/d2056d9fb9f98148466d8515c74f6dbcf655daf0))
+-  Add initial implementation for various application components ([`758e6fb`](https://github.com/yehezkieldio/artemis/commit/758e6fbd818af5ce9feff17e21c89ac20466fb8a))
+-  Add constants and utility function for error handling ([`7ce5c1a`](https://github.com/yehezkieldio/artemis/commit/7ce5c1a68d04e48703b196ce606afa975ed5a2fc))
+-  Define configuration function for Artemis release process ([`7ac375e`](https://github.com/yehezkieldio/artemis/commit/7ac375eaf6ad4b5da9db3e65e064732398e49719))
+-  Add ArtemisOptions interface and related types for configuration ([`702686c`](https://github.com/yehezkieldio/artemis/commit/702686c985bc15a5bfb15d5cf4c3ade7961392ce))
+-  Add initial cli implementation ([`0cab0d2`](https://github.com/yehezkieldio/artemis/commit/0cab0d2b9004d4dd09d7a3b99520b9e64170afc9))
+-  Remove src dir as start of project rework ([`1943c2a`](https://github.com/yehezkieldio/artemis/commit/1943c2a4ddb2756b6de427d88e4332ea1b0253ce))
+
+### 🔹 <!-- 4 -->Bug Fixes
+
+- **commander:** Remove commented-out option for skipping GitLab release ([`7eb9456`](https://github.com/yehezkieldio/artemis/commit/7eb9456d8bfa8540a91f49031088a5e3c13b830d))
+-  Update import path for ArtemisOptions in index.ts ([`84f296e`](https://github.com/yehezkieldio/artemis/commit/84f296ed0838438c71d6984ec5c15e6df287a632))
+
+### 🔹 <!-- 7 -->Code Refactoring
+
+-  Update ArtemisOptions type definition in config ([`022520d`](https://github.com/yehezkieldio/artemis/commit/022520d74ad86d5b6c8f935935b1ef6dadc87295))
+-  Update mergeOptions to return Result type for better error handling ([`c26cd14`](https://github.com/yehezkieldio/artemis/commit/c26cd14a25cab018b5644c895c36dfdf3b1b1690))
+
 ## 📦 artemis@0.2.5 (May 1, 2025)
 
 
