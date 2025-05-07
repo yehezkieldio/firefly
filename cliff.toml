@@ -30,13 +30,6 @@ body = """
         {% endif %}\
     {% endfor %}
   {% endfor %}
-  {% if previous and previous.version -%}
-  [[Compare Changes]]({{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}) \
-   · \
-  [[View Source]]({{ self::remote_url() }}/tree/{{ version }})\
-  {%- else %}
-  [[View Source]]({{ self::remote_url() }}/tree/{{ version }})
-  {%- endif %}
 """
 footer = """
 """
