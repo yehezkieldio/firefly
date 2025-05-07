@@ -5,6 +5,6 @@ export function createCommitPipeline(context: ArtemisContext): ResultAsync<Artem
     return okAsync(context);
 }
 
-export function rollbackCreateCommitPipeline(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
-    return okAsync(context);
+export function rollbackCreateCommitPipeline(context: ArtemisContext): ResultAsync<void, Error> {
+    return okAsync(undefined);
 }

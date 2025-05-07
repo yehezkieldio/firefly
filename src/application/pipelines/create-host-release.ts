@@ -5,6 +5,6 @@ export function createHostReleasePipeline(context: ArtemisContext): ResultAsync<
     return okAsync(context);
 }
 
-export function rollbackCreateHostReleasePipeline(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
-    return okAsync(context);
+export function rollbackCreateHostReleasePipeline(context: ArtemisContext): ResultAsync<void, Error> {
+    return okAsync(undefined);
 }

@@ -5,6 +5,6 @@ export function pushChangesPipeline(context: ArtemisContext): ResultAsync<Artemi
     return okAsync(context);
 }
 
-export function rollbackPushChangesPipeline(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
-    return okAsync(context);
+export function rollbackPushChangesPipeline(context: ArtemisContext): ResultAsync<void, Error> {
+    return okAsync(undefined);
 }

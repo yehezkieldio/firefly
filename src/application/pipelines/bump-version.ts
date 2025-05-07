@@ -5,6 +5,6 @@ export function bumpVersionPipeline(context: ArtemisContext): ResultAsync<Artemi
     return okAsync(context);
 }
 
-export function rollbackBumpVersionPipeline(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
-    return okAsync(context);
+export function rollbackBumpVersionPipeline(context: ArtemisContext): ResultAsync<void, Error> {
+    return okAsync(undefined);
 }
