@@ -1,3 +1,4 @@
+import { ok, Result } from "neverthrow";
 import type { OptionalBumpStrategy, OptionalReleaseType, PreReleaseBase } from "#/types";
 
 export interface ArtemisOptions {
@@ -213,7 +214,7 @@ export const defaultArtemisOptions: ArtemisOptions = {
 export function mergeOptions(
     cliOptions: Partial<ArtemisOptions>,
     fileOptions: Partial<ArtemisOptions>
-): ArtemisOptions {
+): Result<ArtemisOptions, Error> {
     const merged: ArtemisOptions = { ...defaultArtemisOptions };
 
     for (const key of Object.keys(defaultArtemisOptions) as Array<keyof ArtemisOptions>) {
@@ -238,5 +239,5 @@ export function mergeOptions(
         }
     }
 
-    return merged;
+    return ok(merged);
 }

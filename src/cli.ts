@@ -2,6 +2,7 @@
 
 import { colors } from "consola/utils";
 import { okAsync, Result, type ResultAsync } from "neverthrow";
+import { createContext } from "#/application/context";
 import { createFileConfig } from "#/infrastructure/c12";
 import { cli } from "#/infrastructure/commander";
 import { type ArtemisOptions, mergeOptions } from "#/infrastructure/config";
@@ -17,7 +18,12 @@ export async function main(): Promise<void> {
             return logger.error(fileConfig.error.message);
         }
 
-        const options: ArtemisOptions = mergeOptions(cliOptions, fileConfig.value);
+        const options: Result<ArtemisOptions, Error> = mergeOptions(cliOptions, fileConfig.value);
+        if (options.isErr()) {
+            return logger.error(options.error.message);
+        }
+
+        const initialContext = createContext(options.value);
 
         return new Promise<void>((): ResultAsync<void, Error> => okAsync(undefined));
     });
