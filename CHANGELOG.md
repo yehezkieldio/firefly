@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 📦 artemis@1.0.1 (May 7, 2025)
+
+
+### 🔹 <!-- 17 -->CI/CD Configuration
+
+-  Update conditional for continuous delivery job ([`9192e33`](https://github.com/yehezkieldio/artemis/commit/9192e33c5a81269b97f18aca440d727129535440))
+
 ## 📦 artemis@1.0.0 (May 7, 2025)
 
 

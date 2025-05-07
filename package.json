@@ -1,6 +1,6 @@
 {
     "name": "@yehezkieldio/artemis",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "packageManager": "bun@1.2.13",
     "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
     "type": "module",
