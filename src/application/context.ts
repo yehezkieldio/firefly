@@ -1,5 +1,7 @@
 import { okAsync, ResultAsync } from "neverthrow";
 import { type ArtemisOptions, defaultArtemisOptions } from "#/infrastructure/config";
+import { CWD_PACKAGE_PATH } from "#/infrastructure/constants";
+import { fs, type PackageJson, pkgJson } from "#/infrastructure/fs";
 
 export interface ArtemisContext {
     /**
@@ -80,4 +82,17 @@ export function createDefaultContext(): Readonly<ArtemisContext> {
 
 export function createDefaultOptions(): Readonly<ArtemisOptions> {
     return Object.freeze<ArtemisOptions>(defaultArtemisOptions);
+}
+
+export function enrichWithVersion(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
+    function getVersion(): ResultAsync<string, Error> {
+        return fs.getJsonFromFile<PackageJson>(CWD_PACKAGE_PATH).andThen(pkgJson.getPackageVersion);
+    }
+
+    return getVersion().map(
+        (version: string): ArtemisContext => ({
+            ...context,
+            currentVersion: version
+        })
+    );
 }

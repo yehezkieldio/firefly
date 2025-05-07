@@ -248,6 +248,10 @@ export function mergeOptions(
     return ok(merged);
 }
 
+export function sanitizeOptions(options: ArtemisOptions): ResultAsync<ArtemisOptions, Error> {
+    return handleRepositoryOption(options).andThen(handleNameAndScopeConfiguration);
+}
+
 export function handleRepositoryOption(config: ArtemisOptions): ResultAsync<ArtemisOptions, Error> {
     const repoPattern = /^[^/]+\/[^/]+$/;
 

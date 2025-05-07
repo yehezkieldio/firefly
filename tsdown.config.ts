@@ -6,7 +6,7 @@ const config: (UserConfig | UserConfigFn)[] = [
         entry: "./src/index.ts",
         platform: "neutral",
         dts: true,
-        external: Object.keys(pkg.dependencies)
+        external: Object.keys(pkg.dependencies).concat(["node:path"])
     }),
     defineConfig({
         entry: "./src/cli.ts",
