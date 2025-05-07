@@ -1,4 +1,4 @@
-import { ArtemisOptions, defineConfig } from "#/index";
+import { type ArtemisOptions, defineConfig } from "#/index";
 
 const config: ArtemisOptions = defineConfig({
     scope: "",
