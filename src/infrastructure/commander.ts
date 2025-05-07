@@ -32,7 +32,8 @@ cli.name("artemis")
     .option("--release-title [title]", "Specify the release title", "{{name}}@{{version}}")
     .option("--release-latest", "Release as latest version", true)
     .option("--release-prerelease", "Release as pre-release version", false)
-    .option("--release-draft", "Release as draft version", false);
+    .option("--release-draft", "Release as draft version", false)
+    .option("--branch [branch]", "Specify the branch to push and release to", "master");
 
 export function validateBumpStrategy(strategy: string): OptionalBumpStrategy {
     const validStrategies: BumpStrategy[] = ["auto", "manual"];
