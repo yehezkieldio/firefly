@@ -1,6 +1,7 @@
-import { err, errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { err, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import type { ArtemisContext } from "#/application/context";
 import { getGitHubCliToken } from "#/infrastructure/hosting/github";
+import { getGitLabCliToken } from "#/infrastructure/hosting/gitlab";
 import { logger } from "#/infrastructure/logging";
 import { createErrorFromUnknown } from "#/infrastructure/utils";
 
@@ -12,23 +13,34 @@ export interface RepositoryObject {
 }
 
 export function getToken(context: ArtemisContext): ResultAsync<string, Error> {
-    const token: string = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || process.env.TOKEN || "";
+    // First try environment variables
+    const githubToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
+    const gitlabToken = process.env.GITLAB_TOKEN || "";
+    const genericToken = process.env.TOKEN || "";
 
-    if (token.trim()) {
-        logger.verbose("Using token from environment variables");
-        return okAsync(token);
+    if (githubToken.trim() && !context.options.skipGitHubRelease) {
+        logger.verbose("Using GitHub token from environment variables");
+        return okAsync(githubToken);
     }
 
+    if (gitlabToken.trim() && context.options.skipGitHubRelease) {
+        logger.verbose("Using GitLab token from environment variables");
+        return okAsync(gitlabToken);
+    }
+
+    if (genericToken.trim()) {
+        logger.verbose("Using generic token from environment variables");
+        return okAsync(genericToken);
+    }
+
+    // If no environment variables, try CLI tokens
     if (!context.options.skipGitHubRelease) {
         logger.verbose("Using token from GitHub CLI");
         return getGitHubCliToken();
     }
 
-    return errAsync(
-        new Error(
-            "No authentication token provided. Please set GITHUB_TOKEN, GH_TOKEN for publishing to GitHub and GITLAB_TOKEN for GitLab."
-        )
-    );
+    logger.verbose("Using token from GitLab CLI");
+    return getGitLabCliToken();
 }
 
 export function executeGit(args: string[]): ResultAsync<string, Error> {
@@ -78,35 +90,71 @@ export function getRepository(): ResultAsync<Repository, Error> {
 export function extractRepository(url: string): Result<RepositoryObject, Error> {
     const cleanUrl: string = url.trim().replace(/\.git$/, "");
 
-    const sshMatch: RegExpMatchArray | null = cleanUrl.match(/^git@github\.com:([^/]+)\/(.+)$/);
-    if (sshMatch) {
-        const [, owner, name] = sshMatch;
-        if (!name) {
-            return err(new Error("Invalid repository URL format"));
+    // Handle GitHub SSH URLs
+    const githubSshMatch: RegExpMatchArray | null = cleanUrl.match(/^git@github\.com:([^/]+)\/(.+)$/);
+    if (githubSshMatch) {
+        const [, owner, name] = githubSshMatch;
+        if (!name || !owner) {
+            return err(new Error("Invalid GitHub SSH repository URL format"));
         }
-        if (!owner) {
-            return err(new Error("Invalid repository URL format"));
-        }
-
         return ok({ owner: owner, repo: name });
     }
 
-    const httpsMatch: RegExpMatchArray | null = cleanUrl.match(/^https:\/\/github\.com\/([^/]+)\/(.+)$/);
-    if (httpsMatch) {
-        const [, owner, repo] = httpsMatch;
-        if (!repo) {
-            return err(new Error("Invalid repository URL format"));
+    // Handle GitHub HTTPS URLs
+    const githubHttpsMatch: RegExpMatchArray | null = cleanUrl.match(/^https:\/\/github\.com\/([^/]+)\/(.+)$/);
+    if (githubHttpsMatch) {
+        const [, owner, repo] = githubHttpsMatch;
+        if (!repo || !owner) {
+            return err(new Error("Invalid GitHub HTTPS repository URL format"));
         }
-        if (!owner) {
-            return err(new Error("Invalid repository URL format"));
+        return ok({ owner: owner, repo: repo });
+    }
+
+    // Handle GitLab SSH URLs
+    const gitlabSshMatch: RegExpMatchArray | null = cleanUrl.match(/^git@gitlab\.com:([^/]+)\/(.+)$/);
+    if (gitlabSshMatch) {
+        const [, owner, name] = gitlabSshMatch;
+        if (!name || !owner) {
+            return err(new Error("Invalid GitLab SSH repository URL format"));
+        }
+        return ok({ owner: owner, repo: name });
+    }
+
+    // Handle GitLab HTTPS URLs
+    const gitlabHttpsMatch: RegExpMatchArray | null = cleanUrl.match(/^https:\/\/gitlab\.com\/([^/]+)\/(.+)$/);
+    if (gitlabHttpsMatch) {
+        const [, owner, repo] = gitlabHttpsMatch;
+        if (!repo || !owner) {
+            return err(new Error("Invalid GitLab HTTPS repository URL format"));
+        }
+        return ok({ owner: owner, repo: repo });
+    }
+
+    // Try to handle custom GitLab instance URLs if GITLAB_HOST is set
+    const customGitlabHost = process.env.GITLAB_HOST?.replace(/^https?:\/\//, "");
+    if (customGitlabHost) {
+        const customSshMatch = cleanUrl.match(new RegExp(`^git@${customGitlabHost}:([^/]+)/(.+)$`));
+        if (customSshMatch) {
+            const [, owner, name] = customSshMatch;
+            if (!name || !owner) {
+                return err(new Error("Invalid GitLab SSH repository URL format"));
+            }
+            return ok({ owner: owner, repo: name });
         }
 
-        return ok({ owner: owner, repo: repo });
+        const customHttpsMatch = cleanUrl.match(new RegExp(`^https?://${customGitlabHost}/([^/]+)/(.+)$`));
+        if (customHttpsMatch) {
+            const [, owner, repo] = customHttpsMatch;
+            if (!repo || !owner) {
+                return err(new Error("Invalid GitLab HTTPS repository URL format"));
+            }
+            return ok({ owner: owner, repo: repo });
+        }
     }
 
     return err(
         new Error(
-            "Invalid repository URL format. Expected SSH (git@github.com:owner/repo) or HTTPS (https://github.com/owner/repo)"
+            "Invalid repository URL format. Expected GitHub SSH (git@github.com:owner/repo), GitHub HTTPS (https://github.com/owner/repo), GitLab SSH (git@gitlab.com:owner/repo), or GitLab HTTPS (https://gitlab.com/owner/repo)"
         )
     );
 }
