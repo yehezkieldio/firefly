@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## 📦 artemis@0.2.5 (May 1, 2025)
 
 
+### 🔹 <!-- 0 -->Release Versioning
+
+- **release:** Release artemis@0.2.5 ([`87ffb4c`](https://github.com/yehezkieldio/artemis/commit/87ffb4c82812429a1c5c6140673e719193efcfa5))
+
 ### 🔹 <!-- 12 -->Project Maintenance
 
 - **tsdown:** Improve type annotations for config ([`5137a96`](https://github.com/yehezkieldio/artemis/commit/5137a96877ed14ee25fad83364efd5745b6a807f))
@@ -18,9 +22,12 @@ All notable changes to this project will be documented in this file.
 - **deps:** Update dependency biome to beta 2 ([`fd93270`](https://github.com/yehezkieldio/artemis/commit/fd93270f6fbf23554f94fe545502438a5f45da33))
 - **deps:** Update dependency tsdown to ^0.10.0 ([`1370c61`](https://github.com/yehezkieldio/artemis/commit/1370c615a82cfc00d6f8dbfc667650925c6337f9))
 
-[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.2.4...artemis@0.2.5) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.2.5)
 ## 📦 artemis@0.2.4 (April 24, 2025)
 
+
+### 🔹 <!-- 0 -->Release Versioning
+
+- **release:** Release artemis@0.2.4 ([`ca0e8c2`](https://github.com/yehezkieldio/artemis/commit/ca0e8c22380664f02925b2e7c1ee125d9dfde4bb))
 
 ### 🔹 <!-- 11 -->Build System
 
@@ -42,17 +49,23 @@ All notable changes to this project will be documented in this file.
 
 - **biome:** Update includes pattern for better file matching ([`f289885`](https://github.com/yehezkieldio/artemis/commit/f28988565dc9d140df539dfa3e58519c38e92563))
 
-[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.2.3...artemis@0.2.4) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.2.4)
 ## 📦 artemis@0.2.3 (April 22, 2025)
 
+
+### 🔹 <!-- 0 -->Release Versioning
+
+- **release:** Release artemis@0.2.3 ([`74ac0ad`](https://github.com/yehezkieldio/artemis/commit/74ac0ad959b705e8c2717d69ce69b0f63271d788))
 
 ### 🔹 <!-- 7 -->Code Refactoring
 
 - **preflight:** Remove uncommitted changes check from pipeline ([`e94e049`](https://github.com/yehezkieldio/artemis/commit/e94e049c6a163767692d62731b725fae0c376568))
 
-[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.2.2...artemis@0.2.3) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.2.3)
 ## 📦 artemis@0.2.2 (April 22, 2025)
 
+
+### 🔹 <!-- 0 -->Release Versioning
+
+- **release:** Release artemis@0.2.2 ([`0bdbf6b`](https://github.com/yehezkieldio/artemis/commit/0bdbf6b4afd522f51f32b0b383a6853ef5471662))
 
 ### 🔹 <!-- 3 -->New Features
 
@@ -67,8 +80,11 @@ All notable changes to this project will be documented in this file.
 - **config:** Remove tag annotation from configuration ([`bb70fcf`](https://github.com/yehezkieldio/artemis/commit/bb70fcf255538dc5fbfcd9d568522fb85628119f))
 - **changelog:** Include message in changelog body template ([`f968d29`](https://github.com/yehezkieldio/artemis/commit/f968d29d261678405e7fd5ac20e836e64beb0a34))
 
-[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.2.1...artemis@0.2.2) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.2.2)
 ## 📦 artemis@0.2.1 (April 22, 2025)
+
+
+### 📝 Release Notes
+artemis@0.2.1
 
 ### 🔹 <!-- 0 -->Release Versioning
 
@@ -82,14 +98,17 @@ All notable changes to this project will be documented in this file.
 
 - **changelog:** Remove additional metadata before changes ([`c413374`](https://github.com/yehezkieldio/artemis/commit/c413374bad74d82333bbed23044d2f2640b774ea))
 
-[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.2.0...artemis@0.2.1) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.2.1)
 ## 📦 artemis@0.2.0 (April 22, 2025)
+
+
+### 📝 Release Notes
+artemis@0.2.0
 
 ### 🔹 <!-- 0 -->Release Versioning
 
 - **release:** Release artemis@0.2.0 ([`2d7c819`](https://github.com/yehezkieldio/artemis/commit/2d7c819ed060860120989fb23d99e8ad16ac9b13))
 
-### 🔹 <!-- 11 -->Project Maintenance
+### 🔹 <!-- 12 -->Project Maintenance
 
 -  Remove renovate config ([`e3116d2`](https://github.com/yehezkieldio/artemis/commit/e3116d2fcf42470a4b4c86d8a763045d2b177f72))
 -  Remove github copilot settings ([`8985720`](https://github.com/yehezkieldio/artemis/commit/8985720ac367ee82a8686e1d9c66819ae27d24f4))
@@ -103,14 +122,17 @@ All notable changes to this project will be documented in this file.
 - **changelog:** Improve header and body template checks ([`50bba21`](https://github.com/yehezkieldio/artemis/commit/50bba21b219b691c6c727fbeb6247944a5b03963))
 - **context:** Move enrichWithVersion to context.ts ([`85e3345`](https://github.com/yehezkieldio/artemis/commit/85e3345e8e2a85952cb67ed71369a119b3b7a1ac))
 
-[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.1.2...artemis@0.2.0) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.2.0)
 ## 📦 artemis@0.1.2 (April 20, 2025)
+
+
+### 📝 Release Notes
+artemis@0.1.2
 
 ### 🔹 <!-- 0 -->Release Versioning
 
 - **release:** Release artemis@0.1.2 ([`3235b4f`](https://github.com/yehezkieldio/artemis/commit/3235b4fc51c91f801a8ae9b0e3a2aead0a610771))
 
-### 🔹 <!-- 11 -->Project Maintenance
+### 🔹 <!-- 12 -->Project Maintenance
 
 -  Add commit message generation instructions ([`d142fd5`](https://github.com/yehezkieldio/artemis/commit/d142fd5da00192ea72980149743c6833bc7249e2))
 
@@ -118,34 +140,40 @@ All notable changes to this project will be documented in this file.
 
 - **pipeline:** Extract preflight checks ([`f95f18f`](https://github.com/yehezkieldio/artemis/commit/f95f18ff2effc29bcbba89332afd74a78ed339b3))
 
-[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.1.1...artemis@0.1.2) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.1.2)
 ## 📦 artemis@0.1.1 (April 20, 2025)
+
+
+### 📝 Release Notes
+artemis@0.1.1
 
 ### 🔹 <!-- 0 -->Release Versioning
 
 - **release:** Release artemis@0.1.1 ([`8939658`](https://github.com/yehezkieldio/artemis/commit/89396589673379cab15235630ea6ebc639fa176e))
 
-### 🔹 <!-- 11 -->Project Maintenance
+### 🔹 <!-- 12 -->Project Maintenance
 
 - **renovate:** Format file ([`d9b2dbc`](https://github.com/yehezkieldio/artemis/commit/d9b2dbc576b484dce3a42852940b49272c589ebc))
 
-### 🔹 <!-- 16 -->CI/CD Configuration
+### 🔹 <!-- 17 -->CI/CD Configuration
 
 -  Update continuous delivery workflow to publish to npmjs ([`f09c8b4`](https://github.com/yehezkieldio/artemis/commit/f09c8b423155c9fb65555a8cd5dc4532f16f94b0))
 
-### 🔹 <!-- 17 -->Miscellaneous Changes
+### 🔹 <!-- 18 -->Miscellaneous Changes
 
 -  Merge pull request #1 from yehezkieldio/renovate/configure ([`2b29b10`](https://github.com/yehezkieldio/artemis/commit/2b29b1081395ee042d50bb51d9f44475acc7639c)) ([#1](https://github.com/yehezkieldio/artemis/pull/1) by @yehezkieldio)
 -  Add renovate.json ([`614c225`](https://github.com/yehezkieldio/artemis/commit/614c225c314ddae2d1030e036b710d81b9a73724))
 
-[[Compare Changes]](https://github.com/yehezkieldio/artemis/compare/artemis@0.1.0...artemis@0.1.1) · [[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.1.1)
 ## 📦 artemis@0.1.0 (April 20, 2025)
+
+
+### 📝 Release Notes
+artemis@0.1.0
 
 ### 🔹 <!-- 0 -->Release Versioning
 
 - **release:** Release artemis@0.1.0 ([`741beb4`](https://github.com/yehezkieldio/artemis/commit/741beb47907d395ed468d735455bd14d649de58f))
 
-### 🔹 <!-- 11 -->Project Maintenance
+### 🔹 <!-- 12 -->Project Maintenance
 
 -  Initialize project with essential configuration files ([`eb0a26b`](https://github.com/yehezkieldio/artemis/commit/eb0a26b651d0b9d12abddba6174781684a1e6a32))
 
@@ -212,5 +240,3 @@ All notable changes to this project will be documented in this file.
 - **context:** Add type parameters to Object.freeze for clarity ([`077db61`](https://github.com/yehezkieldio/artemis/commit/077db61672dfef7c736cc9370de1fea921e358d7))
 - **utils:** Simplify error handling in createErrorFromUnknown ([`0980436`](https://github.com/yehezkieldio/artemis/commit/0980436c5799ceb70f385362f335ba058855bbc3))
 
-
-[[View Source]](https://github.com/yehezkieldio/artemis/tree/artemis@0.1.0)

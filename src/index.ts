@@ -1,3 +1,12 @@
-import type { ArtemisConfiguration } from "./types";
+import type { ArtemisOptions as _ArtemisOptions } from "#/infrastructure/config";
 
-export const defineConfig = (config: ArtemisConfiguration): ArtemisConfiguration => config;
+type ArtemisOptions = Partial<_ArtemisOptions>;
+
+/**
+ * Defines the configuration for the Artemis release process.
+ */
+export function defineConfig(options: Partial<ArtemisOptions>): Partial<ArtemisOptions> {
+    return options;
+}
+
+export type { ArtemisOptions };

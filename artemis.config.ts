@@ -1,7 +1,6 @@
-import { defineConfig } from "#/index";
-import type { ArtemisConfiguration } from "#/types";
+import { type ArtemisOptions, defineConfig } from "#/index";
 
-const config: ArtemisConfiguration = defineConfig({
+const config: ArtemisOptions = defineConfig({
     scope: "",
     name: "artemis"
 });

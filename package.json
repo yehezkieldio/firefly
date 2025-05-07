@@ -1,21 +1,45 @@
 {
     "name": "@yehezkieldio/artemis",
     "version": "0.2.5",
+    "packageManager": "bun@1.2.13",
     "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
-    "author": "Yehezkiel Dio Sinolungan <yehezkieldio@proton.me>",
-    "license": "MIT",
     "type": "module",
-    "module": "./bin/artemis.js",
-    "main": "./bin/artemis.js",
-    "types": "./dist/index.d.ts",
-    "bin": {
-        "artemis": "./bin/artemis.js"
+    "license": "MIT",
+    "homepage": "https://github.com/yehezkieldio/artemis#readme",
+    "bugs": {
+        "url": "https://github.com/yehezkieldio/artemis/issues"
     },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/yehezkieldio/artemis.git"
+    },
+    "author": "Yehezkiel Dio Sinolungan <yehezkieldio@proton.me>",
+    "funding": "https://www.nihbuatjajan.com/yehezkieldio",
+    "files": [
+        "dist"
+    ],
+    "main": "./dist/cli.js",
+    "module": "./dist/cli.js",
+    "types": "./dist/index.d.ts",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js"
         }
+    },
+    "typesVersions": {
+        "*": {
+            "*": [
+                "./dist/*",
+                "./*"
+            ]
+        }
+    },
+    "bin": {
+        "artemis": "./dist/cli.js"
+    },
+    "publishConfig": {
+        "access": "public"
     },
     "scripts": {
         "start:debug": "bun run src/cli.ts",
@@ -26,6 +50,7 @@
         "build": "tsdown"
     },
     "dependencies": {
+        "@gitbeaker/rest": "^42.5.0",
         "@octokit/auth-token": "^5.1.2",
         "@octokit/core": "^6.1.5",
         "c12": "^3.0.3",
@@ -39,19 +64,10 @@
     },
     "devDependencies": {
         "@biomejs/biome": "^2.0.0-beta.2",
-        "@types/bun": "^1.2.10",
-        "@types/node": "^22.14.1",
+        "@types/bun": "^1.2.12",
+        "@types/node": "^22.15.14",
         "@types/semver": "^7.7.0",
         "tsdown": "^0.11.0",
         "typescript": "^5.8.3"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "files": [
-        "dist",
-        "bin"
-    ],
-    "homepage": "https://github.com/yehezkieldio/artemis#readme",
-    "repository": "github:yehezkieldio/artemis"
+    }
 }

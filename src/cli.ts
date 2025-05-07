@@ -1,44 +1,52 @@
 #!/usr/bin/env bun
 
-import { type Command, createCommand } from "commander";
 import { colors } from "consola/utils";
-import type { ResultAsync } from "neverthrow";
-import { logger } from "#/lib/logger";
-import { validateBumpStrategy, validateReleaseType } from "#/lib/utils";
-import { createPipeline } from "#/pipelines/main";
-import type { ArtemisOptions } from "#/types";
+import { Result, ResultAsync } from "neverthrow";
+import { type ArtemisContext, createContext, enrichWithVersion } from "#/application/context";
+import { ReleaseOrchestrator } from "#/application/services/release-orchestrator";
+import { createFileConfig } from "#/infrastructure/c12";
+import { cli } from "#/infrastructure/commander";
+import { type ArtemisOptions, mergeOptions, sanitizeOptions } from "#/infrastructure/config";
+import { logger } from "#/infrastructure/logging";
 import pkg from "../package.json" with { type: "json" };
 
-const cli: Command = createCommand();
+export async function main(): Promise<void> {
+    cli.action(async (cliOptions: ArtemisOptions): Promise<void> => {
+        logger.info(`${colors.magenta("artemis")} ${colors.dim(`v${pkg.version}`)}`);
 
-cli.name("artemis")
-    .description(pkg.description)
-    .version(pkg.version, "--version", "Display version information")
-    .helpOption("-h, --help", "Display help information")
-    .option("--verbose", "Enable verbose output", false)
-    .option("--dry-run", "Enable dry run mode", false)
-    .option("-b, --bump-strategy [strategy]", "Specify the bumping strategy", validateBumpStrategy, "")
-    .option("-r, --release-type [type]", "Specify the release type", validateReleaseType, "")
-    .option("-p, --pre-release-id [id]", "Specify the pre-release identifier", "")
-    .option("-B, --pre-release-base [base]", "Specify the pre-release base version", "")
-    .option("-n, --release-notes [notes]", "Specify the release notes", "")
-    .option("--skip-bump", "Skip the version bump in the changelog", false)
-    .option("--skip-changelog", "Skip the changelog generation step", false)
-    .option("--skip-github-release", "Skip the GitHub release step", false)
-    .option("--skip-commit", "Skip the commit creation step", false)
-    .option("--skip-tag", "Skip the version tag creation step", false)
-    .option("--skip-push", "Skip the push step", false)
-    .option("--github-release-draft", "Create a draft GitHub release", false)
-    .option("--github-release-prerelease", "Create a pre-release GitHub release", false)
-    .option("--github-release-latest", "Create a latest GitHub release", true)
-    .action((options: ArtemisOptions): Promise<void> => {
-        logger.log(`${colors.magenta("artemis")} ${colors.dim(`v${pkg.version}`)}`);
-        return new Promise<void>((): ResultAsync<void, Error> => createPipeline(options));
-    })
-    .configureOutput({
+        const fileConfig: Result<ArtemisOptions, Error> = await createFileConfig();
+        if (fileConfig.isErr()) {
+            return logger.error(fileConfig.error.message);
+        }
+
+        const options: Result<ArtemisOptions, Error> = mergeOptions(cliOptions, fileConfig.value);
+        if (options.isErr()) {
+            return logger.error(options.error.message);
+        }
+
+        const sanitizedOptions: Result<ArtemisOptions, Error> = await sanitizeOptions(options.value);
+        if (sanitizedOptions.isErr()) {
+            return logger.error(sanitizedOptions.error.message);
+        }
+
+        const initialContext: Result<ArtemisContext, Error> = await (
+            await createContext(sanitizedOptions.value)
+        ).asyncAndThen(enrichWithVersion);
+        if (initialContext.isErr()) {
+            return logger.error(initialContext.error.message);
+        }
+
+        const orchestrator = new ReleaseOrchestrator();
+        return new Promise<void>((): ResultAsync<void, Error> => orchestrator.run(initialContext.value));
+    });
+
+    cli.configureOutput({
         writeErr(str: string): void {
             logger.error(str);
         }
     });
 
-cli.parse(Bun.argv);
+    cli.parse(Bun.argv);
+}
+
+await main();
