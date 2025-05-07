@@ -187,6 +187,14 @@ export interface ArtemisOptions {
      * @flag --release-draft
      */
     releaseDraft: boolean;
+
+    /**
+     * The branch to create the release on.
+     * @default "master"
+     * @example "master"
+     * @flag --branch
+     */
+    branch: string;
 }
 
 export const defaultArtemisOptions: ArtemisOptions = {
@@ -214,7 +222,8 @@ export const defaultArtemisOptions: ArtemisOptions = {
     releaseTitle: "{{name}}@{{version}}",
     releaseLatest: true,
     releaseDraft: false,
-    releasePreRelease: false
+    releasePreRelease: false,
+    branch: "master"
 };
 
 export function mergeOptions(
