@@ -1,9 +1,90 @@
 import { createTokenAuth } from "@octokit/auth-token";
 import { Octokit } from "@octokit/core";
-import { err, ok, Result, ResultAsync } from "neverthrow";
-import { getRepositoryUrl } from "#/infrastructure/git";
+import type { RequestParameters } from "@octokit/core/types";
+import { colors } from "consola/utils";
+import { err, ok, okAsync, Result, ResultAsync } from "neverthrow";
+import type { ArtemisContext } from "#/application/context";
+import { removeHeaderFromChangelog } from "#/infrastructure/changelog/git-cliff";
+import { resolveReleaseTitle, resolveTagName } from "#/infrastructure/config";
+import { getRepositoryUrl, getToken, type Repository } from "#/infrastructure/git";
 import { logger } from "#/infrastructure/logging";
-import { createErrorFromUnknown } from "#/infrastructure/utils";
+import { createErrorFromUnknown, flattenMultilineText } from "#/infrastructure/utils";
+
+interface ReleaseParams extends RequestParameters {
+    owner: string;
+    repo: string;
+    tag_name: string;
+    name: string;
+    body: string;
+    draft: boolean;
+    prerelease: boolean;
+    generate_release_notes: boolean;
+    make_latest: "true" | "false";
+    headers: typeof OctokitRequestHeaders;
+}
+
+function createReleaseParams(context: ArtemisContext, repository: Repository, content: string): ReleaseParams {
+    const { releaseLatest, releaseDraft, releasePreRelease } = context.options;
+
+    const [owner, repo]: string[] = repository.split("/");
+    if (!owner || !repo) {
+        throw new Error("Invalid repository format. Expected 'owner/repo'.");
+    }
+
+    return {
+        owner: owner,
+        repo: repo,
+        tag_name: resolveTagName(context),
+        name: resolveReleaseTitle(context),
+        body: content,
+        draft: releaseDraft,
+        prerelease: releasePreRelease,
+        generate_release_notes: content === "",
+        make_latest: String(releaseLatest) as "true" | "false",
+        headers: OctokitRequestHeaders
+    };
+}
+
+export function createOctoKitGitHubRelease(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
+    const dryRunIndicator = context.options.dryRun ? colors.yellow(" (dry run)") : "";
+
+    function publishRelease(repository: Repository, content: string): ResultAsync<void, Error> {
+        return getToken(context)
+            .andThen(createOctokit)
+            .andThen((octokit: Octokit): ResultAsync<void, Error> => {
+                const params: ReleaseParams = createReleaseParams(context, repository, content);
+                const logParams = { ...params };
+                logParams.body = content.length > 100 ? content.slice(0, 100) + "..." : content;
+
+                logger.verbose(
+                    `Creating GitHub release with params: ${colors.dim(flattenMultilineText(JSON.stringify(logParams)))}`
+                );
+
+                if (context.options.dryRun) {
+                    return okAsync(undefined);
+                }
+
+                return ResultAsync.fromPromise(
+                    octokit.request("POST /repos/{owner}/{repo}/releases", params),
+                    (error: unknown): Error => createErrorFromUnknown(error, "Failed to create GitHub release")
+                ).map((): void => undefined);
+            })
+            .andTee((): void => {
+                logger.info(`GitHub ${colors.dim("release")} created successfully${dryRunIndicator}`);
+            });
+    }
+
+    return removeHeaderFromChangelog(context.changelogContent).andThen(
+        (content: string): ResultAsync<ArtemisContext, Error> => {
+            const repository = context.options.repository! as Repository;
+            if (!repository) {
+                throw new Error("Repository is not defined in the configuration.");
+            }
+
+            return publishRelease(repository, content).map((): ArtemisContext => context);
+        }
+    );
+}
 
 export const OctokitRequestHeaders = {
     "X-GitHub-Api-Version": "2022-11-28",
