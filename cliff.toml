@@ -30,6 +30,8 @@ body = """
         {% endif %}\
     {% endfor %}
   {% endfor %}
+"""
+footer = """
   {% if previous and previous.version -%}
   [[Compare Changes]]({{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}) \
    · \
@@ -38,7 +40,6 @@ body = """
   [[View Source]]({{ self::remote_url() }}/tree/{{ version }})
   {%- endif %}
 """
-footer = ""
 trim = true
 postprocessors = []
 
