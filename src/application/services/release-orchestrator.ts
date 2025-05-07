@@ -2,6 +2,7 @@ import { LogLevels } from "consola";
 import { colors } from "consola/utils";
 import { okAsync, ResultAsync } from "neverthrow";
 import type { ArtemisContext } from "#/application/context";
+import { preflightPipeline } from "#/application/services/preflight-checker";
 import {
     createRollbackStack,
     executeWithRollback,
@@ -12,6 +13,13 @@ import { logger } from "#/infrastructure/logging";
 
 export class ReleaseOrchestrator {
     run(initialContext: ArtemisContext): ResultAsync<void, Error> {
+        preflightPipeline()
+            .map((): void => logger.info(colors.green("Preflight checks completed successfully")))
+            .mapErr((error: Error): Promise<Error> => {
+                logger.error(error.message);
+                process.exit(1);
+            });
+
         if (initialContext.options.verbose) logger.level = LogLevels.verbose;
 
         const rollbackStack: RollbackOperation[] = createRollbackStack();
