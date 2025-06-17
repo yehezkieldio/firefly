@@ -1,4 +1,4 @@
-import { err, ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { err, ok, okAsync, type Result, ResultAsync } from "neverthrow";
 import { useGlobalContext } from "#/application/context";
 import { createErrorFromUnknown } from "#/infrastructure/utils";
 

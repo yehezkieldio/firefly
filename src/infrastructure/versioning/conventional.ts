@@ -1,5 +1,5 @@
 import { Bumper, type BumperRecommendation } from "conventional-recommended-bump";
-import { Ok, ok, ResultAsync } from "neverthrow";
+import { type Ok, ok, ResultAsync } from "neverthrow";
 import type { ReleaseType } from "semver";
 import type { ArtemisContext } from "#/application/context";
 import { CWD } from "#/infrastructure/constants";

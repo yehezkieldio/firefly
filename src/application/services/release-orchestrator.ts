@@ -1,6 +1,6 @@
 import { LogLevels } from "consola";
 import { colors } from "consola/utils";
-import { okAsync, ResultAsync } from "neverthrow";
+import { okAsync, type ResultAsync } from "neverthrow";
 import type { ArtemisContext } from "#/application/context";
 import { preflightPipeline } from "#/application/services/preflight-checker";
 import {

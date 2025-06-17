@@ -39,11 +39,11 @@ function pushTags(context: ArtemisContext): ResultAsync<ArtemisContext, Error> {
         });
 }
 
-export function rollbackPushChangesPipeline(context: ArtemisContext): ResultAsync<void, Error> {
+export function rollbackPushChangesPipeline(_context: ArtemisContext): ResultAsync<void, Error> {
     return okAsync(undefined);
 }
 
-function rollbackPushedTags(context: ArtemisContext): ResultAsync<void, Error> {
+function _rollbackPushedTags(context: ArtemisContext): ResultAsync<void, Error> {
     const tagName: string = resolveTagName(context);
 
     logger.info(`Rolling back pushed tag ${colors.dim(tagName)}`);
@@ -55,8 +55,8 @@ function rollbackPushedTags(context: ArtemisContext): ResultAsync<void, Error> {
         .map((): void => undefined);
 }
 
-function rollbackPushedCommit(context: ArtemisContext): ResultAsync<void, Error> {
-    logger.info(`Rolling back pushed commit`);
+function _rollbackPushedCommit(context: ArtemisContext): ResultAsync<void, Error> {
+    logger.info("Rolling back pushed commit");
 
     return executeGit(["rev-parse", "HEAD~1"])
         .andThen((previousCommit: string): ResultAsync<string, Error> => {
@@ -70,7 +70,7 @@ function rollbackPushedCommit(context: ArtemisContext): ResultAsync<void, Error>
             );
         })
         .andTee((): void => {
-            logger.info(`Force pushed to previous commit state`);
+            logger.info("Force pushed to previous commit state");
         })
         .map((): void => undefined);
 }

@@ -1,4 +1,4 @@
-import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { errAsync, ok, okAsync, type Result, type ResultAsync } from "neverthrow";
 import type { ArtemisContext } from "#/application/context";
 import { CWD_PACKAGE_PATH } from "#/infrastructure/constants";
 import { type PackageJson, pkgJson } from "#/infrastructure/fs";

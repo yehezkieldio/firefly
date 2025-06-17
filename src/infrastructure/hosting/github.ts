@@ -2,7 +2,7 @@ import { createTokenAuth } from "@octokit/auth-token";
 import { Octokit } from "@octokit/core";
 import type { RequestParameters } from "@octokit/core/types";
 import { colors } from "consola/utils";
-import { err, ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { err, ok, okAsync, type Result, ResultAsync } from "neverthrow";
 import type { ArtemisContext } from "#/application/context";
 import { removeHeaderFromChangelog } from "#/infrastructure/changelog/git-cliff";
 import { resolveReleaseTitle, resolveTagName } from "#/infrastructure/config";
@@ -54,7 +54,7 @@ export function createOctoKitGitHubRelease(context: ArtemisContext): ResultAsync
             .andThen((octokit: Octokit): ResultAsync<void, Error> => {
                 const params: ReleaseParams = createReleaseParams(context, repository, content);
                 const logParams = { ...params };
-                logParams.body = content.length > 100 ? content.slice(0, 100) + "..." : content;
+                logParams.body = content.length > 100 ? `${content.slice(0, 100)}...` : content;
 
                 logger.verbose(
                     `Creating GitHub release with params: ${colors.dim(flattenMultilineText(JSON.stringify(logParams)))}`

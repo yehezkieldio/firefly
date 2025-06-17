@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { colors } from "consola/utils";
-import { Result, ResultAsync } from "neverthrow";
+import type { Result, ResultAsync } from "neverthrow";
 import { type ArtemisContext, createContext, enrichWithVersion } from "#/application/context";
 import { ReleaseOrchestrator } from "#/application/services/release-orchestrator";
 import { createFileConfig } from "#/infrastructure/c12";

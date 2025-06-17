@@ -1,4 +1,4 @@
-import { err, ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { err, ok, okAsync, type Result, ResultAsync } from "neverthrow";
 import type { ArtemisContext } from "#/application/context";
 import { getGitHubCliToken } from "#/infrastructure/hosting/github";
 import { getGitLabCliToken } from "#/infrastructure/hosting/gitlab";

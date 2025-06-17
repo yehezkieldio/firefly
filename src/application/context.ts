@@ -1,4 +1,4 @@
-import { okAsync, ResultAsync } from "neverthrow";
+import { okAsync, type ResultAsync } from "neverthrow";
 import { type ArtemisOptions, defaultArtemisOptions } from "#/infrastructure/config";
 import { CWD_PACKAGE_PATH } from "#/infrastructure/constants";
 import { fs, type PackageJson, pkgJson } from "#/infrastructure/fs";

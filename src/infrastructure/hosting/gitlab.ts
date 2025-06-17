@@ -1,6 +1,6 @@
 import { Gitlab } from "@gitbeaker/rest";
 import { colors } from "consola/utils";
-import { err, errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { err, errAsync, ok, okAsync, type Result, ResultAsync } from "neverthrow";
 import type { ArtemisContext } from "#/application/context";
 import { removeHeaderFromChangelog } from "#/infrastructure/changelog/git-cliff";
 import { resolveReleaseTitle, resolveTagName } from "#/infrastructure/config";
@@ -33,7 +33,7 @@ export function createGitLabRelease(context: ArtemisContext): ResultAsync<Artemi
             .andThen((gitlab: InstanceType<typeof Gitlab>): ResultAsync<void, Error> => {
                 const params = createReleaseParams(context, content);
                 const logParams = { ...params };
-                logParams.description = content.length > 100 ? content.slice(0, 100) + "..." : content;
+                logParams.description = content.length > 100 ? `${content.slice(0, 100)}...` : content;
 
                 logger.verbose(
                     `Creating GitLab release with params: ${colors.dim(flattenMultilineText(JSON.stringify(logParams)))}`
