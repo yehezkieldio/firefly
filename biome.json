@@ -1,5 +1,5 @@
 {
-    "$schema": "https://next.biomejs.dev/schemas/2.0.0-beta/schema.json",
+    "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
     "assist": {
         "actions": {
             "source": {
@@ -95,13 +95,7 @@
                 "useImportExtensions": "off"
             },
             "nursery": {
-                "noCommonJs": "off",
-                "noNestedTernary": "off",
-                "noProcessEnv": "off",
                 "noSecrets": "off",
-                "useComponentExportOnlyModules": "off",
-                "useConsistentCurlyBraces": "off",
-                "useConsistentMemberAccessibility": "off",
                 "useExplicitType": "off",
                 "useSortedClasses": {
                     "fix": "safe",
@@ -115,14 +109,14 @@
             "performance": {
                 "noBarrelFile": "off",
                 "noReExportAll": "off",
-                "useTopLevelRegex": "off"
+                "useTopLevelRegex": "off",
+                "noNamespaceImport": "off"
             },
             "recommended": true,
             "style": {
                 "noDefaultExport": "off",
                 "noImplicitBoolean": "off",
                 "noInferrableTypes": "warn",
-                "noNamespaceImport": "off",
                 "noNonNullAssertion": "off",
                 "useBlockStatements": "off",
                 "useExplicitLengthCheck": "off",
@@ -137,7 +131,20 @@
                 "useNamingConvention": "off",
                 "useNodejsImportProtocol": "warn",
                 "useNumberNamespace": "error",
-                "useSingleVarDeclarator": "off"
+                "useSingleVarDeclarator": "off",
+                "noParameterAssign": "error",
+                "useAsConstAssertion": "error",
+                "useDefaultParameterLast": "error",
+                "useEnumInitializers": "error",
+                "useSelfClosingElements": "error",
+                "noUnusedTemplateLiteral": "error",
+                "noUselessElse": "error",
+                "noCommonJs": "off",
+                "noNestedTernary": "off",
+                "noProcessEnv": "off",
+                "useComponentExportOnlyModules": "off",
+                "useConsistentCurlyBraces": "off",
+                "useConsistentMemberAccessibility": "off"
             },
             "suspicious": {
                 "noArrayIndexKey": "off",
