@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## 📦 artemis@1.0.2 (June 18, 2025)
+
+
+### 🔹 <!-- 1 -->Dependencies Updates
+
+- **deps:** Update octokit monorepo ([`6c6ee60`](https://github.com/yehezkieldio/artemis/commit/6c6ee60580c7f7b8efdec1997b6458cdf3fcacb6))
+- **deps:** Update dependency commander to v14 ([`9845f92`](https://github.com/yehezkieldio/artemis/commit/9845f924785f5465d02c2fbb640a32865d284089))
+
+### 🔹 <!-- 18 -->Miscellaneous Changes
+
+-  Merge pull request #9 from yehezkieldio/renovate/major-octokit-monorepo ([`8d09dcf`](https://github.com/yehezkieldio/artemis/commit/8d09dcf1c125318ad0989f783780873685c4152b)) ([#9](https://github.com/yehezkieldio/artemis/pull/9) by @yehezkieldio)
+-  Merge pull request #8 from yehezkieldio/renovate/commander-14.x ([`9f53589`](https://github.com/yehezkieldio/artemis/commit/9f53589146a8a8967ab72ed0f1d23763a3fcb04f)) ([#8](https://github.com/yehezkieldio/artemis/pull/8) by @yehezkieldio)
+-  Merge pull request #7 from yehezkieldio/renovate/node-24.x ([`2113c8f`](https://github.com/yehezkieldio/artemis/commit/2113c8f2858155eeddba3d88f5a19e0d3a2d6f4f)) ([#7](https://github.com/yehezkieldio/artemis/pull/7) by @yehezkieldio)
+-  Merge pull request #6 from yehezkieldio/renovate/tsdown-0.x ([`7726823`](https://github.com/yehezkieldio/artemis/commit/77268230d4eb0dc4d85393f387f9eb14b890e20a)) ([#6](https://github.com/yehezkieldio/artemis/pull/6) by @yehezkieldio)
+
+### 🔹 <!-- 2 -->Dependencies Updates
+
+- **deps:** Update dependency @types/node to v24 ([`f406e28`](https://github.com/yehezkieldio/artemis/commit/f406e28d46ed9ec6e20f0e8c57476ab2fdda7f30))
+- **deps:** Update dependency @biomejs/biome to v2 ([`7548abe`](https://github.com/yehezkieldio/artemis/commit/7548abe00b1ab65fe482e0aae5a5d2baea99a205))
+- **deps:** Update dependency tsdown to ^0.12.0 ([`18bd7e2`](https://github.com/yehezkieldio/artemis/commit/18bd7e27a2bbe572f3b20463ea3cc0b6ecce04b9))
+
+### 🔹 <!-- 7 -->Code Refactoring
+
+-  Update import statements to use 'type' for ResultAsync ([`16a8dd5`](https://github.com/yehezkieldio/artemis/commit/16a8dd51680d9643b704f0a87477ded7f07bab81))
+
 ## 📦 artemis@1.0.1 (May 7, 2025)
 
 
