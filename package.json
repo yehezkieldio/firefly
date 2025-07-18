@@ -26,7 +26,7 @@
     }
   },
   "bin": {
-    "artemis": "./dist/cli.js"
+    "firefly": "./dist/cli.js"
   },
   "publishConfig": {
     "access": "public"
