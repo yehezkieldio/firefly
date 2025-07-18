@@ -48,11 +48,13 @@
       "correctness": {
         "noUnusedVariables": "warn",
         "noUnusedFunctionParameters": "warn",
-        "noUnusedImports": "warn"
+        "noUnusedImports": "warn",
+        "noUndeclaredVariables": "off"
       },
       "style": {
         "noNestedTernary": "off",
-        "useBlockStatements": "off"
+        "useBlockStatements": "off",
+        "noParameterProperties": "off"
       },
       "complexity": {
         "noVoid": "off",
