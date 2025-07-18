@@ -8,8 +8,8 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/cli.js",
-  "module": "./dist/cli.js",
+  "main": "./dist/main.js",
+  "module": "./dist/main.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -26,13 +26,13 @@
     }
   },
   "bin": {
-    "firefly": "./dist/cli.js"
+    "firefly": "./dist/main.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "bun build src/infrastructure/cli/main.ts --outfile=dist/cli.js --target=bun --minify",
+    "build": "tsdown",
     "dev": "bun run src/infrastructure/cli/main.ts",
     "check": "biome check .",
     "check:unsafe": "biome check --write --unsafe .",
@@ -60,6 +60,7 @@
     "@types/semver": "^7.7.0",
     "tsdown": "^0.12.9",
     "typescript": "^5.9.0-beta",
-    "ultracite": "^5.0.39"
+    "ultracite": "^5.0.39",
+    "zshy": "^0.2.5"
   }
 }

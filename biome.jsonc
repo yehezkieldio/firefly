@@ -21,7 +21,8 @@
   },
   "formatter": {
     "indentStyle": "space",
-    "indentWidth": 4
+    "indentWidth": 4,
+    "lineWidth": 110
   },
   "javascript": {
     "formatter": {

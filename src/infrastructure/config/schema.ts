@@ -1,19 +1,9 @@
 import z from "zod";
 
-export const BumpStrategySchema = z
-    .enum(["auto", "manual"] as const)
-    .default("auto");
+export const BumpStrategySchema = z.enum(["auto", "manual"] as const).default("auto");
 
 export const ReleaseTypeSchema = z
-    .enum([
-        "major",
-        "minor",
-        "patch",
-        "prerelease",
-        "premajor",
-        "preminor",
-        "prepatch",
-    ] as const)
+    .enum(["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch"] as const)
     .optional();
 
 export const PreReleaseBaseSchema = z.coerce.number().default(0);
@@ -82,9 +72,7 @@ export const FireflyConfigSchema = z.object({
     /**
      * Specify the commit message for the version bump.
      */
-    commitMessage: z
-        .string()
-        .default("chore(release): release {{name}}@{{version}}"),
+    commitMessage: z.string().default("chore(release): release {{name}}@{{version}}"),
 
     /**
      * Specify the tag name for the version bump.

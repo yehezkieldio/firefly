@@ -13,6 +13,7 @@ export class PackageJsonReader {
         try {
             const packageJsonPath = join(this.cwd, "package.json");
             const packageJsonText = await Bun.file(packageJsonPath).text();
+
             return JSON.parse(packageJsonText);
         } catch (error) {
             logger.debug("Could not read package.json:", error);

@@ -1,10 +1,10 @@
-import type { ArtemisConfig } from "./src/infrastructure/config/schema.js";
+import type { FireflyConfig } from "#/infrastructure/config/schema";
 
 export default {
-    name: "artemis",
+    name: "firefly",
     scope: "yehezkieldio",
     base: "",
-    repository: "yehezkieldio/artemis",
+    repository: "yehezkieldio/firefly",
     changelogPath: "CHANGELOG.md",
     verbose: false,
     dryRun: false,
@@ -22,8 +22,7 @@ export default {
     skipBump: false,
     skipChangelog: false,
     skipGitHubRelease: false,
-    skipGitLabRelease: true,
     skipCommit: false,
     skipTag: false,
     skipPush: false,
-} satisfies ArtemisConfig;
+} satisfies FireflyConfig;
