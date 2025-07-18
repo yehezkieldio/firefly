@@ -1,1 +1,0 @@
-- DON'T USE `any` type in TypeScript.
