@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { logger } from "#/shared/logger";
+import { VersionError } from "#/shared/result";
 
 export interface PackageJson {
     name?: string;
@@ -23,8 +24,10 @@ export class PackageJsonService {
 
             return JSON.parse(packageJsonText);
         } catch (error) {
-            logger.debug("Could not read package.json:", error);
-            return null;
+            throw new VersionError(
+                "Failed to read or parse package.json",
+                error instanceof Error ? error : undefined
+            );
         }
     }
 
@@ -34,8 +37,7 @@ export class PackageJsonService {
             const text = await file.text();
 
             if (!VERSION_REGEX.test(text)) {
-                logger.error("No version field found in package.json");
-                return false;
+                throw new VersionError("No version field found in package.json");
             }
 
             const updatedText = text.replace(VERSION_REGEX, `$1${newVersion}$2`);
@@ -44,8 +46,10 @@ export class PackageJsonService {
             logger.success(`Updated version to ${newVersion} in package.json`);
             return true;
         } catch (error) {
-            logger.error("Failed to update version in package.json:", error);
-            return false;
+            throw new VersionError(
+                "Failed to update version in package.json",
+                error instanceof Error ? error : undefined
+            );
         }
     }
 
@@ -57,8 +61,10 @@ export class PackageJsonService {
             logger.success("package.json written successfully");
             return true;
         } catch (error) {
-            logger.error("Failed to write package.json:", error);
-            return false;
+            throw new VersionError(
+                "Failed to write package.json",
+                error instanceof Error ? error : undefined
+            );
         }
     }
 
