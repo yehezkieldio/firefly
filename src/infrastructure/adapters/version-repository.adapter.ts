@@ -3,8 +3,8 @@ import { join } from "node:path";
 import { err, ok } from "neverthrow";
 import { Version } from "#/core/domain/version";
 import type { IVersionRepository } from "#/core/ports/version.port";
+import { PackageJsonService } from "#/infrastructure/services/package-json.service";
 import { logger } from "#/shared/logger";
-import { PackageJsonHandler } from "#/shared/package-json";
 import { type FireflyResult, VersionError } from "#/shared/result";
 
 export class VersionRepositoryAdapter implements IVersionRepository {
@@ -18,8 +18,8 @@ export class VersionRepositoryAdapter implements IVersionRepository {
 
     async getCurrentVersion(): Promise<FireflyResult<Version>> {
         try {
-            const packageJsonHandler = new PackageJsonHandler(this.basePath);
-            const packageJson = await packageJsonHandler.read();
+            const packageJsonService = new PackageJsonService(this.basePath);
+            const packageJson = await packageJsonService.read();
 
             if (!packageJson?.version) {
                 return err(new VersionError("No version found in package.json"));
@@ -39,14 +39,14 @@ export class VersionRepositoryAdapter implements IVersionRepository {
 
     async setVersion(version: Version): Promise<FireflyResult<void>> {
         try {
-            const packageJsonHandler = new PackageJsonHandler(this.basePath);
-            const packageJson = await packageJsonHandler.read();
+            const packageJsonService = new PackageJsonService(this.basePath);
+            const packageJson = await packageJsonService.read();
 
             if (!packageJson) {
                 return err(new VersionError("Failed to read package.json"));
             }
 
-            packageJsonHandler.updateVersion(version.toString());
+            packageJsonService.updateVersion(version.toString());
 
             logger.success(`Updated version to ${version.toString()} in package.json`);
             return ok(undefined);

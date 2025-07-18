@@ -10,7 +10,7 @@ export interface PackageJson {
 
 const VERSION_REGEX = /^(\s*"version"\s*:\s*)"[^"]*"(.*)$/m;
 
-export class PackageJsonHandler {
+export class PackageJsonService {
     private readonly packageJsonPath: string;
 
     constructor(private cwd: string) {

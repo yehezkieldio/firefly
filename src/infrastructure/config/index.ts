@@ -1,8 +1,8 @@
 import { loadConfig } from "c12";
 import { colors } from "consola/utils";
 import { type FireflyConfig, FireflyConfigSchema } from "#/infrastructure/config/schema";
+import { type PackageJson, PackageJsonService } from "#/infrastructure/services/package-json.service";
 import { logger } from "#/shared/logger";
-import { type PackageJson, PackageJsonHandler } from "#/shared/package-json";
 
 const SCOPED_PACKAGE_REGEX = /^@[^/]+\//;
 const GITHUB_REPO_REGEX = /github\.com[/:]([\w-]+\/[\w-]+)/;
@@ -14,10 +14,10 @@ export interface ConfigLoadOptions {
 }
 
 class ConfigEnricher {
-    constructor(private packageJsonHandler: PackageJsonHandler) {}
+    constructor(private packageJsonService: PackageJsonService) {}
 
     async enrichWithPackageInfo(config: Partial<FireflyConfig>): Promise<void> {
-        const packageJson = await this.packageJsonHandler.read();
+        const packageJson = await this.packageJsonService.read();
         if (!packageJson) return;
 
         this.enrichName(config, packageJson);
@@ -69,7 +69,7 @@ export async function loadFireflyConfig(options: ConfigLoadOptions = {}): Promis
             logger.info(`Using firefly config: ${colors.underline(configFileDisplay)}`);
         }
 
-        const packageJsonReader = new PackageJsonHandler(cwd);
+        const packageJsonReader = new PackageJsonService(cwd);
         const configEnricher = new ConfigEnricher(packageJsonReader);
 
         await configEnricher.enrichWithPackageInfo(config.config);
