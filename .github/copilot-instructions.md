@@ -20,7 +20,9 @@ This separation promotes testability, maintainability, and long-term evolution.
 ## Operating Principles
 
 - Designed to be run with Bun as the runtime, Node.js is not supported.
-- Configuration is loaded via `c12` with support for file-based (`firefly.config.ts`) and CLI-based input.
+- Command line arguments are parsed using the `commander` library for a consistent CLI experience.
+- File Configuration is loaded via `c12` with support for file-based (`firefly.config.ts`) configuration.
+- CLI arguments and file-based configuration are merged into a single unified configuration object.
 - All error handling should use `neverthrow`; avoid throwing exceptions in flow logic.
 - Version bumping uses `conventional-recommended-bump` but supports for manual choosing of versions.
 - Changelogs are generated with `git-cliff` based on commit messages, uses `smol-toml` to load its configuration.
