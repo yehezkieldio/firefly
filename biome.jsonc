@@ -33,7 +33,8 @@
     "rules": {
       "nursery": {
         "noUnknownAtRule": "off",
-        "noShadow": "off"
+        "noShadow": "off",
+        "noUselessUndefined": "off"
       },
       "performance": {
         "noNamespaceImport": "off"

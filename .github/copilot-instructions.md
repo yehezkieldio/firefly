@@ -25,7 +25,7 @@ This separation promotes testability, maintainability, and long-term evolution.
 - CLI arguments and file-based configuration are merged into a single unified configuration object.
 - All error handling should use `neverthrow`; avoid throwing exceptions in flow logic.
 - Version bumping uses `conventional-recommended-bump` but supports for manual choosing of versions.
-- Changelogs are generated with `git-cliff` based on commit messages, uses `smol-toml` to load its configuration.
+- Changelogs are generated with `git-cliff` based on commit messages, uses `smol-toml` to parse its configuration.
 - The release process automates versioning, changelog, Git tagging, and GitHub releases.
 
 ## Class and Function Design
@@ -41,4 +41,3 @@ This separation promotes testability, maintainability, and long-term evolution.
 - Code explains how, comments explain why.
 - Use defensive programming: validate and check types at boundaries (e.g., parsing config, external data).
 - Always use `unknown` instead of `any` for values of uncertain type. Narrow types with type guards before usage.
-- Prefer explicit types for function parameters, return values, and class properties.

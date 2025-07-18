@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".github/firefly.jpg" align="center" width="150px" height="200px">
+<img src=".github/assets/firefly.jpg" align="center" width="150px" height="200px">
 
 <h3>Firefly</h3>
 <p>CLI orchestrator for semantic versioning, changelog generation, and creating releases.</p>
