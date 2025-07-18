@@ -1,8 +1,9 @@
 import { program } from "commander";
+import { LogLevels } from "consola";
 import { colors } from "consola/utils";
+import { loadFireflyConfig } from "#/infrastructure/config";
 import type { FireflyConfig } from "#/infrastructure/config/schema";
 import { logger } from "#/shared/logger";
-
 import pkg from "../../../package.json" with { type: "json" };
 
 export interface CLIOptions extends Partial<FireflyConfig> {
@@ -46,11 +47,22 @@ export async function createCLI(): Promise<typeof program> {
         .option("--release-latest", "Mark as latest release", true)
         .option("--release-prerelease", "Mark as pre-release (GitHub only)", false)
         .option("--release-draft", "Create as draft release (GitHub only)", false)
-        .action(async (_options: CLIOptions) => {
+        .action(async (options: CLIOptions) => {
             try {
-                logger.log(`${colors.magenta("firefly")} ${colors.dim(`v${pkg.version}`)}`);
+                logger.info(`${colors.magenta("firefly")} ${colors.dim(`v${pkg.version}`)}`);
 
-                logger.info("Starting release process...");
+                const globalOptions = program.opts();
+                const mergedOptions = { ...globalOptions, ...options };
+
+                const config = await loadFireflyConfig({
+                    configFile: mergedOptions.config,
+                    overrides: mergedOptions,
+                });
+
+                if (config.verbose) {
+                    logger.level = LogLevels.verbose;
+                }
+
                 logger.warn("Release orchestration not yet implemented");
             } catch (error) {
                 logger.error("Failed to execute release command:", error);
