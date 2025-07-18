@@ -39,3 +39,6 @@ This separation promotes testability, maintainability, and long-term evolution.
 ## Development Standards
 
 - Code explains how, comments explain why.
+- Use defensive programming: validate and check types at boundaries (e.g., parsing config, external data).
+- Always use `unknown` instead of `any` for values of uncertain type. Narrow types with type guards before usage.
+- Prefer explicit types for function parameters, return values, and class properties.
