@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { loadConfig } from "c12";
 import { colors } from "consola/utils";
 import { ConfigEnricher, type ConfigLoadOptions } from "#/config/enricher";
@@ -24,7 +25,7 @@ export async function loadFireflyConfig(options: ConfigLoadOptions = {}): Promis
             logger.info(`Using firefly config: ${colors.underline(configFileDisplay)}`);
         }
 
-        const packageJsonReader = new PackageJsonService(new FileSystemService(cwd));
+        const packageJsonReader = new PackageJsonService(new FileSystemService(join(cwd, "package.json")));
         const configEnricher = new ConfigEnricher(packageJsonReader);
 
         await configEnricher.enrichWithPackageInfo(config.config);
