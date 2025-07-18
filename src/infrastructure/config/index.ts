@@ -1,32 +1,11 @@
-import { join } from "node:path";
 import { loadConfig } from "c12";
 import { colors } from "consola/utils";
 import { type FireflyConfig, FireflyConfigSchema } from "#/infrastructure/config/schema";
 import { logger } from "#/shared/logger";
+import { type PackageJson, PackageJsonHandler } from "#/shared/package-json";
 
 const SCOPED_PACKAGE_REGEX = /^@[^/]+\//;
 const GITHUB_REPO_REGEX = /github\.com[/:]([\w-]+\/[\w-]+)/;
-
-export interface PackageJson {
-    name?: string;
-    repository?: string | { url: string };
-}
-
-export class PackageJsonReader {
-    constructor(private cwd: string) {}
-
-    async read(): Promise<PackageJson | null> {
-        try {
-            const packageJsonPath = join(this.cwd, "package.json");
-            const packageJsonText = await Bun.file(packageJsonPath).text();
-
-            return JSON.parse(packageJsonText);
-        } catch (error) {
-            logger.debug("Could not read package.json:", error);
-            return null;
-        }
-    }
-}
 
 export interface ConfigLoadOptions {
     cwd?: string;
@@ -35,10 +14,10 @@ export interface ConfigLoadOptions {
 }
 
 class ConfigEnricher {
-    constructor(private packageJsonReader: PackageJsonReader) {}
+    constructor(private packageJsonHandler: PackageJsonHandler) {}
 
     async enrichWithPackageInfo(config: Partial<FireflyConfig>): Promise<void> {
-        const packageJson = await this.packageJsonReader.read();
+        const packageJson = await this.packageJsonHandler.read();
         if (!packageJson) return;
 
         this.enrichName(config, packageJson);
@@ -90,7 +69,7 @@ export async function loadFireflyConfig(options: ConfigLoadOptions = {}): Promis
             logger.info(`Using firefly config: ${colors.underline(configFileDisplay)}`);
         }
 
-        const packageJsonReader = new PackageJsonReader(cwd);
+        const packageJsonReader = new PackageJsonHandler(cwd);
         const configEnricher = new ConfigEnricher(packageJsonReader);
 
         await configEnricher.enrichWithPackageInfo(config.config);
