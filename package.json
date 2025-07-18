@@ -26,12 +26,14 @@
     }
   },
   "bin": {
-    "firefly": "./dist/cli.js"
+    "artemis": "./dist/cli.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
+    "build": "bun build src/infrastructure/cli/main.ts --outfile=dist/cli.js --target=bun --minify",
+    "dev": "bun run src/infrastructure/cli/main.ts",
     "check": "biome check .",
     "check:unsafe": "biome check --write --unsafe .",
     "check:write": "biome check --write .",
@@ -42,15 +44,20 @@
   },
   "dependencies": {
     "c12": "^3.1.0",
+    "commander": "^14.0.0",
     "consola": "^3.4.2",
     "conventional-recommended-bump": "^11.2.0",
     "git-cliff": "^2.9.1",
-    "smol-toml": "^1.4.1"
+    "neverthrow": "^8.2.0",
+    "semver": "^7.7.2",
+    "smol-toml": "^1.4.1",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.1.2",
     "@types/bun": "^1.2.18",
     "@types/node": "^24.0.14",
+    "@types/semver": "^7.7.0",
     "tsdown": "^0.12.9",
     "typescript": "^5.9.0-beta",
     "ultracite": "^5.0.39"
