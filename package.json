@@ -1,58 +1,58 @@
 {
-    "name": "@yehezkieldio/firefly",
-    "version": "2.0.0-alpha.0",
-    "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
-    "type": "module",
-    "license": "MIT",
-    "author": "Yehezkiel Dio Sinolungan <yehezkieldio@proton.me>",
-    "files": [
-        "dist"
-    ],
-    "main": "./dist/cli.js",
-    "module": "./dist/cli.js",
-    "types": "./dist/index.d.ts",
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
-        }
-    },
-    "typesVersions": {
-        "*": {
-            "*": [
-                "./dist/*",
-                "./*"
-            ]
-        }
-    },
-    "bin": {
-        "firefly": "./dist/cli.js"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "scripts": {
-        "check": "biome check .",
-        "check:unsafe": "biome check --write --unsafe .",
-        "check:write": "biome check --write .",
-        "typecheck": "tsc --noEmit",
-        "format": "biome format . --write",
-        "lint": "biome lint .",
-        "lint:fix": "biome lint . --fix --unsafe"
-    },
-    "dependencies": {
-        "c12": "^3.1.0",
-        "consola": "^3.4.2",
-        "conventional-recommended-bump": "^11.2.0",
-        "git-cliff": "^2.9.1",
-        "smol-toml": "^1.4.1"
-    },
-    "devDependencies": {
-        "@biomejs/biome": "^2.1.2",
-        "@types/bun": "^1.2.18",
-        "@types/node": "^24.0.14",
-        "tsdown": "^0.12.9",
-        "typescript": "^5.9.0-beta",
-        "ultracite": "^5.0.39"
+  "name": "@yehezkieldio/firefly",
+  "version": "2.0.0-alpha.0",
+  "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Yehezkiel Dio Sinolungan <yehezkieldio@proton.me>",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/cli.js",
+  "module": "./dist/cli.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./*"
+      ]
+    }
+  },
+  "bin": {
+    "firefly": "./dist/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "check": "biome check .",
+    "check:unsafe": "biome check --write --unsafe .",
+    "check:write": "biome check --write .",
+    "typecheck": "tsc --noEmit",
+    "format": "biome format . --write",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint . --fix --unsafe"
+  },
+  "dependencies": {
+    "c12": "^3.1.0",
+    "consola": "^3.4.2",
+    "conventional-recommended-bump": "^11.2.0",
+    "git-cliff": "^2.9.1",
+    "smol-toml": "^1.4.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.2",
+    "@types/bun": "^1.2.18",
+    "@types/node": "^24.0.14",
+    "tsdown": "^0.12.9",
+    "typescript": "^5.9.0-beta",
+    "ultracite": "^5.0.39"
+  }
 }
