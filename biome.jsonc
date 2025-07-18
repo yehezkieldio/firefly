@@ -1,0 +1,72 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
+  "extends": ["ultracite"],
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/dist/**",
+      "!**/node_modules/**",
+      "!.next",
+      "!drizzle",
+      "!public",
+      "!bun.lock"
+    ],
+    "experimentalScannerIgnores": ["node_modules", "dist", ".next"]
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 4,
+    "lineWidth": 120
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noUnknownAtRule": "off",
+        "noShadow": "off",
+        "noUselessUndefined": "off"
+      },
+      "performance": {
+        "noNamespaceImport": "off"
+      },
+      "suspicious": {
+        "useAwait": "off",
+        "noConsole": "off",
+        "noEmptyBlockStatements": "off",
+        "noDocumentCookie": "off",
+        "noEvolvingTypes": "off",
+        "noImplicitAnyLet": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noUnusedFunctionParameters": "warn",
+        "noUnusedImports": "warn",
+        "noUndeclaredVariables": "off"
+      },
+      "style": {
+        "noNestedTernary": "off",
+        "useBlockStatements": "off",
+        "noParameterProperties": "off"
+      },
+      "complexity": {
+        "noVoid": "off",
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": {
+            "maxAllowedComplexity": 40
+          }
+        }
+      }
+    }
+  }
+}

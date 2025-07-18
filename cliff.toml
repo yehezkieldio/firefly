@@ -1,0 +1,74 @@
+[changelog]
+header = """
+# Changelog\n
+All notable changes to Firefly will be documented in this file.
+"""
+body = """
+  {%- macro remote_url() -%}
+    https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
+  {%- endmacro -%}
+  {% if version %}
+  ## {{ version | trim_start_matches(pat="v") }} ({{ timestamp | date(format="%B %d, %Y") | replace(from=" 0", to=" ") }})
+  {% else %}
+  ## Unreleased
+  {% endif %}
+  {% if message %}
+    ### 📝 Release Notes
+    {{ message | safe }}
+  {% endif %}\
+  {% for group, commits in commits | group_by(attribute="group") %}
+    ### {{ group | replace(from="<!-- \\d+ -->", to="") | trim | upper_first }}
+    {% for commit in commits %}
+      - [`{{ commit.id | truncate(length=7, end="") }}`]({{ self::remote_url() }}/commit/{{ commit.id }}) {% if commit.scope %}{{ commit.scope }}:{% endif %} {{ commit.message | upper_first }}\
+        {% if commit.remote.pr_number %} (\
+          [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}) by [@{{ commit.remote.username }}](https://github.com/{{ commit.remote.username }})\
+        {%- endif %}\
+        {% if commit.breaking %}\
+          {% for breakingChange in commit.footers %}\
+            \n{% raw %}  {% endraw %} - **{{ breakingChange.token }}{{ breakingChange.separator }}** {{ breakingChange.value }}\
+          {% endfor %}\
+        {% endif %}\
+    {% endfor %}
+  {% endfor %}
+"""
+footer = ""
+trim = true
+postprocessors = []
+
+[git]
+conventional_commits = true
+filter_unconventional = false
+commit_preprocessors = [
+    { pattern = "\\(#([0-9]+)\\)", replace = "([#${1}](https://github.com/yehezkieldio/firefly/issues/${1}))" },
+]
+commit_parsers = [
+    { message = "^chore\\(release\\): release", skip = true },
+    { message = "^fix\\(deps\\)", group = "<!-- 1 -->🧩 Dependencies Updates" },
+    { message = "^chore\\(deps\\)", group = "<!-- 2 -->🧩 Dependencies Updates" },
+    { message = "^feat", group = "<!-- 3 -->🚀 New Features" },
+    { message = "^fix", group = "<!-- 4 -->🐛 Bug Fixes" },
+    { message = "^docs", group = "<!-- 5 -->📚 Documentation" },
+    { message = "^perf", group = "<!-- 6 -->⚡ Performance" },
+    { message = "^refactor", group = "<!-- 7 -->🚜 Refactor" },
+    { message = "^style\\(deps\\)", group = "<!-- 8 -->🧩 Dependencies Updates" },
+    { message = "^style\\(.*\\)", group = "<!-- 9 -->🎨 Code Styling" },
+    { message = "^style", group = "<!-- 9 -->🎨 Code Styling" },
+    { message = "^test", group = "<!-- 10 -->🧪 Test" },
+    { message = "^chore", group = "<!-- 11 -->🛠️ Miscellaneous" },
+    { message = "^security", group = "<!-- 12 -->🔒 Security" },
+    { message = "^compat", group = "<!-- 13 -->🔗 Compatibility" },
+    { message = "^revert", group = "<!-- 14 -->⏪ Reverts" },
+    { message = "^i18n", group = "<!-- 15 -->🌐 Internationalization" },
+    { message = "^ci", group = "<!-- 16 -->CI/CD" },
+    { message = ".*", group = "<!-- 17 -->🛠️ Miscellaneous" },
+    { message = ".*deprecated", body = ".*deprecated", group = "⚠️ Deprecation" },
+]
+filter_commits = false
+tag_pattern = "firefly@[0-9]*"
+ignore_tags = ""
+topo_order = false
+sort_commits = "oldest"
+
+[remote.github]
+owner = "yehezkieldio"
+repo = "firefly"
