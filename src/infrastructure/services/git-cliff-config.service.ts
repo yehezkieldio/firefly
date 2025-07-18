@@ -28,4 +28,23 @@ export class GitCliffConfigService {
             );
         }
     }
+
+    async removeHeaderFromChangelog(content: string): Promise<string> {
+        const cliffConfig = await this.parseCliffConfig();
+
+        const header = cliffConfig.changelog?.header;
+        const bodyTemplate = cliffConfig.changelog?.body;
+
+        if (!(header && bodyTemplate)) {
+            return content;
+        }
+
+        const changesStartIndex = content.indexOf("###");
+        if (changesStartIndex === -1) {
+            return content;
+        }
+
+        const result = content.slice(changesStartIndex);
+        return result.trimStart();
+    }
 }
