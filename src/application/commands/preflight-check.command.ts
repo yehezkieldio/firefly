@@ -10,13 +10,6 @@ export class PreflightCheckCommand implements ICommand {
     constructor(private readonly context: ApplicationContext) {}
 
     async execute() {
-        if (process.env.FIREFLY_SKIP_PRECHECKS) {
-            logger.warn(
-                "Skipping preflight checks as requested by environment variable FIREFLY_SKIP_PRECHECKS"
-            );
-            return ok(undefined);
-        }
-
         await this.checkGitCliffConfig();
         await this.checkValidGitRepository();
 
