@@ -2,6 +2,7 @@ import { join } from "node:path";
 import { ok } from "neverthrow";
 import type { ICommand } from "#/application/command";
 import type { ApplicationContext } from "#/application/context";
+import { GitProviderAdapter } from "#/infrastructure/adapters/git-provider.adapter";
 import { FileSystemService } from "#/infrastructure/services/file-system.service";
 import { PreflightError } from "#/shared/error";
 
@@ -10,6 +11,7 @@ export class PreflightCheckCommand implements ICommand {
 
     async execute() {
         await this.checkGitCliffConfig();
+        await this.checkValidGitRepository();
 
         return ok(undefined);
     }
@@ -31,14 +33,29 @@ export class PreflightCheckCommand implements ICommand {
         const fileService = new FileSystemService(cliffPath);
 
         const exists = await fileService.exists();
-        if (exists.isOk()) {
-            if (!exists.value) {
-                throw new PreflightError("Could not find git-cliff configuration file at cliff.toml");
-            }
-
-            return ok(undefined);
+        if (exists.isErr()) {
+            throw new PreflightError("Failed to check git-cliff configuration", exists.error);
         }
 
-        throw new PreflightError("Failed to check git-cliff configuration", exists.error);
+        if (!exists.value) {
+            throw new PreflightError("Could not find git-cliff configuration file at cliff.toml");
+        }
+
+        return ok(undefined);
+    }
+
+    private async checkValidGitRepository() {
+        const git = new GitProviderAdapter();
+
+        const result = await git.exec(["rev-parse", "--is-inside-work-tree"]);
+        if (result.isErr()) {
+            throw new PreflightError("Not a valid git repository", result.error);
+        }
+
+        if (result.value.trim() !== "true") {
+            throw new PreflightError("Not a valid git repository");
+        }
+
+        return ok(undefined);
     }
 }
