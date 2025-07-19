@@ -36,13 +36,6 @@ export class PreflightCheckCommand implements ICommand {
     }
 
     private async checkGitCliffConfig() {
-        if (process.env.FIREFLY_SKIP_GITCLIFF_CHECK) {
-            logger.warn(
-                "Skipping git-cliff configuration check as requested by environment variable FIREFLY_SKIP_GITCLIFF_CHECK"
-            );
-            return ok(undefined);
-        }
-
         const fileService = new FileSystemService(join(this.context.getBasePath(), "cliff.toml"));
 
         const exists = await fileService.exists();
@@ -51,9 +44,7 @@ export class PreflightCheckCommand implements ICommand {
         }
 
         if (!exists.value) {
-            throw new PreflightError(
-                "Could not find git-cliff configuration file at cliff.toml, you'll need that for changelog generation."
-            );
+            throw new PreflightError("Could not find git-cliff configuration file at cliff.toml.");
         }
 
         logger.debug("Found a cliff.toml configuration file in the current directory");
@@ -61,13 +52,6 @@ export class PreflightCheckCommand implements ICommand {
     }
 
     private async checkValidGitRepository() {
-        if (process.env.FIREFLY_SKIP_GIT_CHECK) {
-            logger.warn(
-                "Skipping git repository check as requested by environment variable FIREFLY_SKIP_GIT_CHECK"
-            );
-            return ok(undefined);
-        }
-
         const result = await this.context.git.exec(["rev-parse", "--is-inside-work-tree"]);
         if (result.isErr()) {
             throw new PreflightError(

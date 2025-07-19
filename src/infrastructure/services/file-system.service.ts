@@ -13,8 +13,8 @@ export class FileSystemService {
         return this.wrap(Bun.write(this.path, content), "Failed to write file").map(() => undefined);
     }
 
-    async exists(): Promise<FireflyResult<boolean>> {
-        return this.wrap(Bun.file(this.path).exists(), "Failed to check if file exists");
+    async exists(path?: string): Promise<FireflyResult<boolean>> {
+        return this.wrap(Bun.file(path ?? this.path).exists(), "Failed to check if file exists");
     }
 
     private wrap<T>(promise: Promise<T>, message: string): ResultAsync<T, ConfigurationError> {
