@@ -1,4 +1,5 @@
 import semver from "semver";
+import type { PreReleaseBase, ReleaseType } from "#/config/schema";
 import { FireflyError } from "#/shared/result";
 
 export class Version {
@@ -12,97 +13,64 @@ export class Version {
         this._version = cleaned;
     }
 
-    static fromString(version: string): Version {
-        return new Version(version);
-    }
-
-    static current(): Version {
-        return new Version("0.0.0");
-    }
-
     toString(): string {
         return this._version;
     }
 
-    toJSON(): string {
-        return this._version;
-    }
-
-    get major(): number {
-        return semver.major(this._version);
-    }
-
-    get minor(): number {
-        return semver.minor(this._version);
-    }
-
-    get patch(): number {
-        return semver.patch(this._version);
-    }
-
-    get prerelease(): ReadonlyArray<string | number> {
-        return semver.prerelease(this._version) || [];
-    }
-
-    isPrerelease(): boolean {
-        return this.prerelease.length > 0;
-    }
-
-    isGreaterThan(other: Version): boolean {
-        return semver.gt(this._version, other._version);
-    }
-
-    isLessThan(other: Version): boolean {
-        return semver.lt(this._version, other._version);
-    }
-
-    isEqualTo(other: Version): boolean {
-        return semver.eq(this._version, other._version);
-    }
-
-    bump(release: "major" | "minor" | "patch" | "prerelease"): Version {
+    bump(release: Extract<ReleaseType, "major" | "minor" | "patch" | "prerelease">): Version {
         const newVersion = semver.inc(this._version, release);
         if (!newVersion) {
-            throw new FireflyError(
-                `Failed to bump version ${this._version} as ${release}`,
-                "VERSION_BUMP_ERROR"
-            );
+            throw new FireflyError(`Failed to bump ${this._version} as ${release}`, "VERSION_BUMP_ERROR");
         }
+
         return new Version(newVersion);
     }
 
-    bumpPrerelease(identifier?: string, base?: string): Version {
+    bumpPrerelease(identifier: string, _base: PreReleaseBase = 0): Version {
+        const base = this.ensureIdentifierBase(_base);
+
         const newVersion = semver.inc(this._version, "prerelease", identifier, base);
+
         if (!newVersion) {
-            throw new FireflyError(
-                `Failed to bump prerelease version ${this._version}`,
-                "VERSION_BUMP_ERROR"
-            );
+            throw new FireflyError(`Failed to bump prerelease ${this._version}`, "VERSION_BUMP_ERROR");
         }
         return new Version(newVersion);
     }
 
-    bumpPremajor(identifier?: string, base?: string): Version {
+    bumpPremajor(identifier: string, _base: PreReleaseBase = 0): Version {
+        const base = this.ensureIdentifierBase(_base);
+
         const newVersion = semver.inc(this._version, "premajor", identifier, base);
+
         if (!newVersion) {
-            throw new FireflyError(`Failed to bump premajor version ${this._version}`, "VERSION_BUMP_ERROR");
+            throw new FireflyError(`Failed to bump premajor ${this._version}`, "VERSION_BUMP_ERROR");
         }
         return new Version(newVersion);
     }
 
-    bumpPreminor(identifier?: string, base?: string): Version {
+    bumpPreminor(identifier: string, _base: PreReleaseBase = 0): Version {
+        const base = this.ensureIdentifierBase(_base);
+
         const newVersion = semver.inc(this._version, "preminor", identifier, base);
+
         if (!newVersion) {
-            throw new FireflyError(`Failed to bump preminor version ${this._version}`, "VERSION_BUMP_ERROR");
+            throw new FireflyError(`Failed to bump preminor ${this._version}`, "VERSION_BUMP_ERROR");
         }
         return new Version(newVersion);
     }
 
-    bumpPrepatch(identifier?: string, base?: string): Version {
+    bumpPrepatch(identifier: string, _base: PreReleaseBase = 0): Version {
+        const base = this.ensureIdentifierBase(_base);
+
         const newVersion = semver.inc(this._version, "prepatch", identifier, base);
+
         if (!newVersion) {
-            throw new FireflyError(`Failed to bump prepatch version ${this._version}`, "VERSION_BUMP_ERROR");
+            throw new FireflyError(`Failed to bump prepatch ${this._version}`, "VERSION_BUMP_ERROR");
         }
         return new Version(newVersion);
+    }
+
+    private ensureIdentifierBase(value: PreReleaseBase): "0" | "1" {
+        return value === "0" || value === "1" ? value : "0";
     }
 }

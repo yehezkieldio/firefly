@@ -6,7 +6,7 @@ export const ReleaseTypeSchema = z
     .enum(["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch"] as const)
     .optional();
 
-export const PreReleaseBaseSchema = z.coerce.number().default(0);
+export const PreReleaseBaseSchema = z.union([z.coerce.number(), z.string()]).default(0);
 
 export const FireflyConfigSchema = z.object({
     /**
