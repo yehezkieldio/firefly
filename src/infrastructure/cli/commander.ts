@@ -1,6 +1,9 @@
 import { program } from "commander";
 import { LogLevels } from "consola";
 import { colors } from "consola/utils";
+import { PreflightCheckCommand } from "#/application/commands/preflight-check.command";
+import { ApplicationContext } from "#/application/context";
+import { Orchestrator } from "#/application/orchestrator";
 import type { FireflyConfig } from "#/infrastructure/config";
 import { configLoader } from "#/infrastructure/config/loader";
 import { logger } from "#/shared/logger";
@@ -63,7 +66,11 @@ export async function createCLI(): Promise<typeof program> {
                     logger.level = LogLevels.verbose;
                 }
 
-                logger.warn("Release orchestration not yet implemented");
+                const context = new ApplicationContext(config, process.cwd());
+                const commands = [new PreflightCheckCommand()];
+
+                const orchestrator = new Orchestrator(context, commands);
+                await orchestrator.run();
             } catch (error) {
                 logger.error("Failed to execute release command:", error);
                 process.exit(1);

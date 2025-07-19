@@ -1,4 +1,4 @@
-import type { ICommand } from "#/application/commands/command.interface";
+import type { ICommand } from "#/application/command";
 import type { ApplicationContext } from "#/application/context";
 import { RollbackManager } from "#/application/services/rollback-manager.service";
 import { logger } from "#/shared/logger";
@@ -18,13 +18,13 @@ export class Orchestrator {
 
         try {
             for (const step of this.steps) {
-                logger.info(`🔹 ${step.getName()}: ${step.getDescription()}`);
+                logger.debug(`${step.getName()}: ${step.getDescription()}`);
 
                 // biome-ignore lint/nursery/noAwaitInLoop: Sequential execution is required
                 const result = await step.execute();
 
                 if (result.isErr()) {
-                    logger.error(`❌ ${step.getName()} failed:`, result.error.message);
+                    logger.error(`${step.getName()} failed:`, result.error.message);
                     await this.handleFailure(executedSteps);
                     return;
                 }
@@ -32,10 +32,10 @@ export class Orchestrator {
                 this.rollbackManager.addOperation(() => step.undo(), `Rollback: ${step.getName()}`);
 
                 executedSteps++;
-                logger.info(`✅ ${step.getName()} completed successfully`);
+                logger.debug(`${step.getName()} completed successfully`);
             }
 
-            logger.info(` All ${this.steps.length} steps completed successfully!`);
+            logger.debug(` All ${this.steps.length} steps completed successfully!`);
         } catch (error) {
             logger.error("Unexpected error during orchestration:", error);
             await this.handleFailure(executedSteps);

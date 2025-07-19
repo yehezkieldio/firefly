@@ -33,7 +33,7 @@
   },
   "scripts": {
     "build": "tsdown",
-    "dev": "bun run src/cli/main.ts",
+    "dev": "bun run src/infrastructure/cli/main.ts",
     "check": "biome check .",
     "check:unsafe": "biome check --write --unsafe .",
     "check:write": "biome check --write .",
