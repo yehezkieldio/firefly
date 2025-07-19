@@ -15,7 +15,7 @@ export class CommitAnalyzerService {
             level,
             releaseType: level === 0 ? "major" : level === 1 ? "minor" : "patch",
             commits: [...commits],
-            reason: `There ${analysis.breakings === 1 ? "is" : "are"} ${analysis.breakings} BREAKING CHANGE${analysis.breakings === 1 ? "" : "S"} and ${analysis.features} features`,
+            reason: this.generateReason(analysis),
         };
     }
 
@@ -27,5 +27,11 @@ export class CommitAnalyzerService {
             }),
             { breakings: 0, features: 0 }
         );
+    }
+
+    private generateReason({ breakings, features }: Analysis): string {
+        const bc = `${breakings} BREAKING CHANGE${breakings === 1 ? "" : "S"}`;
+        const ft = `${features} feature${features === 1 ? "" : "s"}`;
+        return `There ${breakings === 1 ? "is" : "are"} ${bc} and ${ft}`;
     }
 }
