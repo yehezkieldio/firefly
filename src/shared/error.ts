@@ -10,6 +10,13 @@ export class FireflyError extends Error {
     }
 }
 
+export class PreflightError extends FireflyError {
+    constructor(message: string, cause?: Error) {
+        super(message, "PREFLIGHT_ERROR", cause);
+        this.name = "PreflightError";
+    }
+}
+
 export class ConfigurationError extends FireflyError {
     constructor(message: string, cause?: Error) {
         super(message, "CONFIGURATION_ERROR", cause);

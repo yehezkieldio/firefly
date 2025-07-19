@@ -1,4 +1,5 @@
-import type { Result } from "neverthrow";
+import type { Result, ResultAsync } from "neverthrow";
 import type { FireflyError } from "#/shared/error";
 
 export type FireflyResult<T> = Result<T, FireflyError>;
+export type AsyncFireflyResult<T> = ResultAsync<T, FireflyError>;

@@ -66,8 +66,8 @@ export async function createCLI(): Promise<typeof program> {
                     logger.level = LogLevels.verbose;
                 }
 
-                const context = new ApplicationContext(config, process.cwd());
-                const commands = [new PreflightCheckCommand()];
+                const context = new ApplicationContext(config);
+                const commands = [new PreflightCheckCommand(context)];
 
                 const orchestrator = new Orchestrator(context, commands);
                 await orchestrator.run();

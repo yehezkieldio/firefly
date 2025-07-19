@@ -37,7 +37,7 @@ export class Orchestrator {
 
             logger.debug(` All ${this.steps.length} steps completed successfully!`);
         } catch (error) {
-            logger.error("Unexpected error during orchestration:", error);
+            logger.error(error instanceof Error ? error.message : error);
             await this.handleFailure(executedSteps);
         }
     }
