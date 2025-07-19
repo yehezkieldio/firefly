@@ -35,7 +35,6 @@ export async function configLoader(options: ConfigLoadOptions = {}): Promise<Fir
         await configEnricher.enrichWithPackageInfo(config.config);
 
         const validatedConfig = FireflyConfigSchema.parse(config.config);
-
         return validatedConfig;
     } catch (error) {
         logger.error("Failed to load Firefly configuration:", error);
