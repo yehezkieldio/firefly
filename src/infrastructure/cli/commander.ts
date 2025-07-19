@@ -2,6 +2,7 @@ import { program } from "commander";
 import { LogLevels } from "consola";
 import { colors } from "consola/utils";
 import { BumpVersionCommand } from "#/application/commands/bump-version.command";
+import { DetermineVersionCommand } from "#/application/commands/determine-version.command";
 import { PreflightCheckCommand } from "#/application/commands/preflight-check.command";
 import { ApplicationContext } from "#/application/context";
 import { Orchestrator } from "#/application/orchestrator";
@@ -68,7 +69,11 @@ export async function createCLI(): Promise<typeof program> {
                 }
 
                 const context = new ApplicationContext(config);
-                const commands = [new PreflightCheckCommand(context), new BumpVersionCommand(context)];
+                const commands = [
+                    new PreflightCheckCommand(context),
+                    new DetermineVersionCommand(context),
+                    new BumpVersionCommand(context),
+                ];
 
                 const orchestrator = new Orchestrator(context, commands);
                 await orchestrator.run();
