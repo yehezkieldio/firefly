@@ -51,3 +51,10 @@ export class ParsingError extends FireflyError {
         this.name = "ParsingError";
     }
 }
+
+export class RollbackError extends FireflyError {
+    constructor(message: string, cause?: Error) {
+        super(message, "ROLLBACK_ERROR", cause);
+        this.name = "RollbackError";
+    }
+}
