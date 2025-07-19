@@ -10,7 +10,7 @@ This document outlines the development and coding standards for the Firefly proj
 
 Firefly follows **Hexagonal Architecture**:
 
-- `core/` — Pure domain logic (business rules, pure functions, versioning decisions).
+- `core/` — Pure domain logic (business rules, pure functions or classes, no side effects).
 - `application/` — Use cases and orchestration (command flow, task coordination).
 - `infrastructure/` — External integrations (Git, filesystem, CLI tools).
 - `shared/` — Cross-cutting utilities (types, constants, logging, error wrappers).

@@ -26,7 +26,7 @@ export class Version {
         return new Version(newVersion);
     }
 
-    bumpPrerelease(identifier: string, _base: PreReleaseBase = 0): Version {
+    bumpPrerelease(identifier?: string, _base: PreReleaseBase = 0): Version {
         const base = this.ensureIdentifierBase(_base);
 
         const newVersion = semver.inc(this._version, "prerelease", identifier, base);
@@ -37,7 +37,7 @@ export class Version {
         return new Version(newVersion);
     }
 
-    bumpPremajor(identifier: string, _base: PreReleaseBase = 0): Version {
+    bumpPremajor(identifier?: string, _base: PreReleaseBase = 0): Version {
         const base = this.ensureIdentifierBase(_base);
 
         const newVersion = semver.inc(this._version, "premajor", identifier, base);
@@ -48,7 +48,7 @@ export class Version {
         return new Version(newVersion);
     }
 
-    bumpPreminor(identifier: string, _base: PreReleaseBase = 0): Version {
+    bumpPreminor(identifier?: string, _base: PreReleaseBase = 0): Version {
         const base = this.ensureIdentifierBase(_base);
 
         const newVersion = semver.inc(this._version, "preminor", identifier, base);
@@ -59,7 +59,7 @@ export class Version {
         return new Version(newVersion);
     }
 
-    bumpPrepatch(identifier: string, _base: PreReleaseBase = 0): Version {
+    bumpPrepatch(identifier?: string, _base: PreReleaseBase = 0): Version {
         const base = this.ensureIdentifierBase(_base);
 
         const newVersion = semver.inc(this._version, "prepatch", identifier, base);
