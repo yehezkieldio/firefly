@@ -18,7 +18,7 @@ export class Orchestrator {
 
         try {
             for (const step of this.steps) {
-                logger.debug(`${step.getName()}: ${step.getDescription()}`);
+                logger.debug(`Executing ${step.getName()}`);
 
                 // biome-ignore lint/nursery/noAwaitInLoop: Sequential execution is required
                 const result = await step.execute();
@@ -35,7 +35,7 @@ export class Orchestrator {
                 logger.debug(`${step.getName()} completed successfully`);
             }
 
-            logger.debug(` All ${this.steps.length} steps completed successfully!`);
+            logger.debug(`All ${this.steps.length} commands completed successfully!`);
         } catch (error) {
             logger.error(error instanceof Error ? error.message : error);
             await this.handleFailure(executedSteps);
