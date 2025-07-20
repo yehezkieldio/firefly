@@ -1,26 +1,23 @@
-import { okAsync } from "neverthrow";
 import type { Command } from "#/application/command.interface";
 import type { ApplicationContext } from "#/application/context";
-import { logger } from "#/shared/utils/logger";
-import type { AsyncFireflyResult } from "#/shared/utils/result";
 
 export class DetermineVersionCommand implements Command {
     constructor(private readonly context: ApplicationContext) {}
 
-    getName() {
+    getName(): string {
         return "DetermineVersionCommand";
     }
-    getDescription() {
-        return "";
+
+    getDescription(): string {
+        return "Determines the next version to release";
     }
 
-    execute(): AsyncFireflyResult<void> {
+    async execute(): Promise<void> {
+        // Implementation here
         this.context.getBasePath();
-        return okAsync(undefined);
     }
 
-    undo(): AsyncFireflyResult<void> {
-        logger.info("Undoing DetermineVersionCommand");
-        return okAsync(undefined);
+    async undo(): Promise<void> {
+        // Implementation here - restore previous version state
     }
 }

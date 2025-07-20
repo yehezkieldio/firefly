@@ -1,28 +1,23 @@
-import { okAsync } from "neverthrow";
 import type { Command } from "#/application/command.interface";
 import type { ApplicationContext } from "#/application/context";
-import type { AsyncFireflyResult } from "#/shared/utils/result";
 
 export class CreateCommitCommand implements Command {
-    private context: ApplicationContext;
+    constructor(private readonly context: ApplicationContext) {}
 
-    constructor(context: ApplicationContext) {
-        this.context = context;
-    }
-
-    getName() {
+    getName(): string {
         return "CreateCommitCommand";
     }
-    getDescription() {
-        return "";
+
+    getDescription(): string {
+        return "Creates a git commit with the version changes";
     }
 
-    execute(): AsyncFireflyResult<void> {
+    async execute(): Promise<void> {
+        // Implementation here
         this.context.getBasePath();
-        return okAsync(undefined);
     }
 
-    undo(): AsyncFireflyResult<void> {
-        return okAsync(undefined);
+    async undo(): Promise<void> {
+        // Implementation here - reset commit if needed
     }
 }

@@ -1,28 +1,23 @@
-import { okAsync } from "neverthrow";
 import type { Command } from "#/application/command.interface";
 import type { ApplicationContext } from "#/application/context";
-import type { AsyncFireflyResult } from "#/shared/utils/result";
 
 export class GenerateChangelogCommand implements Command {
-    private context: ApplicationContext;
+    constructor(private readonly context: ApplicationContext) {}
 
-    constructor(context: ApplicationContext) {
-        this.context = context;
-    }
-
-    getName() {
+    getName(): string {
         return "GenerateChangelogCommand";
     }
-    getDescription() {
-        return "";
+
+    getDescription(): string {
+        return "Generates changelog using git-cliff";
     }
 
-    execute(): AsyncFireflyResult<void> {
+    async execute(): Promise<void> {
+        // Implementation here
         this.context.getBasePath();
-        return okAsync(undefined);
     }
 
-    undo(): AsyncFireflyResult<void> {
-        return okAsync(undefined);
+    async undo(): Promise<void> {
+        // Implementation here - restore previous changelog
     }
 }
