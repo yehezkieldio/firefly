@@ -40,7 +40,7 @@ export async function createCLI(): Promise<typeof program> {
     program
         .command("release")
         .description("Create a new release")
-        .option("--bump-strategy <strategy>", "Bump strategy (auto, manual)", "auto")
+        .option("--bump-strategy <strategy>", "Bump strategy (auto, manual)", "manual")
         .option("--release-type <type>", "Release type (major, minor, patch, prerelease, etc.)")
         .option("--pre-release-id <id>", "Pre-release identifier")
         .option("--pre-release-base <base>", "Pre-release base version", "0")
