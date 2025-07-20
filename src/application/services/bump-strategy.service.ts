@@ -143,6 +143,7 @@ export class BumpStrategyService {
         }
 
         const selectedVersion = versionResult.value;
+        logger.log("");
         logger.info(`Version selected: ${selectedVersion}`);
 
         this.context.setNextVersion(selectedVersion);
@@ -178,6 +179,7 @@ export class BumpStrategyService {
         }
 
         const nextVersion = nextVersionResult.value;
+        logger.log("");
         logger.info(`Version decided: ${nextVersion}`);
 
         this.context.setNextVersion(nextVersion);
