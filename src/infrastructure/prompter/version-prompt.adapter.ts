@@ -1,6 +1,7 @@
 import { err, ResultAsync } from "neverthrow";
 import type { ReleaseType } from "semver";
 import { VersionChoiceService } from "#/core/services/version-choice.service";
+import type { PreReleaseBase } from "#/infrastructure/config/schema";
 import { FireflyError, VersionError } from "#/shared/utils/error";
 import { logger } from "#/shared/utils/logger";
 import type { AsyncFireflyResult } from "#/shared/utils/result";
@@ -12,14 +13,24 @@ export class VersionPromptAdapter {
         this.versionChoiceService = versionChoiceService;
     }
 
-    generateVersionChoices(currentVersion: string, releaseType?: ReleaseType): AsyncFireflyResult<string> {
+    generateVersionChoices(
+        currentVersion: string,
+        releaseType?: ReleaseType,
+        preReleaseId?: string,
+        preReleaseBase?: PreReleaseBase
+    ): AsyncFireflyResult<string> {
         if (!currentVersion?.trim()) {
             return ResultAsync.fromSafePromise(
                 Promise.resolve(err(new VersionError("Current version cannot be empty")))
             ).andThen((result) => result);
         }
 
-        const versionsResult = this.versionChoiceService.createVersionChoices(currentVersion, releaseType);
+        const versionsResult = this.versionChoiceService.createVersionChoices(
+            currentVersion,
+            releaseType,
+            preReleaseId,
+            preReleaseBase
+        );
         if (versionsResult.isErr()) {
             return ResultAsync.fromSafePromise(Promise.resolve(err(versionsResult.error))).andThen((result) => result);
         }

@@ -91,11 +91,11 @@ export class VersionChoiceService {
         preReleaseBase?: PreReleaseBase
     ): PromptSelectChoice {
         const version = this.computeNewVersion(currentVersion, increment, preReleaseId, preReleaseBase);
-        const hint = this.getVersionDescription(increment, version);
+        const description = this.getVersionDescription(increment);
 
         return {
-            label: increment,
-            hint,
+            label: `${increment} (${version.toString()})`,
+            hint: description,
             value: version.toString(),
         };
     }
@@ -114,7 +114,7 @@ export class VersionChoiceService {
         });
     }
 
-    private getVersionDescription(increment: ReleaseType, version: Version): string {
-        return VersionChoiceService.VERSION_DESCRIPTIONS[increment] ?? version.toString();
+    private getVersionDescription(increment: ReleaseType): string {
+        return VersionChoiceService.VERSION_DESCRIPTIONS[increment] ?? "";
     }
 }

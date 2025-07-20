@@ -57,7 +57,7 @@ export const FireflyConfigSchema = z.object({
     /**
      * Specify the pre-release identifier for the version bump.
      */
-    preReleaseId: z.string().default(""),
+    preReleaseId: z.string().default("alpha"),
 
     /**
      * Specify the pre-release base version. Usually 0 or 1.

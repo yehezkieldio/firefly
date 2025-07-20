@@ -132,8 +132,15 @@ export class BumpStrategyService {
 
         const config = this.context.getConfig();
         const configuredReleaseType = config.releaseType;
+        const configuredPreReleaseId = config.preReleaseId;
+        const configuredPreReleaseBase = config.preReleaseBase;
 
-        const versionResult = await this.versionPrompt.generateVersionChoices(currentVersion, configuredReleaseType);
+        const versionResult = await this.versionPrompt.generateVersionChoices(
+            currentVersion,
+            configuredReleaseType,
+            configuredPreReleaseId,
+            configuredPreReleaseBase
+        );
 
         if (versionResult.isErr()) {
             throw new CommandExecutionError(
