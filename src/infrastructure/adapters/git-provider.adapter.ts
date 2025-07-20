@@ -39,6 +39,17 @@ export class GitProviderAdapter implements GitProviderPort {
             : okAsync(undefined);
     }
 
+    async restoreFileToHead(pathToFile: string): Promise<AsyncFireflyResult<void>> {
+        if (!pathToFile?.trim()) {
+            return err(new CommandExecutionError("File path cannot be empty"));
+        }
+
+        const result = await this.exec(["checkout", "HEAD", "--", pathToFile]);
+        return result.isErr()
+            ? err(new CommandExecutionError(`Failed to checkout file: ${pathToFile}`, result.error))
+            : okAsync(undefined);
+    }
+
     async createTag(tag: string, message?: string): Promise<AsyncFireflyResult<void>> {
         if (!tag?.trim()) {
             return err(new CommandExecutionError("Tag name cannot be empty"));
@@ -104,6 +115,17 @@ export class GitProviderAdapter implements GitProviderPort {
         }
 
         return okAsync(result.value.trim() !== "");
+    }
+
+    async deleteLocalTag(tag: string): Promise<AsyncFireflyResult<void>> {
+        if (!tag?.trim()) {
+            return err(new CommandExecutionError("Tag name cannot be empty"));
+        }
+
+        const result = await this.exec(["tag", "-d", tag]);
+        return result.isErr()
+            ? err(new CommandExecutionError(`Failed to delete local tag: ${tag}`, result.error))
+            : okAsync(undefined);
     }
 
     async isInsideGitRepository(): Promise<AsyncFireflyResult<boolean>> {

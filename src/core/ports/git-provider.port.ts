@@ -12,7 +12,9 @@ export interface GitProviderPort {
     stageChanges(): Promise<AsyncFireflyResult<void>>;
     createCommit(message: string): Promise<AsyncFireflyResult<void>>;
     resetLastCommit(): Promise<AsyncFireflyResult<void>>;
+    restoreFileToHead(pathToFile: string): Promise<AsyncFireflyResult<void>>;
     createTag(tag: string, message?: string): Promise<AsyncFireflyResult<void>>;
+    deleteLocalTag(tag: string): Promise<AsyncFireflyResult<void>>;
     isInsideGitRepository(): Promise<AsyncFireflyResult<boolean>>;
     getRootDirection(): Promise<AsyncFireflyResult<string>>;
     getRepositoryUrl(): Promise<AsyncFireflyResult<string>>;
