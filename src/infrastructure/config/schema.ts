@@ -136,7 +136,8 @@ export const FireflyConfigSchema = z.object({
 });
 
 export type FireflyConfig = z.infer<typeof FireflyConfigSchema>;
-export type bumpStrategy = z.infer<typeof BumpStrategySchema>;
+export type BumpStrategy = z.infer<typeof BumpStrategySchema>;
+export type BumpStrategyNonOptional = Exclude<BumpStrategy, undefined>;
 export type ReleaseType = z.infer<typeof ReleaseTypeSchema>;
 export type ReleaseTypeNonOptional = Exclude<ReleaseType, undefined>;
 export type PreReleaseBase = z.infer<typeof PreReleaseBaseSchema>;

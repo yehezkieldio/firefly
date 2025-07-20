@@ -12,16 +12,10 @@ export class VersionPromptAdapter {
         this.versionChoiceService = versionChoiceService;
     }
 
-    generateVersionChoices(currentVersion: string, releaseType: ReleaseType): AsyncFireflyResult<string> {
+    generateVersionChoices(currentVersion: string, releaseType?: ReleaseType): AsyncFireflyResult<string> {
         if (!currentVersion?.trim()) {
             return ResultAsync.fromSafePromise(
                 Promise.resolve(err(new VersionError("Current version cannot be empty")))
-            ).andThen((result) => result);
-        }
-
-        if (!releaseType?.trim()) {
-            return ResultAsync.fromSafePromise(
-                Promise.resolve(err(new VersionError("Release type cannot be empty")))
             ).andThen((result) => result);
         }
 
