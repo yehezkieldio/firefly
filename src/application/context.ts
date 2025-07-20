@@ -6,6 +6,7 @@ export class ApplicationContext {
 
     private _currentVersion?: string;
     private _nextVersion?: string;
+    private _changelogContent?: string;
 
     constructor(config: FireflyConfig, basePath: string = process.cwd()) {
         this.config = config;
@@ -34,5 +35,13 @@ export class ApplicationContext {
 
     setNextVersion(version: string): void {
         this._nextVersion = version;
+    }
+
+    getChangelogContent(): string | undefined {
+        return this._changelogContent;
+    }
+
+    setChangelogContent(content: string): void {
+        this._changelogContent = content;
     }
 }
