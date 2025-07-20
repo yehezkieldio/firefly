@@ -2,13 +2,18 @@ import { program } from "commander";
 import { LogLevels } from "consola";
 import { colors } from "consola/utils";
 import { BumpVersionCommand } from "#/application/commands/bump-version.command";
+import { CreateCommitCommand } from "#/application/commands/create-commit.command";
+import { CreateReleaseCommand } from "#/application/commands/create-release.command";
+import { CreateTagCommand } from "#/application/commands/create-tag.command";
 import { DetermineVersionCommand } from "#/application/commands/determine-version.command";
+import { GenerateChangelogCommand } from "#/application/commands/generate-changelog.command";
 import { PreflightCheckCommand } from "#/application/commands/preflight-check.command";
+import { PushChangesCommand } from "#/application/commands/push-changes.command";
 import { ApplicationContext } from "#/application/context";
-import { Orchestrator } from "#/application/orchestrator";
+import { OrchestratorService } from "#/application/services/orchestrator.service";
 import type { FireflyConfig } from "#/infrastructure/config";
 import { configLoader } from "#/infrastructure/config/loader";
-import { logger } from "#/shared/logger";
+import { logger } from "#/shared/utils/logger";
 import pkg from "../../../package.json" with { type: "json" };
 
 export interface CLIOptions extends Partial<FireflyConfig> {
@@ -73,9 +78,14 @@ export async function createCLI(): Promise<typeof program> {
                     new PreflightCheckCommand(context),
                     new DetermineVersionCommand(context),
                     new BumpVersionCommand(context),
+                    new GenerateChangelogCommand(context),
+                    new CreateCommitCommand(context),
+                    new CreateTagCommand(context),
+                    new PushChangesCommand(context),
+                    new CreateReleaseCommand(context),
                 ];
 
-                const orchestrator = new Orchestrator(context, commands);
+                const orchestrator = new OrchestratorService(context, commands);
                 await orchestrator.run();
             } catch (error) {
                 logger.error("Failed to execute release command:", error);

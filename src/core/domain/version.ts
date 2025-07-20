@@ -1,6 +1,6 @@
 import semver from "semver";
 import type { PreReleaseBase, ReleaseType } from "#/infrastructure/config/schema";
-import { FireflyError } from "#/shared/error";
+import { FireflyError } from "#/shared/utils/error";
 
 export class Version {
     private readonly _version: string;

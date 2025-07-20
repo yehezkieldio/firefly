@@ -1,13 +1,27 @@
 import { err, ok, okAsync, type ResultAsync } from "neverthrow";
 import type { ApplicationContext } from "#/application/context";
-import { RollbackError } from "#/shared/error";
-import { logger } from "#/shared/logger";
-import type { FireflyResult } from "#/shared/result";
+import { type FireflyError, RollbackError } from "#/shared/utils/error";
+import { logger } from "#/shared/utils/logger";
+import type { AsyncFireflyResult } from "#/shared/utils/result";
 
-export type RollbackOperation = {
-    operation: (context: ApplicationContext) => Promise<FireflyResult<void>>;
-    description: string;
-};
+type Operation = (context: ApplicationContext) => AsyncFireflyResult<void>;
+type OperationRollBack = ((context: ApplicationContext) => AsyncFireflyResult<void>) | null;
+type OperationWithContext<T> = (context: T) => ResultAsync<T, Error>;
+
+export interface RollbackOperation {
+    readonly operation: Operation;
+    readonly name: string;
+    readonly description: string;
+}
+
+export interface ExecuteWithRollbackParams<T> {
+    readonly operation: OperationWithContext<T>;
+    readonly rollbackOp: OperationRollBack;
+    readonly name: string;
+    readonly description: string;
+    readonly context: T;
+    readonly shouldSkip?: (context: T) => boolean;
+}
 
 export class RollbackManager {
     private readonly operations: RollbackOperation[] = [];
@@ -17,65 +31,56 @@ export class RollbackManager {
         this.context = context;
     }
 
-    addOperation(
-        operation: (context: ApplicationContext) => Promise<FireflyResult<void>>,
-        description: string
-    ): void {
-        this.operations.push({ operation, description });
+    addOperation(operation: Operation, name: string, description: string): void {
+        if (!operation) {
+            logger.warn("Invalid operation provided to rollback manager");
+            return;
+        }
+
+        if (!name?.trim()) {
+            logger.warn("Invalid name provided to rollback manager");
+            return;
+        }
+
+        this.operations.push({ operation, name, description });
     }
 
-    executeWithRollback<T>(
-        operation: (context: T) => ResultAsync<T, Error>,
-        rollbackOp: ((context: ApplicationContext) => Promise<FireflyResult<void>>) | null,
-        description: string,
-        context: T,
-        shouldSkip?: (context: T) => boolean
-    ): ResultAsync<T, Error> {
+    executeWithRollback<T>(params: ExecuteWithRollbackParams<T>): ResultAsync<T, Error> {
+        const { operation, rollbackOp, name, description, context, shouldSkip } = params;
+
         if (shouldSkip?.(context)) {
-            logger.verbose(`Skipping step: ${description}`);
+            logger.verbose(`Skipping command: ${name}`);
             return okAsync(context);
         }
 
-        logger.verbose(`${description}...`);
         return operation(context).map((result: T): T => {
             if (rollbackOp) {
-                this.addOperation(rollbackOp, description);
+                this.addOperation(rollbackOp, name, description);
             }
             return result;
         });
     }
 
-    async executeRollback(): Promise<FireflyResult<void>> {
-        if (this.operations.length === 0) {
+    async executeRollback(): Promise<AsyncFireflyResult<void>> {
+        if (!this.hasOperations()) {
             return ok(undefined);
         }
 
         logger.warn("Initiating rollback of failed operations...");
 
-        for (const { operation, description } of this.operations.slice().reverse()) {
-            logger.verbose(`Rolling back: ${description}`);
+        const reversedOperations = this.operations.slice().reverse();
+
+        for (const { operation, name } of reversedOperations) {
+            logger.verbose(`Rolling back: ${name}`);
 
             try {
-                // biome-ignore lint/nursery/noAwaitInLoop: Sequential execution is required
+                // biome-ignore lint/nursery/noAwaitInLoop: Sequential execution is required for rollbacks
                 const result = await operation(this.context);
                 if (result.isErr()) {
-                    const errorMsg = `Rollback failed for operation: ${description}`;
-                    logger.error(errorMsg, result.error);
-
-                    return err(
-                        new RollbackError(
-                            errorMsg,
-                            result.error instanceof Error ? result.error : new Error(String(result.error))
-                        )
-                    );
+                    return err(new RollbackError(`Rollback failed for operation: ${name}`, result.error));
                 }
             } catch (error) {
-                const errorMsg = `Rollback threw error for operation: ${description}`;
-                logger.error(errorMsg, error);
-
-                return err(
-                    new RollbackError(errorMsg, error instanceof Error ? error : new Error(String(error)))
-                );
+                return err(new RollbackError(`Rollback threw error for operation: ${name}`, error as FireflyError));
             }
         }
 
@@ -83,7 +88,7 @@ export class RollbackManager {
     }
 
     clear(): void {
-        this.operations.splice(0, this.operations.length);
+        this.operations.length = 0;
     }
 
     getOperationCount(): number {

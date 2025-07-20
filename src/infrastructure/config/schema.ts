@@ -6,7 +6,7 @@ export const ReleaseTypeSchema = z
     .enum(["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch"] as const)
     .optional();
 
-export const PreReleaseBaseSchema = z.union([z.coerce.number(), z.string()]).default(0);
+export const PreReleaseBaseSchema = z.union([z.number(), z.literal("0"), z.literal("1")]).default(0);
 
 export const FireflyConfigSchema = z.object({
     /**
@@ -138,4 +138,5 @@ export const FireflyConfigSchema = z.object({
 export type FireflyConfig = z.infer<typeof FireflyConfigSchema>;
 export type bumpStrategy = z.infer<typeof BumpStrategySchema>;
 export type ReleaseType = z.infer<typeof ReleaseTypeSchema>;
+export type ReleaseTypeNonOptional = Exclude<ReleaseType, undefined>;
 export type PreReleaseBase = z.infer<typeof PreReleaseBaseSchema>;

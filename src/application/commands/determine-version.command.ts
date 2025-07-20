@@ -1,24 +1,26 @@
-import { ok } from "neverthrow";
-import type { ICommand } from "#/application/command";
+import { okAsync } from "neverthrow";
+import type { Command } from "#/application/command.interface";
 import type { ApplicationContext } from "#/application/context";
+import { logger } from "#/shared/utils/logger";
+import type { AsyncFireflyResult } from "#/shared/utils/result";
 
-export class DetermineVersionCommand implements ICommand {
+export class DetermineVersionCommand implements Command {
     constructor(private readonly context: ApplicationContext) {}
 
-    async execute() {
-        this.context.getBasePath();
-        return ok(undefined);
-    }
-
-    async undo() {
-        return ok(undefined);
-    }
-
-    getName(): string {
+    getName() {
         return "DetermineVersionCommand";
     }
+    getDescription() {
+        return "";
+    }
 
-    getDescription(): string {
-        return "Determines the next version by analyzing conventional commits or prompting for manual version selection";
+    execute(): AsyncFireflyResult<void> {
+        this.context.getBasePath();
+        return okAsync(undefined);
+    }
+
+    undo(): AsyncFireflyResult<void> {
+        logger.info("Undoing DetermineVersionCommand");
+        return okAsync(undefined);
     }
 }

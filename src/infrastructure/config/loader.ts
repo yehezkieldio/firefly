@@ -1,9 +1,9 @@
 import { loadConfig } from "c12";
 import { colors } from "consola/utils";
-import { ConfigEnricher } from "#/infrastructure/config/enricher";
+import { ConfigEnricherService } from "#/infrastructure/config/enricher.service";
 import { type FireflyConfig, FireflyConfigSchema } from "#/infrastructure/config/schema";
-import { createPackageJsonService } from "#/infrastructure/services/package-json.service.factory";
-import { logger } from "#/shared/logger";
+import { createPackageJsonService } from "#/infrastructure/services/package-json-service.factory";
+import { logger } from "#/shared/utils/logger";
 
 export interface ConfigLoadOptions {
     cwd?: string;
@@ -30,7 +30,7 @@ export async function configLoader(options: ConfigLoadOptions = {}): Promise<Fir
         }
 
         const packageJsonService = createPackageJsonService(cwd);
-        const configEnricher = new ConfigEnricher(packageJsonService);
+        const configEnricher = new ConfigEnricherService(packageJsonService);
 
         await configEnricher.enrichWithPackageInfo(config.config);
 

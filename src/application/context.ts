@@ -1,11 +1,11 @@
-import { GitProviderAdapter } from "#/infrastructure/adapters/git-provider.adapter";
-import type { FireflyConfig } from "#/infrastructure/config";
+import type { FireflyConfig } from "#/infrastructure/config/schema";
 
 export class ApplicationContext {
     private readonly config: FireflyConfig;
     private readonly basePath: string;
 
-    private _git?: GitProviderAdapter;
+    private _currentVersion?: string;
+    private _nextVersion?: string;
 
     constructor(config: FireflyConfig, basePath: string = process.cwd()) {
         this.config = config;
@@ -20,11 +20,19 @@ export class ApplicationContext {
         return this.basePath;
     }
 
-    get git(): GitProviderAdapter {
-        if (!this._git) {
-            this._git = new GitProviderAdapter();
-        }
+    getCurrentVersion(): string | undefined {
+        return this._currentVersion;
+    }
 
-        return this._git;
+    setCurrentVersion(version: string): void {
+        this._currentVersion = version;
+    }
+
+    getNextVersion(): string | undefined {
+        return this._nextVersion;
+    }
+
+    setNextVersion(version: string): void {
+        this._nextVersion = version;
     }
 }

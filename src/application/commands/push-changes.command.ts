@@ -3,11 +3,15 @@ import type { Command } from "#/application/command.interface";
 import type { ApplicationContext } from "#/application/context";
 import type { AsyncFireflyResult } from "#/shared/utils/result";
 
-export class BumpVersionCommand implements Command {
-    constructor(private readonly context: ApplicationContext) {}
+export class PushChangesCommand implements Command {
+    private context: ApplicationContext;
+
+    constructor(context: ApplicationContext) {
+        this.context = context;
+    }
 
     getName() {
-        return "BumpVersionCommand";
+        return "PushChangesCommand";
     }
     getDescription() {
         return "";

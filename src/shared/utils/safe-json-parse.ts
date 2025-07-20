@@ -1,6 +1,6 @@
 import { Result } from "neverthrow";
-import { ParsingError } from "#/shared/error";
+import { FireflyError } from "#/shared/utils/error";
 
-const toParsingError = (e: unknown) => new ParsingError("Failed to parse JSON", e as Error);
+const toJsonParseError = (e: unknown) => new FireflyError("Failed to parse JSON", "JSON_PARSE_ERROR", e as Error);
 
-export const safeJsonParse = Result.fromThrowable(JSON.parse, toParsingError);
+export const safeJsonParse = Result.fromThrowable(JSON.parse, toJsonParseError);

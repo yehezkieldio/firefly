@@ -17,6 +17,10 @@ Firefly follows **Hexagonal Architecture**:
 
 This separation promotes testability, maintainability, and long-term evolution.
 
+Firefly implements each release step as a Command, following a standard interface with `execute()` and `undo()` methods. All commands are orchestrated by a central service that manages execution order, coordinates rollbacks automatically on failure, and ensures each step is reversible.
+
+This orchestration logic resides in the `application/` layer, with individual commands organized under `application/commands/` and orchestration/rollback handled by dedicated services.
+
 ## Operating Principles
 
 - Designed to be run with Bun as the runtime, Node.js is not supported.
@@ -25,7 +29,7 @@ This separation promotes testability, maintainability, and long-term evolution.
 - CLI arguments and file-based configuration are merged into a single unified configuration object.
 - All error handling should use `neverthrow`; avoid throwing exceptions in flow logic.
 - Version bumping uses `conventional-recommended-bump` but supports for manual choosing of versions.
-- Changelogs are generated with `git-cliff` based on commit messages, uses `smol-toml` to parse its configuration.
+- Changelogs are generated with `git-cliff`; uses `smol-toml` to parse its configuration.
 - The release process automates versioning, changelog, Git tagging, and GitHub releases.
 
 ## Class and Function Design
@@ -38,5 +42,8 @@ This separation promotes testability, maintainability, and long-term evolution.
 
 ## Development Standards
 
-- Code explains how, comments explain why.
+- Code explains how, comments explain why. No overt commenting of obvious code.
+- Use TypeScript's type system effectively to avoid unnecessary runtime checks.
 - Use defensive programming: validate and check types at boundaries (e.g., parsing config, external data).
+- Use `neverthrow` for almost all error handling, if error handling is needed.
+- Use `zod` for schema validation where applicable, especially for configuration.

@@ -1,5 +1,5 @@
 import z from "zod";
-import type { FireflyResult } from "#/shared/result";
+import type { FireflyResult } from "#/shared/utils/result";
 
 export const PackageJsonSchema = z
     .object({
