@@ -1,10 +1,11 @@
 import type { BumperRecommendation } from "conventional-recommended-bump";
-import { err, ok, type Result } from "neverthrow";
+import { err, ok } from "neverthrow";
 import type { ReleaseType } from "semver";
 import { Version } from "#/core/domain/version";
 import { SemverService } from "#/core/services/semver.service";
 import type { PreReleaseBase } from "#/infrastructure/config/schema";
 import { VersionError } from "#/shared/utils/error";
+import type { FireflyResult } from "#/shared/utils/result";
 
 export class VersionDeciderService {
     private readonly currentVersion: Version;
@@ -19,7 +20,7 @@ export class VersionDeciderService {
         this.bumper = new SemverService();
     }
 
-    decideNextVersion(releaseType: ReleaseType, recommendation: BumperRecommendation): Result<string, VersionError> {
+    decideNextVersion(releaseType: ReleaseType, recommendation: BumperRecommendation): FireflyResult<string> {
         try {
             const nextVersion =
                 releaseType === "prerelease"
@@ -34,12 +35,21 @@ export class VersionDeciderService {
         }
     }
 
-    private createStandardReleaseVersion(recommendation: BumperRecommendation): Result<string, VersionError> {
+    decideIndependently(releaseType: ReleaseType): FireflyResult<string> {
+        const nextVersion = this.bumpVersion(releaseType);
+        if (nextVersion.isErr()) {
+            return err(nextVersion.error);
+        }
+
+        return ok(nextVersion.value);
+    }
+
+    private createStandardReleaseVersion(recommendation: BumperRecommendation): FireflyResult<string> {
         const releaseType = this.mapRecommendationToReleaseType(recommendation.level);
         return this.bumpVersion(releaseType);
     }
 
-    private createPreReleaseVersion(): Result<string, VersionError> {
+    private createPreReleaseVersion(): FireflyResult<string> {
         return this.bumpVersion("prerelease");
     }
 
@@ -53,7 +63,7 @@ export class VersionDeciderService {
         return levelMapping[level] ?? "patch";
     }
 
-    private bumpVersion(increment: ReleaseType): Result<string, VersionError> {
+    private bumpVersion(increment: ReleaseType): FireflyResult<string> {
         try {
             const newVersion = this.bumper.bump({
                 current: this.currentVersion,
