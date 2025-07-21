@@ -1,4 +1,4 @@
-import { program } from "commander";
+import { InvalidArgumentError, program } from "commander";
 import { LogLevels } from "consola";
 import { colors } from "consola/utils";
 import { BumpVersionCommand } from "#/application/commands/bump-version.command";
@@ -43,7 +43,10 @@ export async function createCLI(): Promise<typeof program> {
         .option("--bump-strategy <strategy>", "Bump strategy (auto, manual)", "manual")
         .option("--release-type <type>", "Release type (major, minor, patch, prerelease, etc.)")
         .option("--pre-release-id <id>", "Pre-release identifier")
-        .option("--pre-release-base <base>", "Pre-release base version", "0")
+        .option("--pre-release-base <base>", "Pre-release base version", (input) => {
+            if (input === "0" || input === "1") return input;
+            throw new InvalidArgumentError("Not a number of 0 or 1.");
+        })
         .option("--release-notes <notes>", "Custom release notes")
         .option("--commit-message <message>", "Commit message template")
         .option("--tag-name <name>", "Tag name template")
