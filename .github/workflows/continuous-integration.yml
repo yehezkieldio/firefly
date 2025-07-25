@@ -5,6 +5,10 @@ on:
         branches:
             - master
 
+permissions:
+    contents: read
+    pull-requests: write
+
 jobs:
     pr_latest_release:
         name: Create Pull Request for Latest Release
