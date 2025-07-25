@@ -37,7 +37,7 @@ jobs:
                   gh pr create \
                       --base stable \
                       --head master \
-                      --title "Release v${VERSION}" \
+                      --title "chore(release): release v${VERSION}" \
                       --body "Automated release PR for version v${VERSION}. Please review and merge." \
                       --assignee "yehezkieldio"
                   echo "Pull request creation initiated."
