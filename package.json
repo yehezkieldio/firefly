@@ -1,6 +1,6 @@
 {
   "name": "@yehezkieldio/firefly",
-  "version": "2.0.0",
+  "version": "1.0.2",
   "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
   "type": "module",
   "license": "MIT",
@@ -8,8 +8,8 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/main.js",
-  "module": "./dist/main.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -33,6 +33,7 @@
   },
   "scripts": {
     "build": "tsdown",
+    "postbuild": "bun run scripts/insert-bun-pragma.ts",
     "dev": "bun run src/infrastructure/cli/main.ts",
     "check": "biome check .",
     "check:unsafe": "biome check --write --unsafe .",
@@ -61,5 +62,13 @@
     "tsdown": "^0.13.0",
     "typescript": "^5.9.0-beta",
     "ultracite": "^5.0.39"
+  },
+  "homepage": "https://github.com/yehezkieldio/firefly#readme",
+  "bugs": {
+    "url": "https://github.com/yehezkieldio/firefly/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yehezkieldio/firefly.git"
   }
 }

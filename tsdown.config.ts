@@ -1,20 +1,16 @@
-import { defineConfig, type UserConfig, type UserConfigFn } from "tsdown/config";
-import pkg from "./package.json" with { type: "json" };
+import { defineConfig } from "tsdown/config";
 
-const config: (UserConfig | UserConfigFn)[] = [
-    defineConfig({
+export default defineConfig([
+    {
         entry: "./src/infrastructure/config/index.ts",
         platform: "neutral",
-        dts: true,
-        external: Object.keys(pkg.dependencies).concat(["node:path"]),
-    }),
-    defineConfig({
+        nodeProtocol: "strip",
+    },
+    {
         entry: "./src/infrastructure/cli/main.ts",
         platform: "neutral",
         dts: false,
-        external: Object.keys(pkg.dependencies).concat(["node:path"]),
+        nodeProtocol: "strip",
         minify: true,
-    }),
-];
-
-export default config;
+    },
+]);

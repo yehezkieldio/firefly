@@ -2,48 +2,70 @@
 
 ## Overview
 
-Firefly is a CLI orchestrator for semantic versioning, changelog generation, and creating releases.
+**Firefly** is a CLI orchestrator designed for semantic versioning, changelog generation, and automated releases. It enables precise control over release workflows, supports safe rollbacks, and promotes modular task execution. This document defines the development and coding standards for Firefly, ensuring code quality, maintainability, and consistency.
 
-This document outlines the development and coding standards for the Firefly project. Adherence to these standards ensures high code quality, maintainability, and consistency across the codebase.
+## Architecture
 
-## Architecture Principles
+Firefly adopts a **Hexagonal Architecture** to separate pure logic from side effects:
 
-Firefly follows **Hexagonal Architecture**:
+```
+src/
+├── core/           # Pure domain logic: deterministic, no side effects
+├── application/    # Use cases: orchestrates tasks, manages versioning flows
+├── infrastructure/ # Integrations: Git, filesystem, GitHub, CLI, etc.
+├── shared/         # Utilities: logging, errors, common types, constants
+```
 
-- `core/` — Pure domain logic (business rules, pure functions or classes, no side effects).
-- `application/` — Use cases and orchestration (command flow, task coordination).
-- `infrastructure/` — External integrations (Git, filesystem, CLI tools).
-- `shared/` — Cross-cutting utilities (types, constants, logging, error wrappers).
+### Architectural Guidelines
 
-This separation promotes testability, maintainability, and long-term evolution.
-
-Firefly implements each release step as a Command, following a standard interface with `execute()` and `undo()` methods. All commands are orchestrated by a central service that manages execution order, coordinates rollbacks automatically on failure, and ensures each step is reversible.
-
-This orchestration logic resides in the `application/` layer, with individual commands organized under `application/commands/` and orchestration/rollback handled by dedicated services.
+- `core/`: Contains timeless, pure logic. May reference types from other layers for boundaries or interoperability.
+- `application/`: Implements use cases, coordinates tasks, manages rollbacks, and mediates between core and infrastructure.
+- `infrastructure/`: Handles side effects such as file I/O, Git operations, and CLI interactions.
+- `shared/`: Provides stateless utilities, error definitions, typed results, and constants.
 
 ## Operating Principles
 
-- Designed to be run with Bun as the runtime, Node.js is not supported.
-- Command line arguments are parsed using the `commander` library for a consistent CLI experience.
-- File Configuration is loaded via `c12` with support for file-based (`firefly.config.ts`) configuration.
-- CLI arguments and file-based configuration are merged into a single unified configuration object.
-- All error handling should use `neverthrow`; avoid throwing exceptions in flow logic.
-- Version bumping uses `conventional-recommended-bump` but supports for manual choosing of versions.
-- Changelogs are generated with `git-cliff`; uses `smol-toml` to parse its configuration.
-- The release process automates versioning, changelog, Git tagging, and GitHub releases.
+- Firefly is **Bun-only**; Node.js is not supported. Use Bun-native APIs where possible.
+- CLI arguments (via [`commander`](https://github.com/tj/commander.js)) and file-based configuration (via [`c12`](https://github.com/unjs/c12)) are unified. CLI values override configuration files when both are present.
+- Changelog generation uses [`git-cliff`](https://github.com/orhun/git-cliff). Parse its TOML config with [`smol-toml`](https://github.com/akheron/smol-toml).
+- Use `conventional-recommended-bump` to infer version changes from commit history. Also support manual version selection.
+- Handle errors exclusively through [`neverthrow`](https://github.com/supermacro/neverthrow). No `throw` in coordinated flows.
 
-## Class and Function Design
+## Design Guidelines
 
-- **Encapsulation First**: Group related logic using classes. Prefer composition over inheritance.
-- **Short & Focused Methods**: Keep methods concise (≤ 30 lines when practical) and single-purpose.
-- **Explicit Naming**: Prioritize clarity over brevity. Avoid cryptic abbreviations.
-- **Guard Clauses**: Use early returns to reduce nesting and improve readability.
-- **Pure Core Logic**: Functions in `core/` should be deterministic and side-effect-free when possible.
+### Class & Function Design
+
+* **Group by Behavior, not by Type**: Co-locate related behaviors rather than abstract by class/interface layers.
+* **Small Units**: Prefer functions under 30 LOC. Keep methods single-responsibility and easy to test.
+* **Favor Composition**: Model behavior through services, not inheritance trees.
+* **Use Guard Clauses**: Reduce nesting by checking edge cases early and returning.
 
 ## Development Standards
 
-- Code explains how, comments explain why. No overt commenting of obvious code.
-- Use TypeScript's type system effectively to avoid unnecessary runtime checks.
-- Use defensive programming: validate and check types at boundaries (e.g., parsing config, external data).
-- Use `neverthrow` for almost all error handling, if error handling is needed.
-- Use `zod` for schema validation where applicable, especially for configuration.
+### Functional Boundaries
+
+- Every module should have a **clear boundary**: know what it owns, what it exposes, and what it depends on.
+- Do not write "god files" that accumulate unrelated logic or touch too many layers.
+- Avoid circular dependencies, excessive indirection, and nesting more than 3 levels deep.
+
+### Type Safety
+
+* Use `zod`, and `strict interfaces` at integration points.
+- Internal modules should assume validated data and rely on the type system, not runtime checks.
+
+### Result Handling
+
+- Use `FireflyResult<T>` and `AsyncFireflyResult<T>` types from `shared/utils/result.ts`, derived from `neverthrow` for consistent error handling and result propagation.
+    - Use `FireflyResult` for synchronous results, when the value is immediately available and does not require awaiting.
+    - Use `AsyncFireflyResult` for asynchronous results, when the value is produced by an async operation and you must await it before accessing the value or error.
+- Always map errors to a descriptive domain-specific `FireflyError`.
+- Never mix `throw` and `try/catch` with `Result` in the same code path.
+- DONT USE `trycatch` WHATSOVER, PREFER `neverhrow` RESULT HANDLING.
+
+## Coding Principles & Patterns
+
+- Limit the use of comments. Code should read like prose. Code explains how, comments explain why.
+- Use defensive programming: validate and check types at boundaries.
+- Define interfaces that do only what is needed. Avoid over-abstraction or "god interfaces".
+- Avoid mutating state unless explicitly modeling it. Prefer copying or producing new values.
+- Structure for navigability. Group related files by feature, not just layer.
