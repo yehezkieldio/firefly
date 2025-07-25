@@ -1,66 +1,133 @@
 import { Bumper, type BumperRecommendation } from "conventional-recommended-bump";
-import { ResultAsync } from "neverthrow";
-import type { Commit } from "#/core/domain/commit";
+import { err, ok } from "neverthrow";
 import { CommitAnalyzerService } from "#/core/services/commit-analyzer.service";
-import { CONVENTIONAL_BUMP_OPTIONS } from "#/shared/constants/conventional-bump-options";
-import { FireflyError } from "#/shared/utils/error";
+import type { Commit } from "#/shared/types/commit.type";
+import { VersionInferenceError } from "#/shared/utils/error.util";
+import { logger } from "#/shared/utils/logger.util";
+import type { AsyncFireflyResult, FireflyResult } from "#/shared/utils/result.util";
+
+interface ConventionalBumperConfig {
+    additionalCommitTypes?: {
+        major?: string[];
+        minor?: string[];
+        patch?: string[];
+    };
+    scopeRules?: Record<string, "major" | "minor" | "patch">;
+    customBreakingPatterns?: RegExp[];
+}
 
 export class ConventionalBumperAdapter {
     private readonly bumper: Bumper;
     private readonly analyzer: CommitAnalyzerService;
     private readonly basePath: string;
+    private readonly config: ConventionalBumperConfig;
 
-    constructor(basePath: string = process.cwd(), analyzer: CommitAnalyzerService = new CommitAnalyzerService()) {
+    private static readonly HEADER_PATTERN = /^(\w*)(?:\((.*)\))?: (.*)$/;
+    private static readonly REVERT_PATTERN = /^Revert "(.+)"\s*\[([a-f0-9]+)\]$/;
+    private static readonly BREAKING_HEADER_PATTERN = /^(\w*)(?:\((.*)\))?!: (.*)$/;
+
+    constructor(
+        basePath: string = process.cwd(),
+        config: ConventionalBumperConfig = {},
+        analyzer?: CommitAnalyzerService
+    ) {
         this.basePath = basePath;
-        this.analyzer = analyzer;
+        this.config = config;
+        this.analyzer = analyzer ?? this.createEnhancedAnalyzer();
         this.bumper = new Bumper();
     }
 
-    getVersionRecommendation(): ResultAsync<BumperRecommendation, FireflyError> {
-        return ResultAsync.fromPromise(
-            this.retrieveAndAnalyzeCommits(),
-            (error) =>
-                new FireflyError(
-                    `Failed to get version recommendation: ${error instanceof Error ? error.message : error}`,
-                    "VERSION_RECOMMENDATION_ERROR"
-                )
-        );
+    private createEnhancedAnalyzer(): CommitAnalyzerService {
+        const commitConfig = {
+            major: ["revert", ...(this.config.additionalCommitTypes?.major ?? [])],
+            minor: ["feat", "feature", ...(this.config.additionalCommitTypes?.minor ?? [])],
+            patch: [
+                "fix",
+                "perf",
+                "refactor",
+                "style",
+                "test",
+                "build",
+                "ci",
+                "chore",
+                "docs",
+                "security",
+                ...(this.config.additionalCommitTypes?.patch ?? []),
+            ],
+            scopeRules: {
+                deps: "patch" as const,
+                security: "patch" as const,
+                api: "minor" as const,
+                breaking: "major" as const,
+                ...this.config.scopeRules,
+            },
+        };
+
+        return new CommitAnalyzerService(commitConfig);
     }
 
-    private async retrieveAndAnalyzeCommits(): Promise<BumperRecommendation> {
+    private get conventionalBumpOptions() {
+        return {
+            headerPattern: ConventionalBumperAdapter.HEADER_PATTERN,
+            headerCorrespondence: ["type", "scope", "subject"],
+            noteKeywords: ["BREAKING CHANGE", "BREAKING-CHANGE"],
+            revertPattern: ConventionalBumperAdapter.REVERT_PATTERN,
+            revertCorrespondence: ["header", "hash"],
+            breakingHeaderPattern: ConventionalBumperAdapter.BREAKING_HEADER_PATTERN,
+        };
+    }
+
+    async getVersionRecommendation(): Promise<AsyncFireflyResult<BumperRecommendation>> {
+        logger.verbose("ConventionalBumperAdapter: Getting version recommendation from commit history...");
+        const result = await this.retrieveAndAnalyzeCommits();
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        const recommendation = result.value;
+        return ok(recommendation);
+    }
+
+    private async retrieveAndAnalyzeCommits(): Promise<FireflyResult<BumperRecommendation>> {
+        logger.verbose("ConventionalBumperAdapter: Retrieving and analyzing commits...");
         try {
             const recommendation = await this.bumper
-                .commits({ path: this.basePath }, CONVENTIONAL_BUMP_OPTIONS)
+                .commits({ path: this.basePath }, this.conventionalBumpOptions)
                 .bump((commits: Commit[]) => this.analyzeCommitsWithErrorHandling(commits));
 
-            return this.validateRecommendation(recommendation);
+            logger.verbose("ConventionalBumperAdapter: Commits analyzed, validating recommendation...");
+            const validationResult = this.validateRecommendation(recommendation);
+            if (validationResult.isErr()) {
+                return err(validationResult.error);
+            }
+
+            logger.verbose("ConventionalBumperAdapter: Recommendation validated successfully.");
+            return ok(validationResult.value);
         } catch (error) {
-            throw new FireflyError(
-                `Commit retrieval failed: ${error instanceof Error ? error.message : error}`,
-                "COMMIT_RETRIEVAL_ERROR"
-            );
+            return err(new VersionInferenceError("Failed to retrieve and analyze commits", error as Error));
         }
     }
 
     private analyzeCommitsWithErrorHandling(commits: Commit[]): BumperRecommendation {
+        logger.verbose("ConventionalBumperAdapter: Analyzing commits for version recommendation...");
         const analysisResult = this.analyzer.analyzeCommits(commits);
 
         if (analysisResult.isErr()) {
             throw analysisResult.error;
         }
 
+        logger.verbose("ConventionalBumperAdapter: Commits analyzed successfully.");
         return analysisResult.value;
     }
 
-    private validateRecommendation(recommendation: unknown): BumperRecommendation {
+    private validateRecommendation(recommendation: unknown): FireflyResult<BumperRecommendation> {
+        logger.verbose("ConventionalBumperAdapter: Validating version recommendation object...");
         if (!this.isValidRecommendation(recommendation)) {
-            throw new FireflyError(
-                "Invalid recommendation structure received from conventional bump analysis",
-                "INVALID_RECOMMENDATION_STRUCTURE"
-            );
+            return err(new VersionInferenceError("Invalid recommendation format"));
         }
 
-        return recommendation as BumperRecommendation;
+        logger.verbose("ConventionalBumperAdapter: Recommendation object is valid.");
+        return ok(recommendation as BumperRecommendation);
     }
 
     private isValidRecommendation(obj: unknown): obj is BumperRecommendation {
@@ -72,6 +139,8 @@ export class ConventionalBumperAdapter {
 
         return (
             typeof recommendation.level === "number" &&
+            recommendation.level >= 0 &&
+            recommendation.level <= 2 &&
             typeof recommendation.releaseType === "string" &&
             Array.isArray(recommendation.commits) &&
             typeof recommendation.reason === "string"

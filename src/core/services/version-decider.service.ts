@@ -1,56 +1,138 @@
 import type { BumperRecommendation } from "conventional-recommended-bump";
 import { err, ok } from "neverthrow";
 import type { ReleaseType } from "semver";
+import semver from "semver";
 import { Version } from "#/core/domain/version";
-import { SemverService } from "#/core/services/semver.service";
-import type { PreReleaseBase } from "#/infrastructure/config/schema";
-import { VersionError } from "#/shared/utils/error";
-import type { FireflyResult } from "#/shared/utils/result";
+import { SemverService, type VersionChoicesArgs } from "#/core/services/semver.service";
+import { TRANSITION_KEYWORDS } from "#/shared/utils/constants";
+import { VersionInferenceError } from "#/shared/utils/error.util";
+import type { FireflyResult } from "#/shared/utils/result.util";
+
+interface PreReleaseContext {
+    isCurrentPreRelease: boolean;
+    preReleaseIdentifier?: string;
+    hasStableTransition: boolean;
+}
 
 export class VersionDeciderService {
-    private readonly currentVersion: Version;
-    private readonly preReleaseId?: string;
-    private readonly preReleaseBase?: PreReleaseBase;
     private readonly bumper: SemverService;
 
-    constructor(currentVersion: string, preReleaseId?: string, preReleaseBase?: PreReleaseBase) {
-        this.currentVersion = new Version(currentVersion);
-        this.preReleaseId = preReleaseId;
-        this.preReleaseBase = preReleaseBase;
+    constructor() {
         this.bumper = new SemverService();
     }
 
-    decideNextVersion(releaseType: ReleaseType, recommendation: BumperRecommendation): FireflyResult<string> {
-        try {
-            const nextVersion =
-                releaseType === "prerelease"
-                    ? this.createPreReleaseVersion()
-                    : this.createStandardReleaseVersion(recommendation);
+    decideNextVersion(options: VersionChoicesArgs, recommendation?: BumperRecommendation): FireflyResult<string> {
+        const preReleaseContext = this.analyzePreReleaseContext(options.currentVersion, recommendation);
 
-            return nextVersion;
-        } catch (error) {
-            return err(
-                new VersionError(`Failed to decide next version: ${error instanceof Error ? error.message : error}`)
-            );
-        }
-    }
-
-    decideIndependently(releaseType: ReleaseType): FireflyResult<string> {
-        const nextVersion = this.bumpVersion(releaseType);
-        if (nextVersion.isErr()) {
-            return err(nextVersion.error);
+        // Handle explicit prerelease request
+        if (options.releaseType === "prerelease") {
+            return this.handlePreReleaseRequest(options, preReleaseContext);
         }
 
-        return ok(nextVersion.value);
+        // Handle transition from pre-release to stable
+        if (preReleaseContext.isCurrentPreRelease && preReleaseContext.hasStableTransition) {
+            return this.handlePreReleaseToStableTransition(options, recommendation);
+        }
+
+        // Handle recommendation-based versioning
+        if (recommendation) {
+            return this.createStandardReleaseVersion(options, recommendation, preReleaseContext);
+        }
+
+        // Default to standard bump
+        return this.bumpVersion(options);
     }
 
-    private createStandardReleaseVersion(recommendation: BumperRecommendation): FireflyResult<string> {
+    private analyzePreReleaseContext(currentVersion: string, recommendation?: BumperRecommendation): PreReleaseContext {
+        const isCurrentPreRelease = !!semver.prerelease(currentVersion);
+        const preReleaseIdentifier = isCurrentPreRelease
+            ? (semver.prerelease(currentVersion)?.[0] as string)
+            : undefined;
+
+        // Check if recommendation indicates stable transition
+        const hasStableTransition = this.detectStableTransition(recommendation);
+
+        return {
+            isCurrentPreRelease,
+            preReleaseIdentifier,
+            hasStableTransition,
+        };
+    }
+
+    private detectStableTransition(recommendation?: BumperRecommendation): boolean {
+        if (!recommendation) return false;
+
+        const reason = recommendation.reason.toLowerCase();
+        const transitionKeywords = TRANSITION_KEYWORDS;
+
+        return transitionKeywords.some((keyword) => reason.includes(keyword));
+    }
+
+    private handlePreReleaseRequest(options: VersionChoicesArgs, context: PreReleaseContext): FireflyResult<string> {
+        // If transitioning from stable to prerelease, need to specify pre-release type
+        if (!(context.isCurrentPreRelease || options.preReleaseId)) {
+            const modifiedOptions = {
+                ...options,
+                preReleaseId: options.preReleaseId || "alpha",
+                releaseType: "prerelease" as ReleaseType,
+            };
+            return this.bumpVersion(modifiedOptions);
+        }
+
+        return this.bumpVersion({
+            ...options,
+            releaseType: "prerelease",
+        });
+    }
+
+    private handlePreReleaseToStableTransition(
+        options: VersionChoicesArgs,
+        recommendation?: BumperRecommendation
+    ): FireflyResult<string> {
+        if (!recommendation) {
+            return err(new VersionInferenceError("Cannot transition to stable without recommendation"));
+        }
+
+        const currentVersion = Version.create(options.currentVersion);
+        if (currentVersion.isErr()) {
+            return err(currentVersion.error);
+        }
+
+        const baseVersion =
+            semver.major(options.currentVersion) +
+            "." +
+            semver.minor(options.currentVersion) +
+            "." +
+            semver.patch(options.currentVersion);
+
         const releaseType = this.mapRecommendationToReleaseType(recommendation.level);
-        return this.bumpVersion(releaseType);
+        const stableVersion = semver.inc(baseVersion, releaseType);
+
+        if (!stableVersion) {
+            return err(new VersionInferenceError(`Failed to create stable version from ${baseVersion}`));
+        }
+
+        return ok(stableVersion);
     }
 
-    private createPreReleaseVersion(): FireflyResult<string> {
-        return this.bumpVersion("prerelease");
+    private createStandardReleaseVersion(
+        options: VersionChoicesArgs,
+        recommendation: BumperRecommendation,
+        context: PreReleaseContext
+    ): FireflyResult<string> {
+        const releaseType = this.mapRecommendationToReleaseType(recommendation.level);
+
+        // If currently in prerelease and no explicit transition, continue prerelease
+        if (context.isCurrentPreRelease && !context.hasStableTransition) {
+            const preReleaseOptions = {
+                ...options,
+                releaseType: "prerelease" as ReleaseType,
+                preReleaseId: options.preReleaseId || context.preReleaseIdentifier,
+            };
+            return this.bumpVersion(preReleaseOptions);
+        }
+
+        return this.bumpVersion({ ...options, releaseType });
     }
 
     private mapRecommendationToReleaseType(level: number): ReleaseType {
@@ -63,18 +145,24 @@ export class VersionDeciderService {
         return levelMapping[level] ?? "patch";
     }
 
-    private bumpVersion(increment: ReleaseType): FireflyResult<string> {
-        try {
-            const newVersion = this.bumper.bump({
-                current: this.currentVersion,
-                increment,
-                preReleaseId: this.preReleaseId,
-                preReleaseBase: this.preReleaseBase,
-            });
+    private bumpVersion(options: VersionChoicesArgs): FireflyResult<string> {
+        const version = Version.create(options.currentVersion);
 
-            return ok(newVersion.toString());
-        } catch (error) {
-            return err(new VersionError(`Failed to bump version: ${error instanceof Error ? error.message : error}`));
+        if (version.isErr()) {
+            return err(new VersionInferenceError(`Invalid current version: ${options.currentVersion}`, version.error));
         }
+
+        const newVersion = this.bumper.bump({
+            currentVersion: version.value,
+            releaseType: options.releaseType,
+            preReleaseId: options.preReleaseId,
+            preReleaseBase: options.preReleaseBase,
+        });
+
+        if (newVersion.isErr()) {
+            return err(newVersion.error);
+        }
+
+        return newVersion.map((v) => v.toString());
     }
 }

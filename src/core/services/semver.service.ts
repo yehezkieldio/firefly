@@ -1,37 +1,42 @@
+import { err } from "neverthrow";
 import type { ReleaseType } from "semver";
 import type { Version } from "#/core/domain/version";
 import type { PreReleaseBase } from "#/infrastructure/config/schema";
-import { VersionError } from "#/shared/utils/error";
+import { VersionError } from "#/shared/utils/error.util";
+import type { FireflyResult } from "#/shared/utils/result.util";
 
 export interface BumpVersionOptions {
-    current: Version;
-    increment: ReleaseType;
+    currentVersion: Version;
+    releaseType?: ReleaseType;
     preReleaseId?: string;
     preReleaseBase?: PreReleaseBase;
 }
 
-export class SemverService {
-    bump(options: BumpVersionOptions): Version {
-        const { current, increment, preReleaseId, preReleaseBase } = options;
+export type VersionChoicesArgs = Omit<BumpVersionOptions, "currentVersion"> & {
+    currentVersion: string;
+};
 
-        switch (increment) {
+export class SemverService {
+    bump(options: BumpVersionOptions): FireflyResult<Version> {
+        const { currentVersion, releaseType, preReleaseId, preReleaseBase } = options;
+
+        switch (releaseType) {
             case "major":
             case "minor":
             case "patch":
-                return current.bump(increment);
+                return currentVersion.bump(releaseType);
 
             case "premajor":
-                return current.bumpPremajor(preReleaseId, preReleaseBase);
+                return currentVersion.bumpPremajor(preReleaseId, preReleaseBase);
             case "preminor":
-                return current.bumpPreminor(preReleaseId, preReleaseBase);
+                return currentVersion.bumpPreminor(preReleaseId, preReleaseBase);
             case "prepatch":
-                return current.bumpPrepatch(preReleaseId, preReleaseBase);
+                return currentVersion.bumpPrepatch(preReleaseId, preReleaseBase);
             case "prerelease":
-                return current.bumpPrerelease(preReleaseId, preReleaseBase);
+                return currentVersion.bumpPrerelease(preReleaseId, preReleaseBase);
 
             default: {
-                const _ = increment;
-                throw new VersionError(`Unhandled semver increment: ${increment}`);
+                return err(new VersionError(`Unhandled semver increment: ${releaseType}`));
             }
         }
     }

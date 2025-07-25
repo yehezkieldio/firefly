@@ -6,7 +6,6 @@
     "editor.defaultFormatter": "redhat.vscode-yaml",
     "editor.tabSize": 4
   },
-  "chat.tools.autoApprove": true,
   "chat.agent.maxRequests": 100,
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",
@@ -15,6 +14,13 @@
   "editor.formatOnPaste": false,
   "editor.formatOnSave": true,
   "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "assert",
+    "node:assert"
+  ],
+  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
+    "^(node:)?assert$"
+  ],
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "typescript.tsdk": "node_modules/typescript/lib"
 }

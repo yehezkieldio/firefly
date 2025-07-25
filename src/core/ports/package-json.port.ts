@@ -1,7 +1,8 @@
 import z from "zod";
-import type { FireflyResult } from "#/shared/utils/result";
+import type { AsyncFireflyResult } from "#/shared/utils/result.util";
 
 export const PackageJsonSchema = z
+    // Minimal structure of package.json as we don't need the full schema
     .object({
         name: z.string().optional(),
         version: z.string().optional(),
@@ -11,6 +12,6 @@ export const PackageJsonSchema = z
 export type PackageJson = z.infer<typeof PackageJsonSchema>;
 
 export interface PackageJsonPort {
-    read(): Promise<FireflyResult<PackageJson>>;
-    updateVersion(version: string): Promise<FireflyResult<void>>;
+    read(): Promise<AsyncFireflyResult<PackageJson>>;
+    updateVersion(version: string, dryRun?: boolean): Promise<AsyncFireflyResult<void>>;
 }

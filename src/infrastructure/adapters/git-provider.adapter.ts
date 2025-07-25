@@ -1,73 +1,247 @@
-import { err, okAsync, ResultAsync } from "neverthrow";
-import type { GitProviderPort, Repository } from "#/core/ports/git-provider.port";
-import { RepositorySchema } from "#/core/ports/git-provider.port";
-import { CommandExecutionError } from "#/shared/utils/error";
-import type { AsyncFireflyResult } from "#/shared/utils/result";
+import { err, ok, okAsync, ResultAsync } from "neverthrow";
+import { type GitProviderPort, type Repository, RepositorySchema } from "#/core/ports/git-provider.port";
+import { REPOSITORY_PATTERNS } from "#/shared/utils/constants";
+import { ConfigurationError, ProcessExecutionError } from "#/shared/utils/error.util";
+import { logger } from "#/shared/utils/logger.util";
+import type { AsyncFireflyResult, FireflyResult } from "#/shared/utils/result.util";
 
 export class GitProviderAdapter implements GitProviderPort {
-    private static readonly REPOSITORY_PATTERNS = [
-        /^https:\/\/github\.com\/([^/]+)\/([^/.]+?)(?:\.git)?$/,
-        /^git@github\.com:([^/]+)\/([^/.]+?)(?:\.git)?$/,
-        /^https:\/\/gitlab\.com\/([^/]+)\/([^/.]+?)(?:\.git)?$/,
-        /^git@gitlab\.com:([^/]+)\/([^/.]+?)(?:\.git)?$/,
-        /^https?:\/\/[^/]+\/([^/]+)\/([^/.]+?)(?:\.git)?$/,
-        /^git@[^:]+:([^/]+)\/([^/.]+?)(?:\.git)?$/,
-    ] as const;
+    private static instance: GitProviderAdapter | null = null;
 
-    async stageChanges(): Promise<AsyncFireflyResult<void>> {
+    private constructor() {}
+
+    static getInstance(): GitProviderAdapter {
+        if (!GitProviderAdapter.instance) {
+            GitProviderAdapter.instance = new GitProviderAdapter();
+        }
+        return GitProviderAdapter.instance;
+    }
+
+    async stageChanges(): Promise<FireflyResult<void>> {
         const result = await this.exec(["add", "."]);
-        return result.isErr()
-            ? err(new CommandExecutionError("Failed to stage changes", result.error))
-            : okAsync(undefined);
-    }
 
-    async createCommit(message: string): Promise<AsyncFireflyResult<void>> {
-        if (!message?.trim()) {
-            return err(new CommandExecutionError("Commit message cannot be empty"));
+        if (result.isErr()) {
+            return err(result.error);
         }
 
-        const result = await this.exec(["commit", "-m", message]);
-        return result.isErr()
-            ? err(new CommandExecutionError("Failed to create commit", result.error))
-            : okAsync(undefined);
+        return ok(undefined);
     }
 
-    async resetLastCommit(): Promise<AsyncFireflyResult<void>> {
+    async stageFile(path: string, dryRun?: boolean): Promise<FireflyResult<void>> {
+        if (!path.trim()) {
+            return err(new ProcessExecutionError("File path cannot be empty"));
+        }
+
+        const result = await this.exec(["add", path], dryRun);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        return ok(undefined);
+    }
+
+    async pushChanges(dryRun?: boolean): Promise<FireflyResult<void>> {
+        const result = await this.exec(["push"], dryRun);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        return ok(undefined);
+    }
+
+    async pushTags(dryRun?: boolean): Promise<FireflyResult<void>> {
+        const result = await this.exec(["push", "--tags"], dryRun);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        return ok(undefined);
+    }
+
+    async pushFollowTags(dryRun?: boolean): Promise<FireflyResult<void>> {
+        const result = await this.exec(["push", "--follow-tags"], dryRun);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        return ok(undefined);
+    }
+
+    async rollbackPushedTags(tagName: string): Promise<FireflyResult<void>> {
+        const deleteResult = await this.deleteLocalTag(tagName);
+        if (deleteResult.isErr()) {
+            return err(deleteResult.error);
+        }
+
+        const pushResult = await this.exec(["push", "origin", "--delete", tagName]);
+        if (pushResult.isErr()) {
+            return err(pushResult.error);
+        }
+
+        return ok(undefined);
+    }
+
+    async rollbackPushedCommit(branch: string): Promise<FireflyResult<void>> {
+        if (!branch.trim()) {
+            return err(new ProcessExecutionError("Branch name cannot be empty"));
+        }
+
+        const previousCommitResult = await this.exec(["rev-parse", "HEAD~1"]);
+        if (previousCommitResult.isErr()) {
+            return err(previousCommitResult.error);
+        }
+
+        const previousCommit = previousCommitResult.value.trim();
+        if (!previousCommit) {
+            return err(new ProcessExecutionError("Failed to get previous commit hash"));
+        }
+
+        const currentBranchResult = await this.exec(["rev-parse", "--abbrev-ref", "HEAD"]);
+        if (currentBranchResult.isErr()) {
+            return err(currentBranchResult.error);
+        }
+
+        const currentBranch = currentBranchResult.value.trim();
+        if (!currentBranch) {
+            return err(new ProcessExecutionError("Failed to get current branch name"));
+        }
+
+        const pushResult = await this.exec(["push", "--force", "origin", `${previousCommit}:${branch}`]);
+        if (pushResult.isErr()) {
+            return err(pushResult.error);
+        }
+
+        return ok(undefined);
+    }
+
+    async getFilteredModifiedFiles(dryRun?: boolean): Promise<FireflyResult<string[]>> {
+        if (dryRun) {
+            return ok(["package.json", "CHANGELOG.md"]);
+        }
+
+        const result = await this.exec(["status", "--porcelain=v1"], dryRun);
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        const lines = result.value.split("\n").filter((line) => line.trim() !== "");
+        const modifiedFiles: string[] = [];
+
+        for (const line of lines) {
+            const statusPrefix = line.substring(0, 2);
+            const filePath = line.substring(3).trim();
+
+            if (
+                statusPrefix.includes("M") || // Modified (staged or unstaged)
+                statusPrefix.includes("A") || // Added (staged, but represents a "change")
+                statusPrefix.includes("D") || // Deleted (staged, but represents a "change")
+                statusPrefix === "??" // Untracked
+            ) {
+                modifiedFiles.push(filePath);
+            }
+        }
+
+        const filtered = modifiedFiles.filter((file) => file === "CHANGELOG.md" || file === "package.json");
+
+        if (filtered.length === 0) {
+            return err(new ProcessExecutionError("No relevant modified files found"));
+        }
+
+        return ok(filtered);
+    }
+
+    async createCommit(message: string, dryRun?: boolean): Promise<FireflyResult<void>> {
+        if (!message.trim()) {
+            return err(new ProcessExecutionError("Commit message cannot be empty"));
+        }
+
+        const canSignResult = await this.canSignCommit();
+        if (canSignResult.isErr()) {
+            return err(canSignResult.error);
+        }
+        const shouldSign = canSignResult.value;
+
+        const args = ["commit", "-m", message];
+        if (shouldSign) {
+            args.push("-S");
+        }
+
+        const result = await this.exec(args, dryRun);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        return ok(undefined);
+    }
+
+    private async canSignCommit(): Promise<FireflyResult<boolean>> {
+        const gpgSignResult = await this.getConfigWithFallback("commit.gpgSign");
+        if (gpgSignResult.isErr()) {
+            return err(gpgSignResult.error);
+        }
+
+        const signingKeyResult = await this.getConfigWithFallback("user.signingkey");
+        if (signingKeyResult.isErr()) {
+            return err(signingKeyResult.error);
+        }
+
+        if (!(gpgSignResult.value.trim() && signingKeyResult.value.trim())) {
+            return ok(false);
+        }
+
+        return ok(gpgSignResult.value.trim() === "true");
+    }
+
+    async resetLastCommit(): Promise<FireflyResult<void>> {
         const result = await this.exec(["reset", "--mixed", "HEAD~1"]);
-        return result.isErr()
-            ? err(new CommandExecutionError("Failed to reset last commit", result.error))
-            : okAsync(undefined);
-    }
 
-    async restoreFileToHead(pathToFile: string): Promise<AsyncFireflyResult<void>> {
-        if (!pathToFile?.trim()) {
-            return err(new CommandExecutionError("File path cannot be empty"));
+        if (result.isErr()) {
+            return err(result.error);
         }
 
+        return ok(undefined);
+    }
+
+    async restoreFileToHead(pathToFile: string): Promise<FireflyResult<void>> {
         const result = await this.exec(["checkout", "HEAD", "--", pathToFile]);
-        return result.isErr()
-            ? err(new CommandExecutionError(`Failed to checkout file: ${pathToFile}`, result.error))
-            : okAsync(undefined);
-    }
 
-    async createTag(tag: string, message?: string): Promise<AsyncFireflyResult<void>> {
-        if (!tag?.trim()) {
-            return err(new CommandExecutionError("Tag name cannot be empty"));
+        if (result.isErr()) {
+            return err(result.error);
         }
 
+        return ok(undefined);
+    }
+
+    async createTag(tag: string, message?: string, dryRun?: boolean): Promise<FireflyResult<void>> {
         const canSignResult = await this.canSignTag();
         if (canSignResult.isErr()) {
             return err(canSignResult.error);
         }
 
-        const args = this.buildTagArgs(tag, canSignResult.value, message);
-        const execResult = await this.exec(args);
+        const shouldSign = canSignResult.value;
 
-        if (execResult.isErr()) {
-            return err(new CommandExecutionError("Failed to create tag", execResult.error));
+        const tagExistsResult = await this.checkIfTagExists(tag, dryRun);
+        if (tagExistsResult.isErr()) {
+            return err(tagExistsResult.error);
         }
 
-        return this.verifyTagCreation(tag);
+        if (tagExistsResult.value) {
+            return err(new ProcessExecutionError(`Tag '${tag}' already exists`));
+        }
+
+        const args = this.buildTagArgs(tag, shouldSign, message);
+        const result = await this.exec(args, dryRun);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        return ok(undefined);
     }
 
     private buildTagArgs(tag: string, shouldSign: boolean, message?: string): string[] {
@@ -84,69 +258,90 @@ export class GitProviderAdapter implements GitProviderPort {
         return args;
     }
 
-    private async verifyTagCreation(tag: string): Promise<AsyncFireflyResult<void>> {
-        const tagExists = await this.checkIfTagExists(tag);
-
-        if (tagExists.isErr()) {
-            return err(tagExists.error);
+    private async canSignTag(): Promise<FireflyResult<boolean>> {
+        const result = await this.exec(["tag", "-l"]);
+        if (result.isErr()) {
+            return err(result.error);
         }
 
-        return tagExists.value
-            ? okAsync(undefined)
-            : err(new CommandExecutionError(`Tag ${tag} was not created successfully`));
+        const gpgSignResult = await this.getConfigWithFallback("tag.gpgSign");
+        if (gpgSignResult.isErr()) {
+            return err(gpgSignResult.error);
+        }
+
+        const signingKeyResult = await this.getConfigWithFallback("user.signingkey");
+        if (signingKeyResult.isErr()) {
+            return err(signingKeyResult.error);
+        }
+
+        if (!(gpgSignResult.value.trim() && signingKeyResult.value.trim())) {
+            return ok(false);
+        }
+
+        return ok(gpgSignResult.value.trim() === "true");
     }
 
-    private async canSignTag(): Promise<AsyncFireflyResult<boolean>> {
-        const result = await this.exec(["config", "--get", "user.signingkey"]);
+    private async getConfigWithFallback(key: string): Promise<FireflyResult<string>> {
+        const localResult = await this.exec(["config", "--get", key]);
+        if (localResult.isErr()) {
+            return err(localResult.error);
+        }
+        const localValue = localResult.value.trim();
+        if (localValue) {
+            return ok(localValue);
+        }
+
+        const globalResult = await this.exec(["config", "--get", "--global", key]);
+        if (globalResult.isErr()) {
+            return err(globalResult.error);
+        }
+
+        return ok(globalResult.value.trim());
+    }
+
+    private async checkIfTagExists(tag: string, dryRun?: boolean): Promise<FireflyResult<boolean>> {
+        const result = await this.exec(["tag", "-l", tag], dryRun);
 
         if (result.isErr()) {
-            return err(new CommandExecutionError("Failed to check if tag signing is enabled", result.error));
+            return err(result.error);
         }
 
-        const isEnabled = result.value.trim().length > 0;
-        return okAsync(isEnabled);
+        return ok(result.value.trim() === tag);
     }
 
-    private async checkIfTagExists(tag: string): Promise<AsyncFireflyResult<boolean>> {
-        const result = await this.exec(["tag", "-l", tag]);
-
-        if (result.isErr()) {
-            return err(new CommandExecutionError("Failed to check if tag exists", result.error));
-        }
-
-        return okAsync(result.value.trim() !== "");
-    }
-
-    async deleteLocalTag(tag: string): Promise<AsyncFireflyResult<void>> {
-        if (!tag?.trim()) {
-            return err(new CommandExecutionError("Tag name cannot be empty"));
-        }
-
+    async deleteLocalTag(tag: string): Promise<FireflyResult<void>> {
         const result = await this.exec(["tag", "-d", tag]);
-        return result.isErr()
-            ? err(new CommandExecutionError(`Failed to delete local tag: ${tag}`, result.error))
-            : okAsync(undefined);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        return ok(undefined);
     }
 
-    async isInsideGitRepository(): Promise<AsyncFireflyResult<boolean>> {
+    async isInsideGitRepository(): Promise<FireflyResult<boolean>> {
         const result = await this.exec(["rev-parse", "--is-inside-work-tree"]);
 
         if (result.isErr()) {
-            return err(new CommandExecutionError("Failed to check if inside a git repository", result.error));
+            return err(result.error);
         }
 
-        return okAsync(result.value.trim() === "true");
+        return ok(result.value.trim() === "true");
     }
 
-    async getRootDirection(): Promise<AsyncFireflyResult<string>> {
+    async getRootDirection(): Promise<FireflyResult<string>> {
         const result = await this.exec(["rev-parse", "--show-prefix"]);
 
         if (result.isErr()) {
-            return err(new CommandExecutionError("Failed to get root directory", result.error));
+            return err(result.error);
         }
 
-        const path = result.value.trim();
-        return okAsync(this.buildRootPath(path));
+        const rootPath = this.buildRootPath(result.value.trim());
+        if (!rootPath) {
+            return err(new ProcessExecutionError("Failed to determine root directory"));
+        }
+
+        return ok(rootPath);
     }
 
     private buildRootPath(path: string): string {
@@ -162,56 +357,143 @@ export class GitProviderAdapter implements GitProviderPort {
             .join("/");
     }
 
-    async getRepositoryUrl(): Promise<AsyncFireflyResult<string>> {
+    async getRepositoryUrl(): Promise<FireflyResult<string>> {
         const result = await this.exec(["remote", "get-url", "origin"]);
 
         if (result.isErr()) {
-            return err(new CommandExecutionError("Failed to get repository URL", result.error));
+            return err(result.error);
         }
 
         const url = result.value.trim();
         if (!url) {
-            return err(new CommandExecutionError("Repository URL is empty"));
+            return err(new ProcessExecutionError("Failed to get repository URL"));
         }
 
-        return okAsync(url);
+        return ok(url);
     }
 
-    async getRepository(): Promise<AsyncFireflyResult<Repository>> {
-        const urlResult = await this.getRepositoryUrl();
-        if (urlResult.isErr()) {
-            return err(urlResult.error);
-        }
-
-        const repository = this.extractRepository(urlResult.value);
-        return repository
-            ? okAsync(repository)
-            : err(new CommandExecutionError(`Failed to extract repository from URL: ${urlResult.value}`));
-    }
-
-    extractRepository(url: string): Repository | null {
+    extractRepository(url: string): FireflyResult<Repository> {
         if (!url?.trim()) {
-            return null;
+            return err(new ConfigurationError("Repository URL is empty"));
         }
 
-        for (const pattern of GitProviderAdapter.REPOSITORY_PATTERNS) {
+        for (const pattern of REPOSITORY_PATTERNS) {
             const match = url.match(pattern);
             if (match?.[1] && match?.[2]) {
-                try {
-                    return RepositorySchema.parse({
-                        owner: match[1],
-                        repository: match[2],
-                    });
-                } catch {
-                    return null;
+                const parseResult = RepositorySchema.safeParse({
+                    owner: match[1],
+                    repository: match[2],
+                });
+                if (parseResult.success) {
+                    return ok(parseResult.data);
                 }
             }
         }
 
-        return null;
+        return err(new ConfigurationError("Failed to extract repository from URL"));
     }
 
-    exec(args: string[]): AsyncFireflyResult<string> {
+    async getCurrentBranch(): Promise<FireflyResult<string>> {
+        const result = await this.exec(["rev-parse", "--abbrev-ref", "HEAD"]);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        const branchName = result.value.trim();
+        if (!branchName) {
+            return err(new ProcessExecutionError("Failed to get current branch name"));
+        }
+
+        return ok(branchName);
+    }
+
+    async getAvailableBranches(): Promise<FireflyResult<string[]>> {
+        const result = await this.exec(["branch", "--list"]);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        const branches = result.value
+            .split("\n")
+            .map((branch) => branch.trim())
+            .filter(Boolean);
+
+        return ok(branches);
+    }
+
+    async isProvidedBranchValid(branch: string): Promise<FireflyResult<boolean>> {
+        if (!branch.trim()) {
+            return err(new ProcessExecutionError("Branch name cannot be empty"));
+        }
+
+        const branchesResult = await this.getAvailableBranches();
+        if (branchesResult.isErr()) {
+            return err(branchesResult.error);
+        }
+
+        const isValid = branchesResult.value.includes(branch);
+        if (!isValid) {
+            return err(new ProcessExecutionError(`Branch '${branch}' does not exist`));
+        }
+
+        return ok(isValid);
+    }
+
+    async isCurrentBranch(branch: string): Promise<FireflyResult<boolean>> {
+        const currentBranchResult = await this.getCurrentBranch();
+
+        if (currentBranchResult.isErr()) {
+            return err(currentBranchResult.error);
+        }
+
+        return ok(currentBranchResult.value === branch);
+    }
+
+    async isWorkingDirClean(): Promise<FireflyResult<boolean>> {
+        const result = await this.exec(["status", "--porcelain"]);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        const isClean = result.value.trim() === "";
+        return ok(isClean);
+    }
+
+    async hasUnpushedCommits(): Promise<FireflyResult<boolean>> {
+        const result = await this.exec(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        const upstreamBranch = result.value.trim();
+        if (!upstreamBranch) {
+            return err(new ProcessExecutionError("Failed to get upstream branch"));
+        }
+
+        const compareResult = await this.exec(["rev-list", "--left-right", `${upstreamBranch}...HEAD`]);
+        if (compareResult.isErr()) {
+            return err(compareResult.error);
+        }
+
+        const commits = compareResult.value
+            .trim()
+            .split("\n")
+            .filter((line) => line.startsWith("<") || line.startsWith(">"));
+        const hasUnpushed = commits.some((commit) => commit.startsWith(">"));
+        return ok(hasUnpushed);
+    }
+
+    exec(args: string[], dryRun?: boolean): AsyncFireflyResult<string> {
+        const sideEffectCommands = ["add", "commit", "push", "tag", "reset", "checkout"];
+        if (dryRun && args.some((arg) => sideEffectCommands.includes(arg))) {
+            logger.verbose(`GitProviderAdapter: Dry run enabled, skipping command execution: git ${args.join(" ")}`);
+            return okAsync("");
+        }
+
         const command = Bun.spawn(["git", ...args], {
             stdout: "pipe",
             stderr: "pipe",
@@ -219,7 +501,7 @@ export class GitProviderAdapter implements GitProviderPort {
 
         return ResultAsync.fromPromise(
             new Response(command).text(),
-            (e) => new CommandExecutionError("Failed to execute git command", e as Error)
-        );
+            (e) => new ProcessExecutionError("Failed to execute git command", e as Error)
+        ).andTee(() => logger.verbose("GitProviderAdapter: Executed command:", `git ${args.join(" ")}`));
     }
 }

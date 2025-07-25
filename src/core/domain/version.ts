@@ -1,124 +1,161 @@
+import { err, ok } from "neverthrow";
 import semver from "semver";
 import type { PreReleaseBase, ReleaseType } from "#/infrastructure/config/schema";
-import { FireflyError } from "#/shared/utils/error";
+import { VersionError } from "#/shared/utils/error.util";
+import { logger } from "#/shared/utils/logger.util";
+import type { FireflyResult } from "#/shared/utils/result.util";
 
 export class Version {
     private readonly _version: string;
 
-    constructor(version: string) {
+    private constructor(version: string) {
+        this._version = version;
+    }
+
+    static create(version: string): FireflyResult<Version> {
+        logger.verbose(`Version: Creating Version instance from string '${version}'...`);
         const cleaned = semver.clean(version);
         if (!cleaned) {
-            throw new FireflyError(`Invalid version: ${version}`, "INVALID_VERSION");
+            return err(new VersionError(`Invalid version: ${version}`));
         }
-        this._version = cleaned;
+        logger.verbose(`Version: Version string cleaned and valid: '${cleaned}'.`);
+        return ok(new Version(cleaned));
     }
 
     toString(): string {
         return this._version;
     }
 
-    bump(release: Extract<ReleaseType, "major" | "minor" | "patch" | "prerelease">): Version {
+    bump(release: Extract<ReleaseType, "major" | "minor" | "patch" | "prerelease">): FireflyResult<Version> {
+        logger.verbose(`Version: Bumping version '${this._version}' as '${release}'...`);
         const newVersion = semver.inc(this._version, release);
         if (!newVersion) {
-            throw new FireflyError(`Failed to bump ${this._version} as ${release}`, "VERSION_BUMP_ERROR");
+            return err(new VersionError(`Failed to bump ${this._version} as ${release}`));
         }
-
-        return new Version(newVersion);
+        logger.verbose(`Version: Bumped version is '${newVersion}'.`);
+        return Version.create(newVersion);
     }
 
-    bumpPrerelease(identifier?: string, base?: PreReleaseBase): Version {
-        let newVersion: string | null;
+    bumpPrerelease(identifier?: string, base?: PreReleaseBase): FireflyResult<Version> {
+        logger.verbose(
+            `Version: Bumping prerelease for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`
+        );
+        let newVersion: string | null = null;
 
         // Case 1: Custom prerelease with complex identifier (e.g., "canary.abc123")
         // When identifier contains dots, treat as complete prerelease identifier
-        if (identifier?.includes(".")) {
-            // Bump using identifier without base (e.g., "1.0.0-canary.abc123")
-            newVersion = semver.inc(this._version, "prerelease", identifier, false);
+        if (this.isComplexIdentifier(identifier)) {
+            newVersion = this.bumpWithComplexIdentifier(identifier);
         }
-
         // Case 2: Bumping from stable to prerelease (or with simple identifier)
         else if (base !== undefined && base !== null) {
-            const ensuredBase = this.ensureIdentifierBase(base);
-            // Bump using identifier and base (e.g., "1.0.0-alpha.1" with base 0 or 1)
-            newVersion = semver.inc(this._version, "prerelease", identifier, ensuredBase);
+            const baseResult = this.ensureIdentifierBase(base);
+            if (baseResult.isErr()) {
+                return err(new VersionError(`Invalid prerelease base: ${base} for identifier: ${identifier}`));
+            }
+
+            newVersion = semver.inc(this._version, "prerelease", identifier, baseResult.value);
         }
 
         // Case 3: Continuation of existing prerelease
         else if (this.isPrerelease()) {
-            if (identifier) {
-                // Continue with specific identifier
-                newVersion = semver.inc(this._version, "prerelease", identifier);
-            } else {
-                // Continue existing prerelease series (e.g., 1.0.0-alpha.1 -> 1.0.0-alpha.2)
-                newVersion = semver.inc(this._version, "prerelease");
-            }
+            newVersion = this.bumpExistingPrerelease(identifier);
         }
 
         // Case 4: Default behavior - start new prerelease from stable
         else {
+            // Default: start new prerelease from stable
             const defaultIdentifier = identifier || "alpha";
             newVersion = semver.inc(this._version, "prerelease", defaultIdentifier);
         }
 
         if (!newVersion) {
-            throw new FireflyError(`Failed to bump prerelease ${this._version}`, "VERSION_BUMP_ERROR");
+            return err(
+                new VersionError(
+                    `Failed to bump ${this._version} as prerelease (identifier: ${identifier}, base: ${base})`
+                )
+            );
         }
-        return new Version(newVersion);
+        logger.verbose(`Version: Bumped prerelease version is '${newVersion}'.`);
+        return Version.create(newVersion);
     }
 
-    bumpPremajor(identifier?: string, base?: PreReleaseBase): Version {
-        let newVersion: string | null;
-
-        if (base !== undefined && base !== null) {
-            const ensuredBase = this.ensureIdentifierBase(base);
-            newVersion = semver.inc(this._version, "premajor", identifier, ensuredBase);
-        } else {
-            newVersion = semver.inc(this._version, "premajor", identifier);
-        }
-
-        if (!newVersion) {
-            throw new FireflyError(`Failed to bump premajor ${this._version}`, "VERSION_BUMP_ERROR");
-        }
-        return new Version(newVersion);
+    bumpPremajor(identifier?: string, base?: PreReleaseBase): FireflyResult<Version> {
+        logger.verbose(
+            `Version: Bumping premajor for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`
+        );
+        return this.bumpPre("premajor", identifier, base);
     }
 
-    bumpPreminor(identifier?: string, base?: PreReleaseBase): Version {
-        let newVersion: string | null;
-
-        if (base !== undefined && base !== null) {
-            const ensuredBase = this.ensureIdentifierBase(base);
-            newVersion = semver.inc(this._version, "preminor", identifier, ensuredBase);
-        } else {
-            newVersion = semver.inc(this._version, "preminor", identifier);
-        }
-
-        if (!newVersion) {
-            throw new FireflyError(`Failed to bump preminor ${this._version}`, "VERSION_BUMP_ERROR");
-        }
-        return new Version(newVersion);
+    bumpPreminor(identifier?: string, base?: PreReleaseBase): FireflyResult<Version> {
+        logger.verbose(
+            `Version: Bumping preminor for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`
+        );
+        return this.bumpPre("preminor", identifier, base);
     }
 
-    bumpPrepatch(identifier?: string, base?: PreReleaseBase): Version {
-        let newVersion: string | null;
-
-        if (base !== undefined && base !== null) {
-            const ensuredBase = this.ensureIdentifierBase(base);
-            newVersion = semver.inc(this._version, "prepatch", identifier, ensuredBase);
-        } else {
-            newVersion = semver.inc(this._version, "prepatch", identifier);
-        }
-
-        if (!newVersion) {
-            throw new FireflyError(`Failed to bump prepatch ${this._version}`, "VERSION_BUMP_ERROR");
-        }
-        return new Version(newVersion);
+    bumpPrepatch(identifier?: string, base?: PreReleaseBase): FireflyResult<Version> {
+        logger.verbose(
+            `Version: Bumping prepatch for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`
+        );
+        return this.bumpPre("prepatch", identifier, base);
     }
 
     private isPrerelease(): boolean {
         return semver.prerelease(this._version) !== null;
     }
 
-    private ensureIdentifierBase(value: PreReleaseBase): "0" | "1" {
-        return value === "0" || value === "1" ? value : "0";
+    private isComplexIdentifier(identifier?: string): boolean {
+        return !!identifier && identifier.includes(".");
+    }
+
+    private bumpWithComplexIdentifier(identifier?: string): string | null {
+        return semver.inc(this._version, "prerelease", identifier, false);
+    }
+
+    private bumpExistingPrerelease(identifier?: string): string | null {
+        if (identifier) {
+            return semver.inc(this._version, "prerelease", identifier);
+        }
+        return semver.inc(this._version, "prerelease");
+    }
+
+    private bumpPre(
+        type: "premajor" | "preminor" | "prepatch",
+        identifier?: string,
+        base?: PreReleaseBase
+    ): FireflyResult<Version> {
+        logger.verbose(
+            `Version: Bumping ${type} for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`
+        );
+        let newVersion: string | null = null;
+
+        if (base !== undefined && base !== null) {
+            const baseResult = this.ensureIdentifierBase(base);
+            if (baseResult.isErr()) {
+                return err(
+                    new VersionError(`Invalid prerelease base: ${base} for ${type} (identifier: ${identifier})`)
+                );
+            }
+            newVersion = semver.inc(this._version, type, identifier, baseResult.value);
+        } else {
+            newVersion = semver.inc(this._version, type, identifier);
+        }
+
+        if (!newVersion) {
+            return err(
+                new VersionError(`Failed to bump ${type} ${this._version} (identifier: ${identifier}, base: ${base})`)
+            );
+        }
+
+        logger.verbose(`Version: Bumped ${type} version is '${newVersion}'.`);
+        return Version.create(newVersion);
+    }
+
+    private ensureIdentifierBase(value: PreReleaseBase): FireflyResult<"0" | "1"> {
+        if (value === "0" || value === "1") {
+            return ok(value);
+        }
+        return err(new VersionError(`Invalid prerelease base: ${value}`));
     }
 }

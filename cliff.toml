@@ -39,32 +39,32 @@ postprocessors = []
 conventional_commits = true
 filter_unconventional = false
 commit_preprocessors = [
-    { pattern = "\\(#([0-9]+)\\)", replace = "([#${1}](https://github.com/yehezkieldio/firefly/issues/${1}))" },
+  { pattern = "\\(#([0-9]+)\\)", replace = "([#${1}](https://github.com/yehezkieldio/firefly/issues/${1}))" },
 ]
 commit_parsers = [
-    { message = "^chore\\(release\\): release", skip = true },
-    { message = "^fix\\(deps\\)", group = "<!-- 1 -->🧩 Dependencies Updates" },
-    { message = "^chore\\(deps\\)", group = "<!-- 2 -->🧩 Dependencies Updates" },
-    { message = "^feat", group = "<!-- 3 -->🚀 New Features" },
-    { message = "^fix", group = "<!-- 4 -->🐛 Bug Fixes" },
-    { message = "^docs", group = "<!-- 5 -->📚 Documentation" },
-    { message = "^perf", group = "<!-- 6 -->⚡ Performance" },
-    { message = "^refactor", group = "<!-- 7 -->🚜 Refactor" },
-    { message = "^style\\(deps\\)", group = "<!-- 8 -->🧩 Dependencies Updates" },
-    { message = "^style\\(.*\\)", group = "<!-- 9 -->🎨 Code Styling" },
-    { message = "^style", group = "<!-- 9 -->🎨 Code Styling" },
-    { message = "^test", group = "<!-- 10 -->🧪 Test" },
-    { message = "^chore", group = "<!-- 11 -->🛠️ Miscellaneous" },
-    { message = "^security", group = "<!-- 12 -->🔒 Security" },
-    { message = "^compat", group = "<!-- 13 -->🔗 Compatibility" },
-    { message = "^revert", group = "<!-- 14 -->⏪ Reverts" },
-    { message = "^i18n", group = "<!-- 15 -->🌐 Internationalization" },
-    { message = "^ci", group = "<!-- 16 -->CI/CD" },
-    { message = ".*", group = "<!-- 17 -->🛠️ Miscellaneous" },
-    { message = ".*deprecated", body = ".*deprecated", group = "⚠️ Deprecation" },
+  { message = "^chore\\(release\\): release", skip = true },
+  { message = "^fix\\(deps\\)", group = "<!-- 1 -->🧩 Dependencies Updates" },
+  { message = "^chore\\(deps\\)", group = "<!-- 2 -->🧩 Dependencies Updates" },
+  { message = "^feat", group = "<!-- 3 -->🚀 New Features" },
+  { message = "^fix", group = "<!-- 4 -->🐛 Bug Fixes" },
+  { message = "^docs", group = "<!-- 5 -->📚 Documentation" },
+  { message = "^perf", group = "<!-- 6 -->⚡ Performance" },
+  { message = "^refactor", group = "<!-- 7 -->🚜 Refactor" },
+  { message = "^style\\(deps\\)", group = "<!-- 8 -->🧩 Dependencies Updates" },
+  { message = "^style\\(.*\\)", group = "<!-- 9 -->🎨 Code Styling" },
+  { message = "^style", group = "<!-- 9 -->🎨 Code Styling" },
+  { message = "^test", group = "<!-- 10 -->🧪 Test" },
+  { message = "^chore", group = "<!-- 11 -->🛠️ Miscellaneous" },
+  { message = "^security", group = "<!-- 12 -->🔒 Security" },
+  { message = "^compat", group = "<!-- 13 -->🔗 Compatibility" },
+  { message = "^revert", group = "<!-- 14 -->⏪ Reverts" },
+  { message = "^i18n", group = "<!-- 15 -->🌐 Internationalization" },
+  { message = "^ci", group = "<!-- 16 -->CI/CD" },
+  { message = ".*", group = "<!-- 17 -->🛠️ Miscellaneous" },
+  { message = ".*deprecated", body = ".*deprecated", group = "⚠️ Deprecation" },
 ]
 filter_commits = false
-tag_pattern = "firefly@[0-9]*"
+tag_pattern = "firefly@[0-9]*,artemis@[0-9]*"
 ignore_tags = ""
 topo_order = false
 sort_commits = "oldest"

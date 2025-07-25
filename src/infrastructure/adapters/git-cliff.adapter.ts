@@ -1,147 +1,111 @@
 import { type Options as GitCliffOptions, runGitCliff } from "git-cliff";
-import { errAsync, ResultAsync } from "neverthrow";
-import type { ApplicationContext } from "#/application/context";
-import type { GitProviderAdapter } from "#/infrastructure/adapters/git-provider.adapter";
-import type { ConfigResolverService } from "#/infrastructure/config/resolver.service";
-import { ConfigurationError, ProcessExecutionError } from "#/shared/utils/error";
-import type { AsyncFireflyResult } from "#/shared/utils/result";
+import { err, ok, ResultAsync } from "neverthrow";
+import type { ChangelogHandlerOptions } from "#/application/services/changelog-handler.service";
+import { TokenService } from "#/infrastructure/services/token.service";
+import { ConfigurationError, ProcessExecutionError } from "#/shared/utils/error.util";
+import { logger } from "#/shared/utils/logger.util";
+import type { AsyncFireflyResult, FireflyResult } from "#/shared/utils/result.util";
 
 export class GitCliffAdapter {
-    constructor(
-        private readonly configResolver: ConfigResolverService,
-        private readonly gitProvider: GitProviderAdapter
-    ) {}
+    private readonly tokenService: TokenService;
 
-    generate(context: ApplicationContext): AsyncFireflyResult<string> {
-        if (!context) {
-            return errAsync(new ConfigurationError("ApplicationContext cannot be null or undefined"));
+    constructor() {
+        this.tokenService = new TokenService();
+    }
+
+    async generate(options: ChangelogHandlerOptions): Promise<FireflyResult<string>> {
+        if (!options) {
+            return err(new ConfigurationError("ChangelogHandlerOptions cannot be null or undefined"));
         }
 
-        return this.createOptions(context)
-            .andThen((options) => this.executeGitCliff(options))
-            .mapErr((error) =>
-                error instanceof ProcessExecutionError
-                    ? error
-                    : new ProcessExecutionError("GitCliff generation failed", error)
-            );
-    }
-
-    private createOptions(context: ApplicationContext): AsyncFireflyResult<GitCliffOptions> {
-        return ResultAsync.fromPromise(
-            this.buildOptionsAsync(context),
-            (error) => new ConfigurationError("Failed to create GitCliff options", error as Error)
-        );
-    }
-
-    private executeGitCliff(options: GitCliffOptions): AsyncFireflyResult<string> {
-        return ResultAsync.fromPromise(
-            runGitCliff(options, { stdio: "pipe" }),
-            (error) => new ProcessExecutionError("GitCliff execution failed", error as Error)
-        ).map((result) => result.stdout);
-    }
-
-    private async buildOptionsAsync(context: ApplicationContext): Promise<GitCliffOptions> {
-        const config = context.getConfig();
-        const tagName = this.configResolver.resolveTagName(config.tagName, context);
-
-        let options = this.createInitialOptions(tagName);
-
-        options = this.addGitHubToken(options);
-        options = await this.addRepositoryConfiguration(options, config);
-        options = this.addDryRunConfiguration(options, config);
-        options = this.addReleaseNotesConfiguration(options, config);
-
-        return options;
-    }
-
-    private addGitHubToken(options: GitCliffOptions): GitCliffOptions {
-        const token = this.configResolver.getTokenByEnvironmentVariable();
-        return {
-            ...options,
-            githubToken: token,
-        };
-    }
-
-    private async addRepositoryConfiguration(
-        options: GitCliffOptions,
-        config: ReturnType<ApplicationContext["getConfig"]>
-    ): Promise<GitCliffOptions> {
-        const rootDirection = await this.getRootDirectionSafely();
-        const repository = await this.getRepositorySafely();
-
-        if (rootDirection && rootDirection !== ".") {
-            return {
-                ...options,
-                repository: rootDirection,
-                includePath: `${config.base}/*`,
-                githubRepo: `${repository.owner}/${repository.repository}`,
-            };
+        const gitCliffOptionsResult = this.createGitCliffOptions(options);
+        if (gitCliffOptionsResult.isErr()) {
+            return err(gitCliffOptionsResult.error);
         }
 
-        return {
-            ...options,
-            githubRepo: `${repository.owner}/${repository.repository}`,
-        };
-    }
+        logger.verbose("GitCliffAdapter: GitCliff options created successfully.");
+        const gitCliffOptions = gitCliffOptionsResult.value;
 
-    private addDryRunConfiguration(
-        options: GitCliffOptions,
-        config: ReturnType<ApplicationContext["getConfig"]>
-    ): GitCliffOptions {
-        if (config.dryRun) {
-            return options;
+        const executeResult = await this.executeGitCliff(gitCliffOptions);
+        if (executeResult.isErr()) {
+            return err(executeResult.error);
         }
 
-        return {
-            ...options,
-            prepend: config.changelogPath,
-        };
+        logger.verbose("GitCliffAdapter: GitCliff executed successfully.");
+        return ok(executeResult.value);
     }
 
-    private addReleaseNotesConfiguration(
-        options: GitCliffOptions,
-        config: ReturnType<ApplicationContext["getConfig"]>
-    ): GitCliffOptions {
-        if (!config.releaseNotes?.trim()) {
-            return options;
+    private createGitCliffOptions(options: ChangelogHandlerOptions): FireflyResult<GitCliffOptions> {
+        if (!options.tagName?.trim()) {
+            return err(new ConfigurationError("Tag name is required for GitCliff generation"));
         }
 
-        return {
-            ...options,
-            withTagMessage: config.releaseNotes.replace(/\\n/g, "\n"),
-        };
-    }
-
-    private async getRootDirectionSafely(): Promise<string> {
-        const result = await this.gitProvider.getRootDirection();
-
-        if (result.isErr()) {
-            throw new ConfigurationError("Failed to get root directory", result.error);
-        }
-
-        return result.value;
-    }
-
-    private async getRepositorySafely() {
-        const result = await this.gitProvider.getRepository();
-
-        if (result.isErr()) {
-            throw new ConfigurationError("Failed to get repository information", result.error);
-        }
-
-        return result.value;
-    }
-
-    private createInitialOptions(tagName: string): GitCliffOptions {
-        if (!tagName?.trim()) {
-            throw new ConfigurationError("Tag name cannot be empty");
-        }
-
-        return {
-            tag: tagName,
+        const gitCliffOptions: GitCliffOptions = {
+            tag: options.tagName,
             unreleased: true,
             config: "./cliff.toml",
             output: "-",
         };
+
+        if (options.releaseNotes) {
+            gitCliffOptions.withTagMessage = options.releaseNotes.replace(/\\n/g, "\n");
+            logger.verbose("GitCliffAdapter: Release notes set.");
+        }
+
+        if (options.dryRun) {
+            logger.verbose("GitCliffAdapter: Prepend option will not be set for dry run.");
+        } else {
+            gitCliffOptions.prepend = options.changelogPath;
+            logger.verbose("GitCliffAdapter: Prepend option set for changelog path.");
+        }
+
+        if (options.hasRootDirection) {
+            gitCliffOptions.repository = options.rootDirection;
+            gitCliffOptions.includePath = options.includePath;
+            logger.verbose(`GitCliffAdapter: Include path set to ${options.includePath}`);
+        }
+
+        if (options.repository) {
+            gitCliffOptions.githubRepo = options.repository;
+            logger.verbose(`GitCliffAdapter: Repository set to ${options.repository}`);
+        }
+
+        logger.verbose("GitCliffAdapter: GitCliffOptions constructed.");
+        return ok(gitCliffOptions);
+    }
+
+    private async executeGitCliff(options: GitCliffOptions): Promise<AsyncFireflyResult<string>> {
+        const optionsWithToken = await this.addGitHubToken(options);
+        if (optionsWithToken.isErr()) {
+            return err(optionsWithToken.error);
+        }
+
+        logger.verbose("GitCliffAdapter: GitHub token added to options.");
+        return ResultAsync.fromPromise(
+            runGitCliff(optionsWithToken.value, { stdio: "pipe" }),
+            (error) => new ProcessExecutionError("GitCliff execution failed", error as Error)
+        )
+            .andTee((r) => {
+                logger.verbose(`GitCliffAdapter: Executing ${this.redactTokenFromCommand(r.escapedCommand)}`);
+            })
+            .map((result) => result.stdout);
+    }
+
+    private async addGitHubToken(options: GitCliffOptions): Promise<FireflyResult<GitCliffOptions>> {
+        const getTokenResult = await this.tokenService.getGithubToken();
+        if (getTokenResult.isErr()) {
+            return err(new ConfigurationError("Failed to get GitHub token", getTokenResult.error));
+        }
+
+        logger.verbose("GitCliffAdapter: GitHub token retrieved successfully.");
+        return ok({
+            ...options,
+            githubToken: getTokenResult.value,
+        });
+    }
+
+    private redactTokenFromCommand(command: string): string {
+        const tokenPattern = /--github-token\s+([^\s]+)/g;
+        return command.replace(tokenPattern, "--github-token REDACTED_FOR_SECURITY");
     }
 }
