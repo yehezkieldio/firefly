@@ -1,6 +1,6 @@
 {
   "name": "@yehezkieldio/firefly",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
   "type": "module",
   "license": "MIT",
