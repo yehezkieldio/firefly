@@ -88,7 +88,7 @@ export class VersionChoicesService {
 
         const choice: PromptSelectChoice = {
             label: `${options.releaseType} (${version.value.toString()})`,
-            hint: this.getVersionDescription(options.releaseType),
+            hint: this.getVersionDescription(options.releaseType ?? "patch"),
             value: version.value.toString(),
         };
 

@@ -1,8 +1,8 @@
 import { err, ok } from "neverthrow";
+import { GithubCliProviderAdapter } from "#/infrastructure/adapters/github-cli-provider.adapter";
 import { ConfigurationError } from "#/shared/utils/error.util";
 import { logger } from "#/shared/utils/logger.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
-import { GithubCliProviderAdapter } from "../adapters/github-cli-provider.adapter";
 
 export class TokenService {
     async getGithubToken(adapter?: GithubCliProviderAdapter): Promise<FireflyResult<string>> {
