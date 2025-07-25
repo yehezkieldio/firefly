@@ -47,6 +47,11 @@ const BaseFireflyConfigSchema = z.object({
     base: z.string().default(""),
 
     /**
+     * Whether the release is being run in a CI environment.
+     */
+    ci: z.boolean().default(false),
+
+    /**
      * Repository identifier in "owner/repo" format.
      * Auto-detected from Git configuration or remote origin if not provided.
      */

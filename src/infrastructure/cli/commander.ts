@@ -40,6 +40,7 @@ export async function createCLI(): Promise<typeof program> {
         .option("--repository <repo>", "Repository identifier (owner/repo)")
         .option("--changelog-path <path>", "Path to changelog file", "CHANGELOG.md")
         .option("--branch <branch>", "Target branch, defaults to current branch if not specified")
+        .option("--ci", "Indicate if running in a CI environment", false)
         .helpOption("-h, --help", "Display help information")
         .helpCommand("help", "Display help for command");
 
