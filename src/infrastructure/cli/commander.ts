@@ -88,6 +88,7 @@ export async function createCLI(): Promise<typeof program> {
         .option("--skip-commit", "Skip git commit", false)
         .option("--skip-tag", "Skip git tag creation", false)
         .option("--skip-push", "Skip git push", false)
+        .option("--skip-git", "Skip all git-related steps", false)
         .option("--release-latest", "Mark as latest release", true)
         .option("--release-prerelease", "Mark as pre-release (GitHub only)", false)
         .option("--release-draft", "Create as draft release (GitHub only)", false)

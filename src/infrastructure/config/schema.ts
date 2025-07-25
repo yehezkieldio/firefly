@@ -168,6 +168,11 @@ const BaseFireflyConfigSchema = z.object({
     skipGitHubRelease: z.boolean().default(false),
 
     /**
+     * Whether to skip all git-related steps (commit, tag, push, GitHub release).
+     */
+    skipGit: z.boolean().default(false),
+
+    /**
      * Specify the release title for the GitHub release.
      * Supports placeholders: {{name}}, {{unscopedName}}, {{version}}.
      *
