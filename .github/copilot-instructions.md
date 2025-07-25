@@ -23,6 +23,14 @@ src/
 - `infrastructure/`: Handles side effects such as file I/O, Git operations, and CLI interactions.
 - `shared/`: Provides stateless utilities, error definitions, typed results, and constants.
 
+## Task Orchestration Pattern
+
+All business logic flows through the **Task System**:
+- Tasks implement `Task` interface (`execute()`, `undo()`, `getName()`, `getDescription()`, `isUndoable?()`)
+- `TaskOrchestratorService` runs tasks sequentially with automatic rollback on failure
+- `ApplicationContext` carries shared state and configuration between tasks
+- Example task sequence: PreflightCheck → DetermineNextVersion → BumpVersion → GenerateChangelog → CreateCommit → CreateTag → PushChanges → CreateRelease
+
 ## Operating Principles
 
 - Firefly is **Bun-only**; Node.js is not supported. Use Bun-native APIs where possible.
@@ -30,6 +38,19 @@ src/
 - Changelog generation uses [`git-cliff`](https://github.com/orhun/git-cliff). Parse its TOML config with [`smol-toml`](https://github.com/akheron/smol-toml).
 - Use `conventional-recommended-bump` to infer version changes from commit history. Also support manual version selection.
 - Handle errors exclusively through [`neverthrow`](https://github.com/supermacro/neverthrow). No `throw` in coordinated flows.
+
+## Development Workflows
+
+### Running & Building
+- **Development**: `bun run dev` (runs `src/infrastructure/cli/main.ts` directly)
+- **Build**: `bun run build` (uses `tsdown` + post-build Bun pragma insertion)
+- **Linting**: `bun run check` (Biome with ultracite config), `check:write` for fixes
+- **Type checking**: `bun run typecheck`
+
+### Path Resolution & Imports
+- Use `#/` path alias for all internal imports (mapped to `./src/*` in tsconfig)
+- Examples: `#/shared/utils/result.util`, `#/application/context`, `#/core/domain/version`
+- JSON imports require `with { type: "json" }` (e.g., `package.json`)
 
 ## Design Guidelines
 
@@ -52,15 +73,22 @@ src/
 
 * Use `zod`, and `strict interfaces` at integration points.
 - Internal modules should assume validated data and rely on the type system, not runtime checks.
+- Configuration schema in `infrastructure/config/schema.ts` uses Zod with custom validation logic
 
 ### Result Handling
 
-- Use `FireflyResult<T>` and `AsyncFireflyResult<T>` types from `shared/utils/result.ts`, derived from `neverthrow` for consistent error handling and result propagation.
+- Use `FireflyResult<T>` and `AsyncFireflyResult<T>` types from `shared/utils/result.util.ts`, derived from `neverthrow` for consistent error handling and result propagation.
     - Use `FireflyResult` for synchronous results, when the value is immediately available and does not require awaiting.
     - Use `AsyncFireflyResult` for asynchronous results, when the value is produced by an async operation and you must await it before accessing the value or error.
-- Always map errors to a descriptive domain-specific `FireflyError`.
+- Always map errors to a descriptive domain-specific `FireflyError` (see `shared/utils/error.util.ts` for error hierarchy)
 - Never mix `throw` and `try/catch` with `Result` in the same code path.
-- DONT USE `trycatch` WHATSOVER, PREFER `neverhrow` RESULT HANDLING.
+- DONT USE `trycatch` WHATSOVER, PREFER `neverthrow` RESULT HANDLING.
+
+### Port & Adapter Pattern
+
+- Ports define interfaces in `core/ports/` (e.g., `GitProviderPort`, `PackageJsonPort`)
+- Adapters implement ports in `infrastructure/adapters/` with specific technologies
+- Services in `infrastructure/services/` provide factory functions and higher-level abstractions
 
 ## Coding Principles & Patterns
 
