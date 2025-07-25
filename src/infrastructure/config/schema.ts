@@ -63,6 +63,7 @@ const BaseFireflyConfigSchema = z.object({
 
     /**
      * Path to the changelog file. Defaults to "CHANGELOG.md".
+     * Must include the file name, relative to the project root.
      */
     changelogPath: z.string().min(1, "Changelog path cannot be empty").default("CHANGELOG.md"),
 
