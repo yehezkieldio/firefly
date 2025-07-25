@@ -31,18 +31,7 @@ export async function createCLI(): Promise<typeof program> {
     program.name("firefly").description(pkg.description).version(pkg.version);
 
     // Global options
-    program
-        .option("--dry-run", "Run in dry-run mode without making changes", false)
-        .option("--verbose", "Enable verbose logging", false)
-        .option("--name <name>", "Project name (defaults to package.json name)")
-        .option("--scope <scope>", "Organization or user scope (without @)")
-        .option("--base <path>", "Base path for the project, if not the current directory")
-        .option("--repository <repo>", "Repository identifier (owner/repo)")
-        .option("--changelog-path <path>", "Path to changelog file", "CHANGELOG.md")
-        .option("--branch <branch>", "Target branch, defaults to current branch if not specified")
-        .option("--ci", "Indicate if running in a CI environment", false)
-        .helpOption("-h, --help", "Display help information")
-        .helpCommand("help", "Display help for command");
+    program.helpOption("-h, --help", "Display help information").helpCommand("help", "Display help for command");
 
     // Release command
     program
@@ -73,6 +62,15 @@ export async function createCLI(): Promise<typeof program> {
             }
             return result.data;
         })
+        .option("--dry-run", "Run in dry-run mode without making changes", false)
+        .option("--verbose", "Enable verbose logging", false)
+        .option("--name <name>", "Project name (defaults to package.json name)")
+        .option("--scope <scope>", "Organization or user scope (without @)")
+        .option("--base <path>", "Base path for the project, if not the current directory")
+        .option("--repository <repo>", "Repository identifier (owner/repo)")
+        .option("--changelog-path <path>", "Path to changelog file", "CHANGELOG.md")
+        .option("--branch <branch>", "Target branch, defaults to current branch if not specified")
+        .option("--ci", "Indicate if running in a CI environment", false)
         .option("--pre-release-id <id>", "Pre-release identifier")
         .option("--pre-release-base <base>", "Pre-release base version", (input) => {
             if (input === "0" || input === "1") return input;
