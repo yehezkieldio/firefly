@@ -72,7 +72,6 @@ These inferred values provide sensible defaults but can be overridden through CL
 #### Command Line Options Reference
 
 ```bash
-firefly release --help
 Usage: firefly release [options]
 
 Create a new release
@@ -80,26 +79,28 @@ Create a new release
 Options:
   --bs,--bump-strategy <strategy>  Bump strategy (auto, manual) (default: "manual")
   --rt, --release-type <type>      Release type (major, minor, patch, prerelease, etc.)
-  --pre-release-id <id>            Pre-release identifier
-  --pre-release-base <base>        Pre-release base version
   --dry-run                        Run in dry-run mode without making changes (default: false)
   --verbose                        Enable verbose logging (default: false)
-  --name <n>                       Project name (defaults to package.json name)
+  --name <name>                    Project name (defaults to package.json name)
   --scope <scope>                  Organization or user scope (without @)
   --base <path>                    Base path for the project, if not the current directory
   --repository <repo>              Repository identifier (owner/repo)
   --changelog-path <path>          Path to changelog file (default: "CHANGELOG.md")
   --branch <branch>                Target branch, defaults to current branch if not specified
+  --ci                             Indicate if running in a CI environment (default: false)
+  --pre-release-id <id>            Pre-release identifier
+  --pre-release-base <base>        Pre-release base version
   --release-notes <notes>          Custom release notes
   --commit-message <message>       Commit message template
-  --tag-name <n>                   Tag name template
+  --tag-name <name>                Tag name template
+  --release-title <title>          Release title template
   --skip-bump                      Skip version bump (default: false)
   --skip-changelog                 Skip changelog generation (default: false)
   --skip-github-release            Skip GitHub release creation (default: false)
   --skip-commit                    Skip git commit (default: false)
   --skip-tag                       Skip git tag creation (default: false)
   --skip-push                      Skip git push (default: false)
-  --release-title <title>          Release title template
+  --skip-git                       Skip all git-related steps (default: false)
   --release-latest                 Mark as latest release (default: true)
   --release-prerelease             Mark as pre-release (GitHub only) (default: false)
   --release-draft                  Create as draft release (GitHub only) (default: false)
