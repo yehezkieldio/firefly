@@ -64,7 +64,7 @@ commit_parsers = [
   { message = ".*deprecated", body = ".*deprecated", group = "⚠️ Deprecation" },
 ]
 filter_commits = false
-tag_pattern = "firefly@[0-9]*,artemis@[0-9]*"
+tag_pattern = "firefly@[0-9]"
 ignore_tags = ""
 topo_order = false
 sort_commits = "oldest"
