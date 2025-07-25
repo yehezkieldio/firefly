@@ -1,0 +1,39 @@
+name: Continuous Integration
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    pr_latest_release:
+        name: Create Pull Request for Latest Release
+        if: ${{contains(github.event.head_commit.message, format('chore(release){0} release firefly@', ':'))}}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Extract Version from Commit Message
+              id: extract_version
+              run: |
+                  echo "Extracting version from commit message..."
+                  COMMIT_MSG="${{ github.event.head_commit.message }}"
+                  VERSION=$(echo "$COMMIT_MSG" | grep -oP 'firefly@\K\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?')
+                  VERSION=$(echo "$VERSION" | xargs)
+                  echo "Extracted version: $VERSION"
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+            - name: Create Pull Request
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  VERSION: ${{ steps.extract_version.outputs.version }}
+              run: |
+                  echo "Creating PR for version: v${VERSION}"
+                  gh pr create \
+                      --base stable \
+                      --head master \
+                      --title "Release v${VERSION}" \
+                      --body "Automated release PR for version v${VERSION}. Please review and merge." \
+                      --assignee "yehezkieldio"
+                  echo "Pull request creation initiated."
