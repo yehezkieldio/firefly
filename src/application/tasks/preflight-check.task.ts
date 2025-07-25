@@ -44,6 +44,11 @@ export class PreflightCheckTask implements Task {
     private async checkIsCleanWorkingDirectory(): Promise<void> {
         const gitProvider = GitProviderAdapter.getInstance();
 
+        if (this.context.getConfig().ci) {
+            logger.verbose("PreflightCheckTask: Skipping working directory check in CI environment.");
+            return;
+        }
+
         logger.verbose("PreflightCheckTask: Checking if working directory is clean...");
         const statusResult = await gitProvider.isWorkingDirClean();
         if (statusResult.isErr()) {
@@ -59,6 +64,11 @@ export class PreflightCheckTask implements Task {
 
     private async checkIfHasLocalCommits(): Promise<void> {
         const gitProvider = GitProviderAdapter.getInstance();
+
+        if (this.context.getConfig().ci) {
+            logger.verbose("PreflightCheckTask: Skipping local commits check in CI environment.");
+            return;
+        }
 
         logger.verbose("PreflightCheckTask: Checking for unpushed local commits...");
         const commitsResult = await gitProvider.hasUnpushedCommits();
