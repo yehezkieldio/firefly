@@ -28,7 +28,7 @@ export class CreateTagTask implements Task {
     }
 
     async execute(): Promise<void> {
-        if (this.context.getConfig().skipTag) {
+        if (this.context.getConfig().skipTag || this.context.getConfig().skipGit) {
             logger.info("Skipping tag creation as per configuration");
             return;
         }

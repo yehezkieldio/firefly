@@ -27,7 +27,7 @@ export class CreateCommitTask implements Task {
     }
 
     async execute(): Promise<void> {
-        if (this.context.getConfig().skipCommit) {
+        if (this.context.getConfig().skipCommit || this.context.getConfig().skipGit) {
             logger.info("Skipping commit creation as per configuration");
             return;
         }

@@ -26,7 +26,7 @@ export class CreateReleaseTask implements Task {
     }
 
     async execute(): Promise<void> {
-        if (this.context.getConfig().skipGitHubRelease) {
+        if (this.context.getConfig().skipGitHubRelease || this.context.getConfig().skipGit) {
             logger.info("Skipping release creation as per configuration");
             return;
         }

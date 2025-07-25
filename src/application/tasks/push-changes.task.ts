@@ -24,7 +24,7 @@ export class PushChangesTask implements Task {
     }
 
     async execute(): Promise<void> {
-        if (this.context.getConfig().skipPush) {
+        if (this.context.getConfig().skipPush || this.context.getConfig().skipGit) {
             logger.info("Skipping push as per configuration");
             return;
         }
