@@ -1,4 +1,3 @@
-import type { BumperRecommendation } from "conventional-recommended-bump";
 import { err, ok } from "neverthrow";
 import type { Commit } from "#/shared/types/commit.type";
 import { TRANSITION_KEYWORDS } from "#/shared/utils/constants";
@@ -19,6 +18,13 @@ interface CommitTypeConfig {
     readonly minor: readonly string[];
     readonly patch: readonly string[];
     readonly scopeRules: Record<string, "major" | "minor" | "patch">;
+}
+
+interface VersionRecommendation {
+    readonly level: 0 | 1 | 2;
+    readonly releaseType: "major" | "minor" | "patch";
+    readonly commits: readonly Commit[];
+    readonly reason: string;
 }
 
 export class CommitAnalyzerService {
@@ -51,7 +57,7 @@ export class CommitAnalyzerService {
 
     constructor(private readonly commitConfig: CommitTypeConfig = CommitAnalyzerService.DEFAULT_COMMIT_CONFIG) {}
 
-    analyzeCommits(commits: readonly Commit[]): FireflyResult<BumperRecommendation> {
+    analyzeCommits(commits: readonly Commit[]): FireflyResult<VersionRecommendation> {
         logger.verbose("CommitAnalyzerService: Analyzing commits for version recommendation...");
         const start = Date.now();
         if (!commits?.length) {
@@ -195,7 +201,7 @@ export class CommitAnalyzerService {
         level: 0 | 1 | 2,
         commits: readonly Commit[],
         analysis: CommitAnalysis
-    ): BumperRecommendation {
+    ): VersionRecommendation {
         logger.verbose("CommitAnalyzerService: Building bumper recommendation object...");
         const recommendation = {
             level,
@@ -207,7 +213,7 @@ export class CommitAnalyzerService {
         return recommendation;
     }
 
-    private createPatchRecommendation(commits: readonly Commit[]): BumperRecommendation {
+    private createPatchRecommendation(commits: readonly Commit[]): VersionRecommendation {
         return {
             level: CommitAnalyzerService.VERSION_LEVELS.PATCH,
             releaseType: "patch",

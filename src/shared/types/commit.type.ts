@@ -23,4 +23,21 @@ interface CommitBase {
     readonly references: CommitReference[];
 }
 
-export type Commit = CommitBase & Record<string, string | null>;
+// Extended commit type with additional fields for our implementation
+export interface Commit extends CommitBase {
+    readonly hash?: string | null;
+    readonly date?: string | null;
+    readonly author?: string | null;
+    readonly type?: string | null;
+    readonly scope?: string | null;
+    readonly subject?: string | null;
+    // Allow arbitrary string properties for compatibility
+    readonly [key: string]:
+        | string
+        | string[]
+        | null
+        | CommitNote[]
+        | CommitReference[]
+        | Record<string, string | null>
+        | undefined;
+}

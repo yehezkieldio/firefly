@@ -23,5 +23,8 @@ export interface GitProviderPort {
     getAvailableBranches(): Promise<FireflyResult<string[]>>;
     isProvidedBranchValid(branch: string): Promise<FireflyResult<boolean>>;
     isCurrentBranch(branch: string): Promise<FireflyResult<boolean>>;
+    getLastTag(): Promise<FireflyResult<string | null>>;
+    getCommitsSinceTag(tagName: string | null): Promise<FireflyResult<string[]>>;
+    getCommitDetails(commitHash: string): Promise<FireflyResult<string>>;
     exec(args: string[]): AsyncFireflyResult<string>;
 }

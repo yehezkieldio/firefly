@@ -487,6 +487,60 @@ export class GitProviderAdapter implements GitProviderPort {
         return ok(hasUnpushed);
     }
 
+    async getLastTag(): Promise<FireflyResult<string | null>> {
+        logger.verbose("GitProviderAdapter: Getting last tag...");
+        const result = await this.exec(["describe", "--tags", "--abbrev=0"]);
+
+        if (result.isErr()) {
+            // No tags found is a valid state
+            if (result.error.message.includes("No names found")) {
+                logger.verbose("GitProviderAdapter: No tags found in repository");
+                return ok(null);
+            }
+            return err(result.error);
+        }
+
+        const lastTag = result.value.trim();
+        logger.verbose(`GitProviderAdapter: Last tag found: ${lastTag}`);
+        return ok(lastTag || null);
+    }
+
+    async getCommitsSinceTag(tagName: string | null): Promise<FireflyResult<string[]>> {
+        logger.verbose(`GitProviderAdapter: Getting commits since tag: ${tagName || "beginning"}`);
+
+        // If no tag, get all commits
+        const revRange = tagName ? `${tagName}..HEAD` : "HEAD";
+        const result = await this.exec(["rev-list", "--reverse", revRange]);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        const commitHashes = result.value
+            .trim()
+            .split("\n")
+            .filter((hash) => hash.trim().length > 0);
+
+        logger.verbose(`GitProviderAdapter: Found ${commitHashes.length} commits since ${tagName || "beginning"}`);
+        return ok(commitHashes);
+    }
+
+    async getCommitDetails(commitHash: string): Promise<FireflyResult<string>> {
+        logger.verbose(`GitProviderAdapter: Getting commit details for: ${commitHash}`);
+
+        // Get commit details in a parseable format
+        const format = ["hash:%H", "date:%ci", "author:%an <%ae>", "subject:%s", "body:%b", "notes:%N"].join("%n");
+
+        const result = await this.exec(["show", `--format=${format}`, "--no-patch", commitHash]);
+
+        if (result.isErr()) {
+            return err(result.error);
+        }
+
+        logger.verbose(`GitProviderAdapter: Retrieved commit details for: ${commitHash}`);
+        return ok(result.value);
+    }
+
     exec(args: string[], dryRun?: boolean): AsyncFireflyResult<string> {
         const sideEffectCommands = ["add", "commit", "push", "tag", "reset", "checkout"];
         if (dryRun && args.some((arg) => sideEffectCommands.includes(arg))) {

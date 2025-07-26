@@ -3,12 +3,13 @@ import { err, ok } from "neverthrow";
 import type { ReleaseType } from "semver";
 import type { ApplicationContext } from "#/application/context";
 import { VersionDeciderService } from "#/core/services/version-decider.service";
-import { ConventionalBumperAdapter } from "#/infrastructure/adapters/conventional-bumper.adapter";
+import { GitProviderAdapter } from "#/infrastructure/adapters/git-provider.adapter";
 import { VersionRepositoryAdapter } from "#/infrastructure/adapters/version-repository.adapter";
 import type { BumpStrategyNonOptional, ReleaseTypeNonOptional } from "#/infrastructure/config/schema";
 import { VersionChoicePrompter } from "#/infrastructure/prompters/version-choice.prompt";
 import { VersionStrategyPromptAdapter } from "#/infrastructure/prompters/version-strategy.prompter";
 import { createPackageJsonService } from "#/infrastructure/services/package-json-service.factory";
+import { SemanticVersionService } from "#/infrastructure/services/semantic-version.service";
 import { TaskExecutionError } from "#/shared/utils/error.util";
 import { logger } from "#/shared/utils/logger.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
@@ -19,17 +20,16 @@ type StrategyHandlers = Record<BumpStrategyNonOptional, StrategyHandler>;
 export class BumpStrategyService {
     private readonly strategyHandlers: StrategyHandlers;
     private readonly versionRepository: VersionRepositoryAdapter;
+    private readonly semanticVersionService: SemanticVersionService;
 
     constructor(
         private readonly context: ApplicationContext,
         private readonly promptStrategy: VersionStrategyPromptAdapter = new VersionStrategyPromptAdapter(),
-        private readonly versionPrompt: VersionChoicePrompter = new VersionChoicePrompter(),
-        private readonly conventionalBumper: ConventionalBumperAdapter = new ConventionalBumperAdapter(
-            context.getBasePath()
-        )
+        private readonly versionPrompt: VersionChoicePrompter = new VersionChoicePrompter()
     ) {
         this.strategyHandlers = this.createStrategyHandlers();
         this.versionRepository = new VersionRepositoryAdapter(createPackageJsonService(context.getBasePath()));
+        this.semanticVersionService = new SemanticVersionService(GitProviderAdapter.getInstance());
     }
 
     async initializeCurrentVersion(): Promise<FireflyResult<void>> {
@@ -210,8 +210,8 @@ export class BumpStrategyService {
             return err(new TaskExecutionError("Current version is not set in the context"));
         }
 
-        logger.verbose("BumpStrategyService: Getting version recommendation from conventional commits...");
-        const recommendationResult = await this.conventionalBumper.getVersionRecommendation();
+        logger.verbose("BumpStrategyService: Getting version recommendation from semantic analysis...");
+        const recommendationResult = await this.semanticVersionService.getVersionRecommendation();
         if (recommendationResult.isErr()) {
             return err(recommendationResult.error);
         }
