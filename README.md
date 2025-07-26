@@ -11,17 +11,18 @@
 
 Firefly is a flexible Command Line Interface (CLI) tool designed to streamline and automate the entire release process. It encompasses semantic versioning, comprehensive changelog generation, and GitHub releases, ensuring a consistent and efficient workflow for myself and possibly for you too.
 
-Firefly is structured around the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification for commit message formatting and strictly adheres to [Semantic Versioning](https://semver.org/) principles. The tool emphasizes automation without sacrificing control, offering both automatic version inference through commits and manual version selection for precise release management.
+Structured around the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification for commit message formatting and strictly adheres to [Semantic Versioning](https://semver.org/) principles. The tool emphasizes automation without sacrificing control, offering both automatic version inference through commits and manual version selection for precise release management.
 
-**Key Features:**
-- Built exclusively for [Bun](https://bun.sh/), leveraging Bun APIs for performance and reliability
-- Automatically determines the next version or allows manual version selection
-- Generates changelogs using [git-cliff](https://github.com/orhun/git-cliff), fully respecting your own configuration for format and rules
-- Unified configuration system using CLI flags and file-based config (`firefly.config.ts`)
-- Creates GitHub releases using the GitHub CLI, supporting draft, pre-release, and latest release options
-- Flexible support for scoped package names and repository roots for complex project structures
-- Atomic release operations with automatic rollback on failure
+**How It Works:**
 
+Built exclusively for [Bun](https://bun.sh/), leveraging Bun APIs for performance and reliability, it will:
+
+- Runs preflight checks to ensure a safe environment
+- Determines the next version automatically from commit history or via manual selection
+- Bumps the version in `package.json` (using `bun pm pkg` or file manipulation)
+- Generates changelogs with [git-cliff](https://github.com/orhun/git-cliff), fully respecting your configuration
+- Creates GitHub releases using the GitHub CLI
+- Stages changes, creates a commit and tag, and pushes to the remote repository
 
 ---
 
