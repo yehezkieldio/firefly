@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: WIP */
 import { loadConfig } from "c12";
 import { colors } from "consola/utils";
 import { ok, ResultAsync } from "neverthrow";
@@ -17,34 +16,80 @@ function mergeConfigWithPriority(
 ): Partial<FireflyConfig> {
     const merged = { ...fileConfig };
 
-    for (const [key, cliValue] of Object.entries(cliOverrides)) {
+    for (const [key, cliValue] of Object.entries(cliOverrides) as [keyof FireflyConfig, unknown][]) {
         if (cliValue === undefined) {
             continue;
         }
 
-        // Special handling for name and scope - only include if they have meaningful values
         if (key === "name" || key === "scope") {
             if (typeof cliValue === "string") {
                 // Only include if non-empty string or explicitly set to empty string via CLI
                 // This preserves the user's intention when they explicitly set --name="" or --scope="" or in the config file
-                merged[key as keyof FireflyConfig] = cliValue as any;
+                merged[key] = cliValue;
             }
             continue;
         }
 
-        if (typeof cliValue === "string") {
-            if (cliValue.trim() !== "") {
-                merged[key as keyof FireflyConfig] = cliValue as any;
-            }
-            continue;
-        }
+        switch (key) {
+            case "base":
+            case "repository":
+            case "changelogPath":
+            case "preReleaseId":
+            case "releaseNotes":
+            case "commitMessage":
+            case "tagName":
+            case "releaseTitle":
+            case "branch":
+                if (typeof cliValue === "string" && cliValue.trim() !== "") {
+                    merged[key] = cliValue;
+                }
+                break;
 
-        if (typeof cliValue === "boolean" || typeof cliValue === "number") {
-            merged[key as keyof FireflyConfig] = cliValue as any;
-            continue;
-        }
+            case "ci":
+            case "verbose":
+            case "dryRun":
+            case "skipBump":
+            case "skipChangelog":
+            case "skipCommit":
+            case "skipTag":
+            case "skipPush":
+            case "skipGitHubRelease":
+            case "skipGit":
+            case "releaseLatest":
+            case "releasePreRelease":
+            case "releaseDraft":
+                if (typeof cliValue === "boolean") {
+                    merged[key] = cliValue;
+                }
+                break;
 
-        merged[key as keyof FireflyConfig] = cliValue as any;
+            case "bumpStrategy":
+                if (typeof cliValue === "string" && (cliValue === "auto" || cliValue === "manual")) {
+                    merged[key] = cliValue;
+                }
+                break;
+
+            case "releaseType":
+                if (
+                    typeof cliValue === "string" &&
+                    ["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch"].includes(cliValue)
+                ) {
+                    merged[key] = cliValue as FireflyConfig["releaseType"];
+                }
+                break;
+
+            case "preReleaseBase":
+                if (typeof cliValue === "number" || cliValue === "0" || cliValue === "1") {
+                    merged[key] = cliValue;
+                }
+                break;
+
+            default:
+                {
+                    const _exhaustive: never = key;
+                }
+                break;
+        }
     }
 
     return merged;

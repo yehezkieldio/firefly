@@ -207,6 +207,9 @@ const BaseFireflyConfigSchema = z.object({
      * If not specified, attempts to use the current branch.
      */
     branch: z.string().optional(),
+
+    // REMINDER:
+    // If you add a new field here, make sure to update mergeConfigWithPriority to handle it properly.
 });
 
 export const FireflyConfigSchema = BaseFireflyConfigSchema.check((ctx) => {
