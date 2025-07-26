@@ -1,4 +1,3 @@
-import type { BumperRecommendation } from "conventional-recommended-bump";
 import { err, ok } from "neverthrow";
 import type { ReleaseType } from "semver";
 import semver from "semver";
@@ -7,6 +6,11 @@ import { SemverService, type VersionChoicesArgs } from "#/core/services/semver.s
 import { TRANSITION_KEYWORDS } from "#/shared/utils/constants";
 import { VersionInferenceError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
+
+interface BumperRecommendation {
+    level: number;
+    reason: string;
+}
 
 interface PreReleaseContext {
     isCurrentPreRelease: boolean;
