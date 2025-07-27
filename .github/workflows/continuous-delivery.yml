@@ -6,6 +6,22 @@ on:
       - master
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      src_changed: ${{ steps.filter.outputs.src_changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for changes in src/
+        id: filter
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^src/'; then
+            echo "src_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "src_changed=false" >> $GITHUB_OUTPUT
+          fi
   latest:
     name: Latest Release
     if: |
@@ -46,9 +62,11 @@ jobs:
 
   next:
     name: Next Release
+    needs: detect-changes
     if: |
       github.event_name == 'push' &&
       github.ref == 'refs/heads/master' &&
+      needs.detect-changes.outputs.src_changed == 'true' &&
       !contains(github.event.head_commit.message, format('chore(release){0} release firefly@', ':'))
     runs-on: ubuntu-latest
     permissions:
