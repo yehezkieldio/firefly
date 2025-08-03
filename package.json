@@ -47,7 +47,7 @@
     "c12": "^3.2.0",
     "commander": "^14.0.0",
     "consola": "^3.4.2",
-    "git-cliff": "^2.9.1",
+    "git-cliff": "^2.10.0",
     "neverthrow": "^8.2.0",
     "semver": "^7.7.2",
     "smol-toml": "^1.4.1",

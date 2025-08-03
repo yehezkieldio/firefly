@@ -7,7 +7,7 @@
         "c12": "^3.2.0",
         "commander": "^14.0.0",
         "consola": "^3.4.2",
-        "git-cliff": "^2.9.1",
+        "git-cliff": "^2.10.0",
         "neverthrow": "^8.2.0",
         "semver": "^7.7.2",
         "smol-toml": "^1.4.1",
@@ -303,19 +303,19 @@
 
     "giget": ["giget@2.0.0", "", { "dependencies": { "citty": "^0.1.6", "consola": "^3.4.0", "defu": "^6.1.4", "node-fetch-native": "^1.6.6", "nypm": "^0.6.0", "pathe": "^2.0.3" }, "bin": { "giget": "dist/cli.mjs" } }, "sha512-L5bGsVkxJbJgdnwyuheIunkGatUF/zssUoxxjACCseZYAVbaqdh9Tsmmlkl8vYan09H7sbvKt4pS8GqKLBrEzA=="],
 
-    "git-cliff": ["git-cliff@2.9.1", "", { "dependencies": { "execa": "^8.0.1" }, "optionalDependencies": { "git-cliff-darwin-arm64": "2.9.1", "git-cliff-darwin-x64": "2.9.1", "git-cliff-linux-arm64": "2.9.1", "git-cliff-linux-x64": "2.9.1", "git-cliff-windows-arm64": "2.9.1", "git-cliff-windows-x64": "2.9.1" }, "bin": "lib/cli/cli.js" }, "sha512-jELmNuu5oolmxmpZ4tZVPeyT4Cjx0ZXZb1mqEcE+ZaLdCECguNtRMcbbAiNMlMn6DlMalJpFiNChQvEHx2idQw=="],
+    "git-cliff": ["git-cliff@2.10.0", "", { "dependencies": { "execa": "^8.0.1" }, "optionalDependencies": { "git-cliff-darwin-arm64": "2.10.0", "git-cliff-darwin-x64": "2.10.0", "git-cliff-linux-arm64": "2.10.0", "git-cliff-linux-x64": "2.10.0", "git-cliff-windows-arm64": "2.10.0", "git-cliff-windows-x64": "2.10.0" }, "bin": "lib/cli/cli.js" }, "sha512-V7rIKfGsmXq5oUqFn8GJ+hkZcdl/enbrUwZIQl7dDgo/PxLOdiXD69+XG4zB7ufaPqhHcMzzH5TZwpFaPK3qNg=="],
 
-    "git-cliff-darwin-arm64": ["git-cliff-darwin-arm64@2.9.1", "", { "os": "darwin", "cpu": "arm64" }, "sha512-e/n/1N68lNx3MrVhmj8Ttgey/8d3UcRhkEOnEI769DUcZVUKy3D/Kz6ZGIMKvDpCmQ40WkEcOhprV+GpLrncnA=="],
+    "git-cliff-darwin-arm64": ["git-cliff-darwin-arm64@2.10.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-/x+KW+CRCpfn3xG71YD0lpQd1MmKH+fhUI7aki5QkU8dRp+IBxieswwb+lJcU4+FcLEbAEL/8hVxrBawrcmLcA=="],
 
-    "git-cliff-darwin-x64": ["git-cliff-darwin-x64@2.9.1", "", { "os": "darwin", "cpu": "x64" }, "sha512-sKf3wd+VBVXNmm3iMA6eThTz0AOkN7mRavStUJ+z5bSyZMrvgVXlj+GUImOuhPUsZd9qdE9wO7q+N10hCaCv8w=="],
+    "git-cliff-darwin-x64": ["git-cliff-darwin-x64@2.10.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-Yiufjb9wNEJ6Y//Na/BvfSd68sB4kp3NPKHtA9keO4UX+EM7xd4qy4daWUTnbDyvqJw4ZHWrdXND0SYoZ1qUqA=="],
 
-    "git-cliff-linux-arm64": ["git-cliff-linux-arm64@2.9.1", "", { "os": "linux", "cpu": "arm64" }, "sha512-VkHX6gIoTxCzG8Pxu3um98Ip2RCY7bbmlDpC8odx1rFK1J8bzu9hzIDfdSWy47yaVJnG47ACLVFsip5qSxRhGA=="],
+    "git-cliff-linux-arm64": ["git-cliff-linux-arm64@2.10.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-rGhsuItIwZlYmoW0h74dox7hJNVwG9H6h61URIh+Ey6EJaQGt7toh7GmgPBnhOnzKXHiVgMAfZaVNuhuuaYTKQ=="],
 
-    "git-cliff-linux-x64": ["git-cliff-linux-x64@2.9.1", "", { "os": "linux", "cpu": "x64" }, "sha512-fEvgOdO9PJNXiQh+MC9WxZ+Hjwc1Hv5yP0JGZZB3ucLn1r7ZWPbngzM/2VoYGDgTkhpo6cHYrs/jl7R5fnBnGA=="],
+    "git-cliff-linux-x64": ["git-cliff-linux-x64@2.10.0", "", { "os": "linux", "cpu": "x64" }, "sha512-MSXv/vvZuSfjfB81i3LiqnjwJm63Go+Ns2L+USLYktHZ69uq1iEWuhqNrCAU4V1xP1i6VMdXeax8Q6gc4Msehg=="],
 
-    "git-cliff-windows-arm64": ["git-cliff-windows-arm64@2.9.1", "", { "os": "win32", "cpu": "arm64" }, "sha512-zqCzo5VHFGc3f/dCHMAR1m1UWgMcU7lIy/YvoTJqp8h2q9debmnKe29bR9HvQUq3Q7VDOHL+aiRayxqZytMnCg=="],
+    "git-cliff-windows-arm64": ["git-cliff-windows-arm64@2.10.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-38iGWPi8O+0c3ejIYZ00d1cXmJ+0Sx0j9WzFBwE2HS2I938sJssrEdkzQyg+/1m8HG+a8yWK86wPEOxvfJ6kQQ=="],
 
-    "git-cliff-windows-x64": ["git-cliff-windows-x64@2.9.1", "", { "os": "win32", "cpu": "x64" }, "sha512-I+kAYLzmSQQ757Nxz+WnX9Ivcl9yfpkiULzrHywU95kUeH0SA07A74lcwjCIv0i4eujj0oCX2Ke5c/V4igPv2A=="],
+    "git-cliff-windows-x64": ["git-cliff-windows-x64@2.10.0", "", { "os": "win32", "cpu": "x64" }, "sha512-ke5yHH2BKtOyQWEtvasw2Dfd18PRbVJjbU/0FrBNBh/AjPOIKctDR0IaApxDDuEk+tJcSmrOA8s44Hw+Pd72Ig=="],
 
     "hookable": ["hookable@5.5.3", "", {}, "sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ=="],
 
