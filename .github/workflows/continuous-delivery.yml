@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
       packages: write
     steps:
       - name: Checkout
@@ -40,6 +41,8 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+          registries: |
+            https://registry.npmjs.org/
 
       - name: Cache dependencies
         id: cache
@@ -57,8 +60,6 @@ jobs:
 
       - name: Publish to NPM
         run: bun publish --registry=https://registry.npmjs.org --tag=latest
-        env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   next:
     name: Next Release
@@ -71,6 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
       packages: write
     steps:
       - name: Checkout
@@ -80,6 +82,8 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+          registries: |
+            https://registry.npmjs.org/
 
       - name: Cache dependencies
         id: cache
@@ -100,5 +104,3 @@ jobs:
 
       - name: Publish to NPM (next)
         run: bun publish --registry=https://registry.npmjs.org --tag=next
-        env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
