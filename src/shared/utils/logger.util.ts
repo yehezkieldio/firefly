@@ -14,10 +14,6 @@ const _logger = createConsola({
 export const logger: ConsolaInstance = createConsola({
     formatOptions: opts,
     reporters: [
-        /**
-         * There has to be a better way to do this...
-         * I am sorry if my perfectionism is annoying, but I like fancy things.
-         */
         {
             log(logObj: LogObject) {
                 if (logObj.type === "verbose") {
