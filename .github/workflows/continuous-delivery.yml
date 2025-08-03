@@ -62,6 +62,8 @@ jobs:
 
       - name: Publish to NPM
         run: bun publish --registry=https://registry.npmjs.org --tag=latest
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   next:
     name: Next Release
@@ -106,3 +108,5 @@ jobs:
 
       - name: Publish to NPM (next)
         run: bun publish --registry=https://registry.npmjs.org --tag=next
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
