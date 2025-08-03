@@ -17,7 +17,7 @@ jobs:
       - name: Check for changes in src/
         id: filter
         run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^src/'; then
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -Eq '(^|./)src/'; then
             echo "src_changed=true" >> $GITHUB_OUTPUT
           else
             echo "src_changed=false" >> $GITHUB_OUTPUT
