@@ -64,13 +64,10 @@ export class CommitRetrieverService {
     }
 
     private parseCommitDetails(rawDetails: string, hash: string): FireflyResult<Commit> {
-        logger.verbose(`CommitRetrieverService: Parsing commit details for hash: ${hash}`);
-
         try {
             const lines = rawDetails.trim().split("\n");
             const commitData: Record<string, string> = {};
 
-            // Parse the formatted output
             for (const line of lines) {
                 const colonIndex = line.indexOf(":");
                 if (colonIndex === -1) continue;
@@ -84,10 +81,8 @@ export class CommitRetrieverService {
             const body = commitData.body || "";
             const notes = commitData.notes || "";
 
-            // Parse the commit message structure
             const messageAnalysis = this.analyzeCommitMessage(subject);
 
-            // Build the commit object conforming to the Commit type
             const commit: Commit = {
                 hash,
                 date: commitData.date || null,
@@ -105,7 +100,6 @@ export class CommitRetrieverService {
                 references: this.extractReferences(body),
             };
 
-            logger.verbose(`CommitRetrieverService: Successfully parsed commit: ${hash}`);
             return ok(commit);
         } catch (error) {
             return err(new ProcessExecutionError(`Failed to parse commit details for ${hash}`, error as Error));
@@ -117,7 +111,6 @@ export class CommitRetrieverService {
         scope: string | null;
         subject: string | null;
     } {
-        // Check for breaking change pattern first
         const breakingMatch = subject.match(CommitRetrieverService.BREAKING_PATTERN);
         if (breakingMatch) {
             return {
@@ -127,7 +120,6 @@ export class CommitRetrieverService {
             };
         }
 
-        // Check for standard conventional commit pattern
         const standardMatch = subject.match(CommitRetrieverService.COMMIT_MESSAGE_PATTERN);
         if (standardMatch) {
             return {
@@ -137,7 +129,6 @@ export class CommitRetrieverService {
             };
         }
 
-        // No conventional commit pattern found
         return {
             type: null,
             scope: null,
@@ -159,7 +150,6 @@ export class CommitRetrieverService {
     private parseBreakingChangeNotes(body: string, notes: string): Array<{ title: string; text: string }> {
         const breakingNotes: Array<{ title: string; text: string }> = [];
 
-        // Check body for BREAKING CHANGE notes
         const breakingChangePattern = /BREAKING CHANGE:\s*(.+?)(?=\n\n|\n[A-Z]|$)/gs;
         const fullText = `${body}\n${notes}`;
 
@@ -211,7 +201,6 @@ export class CommitRetrieverService {
             prefix: string;
         }> = [];
 
-        // Match various reference patterns (fixes #123, closes #456, etc.)
         const referencePattern = /(fixes?|closes?|resolves?)\s+#(\d+)|#(\d+)/gi;
 
         let match = referencePattern.exec(text);
