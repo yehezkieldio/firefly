@@ -33,7 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
       packages: write
     steps:
       - name: Checkout
@@ -43,8 +42,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-          registries: |
-            https://registry.npmjs.org/
 
       - name: Cache dependencies
         id: cache
@@ -76,7 +73,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
       packages: write
     steps:
       - name: Checkout
@@ -86,8 +82,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-          registries: |
-            https://registry.npmjs.org/
 
       - name: Cache dependencies
         id: cache
