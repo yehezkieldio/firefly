@@ -1,7 +1,3 @@
-# Changelog
-
-All notable changes to Firefly will be documented in this file.
-
 ## firefly@2.1.1 (August 3, 2025)
 
 
@@ -17,7 +13,7 @@ All notable changes to Firefly will be documented in this file.
 
 ### <!-- 2 -->🧩 Dependencies Updates
 
-- [`2e1b47d`](https://github.com/yehezkieldio/firefly/commit/2e1b47d55bf3e33b3003184b6a0f068fa58162b6) deps: Update dependency @biomejs/biome to v2.1.3 ([#27](https://github.com/yehezkieldio/firefly/issues/27)) ([#27](https://github.com/yehezkieldio/firefly/pull/27) by [@renovate[bot]](https://github.com/renovate[bot])
+- [`2e1b47d`](https://github.com/yehezkieldio/firefly/commit/2e1b47d55bf3e33b3003184b6a0f068fa58162b6) deps: Update dependency @biomejs/biome to v2.1.3 ([#27](https://github.com/yehezkieldio/firefly/issues/27)) by renovate[bot]
 
 ### <!-- 4 -->🐛 Bug Fixes
 
