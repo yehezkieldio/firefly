@@ -1,4 +1,4 @@
-import type { FireflyConfig } from "#/infrastructure/config";
+import type { FireflyConfig } from "#/platform/config";
 
 export default {
     name: "firefly",
