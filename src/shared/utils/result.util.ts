@@ -21,7 +21,7 @@ export type FireflyResult<T> = Result<T, FireflyError>;
  *
  * @example
  * ```ts
- * const result = await someAsyncFunction(); // someAsyncFunction returns AsyncFireflyResult<T>
+ * const result = await someAsyncFunction(); // someAsyncFunction returns AsyncFireflyResult<T>, we await it
  * if (result.isErr()) {
  *  // Handle the error
  * }
