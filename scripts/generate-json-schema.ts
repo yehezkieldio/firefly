@@ -8,8 +8,7 @@ if (!outputPath) {
     process.exit(1);
 }
 
-const configSchema = SchemaRegistry.getConfigSchema();
-const schema = z.toJSONSchema(configSchema.partial(), {
+const schema = z.toJSONSchema(SchemaRegistry.getConfigSchema().partial(), {
     target: "draft-4",
     io: "input",
 });
