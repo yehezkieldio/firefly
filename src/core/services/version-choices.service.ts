@@ -54,7 +54,7 @@ export class VersionChoicesService {
     }
 
     private determineAvailableVersionTypes(currentVersion: string, releaseType?: ReleaseType): readonly ReleaseType[] {
-        if (releaseType) {
+        if (releaseType !== undefined) {
             return this.getVersionTypesForReleaseType(releaseType);
         }
 
