@@ -8,11 +8,20 @@ export const commandSchemas = {
 
 export type CommandName = keyof typeof commandSchemas;
 
-export function getFinalConfigSchema(command: CommandName): z.ZodTypeAny {
-    const commandSchema = commandSchemas[command];
-    return BaseConfigSchema.extend({
-        ...commandSchema.shape,
-    });
+export function getFinalConfigSchema(command?: CommandName) {
+    if (command) {
+        const commandSchema = commandSchemas[command];
+        return BaseConfigSchema.extend({
+            ...commandSchema.shape,
+        });
+    }
+
+    const mergedShape: z.ZodRawShape = {};
+    for (const schema of Object.values(commandSchemas)) {
+        Object.assign(mergedShape, schema.shape);
+    }
+
+    return BaseConfigSchema.extend(mergedShape);
 }
 
 export type BaseConfig = z.infer<typeof BaseConfigSchema>;
