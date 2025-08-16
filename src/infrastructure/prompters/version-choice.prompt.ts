@@ -1,5 +1,5 @@
 import { LogLevels } from "consola";
-import { err, errAsync, ok, ResultAsync } from "neverthrow";
+import { ResultAsync, err, errAsync, ok } from "neverthrow";
 import type { VersionChoicesArgs } from "#/core/services/semver.service";
 import { VersionChoicesService } from "#/core/services/version-choices.service";
 import type { PromptSelectChoice } from "#/shared/types/prompt-select-choice.type";

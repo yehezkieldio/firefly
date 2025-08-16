@@ -53,7 +53,7 @@ export async function createCLI(): Promise<typeof program> {
         )
         .option("--rt, --release-type <type>", "Release type (major, minor, patch, prerelease, etc.)", (input) => {
             // Accept undefined (no input) or a valid value
-            if (input === undefined) return undefined;
+            if (input === undefined) return;
             const result = ReleaseTypeSchema.safeParse(input);
             if (!result.success) {
                 throw new InvalidArgumentError(

@@ -1,4 +1,4 @@
-import { err, ok, Result } from "neverthrow";
+import { Result, err, ok } from "neverthrow";
 import semver, { type ReleaseType } from "semver";
 import { Version } from "#/core/domain/version";
 import { SemverService, type VersionChoicesArgs } from "#/core/services/semver.service";
@@ -71,7 +71,7 @@ export class VersionChoicesService {
     }
 
     private isPreReleaseVersion(currentVersion: string): boolean {
-        return !!semver.prerelease(currentVersion);
+        return Boolean(semver.prerelease(currentVersion));
     }
 
     private createVersionChoice(options: VersionChoicesArgs): FireflyResult<PromptSelectChoice> {

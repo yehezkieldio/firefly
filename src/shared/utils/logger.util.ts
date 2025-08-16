@@ -1,4 +1,4 @@
-import { type ConsolaInstance, createConsola, type FormatOptions, type LogObject } from "consola";
+import { type ConsolaInstance, type FormatOptions, type LogObject, createConsola } from "consola";
 import { colors } from "consola/utils";
 
 const opts: FormatOptions = {

@@ -106,7 +106,7 @@ export class Version {
     }
 
     private isComplexIdentifier(identifier?: string): boolean {
-        return !!identifier && identifier.includes(".");
+        return Boolean(identifier) && identifier.includes(".");
     }
 
     private bumpWithComplexIdentifier(identifier?: string): string | null {

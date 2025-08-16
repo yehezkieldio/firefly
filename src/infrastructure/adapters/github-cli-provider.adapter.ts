@@ -1,4 +1,4 @@
-import { err, ok, okAsync, ResultAsync } from "neverthrow";
+import { ResultAsync, err, ok, okAsync } from "neverthrow";
 import { type Repository, RepositorySchema } from "#/core/ports/git-provider.port";
 import type { GitHubCliProviderPort } from "#/core/ports/github-cli.port";
 import { REPOSITORY_PATTERNS } from "#/shared/utils/constants";
@@ -94,7 +94,7 @@ export class GithubCliProviderAdapter implements GitHubCliProviderPort {
 
     exec(args: string[], dryRun?: boolean): AsyncFireflyResult<string> {
         let logArgs: string;
-        const dontTruncateNotes = !!process.env.FIREFLY_DEBUG_DONT_TRUNCATE_RELEASE_NOTES;
+        const dontTruncateNotes = Boolean(process.env.FIREFLY_DEBUG_DONT_TRUNCATE_RELEASE_NOTES);
         if (args[0] === "release" && args[1] === "create" && !dontTruncateNotes) {
             const notesIdx = args.indexOf("--notes");
             if (notesIdx !== -1) {

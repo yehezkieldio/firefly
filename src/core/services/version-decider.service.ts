@@ -48,7 +48,7 @@ export class VersionDeciderService {
     }
 
     private analyzePreReleaseContext(currentVersion: string, recommendation?: BumperRecommendation): PreReleaseContext {
-        const isCurrentPreRelease = !!semver.prerelease(currentVersion);
+        const isCurrentPreRelease = Boolean(semver.prerelease(currentVersion));
         const preReleaseIdentifier = isCurrentPreRelease
             ? (semver.prerelease(currentVersion)?.[0] as string)
             : undefined;

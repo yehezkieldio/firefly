@@ -1,5 +1,5 @@
 import { type Options as GitCliffOptions, runGitCliff } from "git-cliff";
-import { err, ok, ResultAsync } from "neverthrow";
+import { ResultAsync, err, ok } from "neverthrow";
 import type { ChangelogHandlerOptions } from "#/application/services/changelog-handler.service";
 import { TokenService } from "#/infrastructure/services/token.service";
 import { ConfigurationError, ProcessExecutionError } from "#/shared/utils/error.util";

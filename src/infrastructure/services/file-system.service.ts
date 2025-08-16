@@ -1,4 +1,4 @@
-import { okAsync, ResultAsync } from "neverthrow";
+import { ResultAsync, okAsync } from "neverthrow";
 import { ConfigurationError } from "#/shared/utils/error.util";
 import { logger } from "#/shared/utils/logger.util";
 import type { AsyncFireflyResult } from "#/shared/utils/result.util";
@@ -19,7 +19,7 @@ export class FileSystemService {
         }
 
         return this.wrapOperation(Bun.write(this.path, content), "Failed to write file")
-            .map(() => undefined)
+            .map(() => {})
             .andTee(() => logger.verbose(`FileSystemService: Wrote file at ${this.path}`));
     }
 

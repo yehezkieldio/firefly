@@ -1,6 +1,6 @@
 import { loadConfig } from "c12";
 import { colors } from "consola/utils";
-import { ok, ResultAsync } from "neverthrow";
+import { ResultAsync, ok } from "neverthrow";
 import { type FireflyConfig, FireflyConfigSchema } from "#/infrastructure/config/schema";
 import { logger } from "#/shared/utils/logger.util";
 

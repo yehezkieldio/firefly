@@ -1,5 +1,5 @@
 import { err, ok } from "neverthrow";
-import { parse, type TomlValue } from "smol-toml";
+import { type TomlValue, parse } from "smol-toml";
 import type { FileSystemService } from "#/infrastructure/services/file-system.service";
 import type { CliffToml } from "#/shared/types/cliff-toml.type";
 import { ConfigurationError } from "#/shared/utils/error.util";

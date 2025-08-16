@@ -1,5 +1,5 @@
 import { LogLevels } from "consola";
-import { err, ok, ResultAsync } from "neverthrow";
+import { ResultAsync, err, ok } from "neverthrow";
 import type { PromptSelectChoice } from "#/shared/types/prompt-select-choice.type";
 import { VersionInferenceError } from "#/shared/utils/error.util";
 import { logger } from "#/shared/utils/logger.util";
