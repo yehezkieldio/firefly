@@ -729,7 +729,7 @@
                 // Ensure async functions utilize await.
                 "useAwait": "off",
                 // Enforce consistent return values in iterable callbacks.
-                "useIterableCallbackReturn": "error",
+                "useIterableCallbackReturn": "off",
                 // Enforce default clauses in switch statements to be last
                 "useDefaultSwitchClauseLast": "error",
                 // Enforce passing a message value when creating a built-in error.
