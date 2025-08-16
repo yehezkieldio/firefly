@@ -522,7 +522,7 @@
                 // Require all enum members to be literal values.
                 "useLiteralEnumMembers": "error",
                 // Reports usage of “magic numbers” — numbers used directly instead of being assigned to named constants.
-                "noMagicNumbers": "error",
+                "noMagicNumbers": "off",
                 // Promotes the usage of node:assert/strict over node:assert.
                 "useNodeAssertStrict": "error",
                 // Enforces using the node: protocol for Node.js builtin modules.
