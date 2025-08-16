@@ -13,7 +13,7 @@ export class TokenService {
         }
         logger.verbose("TokenService: No GitHub token found in environment variables, using GitHub CLI provider.");
 
-        if (adapter) {
+        if (adapter !== undefined) {
             return await adapter.getToken();
         }
 
