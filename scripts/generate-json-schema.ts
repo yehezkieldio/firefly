@@ -1,5 +1,5 @@
 import z from "zod";
-import { getFinalConfigSchema } from "#/modules/configuration/application/schema.registry";
+import { SchemaRegistry } from "#/modules/configuration/application/schema-registry.service";
 import { logger } from "#/shared/logger";
 
 const outputPath = process.argv[2];
@@ -8,7 +8,7 @@ if (!outputPath) {
     process.exit(1);
 }
 
-const configSchema = getFinalConfigSchema();
+const configSchema = SchemaRegistry.getConfigSchema();
 const schema = z.toJSONSchema(configSchema.partial(), {
     target: "draft-4",
     io: "input",
