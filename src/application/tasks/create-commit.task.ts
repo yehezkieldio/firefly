@@ -90,7 +90,6 @@ export class CreateCommitTask implements Task {
         for (const file of files) {
             logger.verbose(`CreateCommitTask: Staging file: ${file}`);
 
-            // biome-ignore lint/nursery/noAwaitInLoop: Staging one file at a time is acceptable here
             const stageResult = await this.gitProvider.stageFile(file, this.context.getConfig().dryRun);
 
             if (stageResult.isErr()) {
