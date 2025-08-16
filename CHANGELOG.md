@@ -6,6 +6,41 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@2.1.3 (August 16, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`93805b6`](https://github.com/yehezkieldio/firefly/commit/93805b62ff2c9e268ba6afb3e637696a2bfe4154) config: Update biome configuration
+- [`aaa356a`](https://github.com/yehezkieldio/firefly/commit/aaa356a8aaa862d7100d175ab2b90670ed7997b2) config: Disable noParameterProperties rule
+- [`223ea3b`](https://github.com/yehezkieldio/firefly/commit/223ea3b152c6338e14f3ee0562fddf50f5b0e57e) config: Disable useIterableCallbackReturn rule
+- [`1d418b4`](https://github.com/yehezkieldio/firefly/commit/1d418b42f4630d5ef11506ef56293f0669848899) config: Disable noMagicNumbers rule
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`ad32444`](https://github.com/yehezkieldio/firefly/commit/ad32444bb23830310cfd7debd399087069cd20df) deps: Update dependency tsdown to ^0.13.4 ([#41](https://github.com/yehezkieldio/firefly/issues/41)) by renovate[bot]
+- [`17329fd`](https://github.com/yehezkieldio/firefly/commit/17329fd09374f939bcbe7d68bd987ba2757b7983) deps: Update dependency @types/node to ^24.2.1 ([#42](https://github.com/yehezkieldio/firefly/issues/42)) by renovate[bot]
+- [`3036785`](https://github.com/yehezkieldio/firefly/commit/30367857764cc3cb9b7a0dd4602b95ca6ee23fae) deps: Update dependency zod to ^4.0.16 ([#43](https://github.com/yehezkieldio/firefly/issues/43)) by renovate[bot]
+- [`19657e2`](https://github.com/yehezkieldio/firefly/commit/19657e2ec9eaac91a106a4c7df52056994a8bc4e) deps: Update dependency smol-toml to ^1.4.2 ([#44](https://github.com/yehezkieldio/firefly/issues/44)) by renovate[bot]
+- [`3dc355a`](https://github.com/yehezkieldio/firefly/commit/3dc355a6fdb6a3448e8f991f044e55d13214dda6) deps: Update dependency zod to ^4.0.17 ([#45](https://github.com/yehezkieldio/firefly/issues/45)) by renovate[bot]
+- [`1bb82c3`](https://github.com/yehezkieldio/firefly/commit/1bb82c3776a5926235fa35099fac2d8049c2cf10) deps: Update dependency tsdown to ^0.13.5 ([#46](https://github.com/yehezkieldio/firefly/issues/46)) by renovate[bot]
+- [`2602720`](https://github.com/yehezkieldio/firefly/commit/26027209480361787bafae9882d30a1ac9cd60cb) deps: Update dependency tsdown to ^0.14.0 ([#47](https://github.com/yehezkieldio/firefly/issues/47)) by renovate[bot]
+- [`55a4de9`](https://github.com/yehezkieldio/firefly/commit/55a4de9df38d00b19fc2cb6c5166dca557a653f8) deps: Update dependency @types/bun to ^1.2.20 ([#48](https://github.com/yehezkieldio/firefly/issues/48)) by renovate[bot]
+- [`ae65051`](https://github.com/yehezkieldio/firefly/commit/ae65051cd296eb4f7f154b3a590d54f8bb57ebbe) deps: Update dependency tsdown to ^0.14.1 ([#49](https://github.com/yehezkieldio/firefly/issues/49)) by renovate[bot]
+- [`cf04639`](https://github.com/yehezkieldio/firefly/commit/cf0463948e5aeeec3a6e115752b928d7ed1daf85) deps: Update dependency @biomejs/biome to v2.2.0 ([#50](https://github.com/yehezkieldio/firefly/issues/50)) by renovate[bot]
+- [`36d2400`](https://github.com/yehezkieldio/firefly/commit/36d2400bd9b94f938542ac9863437eee588e0d1d) deps: Update dependency ultracite to ^5.1.5 ([#51](https://github.com/yehezkieldio/firefly/issues/51)) by renovate[bot]
+- [`e89939b`](https://github.com/yehezkieldio/firefly/commit/e89939bc7c85ec3800c091d3cdcde234e49323fa) deps: Update dependency @types/node to ^24.3.0 ([#52](https://github.com/yehezkieldio/firefly/issues/52)) by renovate[bot]
+- [`bf9ab3e`](https://github.com/yehezkieldio/firefly/commit/bf9ab3ead1888f233cc568e170bafa14bfd800c3) deps: Update dependency ultracite to ^5.1.6 ([#53](https://github.com/yehezkieldio/firefly/issues/53)) by renovate[bot]
+- [`421b941`](https://github.com/yehezkieldio/firefly/commit/421b941e17b8b0a2053ba3bca797adbfa00c72ae) deps: Update dependency ultracite to ^5.1.7 ([#54](https://github.com/yehezkieldio/firefly/issues/54)) by renovate[bot]
+- [`a5f70e7`](https://github.com/yehezkieldio/firefly/commit/a5f70e730c88923d35ce0c31ea728b18ad99196b) deps: Update dependency ultracite to ^5.1.8 ([#55](https://github.com/yehezkieldio/firefly/issues/55)) by renovate[bot]
+
+### <!-- 9 -->🎨 Code Styling
+- [`35d5061`](https://github.com/yehezkieldio/firefly/commit/35d5061406b840373853caa7e32a52e43f789b9b)  Format files
+- [`632ccc9`](https://github.com/yehezkieldio/firefly/commit/632ccc97767cafce6e807362e9d3e0a3032666ee)  Lint fix files
+- [`22ad4ed`](https://github.com/yehezkieldio/firefly/commit/22ad4edda0dcc2b9f00837282543a134282338ad)  Clarify adapter check in TokenService
+- [`27b7620`](https://github.com/yehezkieldio/firefly/commit/27b7620c4a39c7229173a2ddfead812248c26f56)  Clarify release type  in VersionChoices
+- [`31574cc`](https://github.com/yehezkieldio/firefly/commit/31574cc737bb151f8e1c2580bf5292e17f889556)  Remove unnecessary biome ignore comment
+- [`11e06bd`](https://github.com/yehezkieldio/firefly/commit/11e06bd8106291d3365eb7f829ccbc239a919cb4)  Clarify recommended type  in BumpStrategy
+- [`7ba36f5`](https://github.com/yehezkieldio/firefly/commit/7ba36f57bd3c99013e58cd0060e0bc8b107f2c59)  Remove unnecessary biome ignore comment
+- [`f5875ef`](https://github.com/yehezkieldio/firefly/commit/f5875ef305cae735df366a08455c2ed475665900)  Remove unnecessary biome ignore comment
+- [`b6a8ad0`](https://github.com/yehezkieldio/firefly/commit/b6a8ad01dcb15839b83684443951ee644b169192)  Refine isComplexIdentifier check to ensure identifier is a string
 ## firefly@2.1.2 (August 8, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
