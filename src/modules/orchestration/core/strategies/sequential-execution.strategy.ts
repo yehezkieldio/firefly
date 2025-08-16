@@ -5,6 +5,7 @@ import type {
 } from "#/modules/orchestration/core/contracts/orchestration.interface";
 import type { Task } from "#/modules/orchestration/core/contracts/task.interface";
 import type { WorkflowResult } from "#/modules/orchestration/core/contracts/workflow.interface";
+import { FeatureManager } from "#/modules/orchestration/core/services/feature-manager.service";
 import { TaskExecutorService } from "#/modules/orchestration/core/services/task-executor.service";
 import { logger } from "#/shared/logger";
 import { type FireflyError, createFireflyError } from "#/shared/utils/error.util";
@@ -20,11 +21,13 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
     private readonly options: OrchestratorOptions;
     private readonly startTime: Date;
     private readonly executor: TaskExecutorService;
+    private readonly featureManager: FeatureManager;
 
     constructor(options: OrchestratorOptions) {
         this.options = options;
         this.startTime = new Date();
         this.executor = new TaskExecutorService();
+        this.featureManager = new FeatureManager(options);
     }
 
     execute(tasks: readonly Task[], context?: OrchestrationContext): FireflyAsyncResult<WorkflowResult> {
@@ -77,13 +80,32 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
     }
 
     private shouldExecuteTask(task: Task): FireflyResult<boolean> {
+        // Basic validation
         if (!task || typeof task.name !== "string" || typeof task.id !== "string") {
+            logger.warn(`SequentialExecutionStrategy: Invalid task structure for task ${task?.id || "unknown"}`);
             return fireflyOk(false);
         }
+
+        // Check if task has required features enabled
+        const requiredFeatures = task.getRequiredFeatures();
+        if (requiredFeatures.length > 0) {
+            const enabledFeatures = this.featureManager.getEnabledFeatures();
+            const hasRequiredFeatures = task.isEnabled(enabledFeatures);
+
+            if (!hasRequiredFeatures) {
+                logger.verbose(
+                    `SequentialExecutionStrategy: Task ${task.name} disabled due to missing required features: ${requiredFeatures.join(", ")}`,
+                );
+                return fireflyOk(false);
+            }
+        }
+
+        // Legacy feature check for backward compatibility
         if (this.options.enabledFeatures && !task.isEnabled(this.options.enabledFeatures)) {
             logger.verbose(`SequentialExecutionStrategy: Task ${task.name} disabled due to missing required features`);
             return fireflyOk(false);
         }
+
         return fireflyOk(true);
     }
 
