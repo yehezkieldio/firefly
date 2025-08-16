@@ -27,7 +27,6 @@ export class TaskOrchestratorService {
                 this.rollbackManager.addTask(task);
             }
 
-            // biome-ignore lint/nursery/noAwaitInLoop: Sequential execution is required for tasks
             const result = await this.taskExecutor.executeTask(task);
 
             if (result.isErr()) {
