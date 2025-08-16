@@ -1,4 +1,4 @@
-import type { __FireflyConfig } from "#/modules/configuration/application/schema.registry";
+import type { __FireflyConfig } from "#/modules/configuration/application/schema-registry.service";
 
 export type FireflyConfig = Partial<__FireflyConfig>;
 
