@@ -1,0 +1,150 @@
+name: Continuous Delivery
+
+on:
+    push:
+        branches:
+            - master
+permissions:
+    contents: read
+    packages: write
+
+jobs:
+    detect-changes:
+        name: Detect Changes and Release Type
+        runs-on: ubuntu-latest
+        outputs:
+            src_changed: ${{ steps.filter.outputs.src_changed }}
+            is_release: ${{ steps.detect_release.outputs.is_release }}
+            is_prerelease: ${{ steps.detect_release.outputs.is_prerelease }}
+            is_stable: ${{ steps.detect_release.outputs.is_stable }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Check for changes in src/
+              id: filter
+              run: |
+                  if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '^src/'; then
+                    echo "src_changed=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "src_changed=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Determine release type
+              id: detect_release
+              run: |
+                  MSG="${{ github.event.head_commit.message }}"
+
+                  if echo "$MSG" | grep -q 'chore(release): release firefly@'; then
+                    echo "is_release=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "is_release=false" >> $GITHUB_OUTPUT
+                  fi
+
+                  if echo "$MSG" | grep -Pq 'firefly@[0-9]+\.[0-9]+\.[0-9]+-[A-Za-z]+\.[0-9]+'; then
+                    echo "is_prerelease=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "is_prerelease=false" >> $GITHUB_OUTPUT
+                  fi
+
+                  if echo "$MSG" | grep -Pq 'firefly@[0-9]+\.[0-9]+\.[0-9]+$'; then
+                    echo "is_stable=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "is_stable=false" >> $GITHUB_OUTPUT
+                  fi
+
+    publish-latest:
+        name: Publish Latest
+        needs: detect-changes
+        if: |
+            github.event_name == 'push' &&
+            github.ref == 'refs/heads/master' &&
+            needs.detect-changes.outputs.is_release == 'true' &&
+            needs.detect-changes.outputs.is_stable == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Setup Bun Runtime
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install Project Dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Build Firefly Package
+              run: bun run build
+
+            - name: Publish Package to NPM (latest tag)
+              run: bun publish --registry=https://registry.npmjs.org --tag=latest
+              env:
+                  NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+    publish-next:
+        name: Publish Development
+        needs: detect-changes
+        if: |
+            github.event_name == 'push' &&
+            github.ref == 'refs/heads/master' &&
+            needs.detect-changes.outputs.is_release == 'false' &&
+            needs.detect-changes.outputs.src_changed == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Setup Bun Runtime
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install Project Dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Bump Version
+              run: bun run dev release --ci --bs auto --rt prerelease --pre-release-id "dev.$(git rev-parse --verify --short HEAD)" --skip-changelog --skip-git
+
+            - name: Build Firefly Package
+              run: bun run build
+
+            - name: Publish Package to NPM (next tag)
+              run: bun publish --registry=https://registry.npmjs.org --tag=next
+              env:
+                  NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+    publish-pre-release:
+        name: Publish Pre-release
+        needs: detect-changes
+        if: |
+            github.event_name == 'push' &&
+            github.ref == 'refs/heads/master' &&
+            needs.detect-changes.outputs.is_release == 'true' &&
+            needs.detect-changes.outputs.is_prerelease == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Extract Pre-release Tag
+              id: prerelease
+              run: |
+                  TAG=$(echo "${{ github.event.head_commit.message }}" | grep -oP 'firefly@[0-9]+\.[0-9]+\.[0-9]+-\K[^.]+' )
+                  echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+            - name: Setup Bun Runtime
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install Project Dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Build Firefly Package
+              run: bun run build
+
+            - name: Publish Package to NPM (prerelease tag)
+              run: bun publish --registry=https://registry.npmjs.org --tag=${{ steps.prerelease.outputs.tag }}
+              env:
+                  NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
