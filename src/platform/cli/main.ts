@@ -11,9 +11,10 @@ import "#/application/context";
 
 import { createCLI } from "#/platform/cli/commander";
 import { logger } from "#/shared/logger";
+import pkg from "../../../package.json" with { type: "json" };
 
 async function main(): Promise<void> {
-    const cli = await createCLI();
+    const cli = await createCLI(pkg.description, pkg.version);
     await cli.parseAsync(process.argv);
 }
 

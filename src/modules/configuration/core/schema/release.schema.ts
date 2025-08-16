@@ -29,16 +29,19 @@ export const ReleaseConfigSchema = z.object({
     commitMessage: z.string().default(COMMIT_MESSAGE_TEMPLATE).describe("Commit message template with placeholders."),
     tagName: z.string().default(TAG_NAME_TEMPLATE).describe("Tag name template with placeholders."),
 
-    skipBump: z.boolean().default(false).describe("Skip version bump step."),
-    skipChangelog: z.boolean().default(false).describe("Skip changelog generation step."),
-    skipCommit: z.boolean().default(false).describe("Skip commit step."),
-    skipTag: z.boolean().default(false).describe("Skip tag creation step."),
-    skipPush: z.boolean().default(false).describe("Skip push step."),
-    skipGitHubRelease: z.boolean().default(false).describe("Skip GitHub release step."),
-    skipGit: z.boolean().default(false).describe("Skip all git-related steps (commit, tag, push, GitHub release)."),
+    skipBump: z.coerce.boolean().default(false).describe("Skip version bump step."),
+    skipChangelog: z.coerce.boolean().default(false).describe("Skip changelog generation step."),
+    skipCommit: z.coerce.boolean().default(false).describe("Skip commit step."),
+    skipTag: z.coerce.boolean().default(false).describe("Skip tag creation step."),
+    skipPush: z.coerce.boolean().default(false).describe("Skip push step."),
+    skipGitHubRelease: z.coerce.boolean().default(false).describe("Skip GitHub release step."),
+    skipGit: z.coerce
+        .boolean()
+        .default(false)
+        .describe("Skip all git-related steps (commit, tag, push, GitHub release)."),
 
     releaseTitle: z.string().default(RELEASE_TITLE_TEMPLATE).describe("GitHub release title with placeholders."),
-    releaseLatest: z.boolean().default(true).describe("Mark as latest release."),
-    releasePreRelease: z.boolean().default(false).describe("Mark as pre-release."),
-    releaseDraft: z.boolean().default(false).describe("Release as draft version."),
+    releaseLatest: z.coerce.boolean().default(true).describe("Mark as latest release."),
+    releasePreRelease: z.coerce.boolean().default(false).describe("Mark as pre-release."),
+    releaseDraft: z.coerce.boolean().default(false).describe("Release as draft version."),
 });

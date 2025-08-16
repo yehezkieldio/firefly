@@ -7,6 +7,10 @@ export class SchemaRegistry {
         release: ReleaseConfigSchema,
     } as const;
 
+    static getBaseSchema() {
+        return BaseConfigSchema;
+    }
+
     static getConfigSchema(command?: CommandName) {
         if (command) {
             const commandSchema = SchemaRegistry.commandSchemas[command];
