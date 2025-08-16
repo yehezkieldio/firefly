@@ -26,7 +26,6 @@ export class TaskRollbackManager {
 
         for (const command of reversedCommands) {
             logger.verbose(`TaskRollbackManager: Rolling back task: ${command.getName() ?? "unknown"}`);
-            // biome-ignore lint/nursery/noAwaitInLoop: Sequential execution is required for rollbacks
             const result = await taskExecutor.undoTask(command);
 
             if (result.isErr()) {
