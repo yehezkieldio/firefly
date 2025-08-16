@@ -41,7 +41,7 @@ export class WorkflowRunnerService {
         }
 
         const context = contextResult.value;
-        logger.info(`Workflow runner started with execution ID: ${context.executionId}`);
+        logger.verbose(`WorkflowRunnerService: Workflow runner started with execution ID: ${context.executionId}`);
         if (options.verbose) {
             logger.level = LogLevels.verbose;
         }
@@ -113,60 +113,6 @@ export class WorkflowRunnerService {
     }
 
     /**
-     * Pause the current workflow execution.
-     */
-    async pause(): Promise<void> {
-        if (!this.currentWorkflow) {
-            logger.warn("No workflow is currently running");
-            return;
-        }
-
-        logger.info("Pausing workflow execution...");
-        const pauseResult = await this.currentWorkflow.pause();
-        if (pauseResult.isErr()) {
-            logger.error("Failed to pause workflow", pauseResult.error);
-        } else {
-            logger.info("Workflow paused successfully");
-        }
-    }
-
-    /**
-     * Resume the current workflow execution.
-     */
-    async resume(): Promise<void> {
-        if (!this.currentWorkflow) {
-            logger.warn("No workflow is currently paused");
-            return;
-        }
-
-        logger.info("Resuming workflow execution...");
-        const resumeResult = await this.currentWorkflow.resume();
-        if (resumeResult.isErr()) {
-            logger.error("Failed to resume workflow", resumeResult.error);
-        } else {
-            logger.info("Workflow resumed successfully");
-        }
-    }
-
-    /**
-     * Cancel the current workflow execution.
-     */
-    async cancel(): Promise<void> {
-        if (!this.currentWorkflow) {
-            logger.warn("No workflow is currently running");
-            return;
-        }
-
-        logger.info("Cancelling workflow execution...");
-        const cancelResult = await this.currentWorkflow.cancel();
-        if (cancelResult.isErr()) {
-            logger.error("Failed to cancel workflow", cancelResult.error);
-        } else {
-            logger.info("Workflow cancelled successfully");
-        }
-    }
-
-    /**
      * Handle workflow errors using the onError hook if available.
      */
     private async handleWorkflowError(
@@ -187,11 +133,12 @@ export class WorkflowRunnerService {
      * Logs a success message and details.
      */
     private logSuccess(result: WorkflowResult): void {
-        logger.verbose("Execution summary:", {
+        const summary = {
             executionId: result.executionId,
             executedTasks: result.executedTasks,
             skippedTasks: result.skippedTasks,
-        });
+        };
+        logger.verbose(JSON.stringify(summary, null, 2));
     }
 
     /**

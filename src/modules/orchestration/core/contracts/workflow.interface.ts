@@ -9,20 +9,10 @@ import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.ut
 export interface Workflow<TContext extends TaskContext = TaskContext> {
     readonly id: string;
     readonly name: string;
-    readonly version: string;
     readonly description: string;
 
-    // Task management
     buildTasks(context: TContext): FireflyResult<Task[]>;
-    validateTasks(tasks: Task[], context: TContext): FireflyResult<void>;
 
-    // Execution
-    execute(context: TContext): FireflyAsyncResult<WorkflowResult>;
-    pause(): FireflyAsyncResult<void>;
-    resume(): FireflyAsyncResult<void>;
-    cancel(): FireflyAsyncResult<void>;
-
-    // Hooks
     beforeExecute?(context: TContext): FireflyAsyncResult<void>;
     afterExecute?(result: WorkflowResult, context: TContext): FireflyAsyncResult<void>;
     onError?(error: FireflyError, context: TContext): FireflyAsyncResult<void>;
