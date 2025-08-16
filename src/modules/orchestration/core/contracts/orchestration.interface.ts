@@ -1,19 +1,25 @@
 import z from "zod";
+import type { CommandName, FinalConfigFor } from "#/modules/configuration/application/schema-registry.service";
 import type { Task } from "#/modules/orchestration/core/contracts/task.interface";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
 /**
  * Orchestration context for managing shared state across tasks.
  */
-export interface OrchestrationContext<TState extends Record<string, unknown> = Record<string, unknown>> {
+export interface OrchestrationContext<TData = Record<string, unknown>, TCommand extends CommandName = CommandName> {
     readonly executionId: string;
     readonly startTime: Date;
-    get<K extends keyof TState>(key: K): FireflyResult<TState[K]>;
-    set<K extends keyof TState>(key: K, value: TState[K]): FireflyResult<void>;
-    update<K extends keyof TState>(key: K, updater: (current: TState[K] | undefined) => TState[K]): FireflyResult<void>;
-    has<K extends keyof TState>(key: K): boolean;
-    snapshot(): Readonly<TState>;
+    readonly command?: TCommand;
+
+    get<K extends keyof TData>(key: K): FireflyResult<TData[K]>;
+    set<K extends keyof TData>(key: K, value: TData[K]): FireflyResult<void>;
+    update<K extends keyof TData>(key: K, updater: (current: TData[K] | undefined) => TData[K]): FireflyResult<void>;
+    has<K extends keyof TData>(key: K): boolean;
+    snapshot(): Readonly<TData>;
     clear(): FireflyResult<void>;
+
+    getConfig(): TCommand extends CommandName ? FinalConfigFor<TCommand> : never;
+    setConfig(config: TCommand extends CommandName ? FinalConfigFor<TCommand> : never): FireflyResult<void>;
 }
 
 /**

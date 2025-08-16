@@ -1,49 +1,40 @@
 import { program } from "commander";
-import { LogLevels } from "consola";
 import { colors } from "consola/utils";
 import { ZodError } from "zod";
 import type { CommandName, __FireflyConfig } from "#/modules/configuration/application/schema-registry.service";
 import { ConfigLoader } from "#/modules/configuration/infrastructure/services/config-loader.service";
 import {
+    type WorkflowFactory,
     type WorkflowRunnerOptions,
     WorkflowRunnerService,
 } from "#/modules/orchestration/application/workflow-runner.service";
-import type { Workflow } from "#/modules/orchestration/core/contracts/workflow.interface";
 import type { CLIOptions } from "#/platform/cli/commander";
 import { logger } from "#/shared/logger";
 import pkg from "../../../package.json" with { type: "json" };
 
-export type WorkflowFactory = () => Workflow;
-
 export class CLIRunner {
     constructor(private readonly cwd = process.cwd()) {}
 
-    async run(commandName: CommandName, options: CLIOptions, workflowFactory: WorkflowFactory): Promise<void> {
+    async run<TCommand extends CommandName>(
+        commandName: TCommand,
+        options: CLIOptions,
+        workflowFactory: WorkflowFactory<TCommand>,
+    ): Promise<void> {
         logger.info(`${colors.magenta("firefly")} ${colors.dim(`v${pkg.version}`)}`);
 
         const mergedOptions = this.mergeOptions(options);
-
         const configResult = await this.loadConfig(commandName, mergedOptions);
+
         if (configResult.isErr()) {
             this.handleConfigError(configResult.error);
             return;
         }
 
         const config = configResult.value;
-        if (config.verbose) {
-            logger.level = LogLevels.verbose;
-        }
-
         const runnerOptions = this.buildRunnerOptions(config, mergedOptions);
 
         const runner = new WorkflowRunnerService();
-        await runner.run(runnerOptions, (context) => {
-            const setConfigResult = context.set("config", config);
-            if (setConfigResult.isErr()) {
-                logger.error("Failed to set config in application context", setConfigResult.error);
-            }
-            return workflowFactory();
-        });
+        await runner.run(commandName, runnerOptions, workflowFactory);
     }
 
     private mergeOptions(options: CLIOptions): CLIOptions {

@@ -1,21 +1,31 @@
 import z from "zod";
-import type { Task, TaskContext } from "#/modules/orchestration/core/contracts/task.interface";
+import type { CommandName } from "#/modules/configuration/application/schema-registry.service";
+import type { ContextDataFor } from "#/modules/orchestration/core/contracts/context-data.schema";
+import type { OrchestrationContext } from "#/modules/orchestration/core/contracts/orchestration.interface";
+import type { Task } from "#/modules/orchestration/core/contracts/task.interface";
 import type { FireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
 /**
- * Workflow contract for orchestrating task execution.
+ * Workflow contract for orchestrating task execution with command-specific context.
  */
-export interface Workflow<TContext extends TaskContext = TaskContext> {
+export interface Workflow<TCommand extends CommandName = CommandName> {
     readonly id: string;
     readonly name: string;
     readonly description: string;
+    readonly command: TCommand;
 
-    buildTasks(context: TContext): FireflyResult<Task[]>;
+    buildTasks(context: OrchestrationContext<ContextDataFor<TCommand>, TCommand>): FireflyResult<Task[]>;
 
-    beforeExecute?(context: TContext): FireflyAsyncResult<void>;
-    afterExecute?(result: WorkflowResult, context: TContext): FireflyAsyncResult<void>;
-    onError?(error: FireflyError, context: TContext): FireflyAsyncResult<void>;
+    beforeExecute?(context: OrchestrationContext<ContextDataFor<TCommand>, TCommand>): FireflyAsyncResult<void>;
+    afterExecute?(
+        result: WorkflowResult,
+        context: OrchestrationContext<ContextDataFor<TCommand>, TCommand>,
+    ): FireflyAsyncResult<void>;
+    onError?(
+        error: FireflyError,
+        context: OrchestrationContext<ContextDataFor<TCommand>, TCommand>,
+    ): FireflyAsyncResult<void>;
 }
 
 /**

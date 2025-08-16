@@ -1,11 +1,13 @@
 import { LogLevels } from "consola";
-import { ApplicationContext } from "#/application/context";
+import type { CommandName } from "#/modules/configuration/application/schema-registry.service";
 import type {
     OrchestrationContext,
     OrchestratorOptions,
     RollbackStrategy,
 } from "#/modules/orchestration/core/contracts/orchestration.interface";
 import type { Workflow, WorkflowResult } from "#/modules/orchestration/core/contracts/workflow.interface";
+import type { ContextDataFor } from "#/modules/orchestration/core/schemas/context-data.schema";
+import { NarrowedContext } from "#/modules/orchestration/core/services/narrowed-context.service";
 import { TaskOrchestratorService } from "#/modules/orchestration/core/services/task-orchestrator.service";
 import { logger } from "#/shared/logger";
 import type { FireflyError } from "#/shared/utils/error.util";
@@ -19,22 +21,38 @@ export interface WorkflowRunnerOptions {
     enabledFeatures?: string[];
     rollbackStrategy?: RollbackStrategy;
     continueOnError?: boolean;
+    config?: unknown;
     [key: string]: unknown;
 }
 
 /**
- * A service responsible for initializing and running a workflow.
+ * Factory function type for creating workflows with narrowed contexts.
+ */
+export type WorkflowFactory<TCommand extends CommandName> = () => Workflow<TCommand>;
+
+/**
+ * A service responsible for initializing and running a workflow with type-safe, command-specific contexts.
  * It acts as a bridge between the CLI and the task orchestration engine.
  */
 export class WorkflowRunnerService {
     private currentOrchestrator?: TaskOrchestratorService;
-    private currentWorkflow?: Workflow;
+    private currentWorkflow?: Workflow<CommandName>;
 
-    async run(
+    /**
+     * Run a workflow with a command-specific narrowed context.
+     */
+    async run<TCommand extends CommandName>(
+        command: TCommand,
         options: WorkflowRunnerOptions,
-        workflowFactory: (context: ApplicationContext) => Workflow,
+        workflowFactory: WorkflowFactory<TCommand>,
     ): Promise<void> {
-        const contextResult = ApplicationContext.create({ ...options });
+        // Create command-specific context
+        const contextResult = NarrowedContext.create<TCommand>(command, {
+            command,
+            config: options.config,
+            ...options,
+        });
+
         if (contextResult.isErr()) {
             logger.error("Failed to create application context", contextResult.error);
             return;
@@ -42,11 +60,21 @@ export class WorkflowRunnerService {
 
         const context = contextResult.value;
         logger.verbose(`WorkflowRunnerService: Workflow runner started with execution ID: ${context.executionId}`);
+
         if (options.verbose) {
             logger.level = LogLevels.verbose;
         }
 
-        this.currentWorkflow = workflowFactory(context);
+        this.currentWorkflow = workflowFactory();
+
+        // Ensure workflow command matches context command
+        if (this.currentWorkflow.command !== command) {
+            logger.error(
+                `Workflow command '${this.currentWorkflow.command}' does not match expected command '${command}'`,
+            );
+            return;
+        }
+
         if (options.dryRun) {
             logger.warn("Running in dry-run mode. No actual changes will be made.");
         }
@@ -61,7 +89,7 @@ export class WorkflowRunnerService {
 
         // Execute workflow hooks if available
         if (this.currentWorkflow.beforeExecute) {
-            const beforeResult = await this.currentWorkflow.beforeExecute(context as OrchestrationContext);
+            const beforeResult = await this.currentWorkflow.beforeExecute(context);
             if (beforeResult.isErr()) {
                 logger.error("Workflow beforeExecute hook failed", beforeResult.error);
                 return;
@@ -73,6 +101,7 @@ export class WorkflowRunnerService {
             context as OrchestrationContext,
             orchestratorOptions,
         );
+
         if (orchestratorResult.isErr()) {
             logger.error("Failed to initialize the task orchestrator", orchestratorResult.error);
             return;
@@ -82,7 +111,7 @@ export class WorkflowRunnerService {
         const result = await this.currentOrchestrator.run();
 
         if (result.isErr()) {
-            await this.handleWorkflowError(this.currentWorkflow, result.error, context as OrchestrationContext);
+            await this.handleWorkflowError(this.currentWorkflow, result.error, context);
             this.logFailure(this.currentWorkflow.name, "Workflow execution failed unexpectedly.", result.error);
             return;
         }
@@ -90,10 +119,7 @@ export class WorkflowRunnerService {
         const workflowResult = result.value;
 
         if (this.currentWorkflow.afterExecute) {
-            const afterResult = await this.currentWorkflow.afterExecute(
-                workflowResult,
-                context as OrchestrationContext,
-            );
+            const afterResult = await this.currentWorkflow.afterExecute(workflowResult, context);
             if (afterResult.isErr()) {
                 logger.warn("Workflow afterExecute hook failed", afterResult.error);
             }
@@ -102,7 +128,7 @@ export class WorkflowRunnerService {
         if (workflowResult.success) {
             this.logSuccess(workflowResult);
         } else {
-            await this.handleWorkflowError(this.currentWorkflow, workflowResult.error, context as OrchestrationContext);
+            await this.handleWorkflowError(this.currentWorkflow, workflowResult.error, context);
             this.logFailure(
                 this.currentWorkflow.name,
                 "Workflow execution failed.",
@@ -115,10 +141,10 @@ export class WorkflowRunnerService {
     /**
      * Handle workflow errors using the onError hook if available.
      */
-    private async handleWorkflowError(
-        workflow: Workflow,
+    private async handleWorkflowError<TCommand extends CommandName>(
+        workflow: Workflow<TCommand>,
         error?: FireflyError,
-        context?: OrchestrationContext,
+        context?: OrchestrationContext<ContextDataFor<TCommand>, TCommand>,
     ): Promise<void> {
         if (error && workflow.onError && context) {
             logger.verbose("Executing workflow error handler...");
