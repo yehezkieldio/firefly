@@ -10,7 +10,7 @@
 
 ## 2. Coding Standards
 
-- **TypeScript First:** Prefer explicit, advanced types for safety and clarity; never use `any`.
+- **TypeScript First:** Prefer explicit, advanced types for safety and clarity; DO NOT use `any`.
 - **Defensive Programming:** Validate all inputs/outputs at boundaries; treat external data as potentially invalid.
 - **Readable & Intentional:** Code should convey *why* it exists; avoid redundant comments on *how* it works.
 - **Clear Module Boundaries:** Each module has a single, well-defined purpose, ownership, and dependency scope.
