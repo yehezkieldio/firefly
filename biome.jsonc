@@ -30,6 +30,7 @@
             "quoteStyle": "double"
         }
     },
+    "plugins": [".biome/no-try-catch.grit"],
     "linter": {
         "enabled": true,
         "rules": {
