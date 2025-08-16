@@ -1,3 +1,5 @@
+import type { CommandName } from "#/modules/configuration/application/schema-registry.service";
+import type { ContextDataFor } from "#/modules/orchestration/core/contracts/context-data.schema";
 import type { IExecutionStrategy } from "#/modules/orchestration/core/contracts/execution-strategy.interface";
 import {
     type OrchestrationContext,
@@ -65,9 +67,9 @@ export class TaskOrchestratorService {
     /**
      * Create orchestrator from a workflow.
      */
-    static fromWorkflow(
-        workflow: Workflow,
-        context?: OrchestrationContext,
+    static fromWorkflow<TCommand extends CommandName = CommandName>(
+        workflow: Workflow<TCommand>,
+        context: OrchestrationContext<ContextDataFor<TCommand>, TCommand>,
         options: Partial<OrchestratorOptions> = {},
     ): FireflyResult<TaskOrchestratorService> {
         const validatedOptionsResult = TaskOrchestratorService.validateOptions(options);
@@ -76,7 +78,7 @@ export class TaskOrchestratorService {
         }
 
         // Build tasks from workflow
-        const tasksResult = workflow.buildTasks(context ?? ({} as OrchestrationContext));
+        const tasksResult = workflow.buildTasks(context);
         if (tasksResult.isErr()) {
             return fireflyErr(withErrorContext(tasksResult.error, "Failed to build tasks from workflow"));
         }

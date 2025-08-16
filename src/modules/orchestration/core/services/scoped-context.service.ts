@@ -30,7 +30,7 @@ export class ScopedContext<TCommand extends CommandName>
         executionId?: string,
     ) {
         this.command = command;
-        this.executionId = executionId ?? crypto.randomUUID();
+        this.executionId = executionId ?? Bun.randomUUIDv7();
         this.startTime = new Date();
         this.state = initial;
         this.schema = schema;

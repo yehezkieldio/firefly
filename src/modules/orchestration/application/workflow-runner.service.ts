@@ -1,13 +1,13 @@
 import { LogLevels } from "consola";
 import type { CommandName } from "#/modules/configuration/application/schema-registry.service";
+import type { ContextDataFor } from "#/modules/orchestration/core/contracts/context-data.schema";
 import type {
     OrchestrationContext,
     OrchestratorOptions,
     RollbackStrategy,
 } from "#/modules/orchestration/core/contracts/orchestration.interface";
 import type { Workflow, WorkflowResult } from "#/modules/orchestration/core/contracts/workflow.interface";
-import type { ContextDataFor } from "#/modules/orchestration/core/schemas/context-data.schema";
-import { NarrowedContext } from "#/modules/orchestration/core/services/narrowed-context.service";
+import { ScopedContext } from "#/modules/orchestration/core/services/scoped-context.service";
 import { TaskOrchestratorService } from "#/modules/orchestration/core/services/task-orchestrator.service";
 import { logger } from "#/shared/logger";
 import type { FireflyError } from "#/shared/utils/error.util";
@@ -46,9 +46,13 @@ export class WorkflowRunnerService {
         options: WorkflowRunnerOptions,
         workflowFactory: WorkflowFactory<TCommand>,
     ): Promise<void> {
-        // Create command-specific context
-        const contextResult = NarrowedContext.create<TCommand>(command, {
+        const executionId = Bun.randomUUIDv7();
+        const startTime = new Date();
+
+        const contextResult = ScopedContext.create<TCommand>(command, {
             command,
+            executionId,
+            startTime,
             config: options.config,
             ...options,
         });
@@ -67,7 +71,6 @@ export class WorkflowRunnerService {
 
         this.currentWorkflow = workflowFactory();
 
-        // Ensure workflow command matches context command
         if (this.currentWorkflow.command !== command) {
             logger.error(
                 `Workflow command '${this.currentWorkflow.command}' does not match expected command '${command}'`,
@@ -87,7 +90,6 @@ export class WorkflowRunnerService {
             enabledFeatures: options.enabledFeatures ? new Set(options.enabledFeatures) : undefined,
         };
 
-        // Execute workflow hooks if available
         if (this.currentWorkflow.beforeExecute) {
             const beforeResult = await this.currentWorkflow.beforeExecute(context);
             if (beforeResult.isErr()) {
@@ -98,7 +100,7 @@ export class WorkflowRunnerService {
 
         const orchestratorResult = TaskOrchestratorService.fromWorkflow(
             this.currentWorkflow,
-            context as OrchestrationContext,
+            context,
             orchestratorOptions,
         );
 
