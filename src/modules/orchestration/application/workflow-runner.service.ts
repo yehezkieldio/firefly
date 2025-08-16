@@ -1,6 +1,6 @@
 import { LogLevels } from "consola";
 import type { CommandName } from "#/modules/configuration/application/schema-registry.service";
-import type { ContextDataFor } from "#/modules/orchestration/core/contracts/context-data.schema";
+import type { ContextDataFor } from "#/modules/orchestration/core/contracts/context.schema";
 import type {
     OrchestrationContext,
     OrchestratorOptions,
@@ -31,7 +31,7 @@ export interface WorkflowRunnerOptions {
 export type WorkflowFactory<TCommand extends CommandName> = () => Workflow<TCommand>;
 
 /**
- * A service responsible for initializing and running a workflow with type-safe, command-specific contexts.
+ * A service responsible for initializing and running a workflow with command-specific contexts.
  * It acts as a bridge between the CLI and the task orchestration engine.
  */
 export class WorkflowRunnerService {

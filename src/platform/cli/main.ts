@@ -7,6 +7,8 @@ if (!process.versions.bun) {
     process.exit(1);
 }
 
+import "#/application/context";
+
 import { createCLI } from "#/platform/cli/commander";
 import { logger } from "#/shared/logger";
 

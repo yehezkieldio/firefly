@@ -1,4 +1,4 @@
-import type { ReleaseContextData } from "#/modules/orchestration/core/contracts/context-data.schema";
+import type { ReleaseContextData } from "#/application/context";
 import type { OrchestrationContext } from "#/modules/orchestration/core/contracts/orchestration.interface";
 import type { Task } from "#/modules/orchestration/core/contracts/task.interface";
 import { logger } from "#/shared/logger";

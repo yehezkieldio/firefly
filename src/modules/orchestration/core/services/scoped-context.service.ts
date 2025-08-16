@@ -3,14 +3,13 @@ import {
     type ContextDataFor,
     getContextSchema,
     hasContextSchema,
-} from "#/modules/orchestration/core/contracts/context-data.schema";
+} from "#/modules/orchestration/core/contracts/context.schema";
 import type { OrchestrationContext } from "#/modules/orchestration/core/contracts/orchestration.interface";
 import { createFireflyError } from "#/shared/utils/error.util";
 import { type FireflyResult, fireflyErr, fireflyOk } from "#/shared/utils/result.util";
 import { validateWithResult } from "#/shared/utils/result-factory.util";
 
 /**
- * Type-safe, command-specific context implementation.
  * Provides narrowed context data and configuration access based on the command type.
  */
 export class ScopedContext<TCommand extends CommandName>
@@ -20,7 +19,7 @@ export class ScopedContext<TCommand extends CommandName>
     readonly startTime: Date;
     readonly command: TCommand;
 
-    private state: ContextDataFor<TCommand>;
+    private state: ContextDataFor<TCommand> & object;
     private readonly schema: ReturnType<typeof getContextSchema<TCommand>>;
 
     protected constructor(
@@ -103,13 +102,13 @@ export class ScopedContext<TCommand extends CommandName>
     }
 
     clear(): FireflyResult<void> {
-        const emptyState = {
+        const baseState = {
             command: this.command,
             executionId: this.executionId,
             startTime: this.startTime,
-        } as ContextDataFor<TCommand>;
+        };
 
-        const parsed = validateWithResult(this.schema, emptyState, `${this.command}-context`);
+        const parsed = validateWithResult(this.schema, baseState, `${this.command}-context`);
         if (parsed.isErr()) {
             return fireflyErr(parsed.error);
         }
