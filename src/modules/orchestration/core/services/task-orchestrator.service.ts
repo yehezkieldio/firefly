@@ -97,7 +97,7 @@ export class TaskOrchestratorService {
      * Run the orchestration using the configured execution strategy.
      */
     run(): FireflyAsyncResult<WorkflowResult> {
-        logger.info(`TaskOrchestratorService: Starting orchestration (${this.executionId})`);
+        logger.verbose(`TaskOrchestratorService: Starting orchestration (${this.executionId})`);
 
         // Resolve task dependencies and order execution
         const orderedTasksResult = this.resolveDependencies();
@@ -119,7 +119,7 @@ export class TaskOrchestratorService {
         return this.executionStrategy
             .execute(enabledTasksResult.value, this.context)
             .map((result) => {
-                logger.info(
+                logger.verbose(
                     `TaskOrchestratorService: Orchestration completed (${this.executionId}) - Success: ${result.success}`,
                 );
                 return result;

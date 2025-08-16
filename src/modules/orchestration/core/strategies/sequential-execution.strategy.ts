@@ -31,7 +31,7 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
     }
 
     execute(tasks: readonly Task[], context?: OrchestrationContext): FireflyAsyncResult<WorkflowResult> {
-        logger.info(`SequentialExecutionStrategy: Starting execution of ${tasks.length} tasks`);
+        logger.verbose(`SequentialExecutionStrategy: Starting execution of ${tasks.length} tasks`);
 
         const executedTasks: string[] = [];
         const failedTasks: string[] = [];
@@ -61,7 +61,9 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
                     return executeNext(index + 1);
                 }
 
-                logger.info(`SequentialExecutionStrategy: Executing task ${task.name} (${index + 1}/${tasks.length})`);
+                logger.verbose(
+                    `SequentialExecutionStrategy: Executing task ${task.name} (${index + 1}/${tasks.length})`,
+                );
                 return this.executor
                     .executeTask(task, context)
                     .andThen(() => {
