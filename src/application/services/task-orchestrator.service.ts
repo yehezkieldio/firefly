@@ -10,7 +10,7 @@ export class TaskOrchestratorService {
 
     constructor(
         _context: ApplicationContext,
-        private readonly tasks: Task[]
+        private readonly tasks: Task[],
     ) {
         this.rollbackManager = new TaskRollbackManager();
         this.taskExecutor = new TaskExecutorService();
@@ -22,7 +22,7 @@ export class TaskOrchestratorService {
             logger.verbose(`TaskOrchestratorService: Preparing to run task: ${task.getName() ?? "unknown"}`);
             if (this.shouldRegisterForRollback(task)) {
                 logger.verbose(
-                    `TaskOrchestratorService: Registering task for rollback: ${task.getName() ?? "unknown"}`
+                    `TaskOrchestratorService: Registering task for rollback: ${task.getName() ?? "unknown"}`,
                 );
                 this.rollbackManager.addTask(task);
             }
@@ -32,7 +32,7 @@ export class TaskOrchestratorService {
 
             if (result.isErr()) {
                 logger.verbose(
-                    `TaskOrchestratorService: Task failed, initiating failure handler for: ${task.getName() ?? "unknown"}`
+                    `TaskOrchestratorService: Task failed, initiating failure handler for: ${task.getName() ?? "unknown"}`,
                 );
                 await this.handleFailure(result.error);
                 return;

@@ -555,7 +555,7 @@ export class GitProviderAdapter implements GitProviderPort {
 
         return ResultAsync.fromPromise(
             new Response(command).text(),
-            (e) => new ProcessExecutionError("Failed to execute git command", e as Error)
+            (e) => new ProcessExecutionError("Failed to execute git command", e as Error),
         ).andTee(() => logger.verbose("GitProviderAdapter: Executed command:", `git ${args.join(" ")}`));
     }
 }

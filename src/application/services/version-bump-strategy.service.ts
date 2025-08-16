@@ -25,7 +25,7 @@ export class BumpStrategyService {
     constructor(
         private readonly context: ApplicationContext,
         private readonly promptStrategy: VersionStrategyPromptAdapter = new VersionStrategyPromptAdapter(),
-        private readonly versionPrompt: VersionChoicePrompter = new VersionChoicePrompter()
+        private readonly versionPrompt: VersionChoicePrompter = new VersionChoicePrompter(),
     ) {
         this.strategyHandlers = this.createStrategyHandlers();
         this.versionRepository = new VersionRepositoryAdapter(createPackageJsonService(context.getBasePath()));
@@ -150,7 +150,7 @@ export class BumpStrategyService {
         const opts = this.context.getConfig();
 
         logger.verbose(
-            `BumpStrategyService: Prompting for next version (manual) from current version: ${currentVersion}`
+            `BumpStrategyService: Prompting for next version (manual) from current version: ${currentVersion}`,
         );
         const nextVersionResult = await this.versionPrompt.generateVersionChoices({
             currentVersion,
@@ -182,7 +182,7 @@ export class BumpStrategyService {
         const opts = this.context.getConfig();
 
         logger.verbose(
-            `BumpStrategyService: Deciding next version from current: ${currentVersion}, releaseType: ${opts.releaseType}`
+            `BumpStrategyService: Deciding next version from current: ${currentVersion}, releaseType: ${opts.releaseType}`,
         );
         const versionDecider = new VersionDeciderService();
         const nextVersionResult = versionDecider.decideNextVersion({
@@ -223,7 +223,7 @@ export class BumpStrategyService {
 
         const releaseType = this.determineReleaseType(config.releaseType, recommendation.releaseType as ReleaseType);
         logger.verbose(
-            `BumpStrategyService: Deciding next version from current: ${currentVersion}, releaseType: ${releaseType}`
+            `BumpStrategyService: Deciding next version from current: ${currentVersion}, releaseType: ${releaseType}`,
         );
 
         const nextVersionResult = versionDecider.decideNextVersion({

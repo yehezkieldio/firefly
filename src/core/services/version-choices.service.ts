@@ -47,7 +47,7 @@ export class VersionChoicesService {
                 releaseType,
                 preReleaseId: options.preReleaseId,
                 preReleaseBase: options.preReleaseBase,
-            })
+            }),
         );
 
         return Result.combine(choicesResult);

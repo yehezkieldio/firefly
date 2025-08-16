@@ -27,7 +27,7 @@ export class VersionChoicePrompter {
 
         const versions = choicesResult.value;
         logger.verbose(
-            `VersionChoicePrompter: Version choices generated: [${versions.map((v) => v.value).join(", ")}]`
+            `VersionChoicePrompter: Version choices generated: [${versions.map((v) => v.value).join(", ")}]`,
         );
         if (versions.length === 0) {
             return errAsync(new VersionInferenceError("No version choices available."));
@@ -94,7 +94,7 @@ export class VersionChoicePrompter {
 
     private validateSelectedVersion(
         selectedVersion: string,
-        availableVersions: PromptSelectChoice[]
+        availableVersions: PromptSelectChoice[],
     ): FireflyResult<string> {
         logger.verbose(`VersionChoicePrompter: Validating selected version: '${selectedVersion}'`);
         const validVersions = availableVersions.map((v) => v.value);
@@ -102,8 +102,8 @@ export class VersionChoicePrompter {
         if (!validVersions.includes(selectedVersion)) {
             return err(
                 new VersionInferenceError(
-                    `Invalid version selected: ${selectedVersion}. Valid options: ${validVersions.join(", ")}`
-                )
+                    `Invalid version selected: ${selectedVersion}. Valid options: ${validVersions.join(", ")}`,
+                ),
             );
         }
 

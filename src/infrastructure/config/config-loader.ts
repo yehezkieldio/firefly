@@ -12,7 +12,7 @@ export interface ConfigLoadOptions {
 
 function mergeConfigWithPriority(
     fileConfig: Partial<FireflyConfig>,
-    cliOverrides: Partial<FireflyConfig>
+    cliOverrides: Partial<FireflyConfig>,
 ): Partial<FireflyConfig> {
     const merged = { ...fileConfig };
 
@@ -124,7 +124,7 @@ export function configLoader(options: ConfigLoadOptions = {}): ResultAsync<Firef
         (error) => {
             logger.error("Failed to load Firefly configuration:", error);
             return error instanceof Error ? error : new Error(String(error));
-        }
+        },
     )
         .andThen((config) => {
             if (config.configFile !== "firefly.config") {
@@ -142,7 +142,7 @@ export function configLoader(options: ConfigLoadOptions = {}): ResultAsync<Firef
                 Promise.resolve().then(() => FireflyConfigSchema.parse(enrichedConfig)),
                 (error) => {
                     return error instanceof Error ? error : new Error("Failed to validate Firefly configuration");
-                }
+                },
             );
         });
 }

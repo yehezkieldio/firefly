@@ -41,7 +41,7 @@ export class ConfigEnricherService {
     }
 
     private async enrichFromPackageJson(
-        config: Partial<FireflyConfig>
+        config: Partial<FireflyConfig>,
     ): Promise<FireflyResult<Partial<FireflyConfig>>> {
         if (!this.sources.packageJsonService) {
             return err(new ConfigurationError("packageJsonService is not available for enrichment"));
@@ -68,7 +68,7 @@ export class ConfigEnricherService {
     }
 
     private async enrichFromGitRepository(
-        config: Partial<FireflyConfig>
+        config: Partial<FireflyConfig>,
     ): Promise<FireflyResult<Partial<FireflyConfig>>> {
         const isGitRepoResult = await this.sources.gitProvider.isInsideGitRepository();
         if (isGitRepoResult.isErr()) {
@@ -78,8 +78,8 @@ export class ConfigEnricherService {
         if (!isGitRepoResult.value) {
             return err(
                 new ConfigurationError(
-                    "Not inside a Git repository. Please run Firefly from within a valid Git project."
-                )
+                    "Not inside a Git repository. Please run Firefly from within a valid Git project.",
+                ),
             );
         }
         logger.verbose("ConfigEnricherService: Inside a Git repository, enriching configuration...");
@@ -88,7 +88,7 @@ export class ConfigEnricherService {
     }
 
     private async enrichRepositoryFromGit(
-        config: Partial<FireflyConfig>
+        config: Partial<FireflyConfig>,
     ): Promise<FireflyResult<Partial<FireflyConfig>>> {
         if (!this.sources.gitProvider) {
             return ok(config);
@@ -102,8 +102,8 @@ export class ConfigEnricherService {
         if (repositoryUrlResult.isErr()) {
             return err(
                 new ConfigurationError(
-                    " Failed to get repository URL. Make sure a remote 'origin' exists or define repository manually in the config."
-                )
+                    " Failed to get repository URL. Make sure a remote 'origin' exists or define repository manually in the config.",
+                ),
             );
         }
 
@@ -133,16 +133,16 @@ export class ConfigEnricherService {
             if (availableBranchesResult.isErr()) {
                 return err(
                     new ConfigurationError(
-                        `Failed to validate provided branch "${config.branch}": ${availableBranchesResult.error.message}`
-                    )
+                        `Failed to validate provided branch "${config.branch}": ${availableBranchesResult.error.message}`,
+                    ),
                 );
             }
 
             if (!availableBranchesResult.value) {
                 return err(
                     new ConfigurationError(
-                        `Provided branch "${config.branch}" does not exist in the repository. Please check the branch name.`
-                    )
+                        `Provided branch "${config.branch}" does not exist in the repository. Please check the branch name.`,
+                    ),
                 );
             }
 
@@ -154,8 +154,8 @@ export class ConfigEnricherService {
         if (currentBranchResult.isErr()) {
             return err(
                 new ConfigurationError(
-                    "Failed to get current branch. Make sure you are inside a Git repository or define branch manually in the config."
-                )
+                    "Failed to get current branch. Make sure you are inside a Git repository or define branch manually in the config.",
+                ),
             );
         }
         const currentBranch = currentBranchResult.value;
@@ -168,7 +168,7 @@ export class ConfigEnricherService {
 
     private enrichFromPackageData(
         config: Partial<FireflyConfig>,
-        packageJson: PackageJson
+        packageJson: PackageJson,
     ): FireflyResult<Partial<FireflyConfig>> {
         const enrichedConfig = { ...config };
 
@@ -191,7 +191,7 @@ export class ConfigEnricherService {
 
     private enrichNameFromPackageJson(
         enrichedConfig: Partial<FireflyConfig>,
-        packageJson: PackageJson
+        packageJson: PackageJson,
     ): FireflyResult<Partial<FireflyConfig>> {
         // Case 1: If config.name is undefined (not provided) and package.json.name is also missing
         if (enrichedConfig.name === undefined && !packageJson.name) {
@@ -207,7 +207,7 @@ export class ConfigEnricherService {
             }
 
             logger.verbose(
-                `ConfigEnricherService: Enriched name from package.json: ${packageJson.name} -> ${extractedName.value}`
+                `ConfigEnricherService: Enriched name from package.json: ${packageJson.name} -> ${extractedName.value}`,
             );
 
             return ok({ name: extractedName.value });
@@ -218,7 +218,7 @@ export class ConfigEnricherService {
 
     private enrichScopeFromPackageJson(
         originalConfig: Partial<FireflyConfig>,
-        packageJson: PackageJson
+        packageJson: PackageJson,
     ): FireflyResult<Partial<FireflyConfig>> {
         // Check if scope was explicitly provided in the original config (including empty string)
         // We consider scope explicitly provided if:
@@ -228,7 +228,7 @@ export class ConfigEnricherService {
         // Case 1: If scope was explicitly provided (even as empty string), don't enrich from package.json
         if (scopeExplicitlyProvided) {
             logger.verbose(
-                `ConfigEnricherService: Scope explicitly provided in config: "${originalConfig.scope}" - not enriching from package.json`
+                `ConfigEnricherService: Scope explicitly provided in config: "${originalConfig.scope}" - not enriching from package.json`,
             );
             return ok({});
         }
@@ -241,7 +241,7 @@ export class ConfigEnricherService {
             }
 
             logger.verbose(
-                `ConfigEnricherService: Auto-detected scope from package.json: ${extractedScopeResult.value}`
+                `ConfigEnricherService: Auto-detected scope from package.json: ${extractedScopeResult.value}`,
             );
 
             return ok({ scope: extractedScopeResult.value });

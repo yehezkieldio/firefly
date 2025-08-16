@@ -40,7 +40,7 @@ export class CreateReleaseTask implements Task {
         const configResolver = new ConfigResolverService();
         const config = this.context.getConfig();
         const cliffTomlParser = new CliffTomlParserService(
-            new FileSystemService(join(this.context.getBasePath(), "cliff.toml"))
+            new FileSystemService(join(this.context.getBasePath(), "cliff.toml")),
         );
         const changelogPostProcessor = new ChangelogPostProcessor(cliffTomlParser);
 

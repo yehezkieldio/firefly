@@ -91,7 +91,7 @@ export class VersionDeciderService {
 
     private handlePreReleaseToStableTransition(
         options: VersionChoicesArgs,
-        recommendation?: BumperRecommendation
+        recommendation?: BumperRecommendation,
     ): FireflyResult<string> {
         if (!recommendation) {
             return err(new VersionInferenceError("Cannot transition to stable without recommendation"));
@@ -122,7 +122,7 @@ export class VersionDeciderService {
     private createStandardReleaseVersion(
         options: VersionChoicesArgs,
         recommendation: BumperRecommendation,
-        context: PreReleaseContext
+        context: PreReleaseContext,
     ): FireflyResult<string> {
         const releaseType = this.mapRecommendationToReleaseType(recommendation.level);
 

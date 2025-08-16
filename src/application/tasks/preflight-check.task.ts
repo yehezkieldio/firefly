@@ -78,7 +78,7 @@ export class PreflightCheckTask implements Task {
 
         if (commitsResult.value) {
             throw new TaskExecutionError(
-                "Unpushed local commits detected. Please push your commits before proceeding to avoid interfering with Firefly."
+                "Unpushed local commits detected. Please push your commits before proceeding to avoid interfering with Firefly.",
             );
         }
 

@@ -24,7 +24,7 @@ export class ChangelogPostProcessor {
 
         if (!(header && bodyTemplate)) {
             logger.verbose(
-                "ChangelogPostProcessor: No header/body template found in CliffToml, returning raw changelog."
+                "ChangelogPostProcessor: No header/body template found in CliffToml, returning raw changelog.",
             );
             return ok(rawChangelog);
         }

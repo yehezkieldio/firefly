@@ -1,20 +1,20 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", "customManagers:biomeVersions"],
-  "prHourlyLimit": 3,
-  "rangeStrategy": "bump",
-  "ignoreTests": true,
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["major"],
-      "dependencyDashboardApproval": true,
-      "automerge": false
-    },
-    {
-      "matchUpdateTypes": ["patch", "minor"],
-      "dependencyDashboardApproval": false,
-      "automerge": true
-    }
-  ],
-  "reviewers": ["yehezkieldio"]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:recommended", "customManagers:biomeVersions"],
+    "prHourlyLimit": 3,
+    "rangeStrategy": "bump",
+    "ignoreTests": true,
+    "packageRules": [
+        {
+            "matchUpdateTypes": ["major"],
+            "dependencyDashboardApproval": true,
+            "automerge": false
+        },
+        {
+            "matchUpdateTypes": ["patch", "minor"],
+            "dependencyDashboardApproval": false,
+            "automerge": true
+        }
+    ],
+    "reviewers": ["yehezkieldio"]
 }

@@ -23,7 +23,7 @@ export class ChangelogHandlerService {
 
     constructor(
         private readonly gitCliffAdapter: GitCliffAdapter,
-        private readonly gitProvider: GitProviderAdapter
+        private readonly gitProvider: GitProviderAdapter,
     ) {
         this.configResolver = new ConfigResolverService();
     }
@@ -93,7 +93,7 @@ export class ChangelogHandlerService {
     private async buildChangelogOptions(
         config: ReturnType<ApplicationContext["getConfig"]>,
         tagName: string,
-        repository: string
+        repository: string,
     ): Promise<FireflyResult<ChangelogHandlerOptions>> {
         const options: ChangelogHandlerOptions = {
             dryRun: config.dryRun,

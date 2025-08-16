@@ -1,73 +1,73 @@
 {
-  "name": "@yehezkieldio/firefly",
-  "version": "2.1.2",
-  "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
-  "type": "module",
-  "license": "MIT",
-  "author": "Yehezkiel Dio Sinolungan <yehezkieldio@proton.me>",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+    "name": "@yehezkieldio/firefly",
+    "version": "2.1.2",
+    "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
+    "type": "module",
+    "license": "MIT",
+    "author": "Yehezkiel Dio Sinolungan <yehezkieldio@proton.me>",
+    "files": [
+        "dist"
+    ],
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "typesVersions": {
+        "*": {
+            "*": [
+                "./dist/*",
+                "./*"
+            ]
+        }
+    },
+    "bin": {
+        "firefly": "./dist/main.js"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "tsdown",
+        "postbuild": "bun run scripts/insert-bun-pragma.ts",
+        "dev": "bun run src/infrastructure/cli/main.ts",
+        "check": "biome check .",
+        "check:unsafe": "biome check --write --unsafe .",
+        "check:write": "biome check --write .",
+        "typecheck": "tsc --noEmit",
+        "format": "biome format . --write",
+        "lint": "biome lint .",
+        "lint:fix": "biome lint . --fix --unsafe"
+    },
+    "dependencies": {
+        "c12": "^3.2.0",
+        "commander": "^14.0.0",
+        "consola": "^3.4.2",
+        "git-cliff": "^2.10.0",
+        "neverthrow": "^8.2.0",
+        "semver": "^7.7.2",
+        "smol-toml": "^1.4.2",
+        "zod": "^4.0.17"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.2.0",
+        "@types/bun": "^1.2.20",
+        "@types/node": "^24.3.0",
+        "@types/semver": "^7.7.0",
+        "tsdown": "^0.14.1",
+        "typescript": "^5.9.2",
+        "ultracite": "^5.1.8"
+    },
+    "homepage": "https://github.com/yehezkieldio/firefly#readme",
+    "bugs": {
+        "url": "https://github.com/yehezkieldio/firefly/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/yehezkieldio/firefly.git"
     }
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*",
-        "./*"
-      ]
-    }
-  },
-  "bin": {
-    "firefly": "./dist/main.js"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "scripts": {
-    "build": "tsdown",
-    "postbuild": "bun run scripts/insert-bun-pragma.ts",
-    "dev": "bun run src/infrastructure/cli/main.ts",
-    "check": "biome check .",
-    "check:unsafe": "biome check --write --unsafe .",
-    "check:write": "biome check --write .",
-    "typecheck": "tsc --noEmit",
-    "format": "biome format . --write",
-    "lint": "biome lint .",
-    "lint:fix": "biome lint . --fix --unsafe"
-  },
-  "dependencies": {
-    "c12": "^3.2.0",
-    "commander": "^14.0.0",
-    "consola": "^3.4.2",
-    "git-cliff": "^2.10.0",
-    "neverthrow": "^8.2.0",
-    "semver": "^7.7.2",
-    "smol-toml": "^1.4.2",
-    "zod": "^4.0.17"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.2.0",
-    "@types/bun": "^1.2.20",
-    "@types/node": "^24.3.0",
-    "@types/semver": "^7.7.0",
-    "tsdown": "^0.14.1",
-    "typescript": "^5.9.2",
-    "ultracite": "^5.1.8"
-  },
-  "homepage": "https://github.com/yehezkieldio/firefly#readme",
-  "bugs": {
-    "url": "https://github.com/yehezkieldio/firefly/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/yehezkieldio/firefly.git"
-  }
 }

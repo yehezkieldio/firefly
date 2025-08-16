@@ -35,7 +35,7 @@ export class CliffTomlParserService {
 
     private static isObject<T extends new (...args: unknown[]) => unknown = ObjectConstructor>(
         input: unknown,
-        constructorType?: T
+        constructorType?: T,
     ): input is object {
         return typeof input === "object" && input ? input.constructor === (constructorType ?? Object) : false;
     }

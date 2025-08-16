@@ -84,8 +84,8 @@ export class GithubCliProviderAdapter implements GitHubCliProviderPort {
         if (!isAvailable) {
             return err(
                 new ConfigurationError(
-                    "GitHub CLI (gh) is not installed or not available in PATH. (See: https://cli.github.com)"
-                )
+                    "GitHub CLI (gh) is not installed or not available in PATH. (See: https://cli.github.com)",
+                ),
             );
         }
 
@@ -119,7 +119,7 @@ export class GithubCliProviderAdapter implements GitHubCliProviderPort {
 
         return ResultAsync.fromPromise(
             new Response(command).text(),
-            (e) => new ProcessExecutionError("Failed to execute gh command", e as Error)
+            (e) => new ProcessExecutionError("Failed to execute gh command", e as Error),
         ).andTee(() => logger.verbose("GitHubCliProviderAdapter: Executed command:", `gh ${logArgs}`));
     }
 }

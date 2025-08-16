@@ -83,7 +83,7 @@ export class GitCliffAdapter {
         logger.verbose("GitCliffAdapter: GitHub token added to options.");
         return ResultAsync.fromPromise(
             runGitCliff(optionsWithToken.value, { stdio: "pipe" }),
-            (error) => new ProcessExecutionError("GitCliff execution failed", error as Error)
+            (error) => new ProcessExecutionError("GitCliff execution failed", error as Error),
         )
             .andTee((r) => {
                 logger.verbose(`GitCliffAdapter: Executing ${this.redactTokenFromCommand(r.escapedCommand)}`);

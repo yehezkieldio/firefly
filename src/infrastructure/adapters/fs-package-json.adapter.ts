@@ -67,8 +67,8 @@ export class FsPackageJsonAdapter implements PackageJsonPort {
         if (readResult.value.version !== expectedVersion) {
             return errAsync(
                 new ConfigurationError(
-                    `Version update failed: expected ${expectedVersion}, got ${readResult.value.version}`
-                )
+                    `Version update failed: expected ${expectedVersion}, got ${readResult.value.version}`,
+                ),
             );
         }
 

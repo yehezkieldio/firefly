@@ -109,7 +109,7 @@ export class CreateCommitTask implements Task {
         const templateContext = this.context.createTemplateContext();
         const commitMessage = this.configResolver.resolveCommitMessage(
             this.context.getConfig().commitMessage,
-            templateContext
+            templateContext,
         );
 
         logger.verbose(`CreateCommitTask: Built commit message: "${commitMessage}"`);

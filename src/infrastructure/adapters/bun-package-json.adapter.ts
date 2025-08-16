@@ -89,7 +89,7 @@ export class BunPackageJsonAdapter implements PackageJsonPort {
     private exec(args: string[], dryRun?: boolean): AsyncFireflyResult<string> {
         if (dryRun && args.includes("set")) {
             logger.verbose(
-                `BunPackageJsonAdapter: Dry run enabled, skipping command execution: bun pm pkg ${args.join(" ")}`
+                `BunPackageJsonAdapter: Dry run enabled, skipping command execution: bun pm pkg ${args.join(" ")}`,
             );
             return okAsync("");
         }
@@ -101,7 +101,7 @@ export class BunPackageJsonAdapter implements PackageJsonPort {
 
         return ResultAsync.fromPromise(
             new Response(command).text(),
-            (e) => new ProcessExecutionError("Failed to execute bun pm pkg command", e as Error)
+            (e) => new ProcessExecutionError("Failed to execute bun pm pkg command", e as Error),
         ).andTee(() => logger.verbose("BunPackageJsonAdapter: Executed command:", `bun pm pkg ${args.join(" ")}`));
     }
 }

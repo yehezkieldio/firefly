@@ -38,7 +38,7 @@ export class Version {
 
     bumpPrerelease(identifier?: string, base?: PreReleaseBase): FireflyResult<Version> {
         logger.verbose(
-            `Version: Bumping prerelease for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`
+            `Version: Bumping prerelease for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`,
         );
         let newVersion: string | null = null;
 
@@ -72,8 +72,8 @@ export class Version {
         if (!newVersion) {
             return err(
                 new VersionError(
-                    `Failed to bump ${this._version} as prerelease (identifier: ${identifier}, base: ${base})`
-                )
+                    `Failed to bump ${this._version} as prerelease (identifier: ${identifier}, base: ${base})`,
+                ),
             );
         }
         logger.verbose(`Version: Bumped prerelease version is '${newVersion}'.`);
@@ -82,21 +82,21 @@ export class Version {
 
     bumpPremajor(identifier?: string, base?: PreReleaseBase): FireflyResult<Version> {
         logger.verbose(
-            `Version: Bumping premajor for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`
+            `Version: Bumping premajor for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`,
         );
         return this.bumpPre("premajor", identifier, base);
     }
 
     bumpPreminor(identifier?: string, base?: PreReleaseBase): FireflyResult<Version> {
         logger.verbose(
-            `Version: Bumping preminor for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`
+            `Version: Bumping preminor for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`,
         );
         return this.bumpPre("preminor", identifier, base);
     }
 
     bumpPrepatch(identifier?: string, base?: PreReleaseBase): FireflyResult<Version> {
         logger.verbose(
-            `Version: Bumping prepatch for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`
+            `Version: Bumping prepatch for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`,
         );
         return this.bumpPre("prepatch", identifier, base);
     }
@@ -123,10 +123,10 @@ export class Version {
     private bumpPre(
         type: "premajor" | "preminor" | "prepatch",
         identifier?: string,
-        base?: PreReleaseBase
+        base?: PreReleaseBase,
     ): FireflyResult<Version> {
         logger.verbose(
-            `Version: Bumping ${type} for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`
+            `Version: Bumping ${type} for version '${this._version}' (identifier: '${identifier}', base: '${base}')...`,
         );
         let newVersion: string | null = null;
 
@@ -134,7 +134,7 @@ export class Version {
             const baseResult = this.ensureIdentifierBase(base);
             if (baseResult.isErr()) {
                 return err(
-                    new VersionError(`Invalid prerelease base: ${base} for ${type} (identifier: ${identifier})`)
+                    new VersionError(`Invalid prerelease base: ${base} for ${type} (identifier: ${identifier})`),
                 );
             }
             newVersion = semver.inc(this._version, type, identifier, baseResult.value);
@@ -144,7 +144,7 @@ export class Version {
 
         if (!newVersion) {
             return err(
-                new VersionError(`Failed to bump ${type} ${this._version} (identifier: ${identifier}, base: ${base})`)
+                new VersionError(`Failed to bump ${type} ${this._version} (identifier: ${identifier}, base: ${base})`),
             );
         }
 

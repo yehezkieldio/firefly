@@ -11,7 +11,7 @@ export class TaskExecutorService {
 
         if (executeResult.isErr()) {
             logger.verbose(
-                `TaskExecutorService: Task failed: ${task.getName() ?? "unknown"} | Error: ${executeResult.error.message}`
+                `TaskExecutorService: Task failed: ${task.getName() ?? "unknown"} | Error: ${executeResult.error.message}`,
             );
             return errAsync(executeResult.error);
         }

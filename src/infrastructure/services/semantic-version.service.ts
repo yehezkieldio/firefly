@@ -29,7 +29,7 @@ export class SemanticVersionService {
 
     constructor(
         private readonly gitProvider: GitProviderPort,
-        config: SemanticVersionServiceConfig = {}
+        config: SemanticVersionServiceConfig = {},
     ) {
         this.commitRetriever = new CommitRetrieverService(gitProvider);
         this.analyzer = this.createEnhancedAnalyzer(config);

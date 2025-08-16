@@ -105,7 +105,7 @@ export class CommitAnalyzerService {
                 patches: 0,
                 scopedBreaking: [],
                 hasPreReleaseTransition: false,
-            }
+            },
         );
         logger.verbose(`CommitAnalyzerService: Commit analysis reduction complete: ${JSON.stringify(result)}`);
         return result;
@@ -200,7 +200,7 @@ export class CommitAnalyzerService {
     private buildRecommendation(
         level: 0 | 1 | 2,
         commits: readonly Commit[],
-        analysis: CommitAnalysis
+        analysis: CommitAnalysis,
     ): VersionRecommendation {
         logger.verbose("CommitAnalyzerService: Building bumper recommendation object...");
         const recommendation = {

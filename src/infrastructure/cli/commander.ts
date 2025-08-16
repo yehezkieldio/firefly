@@ -44,12 +44,12 @@ export async function createCLI(): Promise<typeof program> {
                 const result = BumpStrategySchema.safeParse(input);
                 if (!result.success) {
                     throw new InvalidArgumentError(
-                        `Invalid bump strategy: "${input}". Must be one of: ${BumpStrategyValues.join(", ")}`
+                        `Invalid bump strategy: "${input}". Must be one of: ${BumpStrategyValues.join(", ")}`,
                     );
                 }
                 return result.data;
             },
-            "manual"
+            "manual",
         )
         .option("--rt, --release-type <type>", "Release type (major, minor, patch, prerelease, etc.)", (input) => {
             // Accept undefined (no input) or a valid value
@@ -57,7 +57,7 @@ export async function createCLI(): Promise<typeof program> {
             const result = ReleaseTypeSchema.safeParse(input);
             if (!result.success) {
                 throw new InvalidArgumentError(
-                    `Invalid release type: "${input}". Must be one of: ${ReleaseTypeValues.join(", ")}`
+                    `Invalid release type: "${input}". Must be one of: ${ReleaseTypeValues.join(", ")}`,
                 );
             }
             return result.data;

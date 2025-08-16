@@ -8,7 +8,7 @@ export class FileSystemService {
 
     async read(): Promise<AsyncFireflyResult<string>> {
         return this.wrapOperation(Bun.file(this.path).text(), "Failed to read file").andTee(() =>
-            logger.verbose(`FileSystemService: Read file at ${this.path}`)
+            logger.verbose(`FileSystemService: Read file at ${this.path}`),
         );
     }
 
@@ -25,7 +25,7 @@ export class FileSystemService {
 
     async exists(): Promise<AsyncFireflyResult<boolean>> {
         return this.wrapOperation(Bun.file(this.path).exists(), "Failed to check if file exists").andTee(() =>
-            logger.verbose(`FileSystemService: Checked existence of file at ${this.path}`)
+            logger.verbose(`FileSystemService: Checked existence of file at ${this.path}`),
         );
     }
 

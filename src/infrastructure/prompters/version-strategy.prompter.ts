@@ -52,7 +52,7 @@ export class VersionStrategyPromptAdapter {
 
     private async promptUser(defaultValue: string): Promise<AsyncFireflyResult<string>> {
         logger.verbose(
-            `VersionStrategyPromptAdapter: Prompting user for version strategy (default: '${defaultValue}')`
+            `VersionStrategyPromptAdapter: Prompting user for version strategy (default: '${defaultValue}')`,
         );
         const promptResult = await this.createPrompt(defaultValue);
         if (promptResult.isErr()) {
@@ -83,8 +83,8 @@ export class VersionStrategyPromptAdapter {
         if (!validStrategies.includes(strategy)) {
             return err(
                 new VersionInferenceError(
-                    `Invalid version strategy: ${strategy}. Valid strategies are: ${validStrategies.join(", ")}`
-                )
+                    `Invalid version strategy: ${strategy}. Valid strategies are: ${validStrategies.join(", ")}`,
+                ),
             );
         }
 

@@ -41,7 +41,7 @@ export class CommitRetrieverService {
         // Get detailed information for each commit
         const commits: Commit[] = [];
         const commitDetailsPromises = commitHashes.map((hash) =>
-            this.gitProvider.getCommitDetails(hash).then((result) => ({ hash, result }))
+            this.gitProvider.getCommitDetails(hash).then((result) => ({ hash, result })),
         );
 
         const commitDetailsResults = await Promise.all(commitDetailsPromises);
