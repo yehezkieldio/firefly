@@ -250,7 +250,7 @@ export class BumpStrategyService {
             return configuredType;
         }
 
-        if (recommendedType) {
+        if (recommendedType !== undefined) {
             return recommendedType;
         }
 
