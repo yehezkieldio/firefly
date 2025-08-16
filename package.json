@@ -60,7 +60,7 @@
     "@types/semver": "^7.7.0",
     "tsdown": "^0.14.1",
     "typescript": "^5.9.2",
-    "ultracite": "^5.1.6"
+    "ultracite": "^5.1.7"
   },
   "homepage": "https://github.com/yehezkieldio/firefly#readme",
   "bugs": {
