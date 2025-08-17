@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@2.1.4 (August 17, 2025)
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`e261e49`](https://github.com/yehezkieldio/firefly/commit/e261e4978166e2387df178922cc81b9d06137508) deps: Update dependency ultracite to ^5.1.9 ([#56](https://github.com/yehezkieldio/firefly/issues/56)) by renovate[bot]
+- [`be37f21`](https://github.com/yehezkieldio/firefly/commit/be37f21d83f4ba14d31fc6823597727875c42d3f) deps: Update dependency ultracite to ^5.2.1 ([#57](https://github.com/yehezkieldio/firefly/issues/57)) by renovate[bot]
+- [`eed7033`](https://github.com/yehezkieldio/firefly/commit/eed7033eb1627fdf9d6347c7f141d200fd598e32) deps: Update dependency ultracite to ^5.2.4 ([#58](https://github.com/yehezkieldio/firefly/issues/58)) by renovate[bot]
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`ee00d24`](https://github.com/yehezkieldio/firefly/commit/ee00d24d2de800cb81d5996c99803f3c470068a2)  Enforce releaseLatest to false when releasePreRelease is enabled
 ## firefly@2.1.3 (August 16, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
