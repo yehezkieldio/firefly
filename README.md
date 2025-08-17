@@ -7,6 +7,16 @@
 
 </div>
 
+---
+
+> **⚠️ Early Alpha v3** <br>
+> This version is under active development and may be unstable.
+> For the latest stable release, see [Firefly v2](https://github.com/yehezkieldio/firefly/tree/firefly%402.1.3).
+
+Firefly is a flexible Command Line Interface (CLI) tool designed to streamline and automate the entire release process. It encompasses semantic versioning, comprehensive changelog generation, and GitHub releases, ensuring a consistent and efficient workflow for myself and possibly for you too.
+
+---
+
 ## License
 
 This project is licensed under the [MIT license](LICENSE).
