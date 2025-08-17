@@ -213,6 +213,11 @@ const BaseFireflyConfigSchema = z.object({
 });
 
 export const FireflyConfigSchema = BaseFireflyConfigSchema.check((ctx) => {
+    // If releasePreRelease is enabled, force releaseLatest to false
+    if (ctx.value.releasePreRelease) {
+        ctx.value.releaseLatest = false;
+    }
+
     if (ctx.value.releaseLatest && ctx.value.releasePreRelease) {
         ctx.issues.push({
             code: "custom",

@@ -94,7 +94,15 @@ export async function createCLI(): Promise<typeof program> {
             logger.info(`${colors.magenta("firefly")} ${colors.dim(`v${pkg.version}`)}`);
 
             const globalOptions = program.opts();
-            const mergedOptions = { ...globalOptions, ...options };
+            const combinedOptions = { ...globalOptions, ...options };
+
+            const mergedOptions: CLIOptions = {
+                ...combinedOptions,
+                releasePreRelease:
+                    typeof (combinedOptions as Record<string, unknown>).releasePrerelease === "boolean"
+                        ? (combinedOptions as Record<string, boolean>).releasePrerelease
+                        : undefined,
+            };
 
             const configResult = await configLoader({
                 configFile: mergedOptions.config,
