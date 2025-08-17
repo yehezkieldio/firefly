@@ -121,9 +121,7 @@ export class TaskOrchestratorService {
         return this.executionStrategy
             .execute(enabledTasksResult.value, this.context)
             .map((result) => {
-                logger.verbose(
-                    `TaskOrchestratorService: Orchestration completed (${this.executionId}) - Success: ${result.success}`,
-                );
+                logger.verbose(`TaskOrchestratorService: Orchestration completed (${this.executionId})`);
                 return result;
             })
             .mapErr((error) => {
