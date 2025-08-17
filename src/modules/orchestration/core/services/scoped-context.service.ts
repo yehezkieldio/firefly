@@ -1,4 +1,4 @@
-import type { CommandName, FinalConfigFor } from "#/modules/configuration/application/schema-registry.service";
+import type { CommandName, FinalConfigFor } from "#/modules/configuration/application/config-schema.registry";
 import {
     type ContextDataFor,
     getContextSchema,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { CommandName } from "#/modules/configuration/application/schema-registry.service";
+import type { CommandName } from "#/modules/configuration/application/config-schema.registry";
 
 /**
  * Base context data that all workflows share

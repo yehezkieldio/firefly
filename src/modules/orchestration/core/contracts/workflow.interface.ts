@@ -1,5 +1,5 @@
 import z from "zod";
-import type { CommandName } from "#/modules/configuration/application/schema-registry.service";
+import type { CommandName } from "#/modules/configuration/application/config-schema.registry";
 import type { ContextDataFor } from "#/modules/orchestration/core/contracts/context.schema";
 import type { OrchestrationContext } from "#/modules/orchestration/core/contracts/orchestration.interface";
 import type { Task } from "#/modules/orchestration/core/contracts/task.interface";

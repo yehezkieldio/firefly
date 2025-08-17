@@ -1,7 +1,7 @@
 import { type Command, InvalidArgumentError, program } from "commander";
 import { colors } from "consola/utils";
 import z, { ZodError, type ZodObject, type ZodRawShape } from "zod";
-import { type CommandName, SchemaRegistry } from "#/modules/configuration/application/schema-registry.service";
+import type { CommandName } from "#/modules/configuration/application/config-schema.registry";
 import { ConfigLoader } from "#/modules/configuration/infrastructure/services/config-loader.service";
 import {
     type WorkflowFactory,
@@ -16,12 +16,12 @@ export class CLIService {
     /**
      * Creates a new CLI instance.
      */
-    create(description: string, version: string): typeof program {
+    create<T extends ZodRawShape>(description: string, version: string, schema: ZodObject<T>): typeof program {
         logger.info(`${colors.magenta("firefly")} ${colors.dim(`v${version}`)}`);
 
         program.name("firefly").description(description).version(version);
         program.helpOption("-h, --help", "Display help information").helpCommand("help", "Display help for command");
-        this.registerOptions(program, SchemaRegistry.getBaseSchema());
+        this.registerOptions(program, schema);
 
         return program;
     }

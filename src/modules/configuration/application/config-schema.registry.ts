@@ -1,6 +1,6 @@
 import type { z } from "zod";
-import { BaseConfigSchema } from "#/modules/configuration/core/schema/base.schema";
-import { ReleaseConfigSchema } from "#/modules/configuration/core/schema/release.schema";
+import { BaseConfigSchema } from "#/modules/configuration/core/schema/config-base.schema";
+import { ReleaseConfigSchema } from "#/modules/configuration/core/schema/config-release.schema";
 
 export class SchemaRegistry {
     static readonly commandSchemas = {

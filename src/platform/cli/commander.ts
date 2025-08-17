@@ -1,6 +1,6 @@
 import type { Command } from "commander";
 import { createReleaseWorkflow } from "#/application/workflows/release.workflow";
-import { SchemaRegistry } from "#/modules/configuration/application/schema-registry.service";
+import { SchemaRegistry } from "#/modules/configuration/application/config-schema.registry";
 import { CLIService } from "#/platform/cli/cli.service";
 import type { FireflyConfig } from "#/platform/config";
 
@@ -14,7 +14,7 @@ export interface CLIOptions extends FireflyConfig {
 export function createCLI(description: string, version: string): Command {
     const cliService = new CLIService();
 
-    const program = cliService.create(description, version);
+    const program = cliService.create(description, version, SchemaRegistry.getBaseSchema());
 
     cliService.registerCommand(
         "release",

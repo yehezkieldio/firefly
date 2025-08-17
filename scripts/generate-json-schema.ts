@@ -1,5 +1,5 @@
 import z from "zod";
-import { SchemaRegistry } from "#/modules/configuration/application/schema-registry.service";
+import { SchemaRegistry } from "#/modules/configuration/application/config-schema.registry";
 import { logger } from "#/shared/logger";
 
 const outputPath = process.argv[2];

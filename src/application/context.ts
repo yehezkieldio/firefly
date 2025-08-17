@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { type CommandName, SchemaRegistry } from "#/modules/configuration/application/schema-registry.service";
+import { type CommandName, SchemaRegistry } from "#/modules/configuration/application/config-schema.registry";
 import { BaseContextDataSchema, ContextDataSchemas } from "#/modules/orchestration/core/contracts/context.schema";
 
 export const ReleaseContextDataSchema = BaseContextDataSchema.extend({

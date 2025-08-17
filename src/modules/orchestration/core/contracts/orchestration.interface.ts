@@ -1,5 +1,5 @@
 import z from "zod";
-import type { CommandName, FinalConfigFor } from "#/modules/configuration/application/schema-registry.service";
+import type { CommandName, FinalConfigFor } from "#/modules/configuration/application/config-schema.registry";
 import type { Task } from "#/modules/orchestration/core/contracts/task.interface";
 import type { FireflyResult } from "#/shared/utils/result.util";
 

@@ -1,7 +1,7 @@
 import { loadConfig } from "c12";
 import { colors } from "consola/utils";
 import { ResultAsync } from "neverthrow";
-import { type CommandName, SchemaRegistry } from "#/modules/configuration/application/schema-registry.service";
+import { type CommandName, SchemaRegistry } from "#/modules/configuration/application/config-schema.registry";
 import type { FireflyConfig } from "#/platform/config";
 import { logger } from "#/shared/logger";
 import { createFireflyError, toFireflyError } from "#/shared/utils/error.util";
