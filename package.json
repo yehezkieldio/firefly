@@ -1,5 +1,5 @@
 {
-    "name": "@yehezkieldio/firefly",
+    "name": "fireflyy",
     "version": "3.0.0-alpha.1",
     "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
     "type": "module",
@@ -27,7 +27,8 @@
         }
     },
     "bin": {
-        "firefly": "./dist/main.js"
+        "firefly": "./dist/main.js",
+        "ff": "./dist/main.js"
     },
     "publishConfig": {
         "access": "public"
