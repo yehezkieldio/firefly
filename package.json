@@ -34,6 +34,7 @@
     },
     "scripts": {
         "postbuild": "bun scripts/generate-json-schema.ts assets/firefly.schema.json",
+        "build": "tsdown",
         "dev": "bun run src/platform/cli/main.ts",
         "check": "biome check .",
         "check:unsafe": "biome check --write --unsafe .",
