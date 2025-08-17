@@ -13,6 +13,9 @@ import type { FireflyConfig } from "#/platform/config";
 import { logger } from "#/shared/logger";
 
 export class CLIService {
+    /**
+     * Creates a new CLI instance.
+     */
     create(description: string, version: string): typeof program {
         logger.info(`${colors.magenta("firefly")} ${colors.dim(`v${version}`)}`);
 
@@ -23,6 +26,9 @@ export class CLIService {
         return program;
     }
 
+    /**
+     * Registers a new command.
+     */
     registerCommand<TCommand extends CommandName>(
         name: TCommand,
         description: string,
@@ -34,6 +40,9 @@ export class CLIService {
         cmd.action((options: CLIOptions) => this.run(name, options, workflowFactory));
     }
 
+    /**
+     * Registers command-line options for a command from a Zod schema.
+     */
     private registerOptions<T extends ZodRawShape>(cmd: Command, schema: ZodObject<T>): void {
         const shape = schema.shape;
 
@@ -155,6 +164,9 @@ export class CLIService {
         }
     }
 
+    /**
+     * Runs the specified command with the given options.
+     */
     private async run<TCommand extends CommandName>(
         commandName: TCommand,
         options: CLIOptions,
@@ -169,6 +181,9 @@ export class CLIService {
         await new WorkflowRunnerService().run(commandName, runnerOptions, workflowFactory);
     }
 
+    /**
+     * Loads the configuration for the given command.
+     */
     private loadConfig(commandName: CommandName, mergedOptions: CLIOptions) {
         const loader = new ConfigLoader({
             configFile: mergedOptions.config,
@@ -178,6 +193,9 @@ export class CLIService {
         return loader.load();
     }
 
+    /**
+     * Handles configuration errors.
+     */
     private handleConfigError(error: unknown): void {
         if (error instanceof ZodError) {
             const messages = error.issues.map((issue) => issue.message);
@@ -185,6 +203,9 @@ export class CLIService {
         }
     }
 
+    /**
+     * Builds the options for the workflow runner.
+     */
     private buildRunnerOptions(config: FireflyConfig, mergedOptions: CLIOptions): WorkflowRunnerOptions {
         const enabledFeatures = ["bump", "changelog", "commit", "push", "git", "github"].filter((feature) => {
             if (mergedOptions.skipBump && feature === "bump") return false;

@@ -8,6 +8,9 @@ export interface CLIOptions extends FireflyConfig {
     config?: string;
 }
 
+/**
+ * Creates and configures the CLI.
+ */
 export function createCLI(description: string, version: string): Command {
     const cliService = new CLIService();
 
