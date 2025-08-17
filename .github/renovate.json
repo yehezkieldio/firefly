@@ -15,6 +15,5 @@
             "dependencyDashboardApproval": false,
             "automerge": true
         }
-    ],
-    "reviewers": ["yehezkieldio"]
+    ]
 }

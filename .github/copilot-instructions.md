@@ -1,99 +1,82 @@
-# Firefly Instructions
+# Development Instruction
 
-## Overview
+## 1. Technology Stack
 
-**Firefly** is a CLI orchestrator designed for semantic versioning, changelog generation, and automated releases. It enables precise control over release workflows, supports safe rollbacks, and promotes modular task execution. This document defines the development and coding standards for Firefly, ensuring code quality, maintainability, and consistency.
+- **CLI:** Commander for building the command-line interface.
+- **Validation:** Zod for runtime validation and compile-time type inference.
+- **Runtime:** Bun for execution and package management.
+- **Changelog Generation:** git-cliff for generating changelog.
+- **Configuration:** c12 for file-based configuration loading.
 
-## Architecture
+## 2. Coding Standards
 
-Firefly adopts a **Hexagonal Architecture** to separate pure logic from side effects:
+- **TypeScript First:** Prefer explicit, advanced types for safety and clarity; DO NOT use `any`.
+- **Defensive Programming:** Validate all inputs/outputs at boundaries; treat external data as potentially invalid.
+- **Readable & Intentional:** Code should convey *why* it exists; avoid redundant comments on *how* it works.
+- **Clear Module Boundaries:** Each module has a single, well-defined purpose, ownership, and dependency scope.
+- **Immutable State:** Prefer immutability; only mutate when modeling inherently mutable behavior.
+- **Extract Complex Expressions:** Break down complex expressions into well-named intermediate variables or functions.
 
+## 3. Architectural Patterns
+
+- **Composition Over Inheritance:** Build from small, focused, composable modules.
+- **Locality of Behavior:** Keep related logic close together.
+- **Inward Dependency Flow:** Outer layers depend on inner layers, never the reverse.
+- **Explicit Interfaces:** Define clear contracts between layers and modules.
+- **Performance:** Every component, function, and hook should be optimized for performance by default
+
+## 3. Result & Error Handling
+
+- **Rust-Style Semantics:** Use neverthrow for explicit success/error handling.
+- **No try/catch:** Do not use `try/catch` at all, forget it exists.
+- **No Mixed Error Models:** Do not mix `throw` with `Result` in the same execution path.
+- **Explicit Unpacking:** Use `isOk()` / `isErr()` guards for clarity and control flow.
+- **Shallow Method Chains:** Limit chaining to two links; use named variables for intermediate results.
+
+### Types
+
+- `FireflyResult<T>`
+  - A synchronous `Result<T, FireflyError>`.
+
+- `FireflyAsyncResult<T>`
+  - An asynchronous `ResultAsync<T, FireflyError>` — behaves like `Promise<Result<T, FireflyError>>`.
+  - **Do not** wrap it in `Promise`.
+  - **Do not** mark a function returning `FireflyAsyncResult<T>` as `async`.
+
+- `Promise<FireflyResult<T>>`
+  - Use **only** when you need to `await` inside the function body (e.g., to unwrap a `FireflyAsyncResult`).
+  - This is the correct type for functions that internally `await` other async operations and then return a `FireflyResult`.
+
+#### Examples
+
+```ts
+// ✅ Correct: returns FireflyAsyncResult<T>
+function getUser(id: string): FireflyAsyncResult<User> {
+  return ResultAsync.fromPromise(fetchUser(id), toFireflyError);
+}
+
+// ✅ Correct: returns Promise<FireflyResult<T>>
+async function getUserCommits(id: string): Promise<FireflyResult<Commit[]>> {
+  const userRes = await getUser(id);
+  if (userRes.isErr()) return FireflyErr(userRes.error);
+  const commitsRes = await fetchCommits(userRes.value);
+  return commitsRes;
+}
 ```
-src/
-├── core/           # Pure domain logic: deterministic, no side effects
-├── application/    # Use cases: orchestrates tasks, manages versioning flows
-├── infrastructure/ # Integrations: Git, filesystem, GitHub, CLI, etc.
-├── shared/         # Utilities: logging, errors, common types, constants
-```
 
-### Architectural Guidelines
+## 4. Operating Principles
 
-- `core/`: Contains timeless, pure logic. May reference types from other layers for boundaries or interoperability.
-- `application/`: Implements use cases, coordinates tasks, manages rollbacks, and mediates between core and infrastructure.
-- `infrastructure/`: Handles side effects such as file I/O, Git operations, and CLI interactions.
-- `shared/`: Provides stateless utilities, error definitions, typed results, and constants.
-
-## Task Orchestration Pattern
-
-All business logic flows through the **Task System**:
-- Tasks implement `Task` interface (`execute()`, `undo()`, `getName()`, `getDescription()`, `isUndoable?()`)
-- `TaskOrchestratorService` runs tasks sequentially with automatic rollback on failure
-- `ApplicationContext` carries shared state and configuration between tasks
-- Example task sequence: PreflightCheck → DetermineNextVersion → BumpVersion → GenerateChangelog → CreateCommit → CreateTag → PushChanges → CreateRelease
-
-## Operating Principles
-
-- Firefly is **Bun-only**; Node.js is not supported. Use Bun-native APIs where possible.
-- CLI arguments (via [`commander`](https://github.com/tj/commander.js)) and file-based configuration (via [`c12`](https://github.com/unjs/c12)) are unified. CLI values override configuration files when both are present.
-- Changelog generation uses [`git-cliff`](https://github.com/orhun/git-cliff). Parse its TOML config with [`smol-toml`](https://github.com/akheron/smol-toml).
-- Use `conventional-recommended-bump` to infer version changes from commit history. Also support manual version selection.
-- Handle errors exclusively through [`neverthrow`](https://github.com/supermacro/neverthrow). No `throw` in coordinated flows.
-
-## Development Workflows
-
-### Running & Building
-- **Development**: `bun run dev` (runs `src/infrastructure/cli/main.ts` directly)
-- **Build**: `bun run build` (uses `tsdown` + post-build Bun pragma insertion)
-- **Linting**: `bun run check` (Biome with ultracite config), `check:write` for fixes
-- **Type checking**: `bun run typecheck`
-
-### Path Resolution & Imports
-- Use `#/` path alias for all internal imports (mapped to `./src/*` in tsconfig)
-- Examples: `#/shared/utils/result.util`, `#/application/context`, `#/core/domain/version`
-- JSON imports require `with { type: "json" }` (e.g., `package.json`)
-
-## Design Guidelines
-
-### Class & Function Design
-
-* **Group by Behavior, not by Type**: Co-locate related behaviors rather than abstract by class/interface layers.
-* **Small Units**: Prefer functions under 30 LOC. Keep methods single-responsibility and easy to test.
-* **Favor Composition**: Model behavior through services, not inheritance trees.
-* **Use Guard Clauses**: Reduce nesting by checking edge cases early and returning.
-
-## Development Standards
-
-### Functional Boundaries
-
-- Every module should have a **clear boundary**: know what it owns, what it exposes, and what it depends on.
-- Do not write "god files" that accumulate unrelated logic or touch too many layers.
-- Avoid circular dependencies, excessive indirection, and nesting more than 3 levels deep.
-
-### Type Safety
-
-* Use `zod`, and `strict interfaces` at integration points.
-- Internal modules should assume validated data and rely on the type system, not runtime checks.
-- Configuration schema in `infrastructure/config/schema.ts` uses Zod with custom validation logic
-
-### Result Handling
-
-- Use `FireflyResult<T>` and `AsyncFireflyResult<T>` types from `shared/utils/result.util.ts`, derived from `neverthrow` for consistent error handling and result propagation.
-    - Use `FireflyResult` for synchronous results, when the value is immediately available and does not require awaiting.
-    - Use `AsyncFireflyResult` for asynchronous results, when the value is produced by an async operation and you must await it before accessing the value or error.
-- Always map errors to a descriptive domain-specific `FireflyError` (see `shared/utils/error.util.ts` for error hierarchy)
-- Never mix `throw` and `try/catch` with `Result` in the same code path.
-- DONT USE `trycatch` WHATSOVER, PREFER `neverthrow` RESULT HANDLING.
-
-### Port & Adapter Pattern
-
-- Ports define interfaces in `core/ports/` (e.g., `GitProviderPort`, `PackageJsonPort`)
-- Adapters implement ports in `infrastructure/adapters/` with specific technologies
-- Services in `infrastructure/services/` provide factory functions and higher-level abstractions
-
-## Coding Principles & Patterns
-
-- Limit the use of comments. Code should read like prose. Code explains how, comments explain why.
-- Use defensive programming: validate and check types at boundaries.
-- Define interfaces that do only what is needed. Avoid over-abstraction or "god interfaces".
-- Avoid mutating state unless explicitly modeling it. Prefer copying or producing new values.
-- Structure for navigability. Group related files by feature, not just layer.
+- **Variables:** Use descriptive names with auxiliary verbs (e.g., `isLoading`, `hasError`, `canDelete`).
+- **Functions, Variables, Object Properties:** Use camelCase (e.g., `fetchData`, `userList`).
+- **Files and Directories:** Use kebab-case (e.g., `user-profile.tsx`, `api-routes/`).
+- **Architecture:** Hexagonal + Feature Slicing
+  - Preserve inward-facing dependency rules.
+  - **Global Structure:**
+    - `application/` — Cross-feature orchestration, no business logic or infra.
+    - `platform/` — CLI startup, config, env bootstrap, process lifecycle.
+    - `shared/` — Shared stateless utilities, constants, errors, types.
+    - `modules/<feature>` — Each capability with:
+      - `core/` — Pure domain logic, infra-agnostic.
+      - `application/` — Module-specific orchestration.
+      - `infrastructure/` — I/O, side effects, infra integrations.
+  - Organize by capability, not just layer; cross-cutting concerns in `shared/`.

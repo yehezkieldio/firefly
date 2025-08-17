@@ -1,46 +1,53 @@
-export class FireflyError extends Error {
-    readonly code: string;
-    readonly cause?: Error;
+import { z } from "zod";
 
-    constructor(message: string, code: string, cause?: Error) {
-        super(message);
-        this.name = "FireflyError";
-        this.code = code;
-        this.cause = cause;
-    }
+export const FireflyErrorCodeSchema = z.enum([
+    "VALIDATION",
+    "NOT_FOUND",
+    "CONFLICT",
+    "IO",
+    "TIMEOUT",
+    "UNEXPECTED",
+    "FAILED",
+    "INVALID",
+]);
+
+export type FireflyErrorCode = z.infer<typeof FireflyErrorCodeSchema>;
+
+export const FireflyErrorSchema = z.object({
+    code: FireflyErrorCodeSchema,
+    message: z.string(),
+    details: z.unknown().optional(),
+    cause: z.unknown().optional(),
+    retryable: z.boolean().optional(),
+    source: z.enum(["core", "application", "infrastructure"]).optional(),
+});
+
+export type FireflyError = Readonly<z.infer<typeof FireflyErrorSchema>>;
+
+/**
+ * Creates a FireflyError with a stack trace.
+ */
+export function createFireflyError(error: FireflyError): FireflyError & { stack?: string } {
+    const err = new Error(error.message);
+    return Object.freeze({
+        ...error,
+        stack: err.stack,
+    });
 }
 
-export class VersionError extends FireflyError {
-    constructor(message: string, cause?: Error) {
-        super(message, "VERSION_ERROR", cause);
-        this.name = "VersionError";
-    }
-}
-
-export class VersionInferenceError extends FireflyError {
-    constructor(message: string, cause?: Error) {
-        super(message, "VERSION_INFERENCE_ERROR", cause);
-        this.name = "VersionInferenceError";
-    }
-}
-
-export class ConfigurationError extends FireflyError {
-    constructor(message: string, cause?: Error) {
-        super(message, "CONFIGURATION_ERROR", cause);
-        this.name = "ConfigurationError";
-    }
-}
-
-export class TaskExecutionError extends FireflyError {
-    constructor(message: string, cause?: Error) {
-        super(message, "TASK_EXECUTION_ERROR", cause);
-        this.name = "TaskExecutionError";
-    }
-}
-
-export class ProcessExecutionError extends FireflyError {
-    constructor(message: string, cause?: Error) {
-        super(message, "PROCESS_EXECUTION_ERROR", cause);
-        this.name = "ProcessExecutionError";
-    }
+/**
+ * Converts an error into a FireflyError.
+ */
+export function toFireflyError(
+    e: unknown,
+    code: FireflyErrorCode = "UNEXPECTED",
+    source?: FireflyError["source"],
+): FireflyError {
+    const base = {
+        code,
+        message: e instanceof Error ? e.message : String(e),
+        cause: e,
+        source,
+    };
+    return createFireflyError(FireflyErrorSchema.parse(base));
 }
