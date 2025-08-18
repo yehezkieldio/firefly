@@ -1,3 +1,4 @@
-> **⚠️ Early Alpha v3** <br>
-> This version is under active development and may be unstable. <br>
-> For the latest stable release, see [Firefly v2](https://github.com/yehezkieldio/firefly/tree/v2).
+> [!CAUTION]
+> This is a **very early alpha** of the Firefly v3 rewrite. <br>
+> Many features are incomplete or missing, and the code is **not yet runnable** in its current state. <br>
+> For a stable and production-ready version, see [Firefly v2](https://github.com/yehezkieldio/firefly/tree/v2).
