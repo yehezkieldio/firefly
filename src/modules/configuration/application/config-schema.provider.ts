@@ -45,4 +45,4 @@ export type CommandConfigMap = {
 
 export type FinalConfigFor<C extends CommandName> = BaseConfig & CommandConfigMap[C];
 
-export type FireflyConfig = FinalConfigFor<CommandName>;
+export type _FireflyConfig = FinalConfigFor<CommandName>;
