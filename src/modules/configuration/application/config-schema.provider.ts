@@ -6,6 +6,9 @@ export const schemas = {
     release: ReleaseConfigSchema,
 } as const;
 
+/**
+ * Provides access to configuration schemas.
+ */
 export class ConfigSchemaProvider {
     private static readonly schemas = schemas;
 
