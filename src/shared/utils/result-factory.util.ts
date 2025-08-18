@@ -40,11 +40,11 @@ export const withContextAsync = <T>(result: FireflyAsyncResult<T>, context: stri
  * Validates input using a Zod schema with full type inference.
  * Avoids repeating the schema type parameter.
  */
-export function validateWithResult<TSchema extends z.ZodTypeAny>(
+export function validateWithResult<Output, Input, TSchema extends z.ZodType<Output, Input>>(
     schema: TSchema,
-    data: unknown,
+    data: Input,
     fieldName?: string,
-): FireflyResult<z.infer<TSchema>> {
+): FireflyResult<Output> {
     const result = schema.safeParse(data);
     if (result.success) {
         return fireflyOk(result.data);
