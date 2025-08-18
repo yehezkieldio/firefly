@@ -1,11 +1,13 @@
-import type z from "zod";
+import type { z } from "zod";
 import { BaseConfigSchema } from "#/modules/configuration/core/schema/config-base.schema";
 import { ReleaseConfigSchema } from "#/modules/configuration/core/schema/config-release.schema";
 
+export const schemas = {
+    release: ReleaseConfigSchema,
+} as const;
+
 export class ConfigSchemaProvider {
-    private static readonly schemas = {
-        release: ReleaseConfigSchema,
-    } as const;
+    private static readonly schemas = schemas;
 
     /**
      * Get the base configuration schema.
@@ -36,9 +38,11 @@ export class ConfigSchemaProvider {
 
 export type BaseConfig = z.infer<typeof BaseConfigSchema>;
 
-export type CommandName = keyof (typeof ConfigSchemaProvider)["schemas"];
+export type CommandName = keyof typeof schemas;
 export type CommandConfigMap = {
-    [K in CommandName]: z.infer<(typeof ConfigSchemaProvider)["schemas"][K]>;
+    [K in keyof typeof schemas]: z.infer<(typeof schemas)[K]>;
 };
 
 export type FinalConfigFor<C extends CommandName> = BaseConfig & CommandConfigMap[C];
+
+export type FireflyConfig = FinalConfigFor<CommandName>;
