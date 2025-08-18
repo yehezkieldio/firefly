@@ -15,7 +15,7 @@
 - **Readable & Intentional:** Code should convey *why* it exists; avoid redundant comments on *how* it works.
 - **Clear Module Boundaries:** Each module has a single, well-defined purpose, ownership, and dependency scope.
 - **Immutable State:** Prefer immutability; only mutate when modeling inherently mutable behavior.
-- **Extract Complex Expressions:** Break down complex expressions into well-named intermediate variables or functions.
+- **Extract Complex Expressions:** Break down complex expressions into well-named intermediate variables or functions/classes.
 
 ## 3. Architectural Patterns
 
@@ -23,7 +23,7 @@
 - **Locality of Behavior:** Keep related logic close together.
 - **Inward Dependency Flow:** Outer layers depend on inner layers, never the reverse.
 - **Explicit Interfaces:** Define clear contracts between layers and modules.
-- **Performance:** Every component, function, and hook should be optimized for performance by default
+- **Performance:** Every component, function, and class should be optimized for performance by default
 
 ## 3. Result & Error Handling
 
