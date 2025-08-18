@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.2 (August 18, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`8895c77`](https://github.com/yehezkieldio/firefly/commit/8895c77ef52f7fd8978b06dd2970de63b11afba8)  Rename package to fireflyy
+- [`0e11133`](https://github.com/yehezkieldio/firefly/commit/0e11133ca3e006c63eb80c2eb84c62977827f3bc)  Clean codebase (again)
+- [`b1c9184`](https://github.com/yehezkieldio/firefly/commit/b1c918448938ce7129573f725f4adb6e882bfac2) copilot: Update coding standards to account for classes
+
+### <!-- 16 -->🤖 CI/CD
+- [`a9ae951`](https://github.com/yehezkieldio/firefly/commit/a9ae9515efd50b780fa36ef38bdb2c6fc3739b7c)  Disable pre-release publishing
+
+### <!-- 3 -->🚀 New Features
+- [`08dcff9`](https://github.com/yehezkieldio/firefly/commit/08dcff9d359bb104572b694e20835b7fc1d53519) semver: Add bump strategy and release type constants
+- [`578a7a4`](https://github.com/yehezkieldio/firefly/commit/578a7a459305f4d738e05cb2dfc3d31aef926c91) schema: Add repository schema
+- [`8bfa3b5`](https://github.com/yehezkieldio/firefly/commit/8bfa3b598524f2a45a8da9f031ee560ed4c3c462) config: Add configuration schemas for base and release
+
+### <!-- 5 -->📚 Documentation
+- [`9b26674`](https://github.com/yehezkieldio/firefly/commit/9b26674a7b43d9671969745222537b3d044f0189)  Update readme
 ## firefly@3.0.0-alpha.1 (August 17, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
