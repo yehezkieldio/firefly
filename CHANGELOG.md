@@ -6,6 +6,20 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.3 (August 18, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`40a3e1a`](https://github.com/yehezkieldio/firefly/commit/40a3e1a876b24d4ca86c7633e803117e3f0ac9c0) schema: Add json schema generation
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`fe2cf23`](https://github.com/yehezkieldio/firefly/commit/fe2cf23010f57d85e224785d254d37cc539cb70f) config: Correct exports path for config module
+- [`09aa1a2`](https://github.com/yehezkieldio/firefly/commit/09aa1a2c348731a2b1123d0d8a8336e7eb14c9b4) config: Preserve full type by keeping Zod schema literal types
+
+### <!-- 5 -->📚 Documentation
+- [`3d5bdad`](https://github.com/yehezkieldio/firefly/commit/3d5bdad26bfeba9f3988ab34eaf67ca33f2949c3)  Update readme
+
+### <!-- 7 -->🚜 Refactor
+- [`0f6807d`](https://github.com/yehezkieldio/firefly/commit/0f6807d13c47852c58b02e286163aa80c051d1c3) config: Rename FireflyConfig type to _FireflyConfig
 ## firefly@3.0.0-alpha.2 (August 18, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
