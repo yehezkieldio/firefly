@@ -1,19 +1,15 @@
-# Development Instruction
+# Development Instructions
 
 ## 1. Technology Stack
 
-- **CLI:** Commander for building the command-line interface.
-- **Validation:** Zod for runtime validation and compile-time type inference.
 - **Runtime:** Bun for execution and package management.
-- **Changelog Generation:** git-cliff for generating changelog.
-- **Configuration:** c12 for file-based configuration loading.
+- **Validation:** Zod for runtime validation and compile-time type inference.
 
 ## 2. Coding Standards
 
-- **TypeScript First:** Prefer explicit, advanced types for safety and clarity; DO NOT use `any`.
+- **TypeScript First:** Prefer explicit, advanced types for safety and clarity.
 - **Defensive Programming:** Validate all inputs/outputs at boundaries; treat external data as potentially invalid.
 - **Readable & Intentional:** Code should convey *why* it exists; avoid redundant comments on *how* it works.
-- **Clear Module Boundaries:** Each module has a single, well-defined purpose, ownership, and dependency scope.
 - **Immutable State:** Prefer immutability; only mutate when modeling inherently mutable behavior.
 - **Extract Complex Expressions:** Break down complex expressions into well-named intermediate variables or functions/classes.
 
@@ -23,13 +19,12 @@
 - **Locality of Behavior:** Keep related logic close together.
 - **Inward Dependency Flow:** Outer layers depend on inner layers, never the reverse.
 - **Explicit Interfaces:** Define clear contracts between layers and modules.
-- **Performance:** Every component, function, and class should be optimized for performance by default
+- **Performance:** Optimize by default and avoid common pitfalls; favor clarity over premature micro-optimizations.
 
-## 3. Result & Error Handling
+## 4. Result & Error Handling
 
 - **Rust-Style Semantics:** Use neverthrow for explicit success/error handling.
-- **No try/catch:** Do not use `try/catch` at all, forget it exists.
-- **No Mixed Error Models:** Do not mix `throw` with `Result` in the same execution path.
+- **No try/catch:** Do not use `try/catch` and `throw` at all, forget it exists.
 - **Explicit Unpacking:** Use `isOk()` / `isErr()` guards for clarity and control flow.
 - **Shallow Method Chains:** Limit chaining to two links; use named variables for intermediate results.
 
@@ -66,17 +61,17 @@ async function getUserCommits(id: string): Promise<FireflyResult<Commit[]>> {
 
 ## 4. Operating Principles
 
-- **Variables:** Use descriptive names with auxiliary verbs (e.g., `isLoading`, `hasError`, `canDelete`).
-- **Functions, Variables, Object Properties:** Use camelCase (e.g., `fetchData`, `userList`).
-- **Files and Directories:** Use kebab-case (e.g., `user-profile.tsx`, `api-routes/`).
+- **Type Safety**: Never use any; leverage full TypeScript type system and advanced types.
+- **Naming Conventions**:
+  - Use `kebab-case` for files and directories.
+  - Use descriptive, `camelCase` names with auxiliary verbs for variables, functions, and object properties.
+  - Use `PascalCase` for types, interfaces, and classes.
 - **Architecture:** Hexagonal + Feature Slicing
-  - Preserve inward-facing dependency rules.
-  - **Global Structure:**
+  - **Project Tree:**
     - `application/` — Cross-feature orchestration, no business logic or infra.
-    - `platform/` — CLI startup, config, env bootstrap, process lifecycle.
-    - `shared/` — Shared stateless utilities, constants, errors, types.
+    - `platform/` — CLI startup.
+    - `shared/` — Shared stateless utilities.
     - `modules/<feature>` — Each capability with:
       - `core/` — Pure domain logic, infra-agnostic.
       - `application/` — Module-specific orchestration.
       - `infrastructure/` — I/O, side effects, infra integrations.
-  - Organize by capability, not just layer; cross-cutting concerns in `shared/`.
