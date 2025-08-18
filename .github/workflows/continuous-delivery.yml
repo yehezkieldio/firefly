@@ -118,11 +118,12 @@ jobs:
   publish-pre-release:
     name: Publish Pre-release
     needs: detect-changes
-    if: |
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/master' &&
-      needs.detect-changes.outputs.is_release == 'true' &&
-      needs.detect-changes.outputs.is_prerelease == 'true'
+    if: false
+    # if: |
+    #   github.event_name == 'push' &&
+    #   github.ref == 'refs/heads/master' &&
+    #   needs.detect-changes.outputs.is_release == 'true' &&
+    #   needs.detect-changes.outputs.is_prerelease == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
