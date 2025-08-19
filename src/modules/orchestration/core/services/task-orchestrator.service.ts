@@ -37,7 +37,6 @@ export class TaskOrchestratorService {
         this.tasks = tasks;
         this.options = options;
         this.context = context;
-        this.executionId = this.options.executionId ?? "unknown";
         this.executionId = options.executionId ?? Bun.randomUUIDv7();
 
         this.featureManager = FeatureManager.fromOptions(options);
