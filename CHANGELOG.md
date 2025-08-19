@@ -6,6 +6,36 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.4 (August 19, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`a8ac9c3`](https://github.com/yehezkieldio/firefly/commit/a8ac9c329a7aefb882b0acbd3d8c5af7e775b641) orchestration: Add context, task, and workflow interfaces
+- [`514d027`](https://github.com/yehezkieldio/firefly/commit/514d027245e2974fa6a5b62ee1dd33ac6a3c98f7) orchestration: Add execution strategy interface for tasks
+- [`c630a21`](https://github.com/yehezkieldio/firefly/commit/c630a210df722371181e59b68a69674396dfe826) orchestration: Implement feature manager for toggling features
+- [`e898683`](https://github.com/yehezkieldio/firefly/commit/e8986838fb4390e5fa561d7fca7aa1493a056ca6) core: Implement rollback manager for task handling
+- [`0d06021`](https://github.com/yehezkieldio/firefly/commit/0d06021dc21ef1c33b77557365cc3c3f5bdc0b54) orchestration: Add scoped context for command execution
+- [`7d8b94e`](https://github.com/yehezkieldio/firefly/commit/7d8b94ea327804b648f28fd89112bd4dbc4e7a84) orchestration: Implement task execution service with lifecycle
+- [`9e92823`](https://github.com/yehezkieldio/firefly/commit/9e92823384b3c8101e3997571510050712498671) orchestration: Add sequential execution strategy implementation
+- [`3c787f8`](https://github.com/yehezkieldio/firefly/commit/3c787f84f3e30b838623c038fbe37f2b296dee9b) orchestration: Implement task orchestrator service
+- [`f7db227`](https://github.com/yehezkieldio/firefly/commit/f7db227fec6bd93582e7d8f127eeb2d686bb1744) orchestration: Implement workflow executor service
+- [`6f8f6fc`](https://github.com/yehezkieldio/firefly/commit/6f8f6fc5dba23fd1c94cf45343dab14bebe5b341) orchestration: Implement rollback management in sequential strategy
+- [`8de65f5`](https://github.com/yehezkieldio/firefly/commit/8de65f5444d834f213fdd152830628ee3a44df10) configuration: Implement config loader service
+- [`8944356`](https://github.com/yehezkieldio/firefly/commit/89443563b70dafb61a8683d4b190218951379bcf) cli: Implement command-line interface manager
+- [`b098d32`](https://github.com/yehezkieldio/firefly/commit/b098d32d38dd2cbec7e89db5f5c39848aa310742) orchestration: Add release context data schema
+- [`3ccd653`](https://github.com/yehezkieldio/firefly/commit/3ccd65301bcd46f213a6ba5f9479294989daf9ce) cli: Implement command-line interface entry point
+- [`26bf72c`](https://github.com/yehezkieldio/firefly/commit/26bf72cb88dce3b02e6604cb430053584b0eff56) cli: Add release command to CLI manager
+
+### <!-- 5 -->📚 Documentation
+- [`81bff3d`](https://github.com/yehezkieldio/firefly/commit/81bff3d90dedc493ed883d17bfe3148701ec5ac7) config: Add documentation for configuration schemas
+
+### <!-- 7 -->🚜 Refactor
+- [`711eab5`](https://github.com/yehezkieldio/firefly/commit/711eab50d6bed40a253e723a401396eee93fadf8) utils: Improve type inference in validateWithResult
+- [`40b390e`](https://github.com/yehezkieldio/firefly/commit/40b390eedef48c09456de2533e64cb88438a3bd2) orchestration: Improve context data schema handling
+- [`ef7d7a5`](https://github.com/yehezkieldio/firefly/commit/ef7d7a5e00873690a4a2bad77e1ba999efd25f28) utils: Simplify validateWithResult signature
+- [`696fea0`](https://github.com/yehezkieldio/firefly/commit/696fea0adf1958f0e01affd676fd9d48b1d94852) orchestration: Update execution ID initialization
+
+### <!-- 9 -->🎨 Code Styling
+- [`97dae45`](https://github.com/yehezkieldio/firefly/commit/97dae453e0f7de076b127831e60b13df467c2489) copilot: Clarify typescript usage guidelines
 ## firefly@3.0.0-alpha.3 (August 18, 2025)
 
 ### <!-- 3 -->🚀 New Features
