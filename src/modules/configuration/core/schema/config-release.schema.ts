@@ -1,5 +1,7 @@
 import z from "zod";
-import { BumpStrategySchema, PreReleaseBaseSchema, ReleaseTypeSchema } from "#/modules/semver/core/constants";
+import { BumpStrategySchema } from "#/modules/semver/core/constants/bump-strategy.constant";
+import { PreReleaseBaseSchema } from "#/modules/semver/core/constants/pre-release-base.constant";
+import { ReleaseTypeSchema } from "#/modules/semver/core/constants/release-type.constant";
 
 export const COMMIT_MESSAGE_TEMPLATE = "chore(release): release {{name}}@{{version}}";
 export const TAG_NAME_TEMPLATE = "{{name}}@{{version}}";
