@@ -201,47 +201,37 @@ export class ConfigEnricherService {
         originalConfig: Partial<FireflyConfig>,
         packageJson: PackageJson,
     ): FireflyResult<Partial<FireflyConfig>> {
-        // Check if preReleaseId was explicitly provided
-        const explicitlyProvided =
-            Object.hasOwn(originalConfig, "preReleaseId") && originalConfig.preReleaseId !== undefined;
+        const preReleaseProvided =
+            originalConfig.preReleaseId !== undefined && originalConfig.preReleaseId.trim() !== "";
 
-        if (explicitlyProvided) {
-            logger.verbose(
-                `ConfigEnricherService: preReleaseId explicitly provided in config: "${originalConfig.preReleaseId}" - not enriching from package.json`,
-            );
+        if (preReleaseProvided) {
             return ok({});
         }
 
-        if (!packageJson.version) {
-            logger.verbose(
-                "ConfigEnricherService: No version found in package.json - skipping preReleaseId enrichment",
-            );
-            return ok({});
+        if (packageJson.version) {
+            const parsed = semver.parse(packageJson.version);
+            if (!parsed) {
+                return err(new ConfigurationError(`Invalid version in package.json: ${packageJson.version}`));
+            }
+
+            if (parsed.prerelease.length > 0) {
+                const preId = typeof parsed.prerelease[0] === "string" ? parsed.prerelease[0] : "";
+                if (!preId) {
+                    return err(
+                        new ConfigurationError(
+                            `package.json version "${packageJson.version}" is a prerelease but has no valid identifier`,
+                        ),
+                    );
+                }
+
+                logger.verbose(`ConfigEnricherService: Auto-detected preReleaseId from package.json: ${preId}`);
+                return ok({ preReleaseId: preId });
+            }
         }
 
-        const parsed = semver.parse(packageJson.version);
-        if (!parsed) {
-            return err(new ConfigurationError(`Invalid version in package.json: ${packageJson.version}`));
-        }
-
-        if (!parsed.prerelease.length) {
-            logger.verbose(
-                `ConfigEnricherService: package.json version "${packageJson.version}" is not a prerelease - skipping preReleaseId enrichment`,
-            );
-            return ok({});
-        }
-
-        const preId = typeof parsed.prerelease[0] === "string" ? parsed.prerelease[0] : "";
-        if (!preId) {
-            return err(
-                new ConfigurationError(
-                    `package.json version "${packageJson.version}" is a prerelease but has no valid identifier`,
-                ),
-            );
-        }
-
-        logger.verbose(`ConfigEnricherService: Auto-detected preReleaseId from package.json: ${preId}`);
-        return ok({ preReleaseId: preId });
+        return ok({
+            preReleaseId: "alpha",
+        });
     }
 
     private enrichNameFromPackageJson(
