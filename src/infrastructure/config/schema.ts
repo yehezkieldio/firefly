@@ -100,7 +100,7 @@ const BaseFireflyConfigSchema = z.object({
      * This can be any string, including commit-based identifiers like "canary.$(git rev-parse --short HEAD)".
      * If not specified, defaults to "alpha".
      */
-    preReleaseId: z.string().min(1, "Pre-release ID cannot be empty").default("alpha"),
+    preReleaseId: z.string().min(1, "Pre-release ID cannot be empty").default(""),
 
     /**
      * Starting version for pre-releases, typically "0" or "1".
