@@ -16,12 +16,13 @@ import { logger } from "#/shared/logger";
  * CLI Manager for handling command-line interface interactions, setup, and processing.
  */
 export class CLIManager {
+    private version = "";
+
     /**
      * Creates a new CLI instance.
      */
     create<T extends ZodRawShape>(description: string, version: string, schema: ZodObject<T>): typeof program {
-        logger.info(`${colors.magenta("firefly")} ${colors.dim(`v${version}`)}`);
-
+        this.version = version;
         program.name("firefly").description(description).version(version);
         program.helpOption("-h, --help", "Display help information").helpCommand("help", "Display help for command");
         this.registerOptions(program, schema);
@@ -40,7 +41,10 @@ export class CLIManager {
     ): void {
         const cmd = program.command(name).description(description);
         this.registerOptions(cmd, schema);
-        cmd.action((options: CLIOptions) => this.run(name, options, workflowFactory));
+        cmd.action((options: CLIOptions) => {
+            logger.info(`${colors.magenta("firefly")} ${colors.dim(`v${this.version}`)}`);
+            return this.run(name, options, workflowFactory);
+        });
     }
 
     /**

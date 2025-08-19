@@ -15,6 +15,11 @@ import pkg from "../../../package.json" with { type: "json" };
  * Main entry point for Firefly.
  */
 async function main(): Promise<void> {
+    // Ensure help is shown if no command is provided
+    if (process.argv.length === 2) {
+        process.argv.push("-h");
+    }
+
     const cli = createCLI(pkg.description, pkg.version);
     await cli.parseAsync(process.argv);
 }
