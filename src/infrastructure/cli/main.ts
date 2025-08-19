@@ -11,6 +11,11 @@ import { createCLI } from "#/infrastructure/cli/commander";
 import { logger } from "#/shared/utils/logger.util";
 
 async function main(): Promise<void> {
+    // Ensure help is shown if no command is provided
+    if (process.argv.length === 2) {
+        process.argv.push("-h");
+    }
+
     try {
         const cli = await createCLI();
         await cli.parseAsync(process.argv);
