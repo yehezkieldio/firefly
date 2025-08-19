@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@2.1.5 (August 19, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`a995711`](https://github.com/yehezkieldio/firefly/commit/a995711b6e68c31cf1341e14f4e5cd81b1ebaad7)  Enrich preReleaseId from package.json if not explicitly provided
+- [`8c00b34`](https://github.com/yehezkieldio/firefly/commit/8c00b34c3ec82f8ae8849c907fb6566d993edc25)  Ensure help is shown when no command is provided
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`21ecd9e`](https://github.com/yehezkieldio/firefly/commit/21ecd9e565577a320a8b90d5b21a0710cca0f254)  Set default preReleaseId to an empty string instead of "alpha"
+- [`4d8e975`](https://github.com/yehezkieldio/firefly/commit/4d8e975d94c733c1e81a9eb6c25c2bd245fe766f)  Improve preReleaseId enrichment logic from package.json
 ## firefly@2.1.4 (August 17, 2025)
 
 ### <!-- 2 -->🧩 Dependencies Updates
