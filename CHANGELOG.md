@@ -6,6 +6,26 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.6 (August 31, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`9eba96f`](https://github.com/yehezkieldio/firefly/commit/9eba96f998316b509328980e54faa10f3cf5f255)  Cleanup everything
+- [`1ccf158`](https://github.com/yehezkieldio/firefly/commit/1ccf1584f0e3434111d10d31e7e205c2766f6431) biome: Add neverthrow error handling diagnostics
+- [`1e35d6b`](https://github.com/yehezkieldio/firefly/commit/1e35d6b92714bdd0a5aa52117fc1e3923ace8599) biome: Simplify error handling diagnostic registration format
+- [`4fe85a1`](https://github.com/yehezkieldio/firefly/commit/4fe85a1237121d0cd554bb252d5561f8022e572a)  Correct version mismatch
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`de33552`](https://github.com/yehezkieldio/firefly/commit/de33552bb74ad66bf3db77735f89b42ca986dee2) deps: Update dependency zod to ^4.1.5 ([#68](https://github.com/yehezkieldio/firefly/issues/68)) by renovate[bot]
+- [`fca4893`](https://github.com/yehezkieldio/firefly/commit/fca489381ca572e3ffbdb41a6ff89006d5dc7128) deps: Update dependency ultracite to ^5.2.10 ([#69](https://github.com/yehezkieldio/firefly/issues/69)) by renovate[bot]
+- [`6fc5312`](https://github.com/yehezkieldio/firefly/commit/6fc53121dc4f7ffb4a9d2de3b0d0c9d7e4d090d6) deps: Remove ultracite dependency
+
+### <!-- 3 -->🚀 New Features
+- [`360ca7f`](https://github.com/yehezkieldio/firefly/commit/360ca7f35e017b1959903d13a4625fc0f4e134a8) logger: Add logger utility with custom formatting
+- [`2d18bc8`](https://github.com/yehezkieldio/firefly/commit/2d18bc8a96d1457087755411089ed84fbfc8ade3) utils: Implement firefly error handling utilities
+
+### <!-- 5 -->📚 Documentation
+- [`1914e7a`](https://github.com/yehezkieldio/firefly/commit/1914e7a70c414f37608d3fd2f5348bccc9e67d7d) copilot: Update development instructions for clarity
+- [`77b92f5`](https://github.com/yehezkieldio/firefly/commit/77b92f5c7c7f431637dd095829e836fed143f37a) copilot: Update commit message guidelines
 ## firefly@3.0.0-alpha.4 (August 19, 2025)
 
 ### <!-- 3 -->🚀 New Features
