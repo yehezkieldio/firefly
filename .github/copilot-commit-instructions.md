@@ -148,10 +148,10 @@ refactor: consolidate utility functions
 
 ## 8. Quality Checklist
 
-- [ ] ≤ 50 characters total
-- [ ] Imperative mood used
-- [ ] Type matches actual change
-- [ ] Scope is most specific applicable
-- [ ] Description is clear and actionable
-- [ ] No filler words or explanations
-- [ ] Would make sense to another developer
+- ≤ 50 characters total
+- Imperative mood used
+- Type matches actual change
+- Scope is most specific applicable
+- Description is clear and actionable
+- No filler words or explanations
+- Would make sense to another developer
