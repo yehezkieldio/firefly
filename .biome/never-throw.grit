@@ -1,0 +1,9 @@
+language js;
+
+`throw $expr` where {
+    register_diagnostic(
+        span = $expr,
+        message = "Avoid throw, use neverthrow Result or ResultAsync for error handling.",
+        severity = "error"
+    )
+}

@@ -1,4 +1,4 @@
 `$fn` where {
     $fn <: `try { $body } catch($err) { $catchBody }`,
-    register_diagnostic(span=$fn, message="Avoid try/catch, use FireflyResult or FireflyAsyncResult for error handling.")
+    register_diagnostic(span=$fn, message="Avoid try/catch, use neverthrow Result or ResultAsync for error handling.")
 }
