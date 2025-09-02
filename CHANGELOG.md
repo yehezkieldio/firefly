@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.7 (September 2, 2025)
+
+### <!-- 5 -->📚 Documentation
+- [`28ff51d`](https://github.com/yehezkieldio/firefly/commit/28ff51da1b017cf48749f713411e1315ac1ce352)  Update readme
 ## firefly@3.0.0-alpha.6 (August 31, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
