@@ -59,7 +59,7 @@
         "@biomejs/biome": "^2.2.2",
         "@types/bun": "^1.2.21",
         "@types/node": "^24.3.0",
-        "@types/semver": "^7.7.0",
+        "@types/semver": "^7.7.1",
         "tsdown": "^0.14.2",
         "typescript": "^5.9.2"
     },
