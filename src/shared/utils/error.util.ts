@@ -25,6 +25,7 @@ export type FireflyError = Readonly<z.infer<typeof FireflyErrorSchema>>;
 
 /**
  * Creates a firefly error with a stack trace.
+ * @param error The firefly error details.
  */
 export function createFireflyError(error: FireflyError): FireflyError & { stack?: string } {
     const err = new Error(error.message);
@@ -36,6 +37,9 @@ export function createFireflyError(error: FireflyError): FireflyError & { stack?
 
 /**
  * Converts any error into a firefly error.
+ * @param e The error to convert.
+ * @param code The error code to use. Defaults to 'UNEXPECTED'.
+ * @param source The source of the error.
  */
 export function toFireflyError(
     e: unknown,
