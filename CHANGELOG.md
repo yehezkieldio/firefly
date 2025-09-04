@@ -6,6 +6,33 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.8 (September 4, 2025)
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`9fec52c`](https://github.com/yehezkieldio/firefly/commit/9fec52ccb1da673546edb6c7254b9a1e6489b325) deps: Update dependency @types/semver to ^7.7.1 ([#70](https://github.com/yehezkieldio/firefly/issues/70)) by renovate[bot]
+- [`195efa8`](https://github.com/yehezkieldio/firefly/commit/195efa88c542f93d48bfaf36cf39dc09acada501) deps: Update dependency @types/node to ^24.3.1 ([#71](https://github.com/yehezkieldio/firefly/issues/71)) by renovate[bot]
+
+### <!-- 3 -->🚀 New Features
+- [`dc37420`](https://github.com/yehezkieldio/firefly/commit/dc3742023c5289c65dd94904428fabbd25a02cc3) shared: Add logger and error handling utilities
+- [`749fa7a`](https://github.com/yehezkieldio/firefly/commit/749fa7aaedb240efa35fd063c7f747ce07507847) shared/schema: Add repository identifier validation schema
+- [`2fd3618`](https://github.com/yehezkieldio/firefly/commit/2fd3618cf82df4b5624254cf1dc54ccf686a8b13) configuration: Add base configuration schema
+- [`5b22c96`](https://github.com/yehezkieldio/firefly/commit/5b22c96dac28ff370607137f18f1fabb5fc4c2a9) semver: Add bump strategy and release type constants
+- [`069d674`](https://github.com/yehezkieldio/firefly/commit/069d674b9ea82933c09730e8a2accac004ce2f3c) configuration: Add release commit message templates
+- [`6c97c3e`](https://github.com/yehezkieldio/firefly/commit/6c97c3ed9af8c40cb34131df6e0f14d2c453587f) configuration: Add config release schema
+- [`60fc86e`](https://github.com/yehezkieldio/firefly/commit/60fc86e50752f7090075c7bf486ca4a2546f7eff) configuration: Add release configuration schema
+- [`13141a1`](https://github.com/yehezkieldio/firefly/commit/13141a1cc3008d91b0b3c7fbc1b45100f07bf4b4) configuration: Add config schema provider
+- [`f68d52a`](https://github.com/yehezkieldio/firefly/commit/f68d52a28d5b96f284d02ec2da562accbbe65de7) configuration: Add script to generate JSON schema
+- [`ff3fb3b`](https://github.com/yehezkieldio/firefly/commit/ff3fb3b9f1ef2ea262b8227b0c3fc3b40f5bc983) configuration: Add firefly JSON schema
+- [`6470d0d`](https://github.com/yehezkieldio/firefly/commit/6470d0de3190b8eef418e344f4536dbb55f561ee) platform/config: Add configuration helper
+- [`188a597`](https://github.com/yehezkieldio/firefly/commit/188a597c40d088f2df765fafc285915b5d85bec7) configuration: Implement config loader service
+
+### <!-- 5 -->📚 Documentation
+- [`51a6b1c`](https://github.com/yehezkieldio/firefly/commit/51a6b1c379dabaebf9dd668ab279b7452d3d0e52) copilot: Update instructions for result handling
+- [`49441bf`](https://github.com/yehezkieldio/firefly/commit/49441bf96d2b08f28c434ae2790537320b639168) copilot: Clarify error handling guidelines in instructions
+
+### <!-- 7 -->🚜 Refactor
+- [`29abdc1`](https://github.com/yehezkieldio/firefly/commit/29abdc1f4392e967dbf3cfb7136cd411c9caf6ae) shared: Restructure result types documentation
+- [`4fcbdbf`](https://github.com/yehezkieldio/firefly/commit/4fcbdbf59f15b39ec244ef71b59d21e2a7161fe7) shared: Update error handling function documentation
 ## firefly@3.0.0-alpha.7 (September 2, 2025)
 
 ### <!-- 5 -->📚 Documentation
