@@ -26,9 +26,40 @@ Firefly is a CLI orchestrator for automatic semantic versioning, git-cliff chang
 ## 4. Result & Error Handling
 
 - **Rust-Style Semantics:** Use `neverthrow` for explicit success/error handling.
-- **No try/catch and throw:** Do not use `try/catch` and `throw` at all.
+- **No try/catch and throw:** Explicitly DO not use `try/catch` and `throw` at all.
 - **Explicit Unpacking:** Use `isOk()` / `isErr()` guards for clarity and control flow.
 - **Shallow Method Chains:** Limit chaining to two links; use named variables for intermediate results.
+
+## Types
+
+- `FireflyResult<T>`
+  - A synchronous `Result<T, FireflyError>`.
+
+- `FireflyAsyncResult<T>`
+  - An asynchronous `ResultAsync<T, FireflyError>` — behaves like `Promise<Result<T, FireflyError>>`.
+  - **Do not** wrap it in `Promise`.
+  - **Do not** mark a function returning `FireflyAsyncResult<T>` as `async`.
+
+- `Promise<FireflyResult<T>>`
+  - Use **only** when you need to `await` inside the function body (e.g., to unwrap a `FireflyAsyncResult`).
+  - This is the correct type for functions that internally `await` other async operations and then return a `FireflyResult`.
+
+#### Examples
+
+```ts
+// ✅ Correct: returns FireflyAsyncResult<T>
+function getUser(id: string): FireflyAsyncResult<User> {
+  return ResultAsync.fromPromise(fetchUser(id), toFireflyError);
+}
+
+// ✅ Correct: returns Promise<FireflyResult<T>>
+async function getUserCommits(id: string): Promise<FireflyResult<Commit[]>> {
+  const userRes = await getUser(id);
+  if (userRes.isErr()) return FireflyErr(userRes.error);
+  const commitsRes = await fetchCommits(userRes.value);
+  return commitsRes;
+}
+```
 
 ## 5. Operating Principles
 
@@ -42,7 +73,4 @@ Firefly is a CLI orchestrator for automatic semantic versioning, git-cliff chang
     - `application/` — Cross-feature orchestration, no business logic or infra.
     - `platform/` — CLI startup.
     - `shared/` — Shared stateless utilities.
-    - `modules/<feature>` — Each capability with:
-      - `core/` — Pure domain logic, infra-agnostic.
-      - `application/` — Module-specific orchestration.
-      - `infrastructure/` — I/O, side effects, infra integrations.
+    - `modules/<feature>` — Localized business logic, infra, and state.
