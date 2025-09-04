@@ -1,11 +1,19 @@
-import { type Result, type ResultAsync, err, errAsync, ok, okAsync } from "neverthrow";
+import type { Result, ResultAsync } from "neverthrow";
 import type { FireflyError } from "#/shared/utils/error.util";
 
+/**
+ * - Represents `Result<T, FireflyError>`.
+ * - Can be wrapped in a `Promise<FireflyResult<T>>` when internally unwrapping a `FireflyAsyncResult<T>`.
+ *
+ * @template T The success value type.
+ */
 export type FireflyResult<T> = Result<T, FireflyError>;
+
+/**
+ * - Represents `ResultAsync<T, FireflyError>`.
+ * - **Do not** wrap in another `Promise`.
+ * - **Do not** mark functions returning this type as `async`.
+ *
+ * @template T The success value type.
+ */
 export type FireflyAsyncResult<T> = ResultAsync<T, FireflyError>;
-
-export const fireflyOk = <T = void>(value?: T): FireflyResult<T> => ok(value as T);
-export const fireflyErr = (error: FireflyError): FireflyResult<never> => err(error);
-
-export const fireflyOkAsync = <T = void>(value?: T): FireflyAsyncResult<T> => okAsync(value as T);
-export const fireflyErrAsync = (error: FireflyError): FireflyAsyncResult<never> => errAsync(error);
