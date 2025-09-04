@@ -26,7 +26,7 @@ Firefly is a CLI orchestrator for automatic semantic versioning, git-cliff chang
 ## 4. Result & Error Handling
 
 - **Rust-Style Semantics:** Use `neverthrow` for explicit success/error handling.
-- **No try/catch and throw:** Explicitly DO not use `try/catch` and `throw` at all.
+- **No exceptions:** EXPLICITLY DO NOT USE ANY `try/catch` OR `throw` STATEMENTS.
 - **Explicit Unpacking:** Use `isOk()` / `isErr()` guards for clarity and control flow.
 - **Shallow Method Chains:** Limit chaining to two links; use named variables for intermediate results.
 
