@@ -5,7 +5,7 @@ import { type CommandName, ConfigSchemaProvider } from "#/modules/configuration/
 import type { FireflyConfig } from "#/platform/config";
 import { logger } from "#/shared/logger";
 import { createFireflyError, toFireflyError } from "#/shared/utils/error.util";
-import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
+import { type FireflyAsyncResult, type FireflyResult, parseSchemaAsync } from "#/shared/utils/result.util";
 
 export interface ConfigLoadOptions {
     cwd?: string;
@@ -50,9 +50,7 @@ export class ConfigLoaderService {
     }
 
     private validateConfig(config: FireflyConfig): FireflyAsyncResult<FireflyConfig> {
-        return ResultAsync.fromPromise(ConfigSchemaProvider.get(this.options.commandName).parseAsync(config), (error) =>
-            createFireflyError(toFireflyError(error)),
-        );
+        return parseSchemaAsync(ConfigSchemaProvider.get(this.options.commandName), config);
     }
 
     private normalizeFields(config: FireflyConfig): FireflyConfig {
