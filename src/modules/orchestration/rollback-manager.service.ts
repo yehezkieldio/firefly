@@ -28,6 +28,9 @@ interface RollbackResult {
     duration: number;
 }
 
+type RollbackStrategyHandler = (context?: TaskContext) => FireflyAsyncResult<RollbackResult>;
+type TaskExecutionFn = (entry: RollbackEntry, context?: TaskContext) => FireflyAsyncResult<void>;
+
 export class RollbackManagerService {
     private readonly rollbackStack: RollbackEntry[] = [];
     private readonly compensationTasks = new Map<string, CompensationTask>();
@@ -117,20 +120,12 @@ export class RollbackManagerService {
         strategy: RollbackStrategy,
         context?: TaskContext,
     ): FireflyAsyncResult<RollbackResult> {
-        const handlers: Readonly<Record<RollbackStrategy, (ctx?: TaskContext) => FireflyAsyncResult<RollbackResult>>> =
-            {
-                reverse: (ctx) => this.executeReverseRollback(ctx),
-                compensation: (ctx) => this.executeCompensationRollback(ctx),
-                custom: (ctx) => this.executeCustomRollback(ctx),
-                none: () =>
-                    okAsync({
-                        success: true,
-                        rolledBackTasks: [],
-                        failedTasks: [],
-                        errors: [],
-                        duration: 0,
-                    }),
-            };
+        const handlers: Readonly<Record<RollbackStrategy, RollbackStrategyHandler>> = {
+            reverse: (ctx) => this.executeReverseRollback(ctx),
+            compensation: (ctx) => this.executeCompensationRollback(ctx),
+            custom: (ctx) => this.executeCustomRollback(ctx),
+            none: () => okAsync(this.createEmptyResult()),
+        };
 
         const handler = handlers[strategy];
 
@@ -147,157 +142,162 @@ export class RollbackManagerService {
         return handler(context);
     }
 
-    private executeReverseRollback(context?: TaskContext): FireflyAsyncResult<RollbackResult> {
-        const reversedTasks = [...this.rollbackStack].reverse();
-        const result: RollbackResult = {
+    private createEmptyResult(): RollbackResult {
+        return {
             success: true,
             rolledBackTasks: [],
             failedTasks: [],
             errors: [],
             duration: 0,
         };
+    }
 
-        const processNext = (index: number): FireflyAsyncResult<RollbackResult> => {
-            if (index >= reversedTasks.length) {
+    private handleRollbackError(result: RollbackResult, entry: RollbackEntry, error: FireflyError): void {
+        result.failedTasks.push(entry.taskName);
+        result.errors.push(error);
+        result.success = false;
+    }
+
+    private executeRollbackSequence(
+        entries: RollbackEntry[],
+        executeFn: TaskExecutionFn,
+        context?: TaskContext,
+    ): FireflyAsyncResult<RollbackResult> {
+        const result = this.createEmptyResult();
+        const reversedEntries = [...entries].reverse();
+
+        const processSequentially = (index: number): FireflyAsyncResult<RollbackResult> => {
+            if (index >= reversedEntries.length) {
                 return okAsync(result);
             }
 
-            const entry = reversedTasks[index];
+            const entry = reversedEntries[index];
             if (!entry) {
-                return processNext(index + 1);
+                return processSequentially(index + 1);
             }
 
-            return this.executeTaskRollback(entry, context)
+            const executeWithTimeout = this.config.timeout
+                ? this.addTimeoutToOperation(() => executeFn(entry, context), this.config.timeout)
+                : () => executeFn(entry, context);
+
+            return this.executeWithRetries(executeWithTimeout, this.config.maxRetries ?? 1)
                 .andThen(() => {
                     result.rolledBackTasks.push(entry.taskName);
-                    return processNext(index + 1);
+                    return processSequentially(index + 1);
                 })
                 .orElse((error) => {
-                    result.failedTasks.push(entry.taskName);
-                    result.errors.push(error);
-                    result.success = false;
-
+                    this.handleRollbackError(result, entry, error);
                     if (this.config.continueOnError) {
-                        return processNext(index + 1);
+                        return processSequentially(index + 1);
                     }
                     return okAsync(result);
                 });
         };
 
-        return processNext(0);
+        return processSequentially(0);
+    }
+
+    private addTimeoutToOperation<T>(
+        operation: () => FireflyAsyncResult<T>,
+        timeoutMs: number,
+    ): () => FireflyAsyncResult<T> {
+        return () => {
+            let timeoutId: NodeJS.Timeout | undefined;
+            let isTimedOut = false;
+
+            const timeoutPromise = new Promise<never>((_, reject) => {
+                timeoutId = setTimeout(() => {
+                    isTimedOut = true;
+                    reject(
+                        createFireflyError({
+                            code: "TIMEOUT",
+                            message: `Operation timed out after ${timeoutMs}ms`,
+                            source: "orchestration/rollback-manager-service",
+                        }),
+                    );
+                }, timeoutMs);
+            });
+
+            const operationPromise = operation().then((result) => {
+                if (timeoutId && !isTimedOut) {
+                    clearTimeout(timeoutId);
+                }
+                return result;
+            });
+
+            // Create a race between the operation and timeout
+            return okAsync(undefined).andThen(() => {
+                return new Promise<FireflyResult<T>>((resolve) => {
+                    Promise.race([operationPromise, timeoutPromise])
+                        .then((result) => {
+                            if (typeof result === "object" && result !== null && "isOk" in result) {
+                                resolve(result as FireflyResult<T>);
+                            }
+                        })
+                        .catch((error) => {
+                            if (timeoutId && !isTimedOut) {
+                                clearTimeout(timeoutId);
+                            }
+                            resolve(err(error as FireflyError));
+                        });
+                });
+            }) as FireflyAsyncResult<T>;
+        };
+    }
+
+    private executeWithRetries<T>(operation: () => FireflyAsyncResult<T>, maxRetries: number): FireflyAsyncResult<T> {
+        const attemptOperation = (attempt: number): FireflyAsyncResult<T> => {
+            return operation().orElse((error) => {
+                if (attempt < maxRetries) {
+                    logger.verbose(`RollbackManagerService: Retry attempt ${attempt + 1}/${maxRetries}`);
+                    return attemptOperation(attempt + 1);
+                }
+                return errAsync(error);
+            });
+        };
+
+        return attemptOperation(0);
+    }
+
+    private executeReverseRollback(context?: TaskContext): FireflyAsyncResult<RollbackResult> {
+        return this.executeRollbackSequence(
+            this.rollbackStack,
+            (entry, ctx) => this.executeTaskRollback(entry, ctx),
+            context,
+        );
     }
 
     private executeCompensationRollback(context?: TaskContext): FireflyAsyncResult<RollbackResult> {
-        const reversedTasks = [...this.rollbackStack].reverse();
-        const result: RollbackResult = {
-            success: true,
-            rolledBackTasks: [],
-            failedTasks: [],
-            errors: [],
-            duration: 0,
+        const executeCompensationOrFallback = (entry: RollbackEntry, ctx?: TaskContext): FireflyAsyncResult<void> => {
+            if (entry.compensationId && this.compensationTasks.has(entry.compensationId)) {
+                return this.executeCompensation(entry.compensationId, ctx);
+            }
+            return this.executeTaskRollback(entry, ctx);
         };
 
-        const processNext = (index: number): FireflyAsyncResult<RollbackResult> => {
-            if (index >= reversedTasks.length) {
-                return okAsync(result);
-            }
-
-            const entry = reversedTasks[index];
-            if (!entry) {
-                return processNext(index + 1);
-            }
-
-            const executeCompensation =
-                entry.compensationId && this.compensationTasks.has(entry.compensationId)
-                    ? this.executeCompensation(entry.compensationId, context)
-                    : this.executeTaskRollback(entry, context);
-
-            return executeCompensation
-                .andThen(() => {
-                    result.rolledBackTasks.push(entry.taskName);
-                    return processNext(index + 1);
-                })
-                .orElse((error) => {
-                    result.failedTasks.push(entry.taskName);
-                    result.errors.push(error);
-                    result.success = false;
-
-                    if (this.config.continueOnError) {
-                        return processNext(index + 1);
-                    }
-                    return okAsync(result);
-                });
-        };
-
-        return processNext(0);
+        return this.executeRollbackSequence(this.rollbackStack, executeCompensationOrFallback, context);
     }
 
     private executeCustomRollback(context?: TaskContext): FireflyAsyncResult<RollbackResult> {
-        const reversedTasks = [...this.rollbackStack].reverse();
-        const result: RollbackResult = {
-            success: true,
-            rolledBackTasks: [],
-            failedTasks: [],
-            errors: [],
-            duration: 0,
-        };
-
-        const processNext = (index: number): FireflyAsyncResult<RollbackResult> => {
-            if (index >= reversedTasks.length) {
-                return okAsync(result);
+        const executeWithHooks = (entry: RollbackEntry, ctx?: TaskContext): FireflyAsyncResult<void> => {
+            if (!ctx) {
+                return this.executeTaskRollback(entry, ctx);
             }
 
-            const entry = reversedTasks[index];
-            if (!entry) {
-                return processNext(index + 1);
-            }
-
-            const executeWithHooks = (): FireflyAsyncResult<void> => {
-                if (!context) {
-                    return this.executeTaskRollback(entry, context);
-                }
-
-                const beforeHook = entry.task.beforeRollback?.(context) ?? okAsync();
-                return beforeHook
-                    .andThen(() => this.executeTaskRollback(entry, context))
-                    .andThen(() => {
-                        const afterHook = entry.task.afterRollback?.(context) ?? okAsync();
-                        return afterHook;
-                    });
-            };
-
-            return executeWithHooks()
+            const beforeHook = entry.task.beforeRollback?.(ctx) ?? okAsync();
+            return beforeHook
+                .andThen(() => this.executeTaskRollback(entry, ctx))
                 .andThen(() => {
-                    result.rolledBackTasks.push(entry.taskName);
-                    return processNext(index + 1);
+                    const afterHook = entry.task.afterRollback?.(ctx) ?? okAsync();
+                    return afterHook;
                 })
                 .orElse((error) => {
-                    const failureHook = context
-                        ? (entry.task.onRollbackError?.(error, context) ?? okAsync())
-                        : okAsync();
-
-                    return failureHook
-                        .andThen(() => {
-                            result.failedTasks.push(entry.taskName);
-                            result.errors.push(error);
-                            result.success = false;
-
-                            if (this.config.continueOnError) {
-                                return processNext(index + 1);
-                            }
-                            return okAsync(result);
-                        })
-                        .orElse(() => {
-                            result.failedTasks.push(entry.taskName);
-                            result.errors.push(error);
-                            result.success = false;
-
-                            return okAsync(result);
-                        });
+                    const failureHook = entry.task.onRollbackError?.(error, ctx) ?? okAsync();
+                    return failureHook.andThen(() => errAsync(error));
                 });
         };
 
-        return processNext(0);
+        return this.executeRollbackSequence(this.rollbackStack, executeWithHooks, context);
     }
 
     private executeTaskRollback(entry: RollbackEntry, context?: TaskContext): FireflyAsyncResult<void> {
