@@ -1,4 +1,4 @@
-import { err, errAsync, ok, okAsync } from "neverthrow";
+import { err, errAsync, ok, okAsync, ResultAsync } from "neverthrow";
 import z from "zod";
 import type { RollbackEntry, RollbackStrategy } from "#/modules/orchestration/contracts/orchestration.interface";
 import type { Task, TaskContext } from "#/modules/orchestration/contracts/task.interface";
@@ -17,7 +17,6 @@ interface RollbackConfig {
     maxRetries?: number;
     continueOnError?: boolean;
     parallel?: boolean;
-    timeout?: number;
 }
 
 interface RollbackResult {
@@ -42,7 +41,6 @@ export class RollbackManagerService {
             maxRetries: config?.maxRetries ?? 1,
             continueOnError: config?.continueOnError ?? false,
             parallel: config?.parallel ?? false,
-            timeout: config?.timeout,
         };
     }
 
@@ -176,11 +174,7 @@ export class RollbackManagerService {
                 return processSequentially(index + 1);
             }
 
-            const executeWithTimeout = this.config.timeout
-                ? this.addTimeoutToOperation(() => executeFn(entry, context), this.config.timeout)
-                : () => executeFn(entry, context);
-
-            return this.executeWithRetries(executeWithTimeout, this.config.maxRetries ?? 1)
+            return this.executeWithRetries(() => executeFn(entry, context), this.config.maxRetries ?? 1)
                 .andThen(() => {
                     result.rolledBackTasks.push(entry.taskName);
                     return processSequentially(index + 1);
@@ -195,54 +189,6 @@ export class RollbackManagerService {
         };
 
         return processSequentially(0);
-    }
-
-    private addTimeoutToOperation<T>(
-        operation: () => FireflyAsyncResult<T>,
-        timeoutMs: number,
-    ): () => FireflyAsyncResult<T> {
-        return () => {
-            let timeoutId: NodeJS.Timeout | undefined;
-            let isTimedOut = false;
-
-            const timeoutPromise = new Promise<never>((_, reject) => {
-                timeoutId = setTimeout(() => {
-                    isTimedOut = true;
-                    reject(
-                        createFireflyError({
-                            code: "TIMEOUT",
-                            message: `Operation timed out after ${timeoutMs}ms`,
-                            source: "orchestration/rollback-manager-service",
-                        }),
-                    );
-                }, timeoutMs);
-            });
-
-            const operationPromise = operation().then((result) => {
-                if (timeoutId && !isTimedOut) {
-                    clearTimeout(timeoutId);
-                }
-                return result;
-            });
-
-            // Create a race between the operation and timeout
-            return okAsync(undefined).andThen(() => {
-                return new Promise<FireflyResult<T>>((resolve) => {
-                    Promise.race([operationPromise, timeoutPromise])
-                        .then((result) => {
-                            if (typeof result === "object" && result !== null && "isOk" in result) {
-                                resolve(result as FireflyResult<T>);
-                            }
-                        })
-                        .catch((error) => {
-                            if (timeoutId && !isTimedOut) {
-                                clearTimeout(timeoutId);
-                            }
-                            resolve(err(error as FireflyError));
-                        });
-                });
-            }) as FireflyAsyncResult<T>;
-        };
     }
 
     private executeWithRetries<T>(operation: () => FireflyAsyncResult<T>, maxRetries: number): FireflyAsyncResult<T> {
