@@ -17,7 +17,7 @@ export const FireflyErrorSchema = z.object({
     details: z.unknown().optional(),
     cause: z.unknown().optional(),
     retryable: z.boolean().optional(),
-    source: z.enum(["core", "application", "infrastructure"]).optional(),
+    source: z.string().optional(),
 });
 
 export type FireflyErrorCode = z.infer<typeof FireflyErrorCodeSchema>;
