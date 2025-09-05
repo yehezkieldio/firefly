@@ -37,7 +37,7 @@ export const OrchestratorOptionsSchema = z.object({
     name: z.string().min(1).optional(),
     description: z.string().optional(),
     dryRun: z.boolean().default(false),
-    featureFlags: z.map(z.string(), z.boolean()).optional(),
+    featureFlags: z.record(z.string(), z.boolean()).optional(),
     rollbackStrategy: RollbackStrategySchema.default("reverse"),
 });
 
