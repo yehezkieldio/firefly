@@ -35,13 +35,25 @@ export class RollbackManagerService {
     private readonly compensationTasks = new Map<string, CompensationTask>();
     private readonly config: RollbackConfig;
 
-    constructor(config?: Partial<RollbackConfig>) {
+    protected constructor(config?: Partial<RollbackConfig>) {
         this.config = {
             strategy: config?.strategy ?? "reverse",
             maxRetries: config?.maxRetries ?? 1,
             continueOnError: config?.continueOnError ?? false,
             parallel: config?.parallel ?? false,
         };
+    }
+
+    static create(config?: Partial<RollbackConfig>): FireflyResult<RollbackManagerService> {
+        return parseSchema(
+            z.object({
+                strategy: z.enum(["reverse", "compensation", "custom", "none"]).default("reverse"),
+                maxRetries: z.number().min(0).optional(),
+                continueOnError: z.boolean().optional(),
+                parallel: z.boolean().optional(),
+            }),
+            config ?? {},
+        ).map((validatedConfig) => new RollbackManagerService(validatedConfig));
     }
 
     addTask(task: Task): FireflyResult<void> {
