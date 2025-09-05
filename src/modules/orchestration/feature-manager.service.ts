@@ -59,7 +59,7 @@ export class FeatureManagerService {
         return ok(FeatureManagerService.fromMaps(featureFlags, new Map()));
     }
 
-    static fromOptions(options: Pick<OrchestratorOptions, "featureFlags">): FireflyResult<FeatureManagerService> {
+    static create(options: Pick<OrchestratorOptions, "featureFlags">): FireflyResult<FeatureManagerService> {
         if (!options.featureFlags) {
             return ok(new FeatureManagerService());
         }
