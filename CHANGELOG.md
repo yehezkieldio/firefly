@@ -6,6 +6,18 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.11 (September 6, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`2c30182`](https://github.com/yehezkieldio/firefly/commit/2c30182a9725f12fdf026c4a4031b87cb9cac877) types: Add PromptSelectChoice interface
+- [`29f2103`](https://github.com/yehezkieldio/firefly/commit/29f21032dbe70cc865d6fffebb1e8ad6554fc074) semver: Add version bump strategy prompter service
+- [`be4411d`](https://github.com/yehezkieldio/firefly/commit/be4411d1cde233484da1a737abc0945ea61b317e) cli: Add CLI option normalizer for schema mapping
+- [`7b64f7d`](https://github.com/yehezkieldio/firefly/commit/7b64f7dcf363e27e17766debc2c78b82ba29eae9) cli: Add release command and workflow integration
+
+### <!-- 7 -->🚜 Refactor
+- [`2752485`](https://github.com/yehezkieldio/firefly/commit/275248507d5a2f82c4cc1c39383ebc13f29a6a89) semver: Restructure bump strategy constants
+- [`62bf8ed`](https://github.com/yehezkieldio/firefly/commit/62bf8ed6b000379e1094f595a25191fc46f877c7) cli: Update command registration and option normalization
+- [`1d665bf`](https://github.com/yehezkieldio/firefly/commit/1d665bf4058d4656262d0c2aef88a22de69f8aa9) cli: Remove logging of runner options
 ## firefly@3.0.0-alpha.10 (September 6, 2025)
 
 ### <!-- 3 -->🚀 New Features
