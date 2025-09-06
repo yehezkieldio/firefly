@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.10 (September 6, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`a708d72`](https://github.com/yehezkieldio/firefly/commit/a708d72f107a805826b93c76f8db1e62109ede6e) workflows: Add release workflow and context schema
+- [`f5d9730`](https://github.com/yehezkieldio/firefly/commit/f5d97303cb88fc6b5961b923e41dcf9128c983d4) cli: Implement CLI option registrar with parsers
+- [`2b9909c`](https://github.com/yehezkieldio/firefly/commit/2b9909c7341e877367dfa1bd555388494a475c4b) cli: Implement CLI manager with command registration
+- [`38d5e19`](https://github.com/yehezkieldio/firefly/commit/38d5e192fcd28880c49034f73daf050e3890d6f9) cli: Add CLI command for release management
+- [`99c31a2`](https://github.com/yehezkieldio/firefly/commit/99c31a2277ad8f5ca11dc2e3bb1c435aa2e01ee3) cli: Implement main CLI entry point
+- [`4dab3d0`](https://github.com/yehezkieldio/firefly/commit/4dab3d01dc73a95de99ac241348570add54b0a4c) cli: Add git-cliff version to release command output
 ## firefly@3.0.0-alpha.9 (September 6, 2025)
 
 ### <!-- 17 -->🛠️ Miscellaneous
