@@ -63,7 +63,6 @@ export class CLIManager {
         if (configResult.isErr()) return this.handleConfigError(configResult.error);
 
         const runnerOptions = this.buildRunnerOptions(configResult.value, mergedOptions);
-        logger.log(JSON.stringify(runnerOptions.config, null, 2));
         await new WorkflowExecutorService().run(commandName, runnerOptions, workflowFactory);
     }
 
