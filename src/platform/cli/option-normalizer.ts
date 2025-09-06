@@ -1,6 +1,6 @@
 import type { ZodObject, ZodRawShape } from "zod";
 import { type CommandName, ConfigSchemaProvider } from "#/modules/configuration/config-schema.provider";
-import type { CLIOptions } from "#/platform/cli/commander";
+import type { CLIOptions } from "#/platform/cli/cli-commander";
 
 export class CLIOptionNormalizer {
     private toKebab(camelCase: string): string {

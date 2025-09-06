@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import { createReleaseWorkflow } from "#/application/workflows/release.workflow";
 import { ConfigSchemaProvider } from "#/modules/configuration/config-schema.provider";
-import { CLIManager } from "#/platform/cli/manager";
+import { CLIManager } from "#/platform/cli/cli-manager";
 import type { FireflyConfig } from "#/platform/config";
 
 export interface CLIOptions extends FireflyConfig {

@@ -8,7 +8,7 @@ if (!process.versions.bun) {
 }
 
 import "#/application/context";
-import { createCLI } from "#/platform/cli/commander";
+import { createCLI } from "#/platform/cli/cli-commander";
 import pkg from "../../../package.json" with { type: "json" };
 
 async function main(): Promise<void> {
