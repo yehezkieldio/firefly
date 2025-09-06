@@ -33,9 +33,16 @@ export class CLIManager {
         workflowFactory: WorkflowFactory<TCommand>,
     ): void {
         const cmd = program.command(name).description(description);
+        const gitCliffVersion = `powered by git-cliff ${colors.dim(`v${process.env.FIREFLY_GIT_CLIFF_VERSION ?? "0"}`)}`;
         this.optionRegistrar.registerOptions(program, schema);
+
         cmd.action((options: CLIOptions) => {
-            logger.info(`${colors.magenta("firefly")} ${colors.dim(`v${this.version}`)}`);
+            if (name === "release") {
+                logger.info(`${colors.magenta("firefly")} ${colors.dim(`v${this.version}`)} ${gitCliffVersion}`);
+            } else {
+                logger.info(`${colors.magenta("firefly")} ${colors.dim(`v${this.version}`)}`);
+            }
+
             return this.run(name, options, workflowFactory);
         });
     }

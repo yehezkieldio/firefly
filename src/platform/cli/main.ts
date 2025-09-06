@@ -17,6 +17,8 @@ async function main(): Promise<void> {
         process.argv.push("-h");
     }
 
+    process.env.FIREFLY_GIT_CLIFF_VERSION = pkg.dependencies["git-cliff"].replace("^", "");
+
     const cli = createCLI(pkg.description, pkg.version);
     await cli.parseAsync(process.argv);
 }
