@@ -9,12 +9,15 @@ import {
     type WorkflowFactory,
 } from "#/modules/orchestration/workflow-executor.service";
 import type { CLIOptions } from "#/platform/cli/commander";
+import { CLIOptionNormalizer } from "#/platform/cli/option-normalizer";
 import { CLIOptionRegistrar } from "#/platform/cli/option-registrar";
 import type { FireflyConfig } from "#/platform/config";
 import { logger } from "#/shared/logger";
 
 export class CLIManager {
     private readonly optionRegistrar = new CLIOptionRegistrar();
+    private readonly optionNormalizer = new CLIOptionNormalizer();
+
     private version = "";
 
     create<T extends ZodRawShape>(description: string, version: string, schema: ZodObject<T>): typeof program {
@@ -34,7 +37,8 @@ export class CLIManager {
     ): void {
         const cmd = program.command(name).description(description);
         const gitCliffVersion = `powered by git-cliff ${colors.dim(`v${process.env.FIREFLY_GIT_CLIFF_VERSION ?? "0"}`)}`;
-        this.optionRegistrar.registerOptions(program, schema);
+
+        this.optionRegistrar.registerOptions(cmd, schema);
 
         cmd.action((options: CLIOptions) => {
             if (name === "release") {
@@ -52,12 +56,14 @@ export class CLIManager {
         options: CLIOptions,
         workflowFactory: WorkflowFactory<TCommand>,
     ): Promise<void> {
-        const mergedOptions = { ...program.opts(), ...options };
+        const rawMergedOptions = { ...program.opts(), ...options };
+        const mergedOptions = this.optionNormalizer.normalize(rawMergedOptions, commandName);
 
         const configResult = await this.loadConfig(commandName, mergedOptions);
         if (configResult.isErr()) return this.handleConfigError(configResult.error);
 
         const runnerOptions = this.buildRunnerOptions(configResult.value, mergedOptions);
+        logger.log(JSON.stringify(runnerOptions.config, null, 2));
         await new WorkflowExecutorService().run(commandName, runnerOptions, workflowFactory);
     }
 
