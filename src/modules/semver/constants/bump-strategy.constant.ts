@@ -5,6 +5,9 @@ import z from "zod";
  * - "auto": Automatically determine the version bump based on commit messages.
  * - "manual": Manually specify the version bump, will generate selection options based on current version.
  */
-export const BumpStrategyValues = ["auto", "manual"] as const;
+export const BUMP_STRATEGY_AUTO = "auto" as const;
+export const BUMP_STRATEGY_MANUAL = "manual" as const;
 
-export const BumpStrategySchema = z.enum(BumpStrategyValues).default("auto");
+export const BumpStrategyValues = [BUMP_STRATEGY_AUTO, BUMP_STRATEGY_MANUAL] as const;
+
+export const BumpStrategySchema = z.enum(BumpStrategyValues).default(BUMP_STRATEGY_AUTO);
