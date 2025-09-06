@@ -6,6 +6,37 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.9 (September 6, 2025)
+
+### <!-- 17 -->🛠️ Miscellaneous
+- [`3f0a015`](https://github.com/yehezkieldio/firefly/commit/3f0a01565a2301e6723e86fd2a8ee45718d7a2da)  Merge branch 'master' of github.com:yehezkieldio/firefly
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`7c1f48c`](https://github.com/yehezkieldio/firefly/commit/7c1f48c523214d8f48cdffbf6d05596bd37a5ae9) deps: Update dependency @biomejs/biome to v2.2.3 ([#72](https://github.com/yehezkieldio/firefly/issues/72)) by renovate[bot]
+
+### <!-- 3 -->🚀 New Features
+- [`2bca9d7`](https://github.com/yehezkieldio/firefly/commit/2bca9d73c396de200524fd5646644e15ab8753b2) orchestration: Add context and workflow interfaces
+- [`fda38d6`](https://github.com/yehezkieldio/firefly/commit/fda38d6e8c1c8d8dfa731300f116edd6a91f0159) shared: Add schema parsing functions
+- [`f57c21c`](https://github.com/yehezkieldio/firefly/commit/f57c21ccc813a813466e69e2922f91267ac485d4) orchestration: Add feature manager service
+- [`d4fd46b`](https://github.com/yehezkieldio/firefly/commit/d4fd46b830e427ede151ec36b085eaf1e9da2996) orchestration: Implement rollback manager service
+- [`b4be679`](https://github.com/yehezkieldio/firefly/commit/b4be6799cc45184a5b47a5749db6f8dd16bf1578) orchestration: Implement scoped context service
+- [`05e10ab`](https://github.com/yehezkieldio/firefly/commit/05e10abcbe26d84d02e8d0f23e90531a06bf5460) orchestration: Implement task execution and management service
+- [`09b8a4c`](https://github.com/yehezkieldio/firefly/commit/09b8a4cab457e85847d354faf6d8ddfc45d237b3) orchestration/rollback: Add static create method for service instantiation
+- [`66d7dcf`](https://github.com/yehezkieldio/firefly/commit/66d7dcfac42490a4134a3c8c07447e5322408abd) orchestration: Implement sequential execution strategy
+- [`026b42c`](https://github.com/yehezkieldio/firefly/commit/026b42c17c68f7b5d426632d083a7902fcac8683) orchestration/strategies: Add execution strategy factory function
+- [`398380f`](https://github.com/yehezkieldio/firefly/commit/398380ff22460538436920ffc5562b608065f97d) orchestration: Implement task orchestrator service
+- [`d5e3652`](https://github.com/yehezkieldio/firefly/commit/d5e3652d7e09977c8b650fa54172e2997fff0fa8) orchestration: Implement workflow executor service
+
+### <!-- 7 -->🚜 Refactor
+- [`1070f1d`](https://github.com/yehezkieldio/firefly/commit/1070f1d5dc1630260ebb6e323450da0c8ac91176) configuration: Simplify config validation logic
+- [`54b43c5`](https://github.com/yehezkieldio/firefly/commit/54b43c512722b903b7b34e533f7322df082671f8) utils: Remove redundant template annotations
+- [`f2f5b7f`](https://github.com/yehezkieldio/firefly/commit/f2f5b7f31e3088cac4a71e8cecf8098c266c418c) utils: Change error source type to string
+- [`b750670`](https://github.com/yehezkieldio/firefly/commit/b7506701609714e2eed5d34eef409e58c5a8536f) orchestration/rollback: Simplify rollback strategy handling
+- [`0f5d874`](https://github.com/yehezkieldio/firefly/commit/0f5d874f51cc7c6f5c7fa6a26f18c693112dbf14) orchestration/rollback: Remove timeout handling from rollback
+- [`d012e32`](https://github.com/yehezkieldio/firefly/commit/d012e32da0044b7185a880a4ce36cc56ef3eadb3) orchestration/rollback: Remove unused imports from service
+- [`37c88e2`](https://github.com/yehezkieldio/firefly/commit/37c88e251dd9e55f3cabc1a684beaf78a9bbfc3a) orchestration/feature: Rename fromOptions to create
+- [`e6ee849`](https://github.com/yehezkieldio/firefly/commit/e6ee849d339998aa4b60ed55342cea3e1e2d3e5b) orchestration: Change featureFlags to use record type
+- [`3bf00ed`](https://github.com/yehezkieldio/firefly/commit/3bf00ed455c0cb2b389f40a0ddb308c560365535) orchestration: Change featureFlags to use map type
 ## firefly@3.0.0-alpha.8 (September 4, 2025)
 
 ### <!-- 2 -->🧩 Dependencies Updates
