@@ -33,3 +33,7 @@ export function parseSchemaAsync<TSchema extends z.ZodType>(
 ): FireflyAsyncResult<z.infer<TSchema>> {
     return ResultAsync.fromPromise(schema.parseAsync(data), (error) => createFireflyError(toFireflyError(error)));
 }
+
+export function wrapPromise<T>(promise: Promise<T>): FireflyAsyncResult<T> {
+    return ResultAsync.fromPromise(promise, (e) => createFireflyError(toFireflyError(e)));
+}
