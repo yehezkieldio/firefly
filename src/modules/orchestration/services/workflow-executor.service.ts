@@ -7,8 +7,8 @@ import type {
     RollbackStrategy,
 } from "#/modules/orchestration/contracts/orchestration.interface";
 import type { Workflow, WorkflowResult } from "#/modules/orchestration/contracts/workflow.interface";
-import { ScopedContextService } from "#/modules/orchestration/scoped-context.service";
-import { TaskOrchestratorService } from "#/modules/orchestration/task-orchestrator.service";
+import { ScopedContextService } from "#/modules/orchestration/services/scoped-context.service";
+import { TaskOrchestratorService } from "#/modules/orchestration/services/task-orchestrator.service";
 import { logger } from "#/shared/logger";
 import type { FireflyError } from "#/shared/utils/error.util";
 

@@ -7,7 +7,7 @@ import {
     type WorkflowExecutorOptions,
     WorkflowExecutorService,
     type WorkflowFactory,
-} from "#/modules/orchestration/workflow-executor.service";
+} from "#/modules/orchestration/services/workflow-executor.service";
 import type { CLIOptions } from "#/platform/cli/cli-commander";
 import { CLIOptionNormalizer } from "#/platform/cli/option-normalizer";
 import { CLIOptionRegistrar } from "#/platform/cli/option-registrar";

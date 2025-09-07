@@ -9,7 +9,7 @@ import {
 } from "#/modules/orchestration/contracts/orchestration.interface";
 import type { Task } from "#/modules/orchestration/contracts/task.interface";
 import type { Workflow, WorkflowResult } from "#/modules/orchestration/contracts/workflow.interface";
-import { FeatureManagerService } from "#/modules/orchestration/feature-manager.service";
+import { FeatureManagerService } from "#/modules/orchestration/services/feature-manager.service";
 import { createExecutionStrategy } from "#/modules/orchestration/strategies/execution-strategy.factory";
 import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";

@@ -6,9 +6,9 @@ import type {
 } from "#/modules/orchestration/contracts/orchestration.interface";
 import { type Task, isConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import type { WorkflowResult } from "#/modules/orchestration/contracts/workflow.interface";
-import { FeatureManagerService } from "#/modules/orchestration/feature-manager.service";
-import { RollbackManagerService } from "#/modules/orchestration/rollback-manager.service";
-import { TaskExecutorService } from "#/modules/orchestration/task-executor.service";
+import { FeatureManagerService } from "#/modules/orchestration/services/feature-manager.service";
+import { RollbackManagerService } from "#/modules/orchestration/services/rollback-manager.service";
+import { TaskExecutorService } from "#/modules/orchestration/services/task-executor.service";
 import { logger } from "#/shared/logger";
 import { type FireflyError, createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
