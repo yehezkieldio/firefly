@@ -6,26 +6,26 @@ import type { FireflyAsyncResult } from "#/shared/utils/result.util";
 
 export class TaskExecutorService {
     executeTask(task: Task, context?: TaskContext): FireflyAsyncResult<void> {
-        logger.verbose(`TaskExecutorService: Executing task ${task.name}`);
+        logger.verbose(`TaskExecutorService: Executing task '${task.id}'`);
 
         return this.executeWithLifecycle(task, context)
             .andThen(() => {
-                logger.verbose(`TaskExecutorService: Successfully executed task ${task.name}`);
+                logger.verbose(`TaskExecutorService: Successfully executed task '${task.id}'`);
                 return okAsync();
             })
             .mapErr((error) => {
-                logger.verbose(`TaskExecutorService: Failed to execute task ${task.name}: ${error.message}`);
+                logger.verbose(`TaskExecutorService: Failed to execute task '${task.id}': ${error.message}`);
                 return error;
             });
     }
 
     undoTask(task: Task, context?: TaskContext): FireflyAsyncResult<void> {
-        logger.verbose(`TaskExecutorService: Undoing task ${task.name}`);
+        logger.verbose(`TaskExecutorService: Undoing task '${task.id}'`);
 
         if (!task.canUndo?.()) {
             return errAsync(
                 createFireflyError({
-                    message: `Task ${task.name} cannot be undone.`,
+                    message: `Task '${task.id}' cannot be undone.`,
                     code: "INVALID",
                     source: "orchestration/task-executor-service",
                 }),
@@ -34,22 +34,22 @@ export class TaskExecutorService {
 
         return this.undoWithLifecycle(task, context)
             .andThen(() => {
-                logger.verbose(`TaskExecutorService: Successfully undone task ${task.name}`);
+                logger.verbose(`TaskExecutorService: Successfully undone task '${task.id}'`);
                 return okAsync();
             })
             .mapErr((error) => {
-                logger.verbose(`TaskExecutorService: Failed to undo task ${task.name}: ${error.message}`);
+                logger.verbose(`TaskExecutorService: Failed to undo task '${task.id}': ${error.message}`);
                 return error;
             });
     }
 
     compensateTask(task: Task, context?: TaskContext): FireflyAsyncResult<void> {
-        logger.verbose(`TaskExecutorService: Compensating task ${task.name}`);
+        logger.verbose(`TaskExecutorService: Compensating task '${task.id}'`);
 
         if (!task.compensate) {
             return errAsync(
                 createFireflyError({
-                    message: `Task ${task.name} does not have a compensate operation defined.`,
+                    message: `Task '${task.id}' does not have a compensate operation defined.`,
                     code: "INVALID",
                     source: "orchestration/task-executor-service",
                 }),
@@ -59,11 +59,11 @@ export class TaskExecutorService {
         const compensation = context ? task.compensate?.(context) : task.compensate?.({} as TaskContext);
         return compensation
             .andThen(() => {
-                logger.verbose(`TaskExecutorService: Successfully compensated task ${task.name}`);
+                logger.verbose(`TaskExecutorService: Successfully compensated task '${task.id}'`);
                 return okAsync();
             })
             .mapErr((error) => {
-                logger.verbose(`TaskExecutorService: Failed to compensate task ${task.name}: ${error.message}`);
+                logger.verbose(`TaskExecutorService: Failed to compensate task '${task.id}': ${error.message}`);
                 return error;
             });
     }
@@ -129,7 +129,7 @@ export class TaskExecutorService {
         if (!undoOperation) {
             return errAsync(
                 createFireflyError({
-                    message: `Task ${task.name} does not have an undo operation defined.`,
+                    message: `Task '${task.id}' does not have an undo operation defined.`,
                     code: "INVALID",
                     source: "orchestration/task-executor-service",
                 }),

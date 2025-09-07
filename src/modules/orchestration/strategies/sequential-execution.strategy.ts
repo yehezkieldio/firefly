@@ -52,8 +52,6 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
     }
 
     execute(tasks: readonly Task[], context?: OrchestrationContext): FireflyAsyncResult<WorkflowResult> {
-        logger.verbose(`SequentialExecutionStrategy: Starting execution of ${tasks.length} tasks`);
-
         this.initializeTaskMap(tasks);
 
         const executedTasks: string[] = [];
@@ -93,37 +91,34 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
             return shouldExecuteResult.asyncAndThen((shouldExecute) => {
                 if (!shouldExecute) {
                     logger.verbose(
-                        `SequentialExecutionStrategy: Skipping task ${task.name} based on runtime conditions`,
+                        `SequentialExecutionStrategy: Skipping task '${task.id}' based on runtime conditions`,
                     );
                     skippedTasks.push(task.id);
                     this.removeFromQueue(executionQueue, nextTaskId);
                     return executeNext();
                 }
 
-                logger.verbose(`SequentialExecutionStrategy: Executing task ${task.name}`);
-
                 return this.taskExecutor
                     .executeTask(task, context)
                     .andThen(() => {
                         const addResult = this.rollbackManager.addTask(task);
                         if (addResult.isErr()) {
-                            logger.warn(`Failed to add task ${task.name} to rollback stack`, addResult.error);
+                            logger.warn(`Failed to add task '${task.id}' to rollback stack`, addResult.error);
                         }
 
                         executedTasks.push(task.id);
                         this.removeFromQueue(executionQueue, nextTaskId);
 
-                        // Handle dynamic next tasks for conditional tasks
                         const addNextTasksResult = this.addDynamicNextTasks(task, executionQueue, context);
                         if (addNextTasksResult.isErr()) {
-                            logger.warn(`Failed to resolve next tasks for ${task.name}`, addNextTasksResult.error);
+                            logger.warn(`Failed to resolve next tasks for '${task.id}'`, addNextTasksResult.error);
                         }
 
                         return executeNext();
                     })
                     .orElse((error) => {
                         failedTasks.push(task.id);
-                        logger.error(`SequentialExecutionStrategy: Task ${task.name} failed`, error);
+                        logger.error(`SequentialExecutionStrategy: Task '${task.id}' failed`, error);
 
                         if (this.options.rollbackStrategy !== "none") {
                             logger.info(
@@ -238,12 +233,12 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
                     if (this.taskMap.has(nextTaskId) && !queue.includes(nextTaskId)) {
                         queue.push(nextTaskId);
                         logger.verbose(
-                            `SequentialExecutionStrategy: Added dynamic next task ${nextTaskId} from ${task.name}`,
+                            `SequentialExecutionStrategy: Added dynamic next task '${nextTaskId}' from '${task.id}'`,
                         );
                     }
                 }
             } else if (nextTasksResult?.isErr()) {
-                logger.warn(`Failed to get next tasks from ${task.name}`, nextTasksResult.error);
+                logger.warn(`Failed to get next tasks from '${task.id}'`, nextTasksResult.error);
             }
         }
 
@@ -252,7 +247,7 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
             if (dependencies.includes(task.id) && !queue.includes(taskId) && !taskNode.visited) {
                 queue.push(taskId);
                 logger.verbose(
-                    `SequentialExecutionStrategy: Added dependent task ${taskId} after completing ${task.name}`,
+                    `SequentialExecutionStrategy: Added dependent task '${taskId}' after completing '${task.id}'`,
                 );
             }
         }
@@ -280,7 +275,7 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
 
             if (!hasRequiredFeatures) {
                 logger.verbose(
-                    `SequentialExecutionStrategy: Task ${task.name} disabled due to missing required features: ${requiredFeatures.join(", ")}`,
+                    `SequentialExecutionStrategy: Task '${task.id}' disabled due to missing required features: ${requiredFeatures.join(", ")}`,
                 );
                 return ok(false);
             }
@@ -290,14 +285,14 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
             const shouldExecuteResult = task.shouldExecute(context);
             if (shouldExecuteResult.isErr()) {
                 logger.warn(
-                    `SequentialExecutionStrategy: Error evaluating conditions for task ${task.name}`,
+                    `SequentialExecutionStrategy: Error evaluating conditions for task '${task.id}'`,
                     shouldExecuteResult.error,
                 );
                 return ok(false);
             }
 
             if (!shouldExecuteResult.value) {
-                logger.verbose(`SequentialExecutionStrategy: Task ${task.name} skipped due to runtime conditions`);
+                logger.verbose(`SequentialExecutionStrategy: Task '${task.id}' skipped due to runtime conditions`);
                 return ok(false);
             }
         }

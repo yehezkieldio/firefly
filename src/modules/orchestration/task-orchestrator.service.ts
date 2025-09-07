@@ -7,7 +7,7 @@ import {
     type OrchestratorOptions,
     OrchestratorOptionsSchema,
 } from "#/modules/orchestration/contracts/orchestration.interface";
-import { type Task, isConditionalTask } from "#/modules/orchestration/contracts/task.interface";
+import type { Task } from "#/modules/orchestration/contracts/task.interface";
 import type { Workflow, WorkflowResult } from "#/modules/orchestration/contracts/workflow.interface";
 import { FeatureManagerService } from "#/modules/orchestration/feature-manager.service";
 import { createExecutionStrategy } from "#/modules/orchestration/strategies/execution-strategy.factory";
@@ -61,6 +61,8 @@ export class TaskOrchestratorService {
         context: OrchestrationContext<ContextDataFor<TCommand>, TCommand>,
         options: Partial<OrchestratorOptions> = {},
     ): FireflyResult<TaskOrchestratorService> {
+        logger.verbose(`TaskOrchestratorService: Building tasks from workflow '${workflow.id}'.`);
+
         const validateOptions = TaskOrchestratorService.validateOptions(options);
         if (validateOptions.isErr()) {
             return err(validateOptions.error);
@@ -80,7 +82,7 @@ export class TaskOrchestratorService {
     }
 
     run(): FireflyAsyncResult<WorkflowResult> {
-        logger.verbose(`TaskOrchestratorService: Starting orchestration with execution ID: ${this.executionId}`);
+        logger.verbose(`TaskOrchestratorService: Starting orchestration for execution ID: ${this.executionId}`);
 
         const enabledTasks = this.filterTasksByFeatures(Array.from(this.tasks));
         if (enabledTasks.isErr()) {
@@ -138,10 +140,6 @@ export class TaskOrchestratorService {
                 if (!taskIds.has(depId)) {
                     errors.push(`Task ${task.id} has a missing dependent: ${depId}`);
                 }
-            }
-
-            if (isConditionalTask(task)) {
-                logger.verbose(`TaskOrchestratorService: Found conditional task: ${task.name}`);
             }
         }
 
@@ -201,7 +199,6 @@ export class TaskOrchestratorService {
             }
         }
 
-        logger.verbose(`TaskOrchestratorService: Filtered to ${filteredTasks.length} enabled tasks.`);
         return ok(filteredTasks);
     }
 }

@@ -66,6 +66,13 @@ export class RollbackManagerService {
                 compensationId: undefined,
             };
 
+            if (!task.canUndo?.()) {
+                logger.verbose(
+                    `RollbackManagerService: Task '${task.id}' cannot be undone. Not adding to rollback stack.`,
+                );
+                return ok();
+            }
+
             this.rollbackStack.push(entry);
 
             logger.verbose(`RollbackManagerService: Added task to rollback stack: ${task.name} (${task.id})`);
@@ -94,7 +101,6 @@ export class RollbackManagerService {
             entry.compensationId = compensation.id;
         }
 
-        logger.verbose(`RollbackManagerService: Registered compensation for task: ${taskId}`);
         return ok();
     }
 
@@ -339,7 +345,6 @@ export class RollbackManagerService {
     clear(): void {
         this.rollbackStack.length = 0;
         this.compensationTasks.clear();
-        logger.verbose("RollbackManagerService: Cleared rollback stack and compensation tasks.");
     }
 
     getTaskCount(): number {

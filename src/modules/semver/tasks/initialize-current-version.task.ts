@@ -11,4 +11,8 @@ export class InitializeCurrentVersionTask implements Task<ReleaseTaskContext> {
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
         return okAsync();
     }
+
+    canUndo(): boolean {
+        return false;
+    }
 }

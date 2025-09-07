@@ -33,6 +33,7 @@ export class WorkflowExecutorService {
             executedTasks: result.executedTasks,
             skippedTasks: result.skippedTasks,
         };
+        logger.verbose("");
         logger.verbose(JSON.stringify(summary, null, 2));
     }
 

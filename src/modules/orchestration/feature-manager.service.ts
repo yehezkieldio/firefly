@@ -79,7 +79,6 @@ export class FeatureManagerService {
         }
 
         const enabled = this.features.get(featureName) ?? false;
-        logger.verbose(`FeatureManagerService: Feature "${featureName}" is ${enabled ? "enabled" : "disabled"}`);
         return enabled;
     }
 
@@ -94,7 +93,6 @@ export class FeatureManagerService {
     enable(featureName: string): FireflyResult<FeatureManagerService> {
         const validation = parseSchema(FeatureNameSchema, featureName);
         if (validation.isErr()) {
-            logger.warn(`FeatureManagerService: Invalid feature name checked - ${validation.error.message}`);
             return err(validation.error);
         }
 
@@ -121,7 +119,6 @@ export class FeatureManagerService {
             updatedAt: new Date(),
         });
 
-        logger.verbose(`FeatureManagerService: Feature "${featureName}" enabled`);
         return ok(FeatureManagerService.fromMaps(updated, updatedMetadata));
     }
 
@@ -155,7 +152,6 @@ export class FeatureManagerService {
             updatedAt: new Date(),
         });
 
-        logger.verbose(`FeatureManagerService: Feature "${featureName}" disabled`);
         return ok(FeatureManagerService.fromMaps(updated, updatedMetadata));
     }
 
@@ -275,7 +271,6 @@ export class FeatureManagerService {
             );
         }
 
-        logger.verbose(`FeatureManagerService: Set ${features.size} features`);
         return ok(FeatureManagerService.fromMaps(updated, updatedMetadata));
     }
 
@@ -325,7 +320,6 @@ export class FeatureManagerService {
             ...metadata,
         });
 
-        logger.verbose(`FeatureManagerService: Updated metadata for feature "${featureName}"`);
         return ok(FeatureManagerService.fromMaps(this.features, updatedMetadata));
     }
 
