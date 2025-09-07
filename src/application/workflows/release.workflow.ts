@@ -2,6 +2,7 @@ import { ok } from "neverthrow";
 import type { Task } from "#/modules/orchestration/contracts/task.interface";
 import type { Workflow } from "#/modules/orchestration/contracts/workflow.interface";
 import { AutomaticBumpTask } from "#/modules/semver/tasks/automatic-bump.task";
+import { BumpVersionTask } from "#/modules/semver/tasks/bump-version.task";
 import { ExecuteBumpStrategyTask } from "#/modules/semver/tasks/execute-bump-strategy.task";
 import { InitializeCurrentVersionTask } from "#/modules/semver/tasks/initialize-current-version.task";
 import { ManualBumpTask } from "#/modules/semver/tasks/manual-bump.task";
@@ -28,6 +29,8 @@ export function createReleaseWorkflow(): Workflow<"release"> {
 
                 new PromptManualVersionTask(),
                 new ManualBumpTask(),
+
+                new BumpVersionTask(),
             ];
 
             return ok(tasks);

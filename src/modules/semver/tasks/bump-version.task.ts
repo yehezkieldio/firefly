@@ -1,0 +1,18 @@
+import { okAsync } from "neverthrow";
+import type { ReleaseTaskContext } from "#/application/context";
+import type { Task } from "#/modules/orchestration/contracts/task.interface";
+import type { FireflyAsyncResult } from "#/shared/utils/result.util";
+
+export class BumpVersionTask implements Task<ReleaseTaskContext> {
+    readonly id = "bump-version";
+    readonly name = "Bump Version";
+    readonly description = "Writes the new version to package.json.";
+
+    getDependencies(): string[] {
+        return ["straight-bump", "automatic-bump", "manual-bump"];
+    }
+
+    execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        return okAsync();
+    }
+}

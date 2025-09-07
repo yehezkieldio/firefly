@@ -225,10 +225,15 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
     }
 
     private addDynamicNextTasks(task: Task, queue: string[], context?: OrchestrationContext): FireflyResult<void> {
+        let hasExplicitNextTasks = false;
+
+        // First, handle explicit next tasks from conditional tasks
         if (isConditionalTask(task)) {
             const nextTasksResult = task.getNextTasks?.(context);
             if (nextTasksResult?.isOk()) {
                 const nextTasks = nextTasksResult.value;
+                hasExplicitNextTasks = nextTasks.length > 0;
+
                 for (const nextTaskId of nextTasks) {
                     if (this.taskMap.has(nextTaskId) && !queue.includes(nextTaskId)) {
                         queue.push(nextTaskId);
@@ -242,20 +247,23 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
             }
         }
 
-        for (const [taskId, taskNode] of this.taskMap) {
-            const dependencies = taskNode.task.getDependencies?.() ?? [];
-            if (dependencies.includes(task.id) && !queue.includes(taskId) && !taskNode.visited) {
-                queue.push(taskId);
-                logger.verbose(
-                    `SequentialExecutionStrategy: Added dependent task '${taskId}' after completing '${task.id}'`,
-                );
+        // Only add implicit dependents if there are no explicit next tasks
+        if (!hasExplicitNextTasks) {
+            for (const [taskId, taskNode] of this.taskMap) {
+                const dependencies = taskNode.task.getDependencies?.() ?? [];
+                if (dependencies.includes(task.id) && !queue.includes(taskId) && !taskNode.visited) {
+                    queue.push(taskId);
+                    logger.verbose(
+                        `SequentialExecutionStrategy: Added dependent task '${taskId}' after completing '${task.id}'`,
+                    );
+                }
             }
-        }
 
-        const dependents = task.getDependents?.() ?? [];
-        for (const dependentId of dependents) {
-            if (this.taskMap.has(dependentId) && !queue.includes(dependentId)) {
-                queue.push(dependentId);
+            const dependents = task.getDependents?.() ?? [];
+            for (const dependentId of dependents) {
+                if (this.taskMap.has(dependentId) && !queue.includes(dependentId)) {
+                    queue.push(dependentId);
+                }
             }
         }
 

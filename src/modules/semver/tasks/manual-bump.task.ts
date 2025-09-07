@@ -20,6 +20,10 @@ export class ManualBumpTask implements ConditionalTask<ReleaseTaskContext> {
         return ok(strategy === "manual");
     }
 
+    getNextTasks(): FireflyResult<string[]> {
+        return ok(["bump-version"]);
+    }
+
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
         return okAsync();
     }

@@ -19,8 +19,8 @@ export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
         return ok(Boolean(hasStraightBumpParams));
     }
 
-    getNextTasks(_context?: ReleaseTaskContext): FireflyResult<string[]> {
-        return ok([""]);
+    getNextTasks(): FireflyResult<string[]> {
+        return ok(["bump-version"]);
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {

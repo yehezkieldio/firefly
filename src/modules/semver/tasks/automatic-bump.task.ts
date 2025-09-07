@@ -20,6 +20,10 @@ export class AutomaticBumpTask implements ConditionalTask<ReleaseTaskContext> {
         return ok(strategy === "auto");
     }
 
+    getNextTasks(): FireflyResult<string[]> {
+        return ok(["bump-version"]);
+    }
+
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
         return okAsync();
     }
