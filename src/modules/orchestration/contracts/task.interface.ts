@@ -20,7 +20,9 @@ export interface Task<TContext extends TaskContext = TaskContext> {
     canUndo?(): boolean;
     undo?(context: TContext): FireflyAsyncResult<void>;
     compensate?(context: TContext): FireflyAsyncResult<void>;
+    // Tasks that need to be completed before this one can run
     getDependencies?(): string[];
+    // Tasks that depend on this task
     getDependents?(): string[];
     getRequiredFeatures?(): string[];
     isEnabled?(features: Set<string>): boolean;
