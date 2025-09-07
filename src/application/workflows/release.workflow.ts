@@ -20,14 +20,23 @@ export function createReleaseWorkflow(): Workflow<"release"> {
             const tasks: Task[] = [
                 new InitializeCurrentVersionTask(),
 
+                // releaseType is defined, so we can do a straight bump task
+                // after straight bump task, we skip the rest and jump to the bump version task
                 new StraightBumpTask(),
 
+                // if releaseType is not defined, we prompt for a bump strategy
                 new PromptBumpStrategyTask(),
+                // this task delegates to either automatic or manual bump tasks
                 new ExecuteBumpStrategyTask(),
 
+                // if automatic, we do an automatic bump
+                // then we skip the manual bump task and go to the bump version task
                 new AutomaticBumpTask(),
 
+                // we prompt for a manual version
                 new PromptManualVersionTask(),
+                // if manual, we do a manual bump
+                // then we move to the bump version task
                 new ManualBumpTask(),
 
                 new BumpVersionTask(),

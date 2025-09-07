@@ -9,15 +9,17 @@ export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskConte
     readonly description = "Executes the selected bump strategy to determine the new version.";
 
     getDependencies(): string[] {
-        return ["prompt-bump-strategy"];
+        return ["initialize-current-version"];
     }
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
         const hasReleaseType = Boolean(config.releaseType);
+        const hasBumpStrategy = Boolean(config.bumpStrategy);
 
-        // Don't execute if releaseType is defined (goes straight to bump)
-        return ok(!hasReleaseType);
+        // Execute if releaseType is not defined but bumpStrategy is defined
+        const shouldExecute = !hasReleaseType && hasBumpStrategy;
+        return ok(shouldExecute);
     }
 
     getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {

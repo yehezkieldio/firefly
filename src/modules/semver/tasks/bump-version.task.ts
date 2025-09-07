@@ -9,7 +9,11 @@ export class BumpVersionTask implements Task<ReleaseTaskContext> {
     readonly description = "Writes the new version to package.json.";
 
     getDependencies(): string[] {
-        return ["straight-bump", "automatic-bump", "manual-bump"];
+        return [];
+    }
+
+    getDependents(): string[] {
+        return [];
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {

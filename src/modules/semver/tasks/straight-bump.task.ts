@@ -13,10 +13,14 @@ export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
     }
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
-        const hasStraightBumpParams = context.getConfig().releaseType;
+        const config = context.getConfig();
 
-        // Only execute if releaseType is specified (indicating a straight bump)
-        return ok(Boolean(hasStraightBumpParams));
+        // If releaseType is specified, we are doing a straight bump - skipping bump strategy and manual version prompts
+        if (config.releaseType !== undefined) {
+            return ok(true);
+        }
+
+        return ok(false);
     }
 
     getNextTasks(): FireflyResult<string[]> {
