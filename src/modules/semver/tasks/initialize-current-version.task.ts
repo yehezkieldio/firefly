@@ -1,7 +1,7 @@
 import { okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
+import { ReleasePreflightCheckTask } from "#/modules/configuration/tasks/release-preflight-check.task";
 import type { Task } from "#/modules/orchestration/contracts/task.interface";
-import { ReleasePreflightCheckTask } from "#/modules/orchestration/tasks/release-preflight-check.task";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import type { FireflyAsyncResult } from "#/shared/utils/result.util";
 

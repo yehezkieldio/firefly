@@ -1,10 +1,10 @@
 import { ok } from "neverthrow";
 import { GenerateChangelogTask, WriteChangelogFileTask } from "#/modules/changelog/tasks";
+import { ReleasePreflightCheckTask } from "#/modules/configuration/tasks";
 import { CommitChangesTask, CreateTagTask, PushCommitTask, PushTagTask, StageChangesTask } from "#/modules/git/tasks";
 import { PublishGitHubReleaseTask } from "#/modules/github/tasks";
 import type { Task } from "#/modules/orchestration/contracts/task.interface";
 import type { Workflow } from "#/modules/orchestration/contracts/workflow.interface";
-import { ReleasePreflightCheckTask } from "#/modules/orchestration/tasks";
 import {
     AutomaticBumpTask,
     BumpVersionTask,
