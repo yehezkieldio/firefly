@@ -7,7 +7,6 @@ import type { FireflyAsyncResult } from "#/shared/utils/result.util";
 
 export class StageChangesTask implements Task<ReleaseTaskContext> {
     readonly id = "stage-changes";
-    readonly name = "Stage Changes";
     readonly description = "Stages the changes for the release.";
 
     getDependencies(): string[] {
