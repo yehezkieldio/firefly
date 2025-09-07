@@ -183,19 +183,13 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
     }
 
     private getInitialExecutionQueue(tasks: readonly Task[]): string[] {
-        const nonEntryTasks = new Set(["bump-version"]);
-
         const entryTasks = tasks.filter((task) => {
-            if (nonEntryTasks.has(task.id)) {
-                return false;
-            }
-
-            const dependencies = task.getDependencies?.() ?? [];
-            return dependencies.length === 0;
+            const deps = task.getDependencies?.() ?? [];
+            return deps.length === 0 && (task.isEntryPoint?.() ?? true);
         });
 
         if (entryTasks.length === 0) {
-            const firstTask = tasks.find((task) => !nonEntryTasks.has(task.id));
+            const firstTask = tasks.find((task) => task.isEntryPoint?.() ?? true);
             return firstTask ? [firstTask.id] : [];
         }
 

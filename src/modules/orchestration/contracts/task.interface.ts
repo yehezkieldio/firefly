@@ -24,6 +24,7 @@ export interface Task<TContext extends TaskContext = TaskContext> {
     getDependents?(): string[];
     getRequiredFeatures?(): string[];
     isEnabled?(features: Set<string>): boolean;
+    isEntryPoint?(): boolean;
     beforeExecute?(context: TContext): FireflyAsyncResult<void>;
     afterExecute?(context: TContext): FireflyAsyncResult<void>;
     onExecuteError?(error: FireflyError, context: TContext): FireflyAsyncResult<void>;

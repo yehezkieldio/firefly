@@ -8,6 +8,10 @@ export class BumpVersionTask implements Task<ReleaseTaskContext> {
     readonly name = "Bump Version";
     readonly description = "Writes the new version to package.json.";
 
+    isEntryPoint(): boolean {
+        return false;
+    }
+
     getDependencies(): string[] {
         return [];
     }
