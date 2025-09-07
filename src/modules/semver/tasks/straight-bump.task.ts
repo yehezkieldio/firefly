@@ -20,7 +20,7 @@ export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
     }
 
     getNextTasks(_context?: ReleaseTaskContext): FireflyResult<string[]> {
-        return ok(["generate-changelog"]);
+        return ok([""]);
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
