@@ -19,9 +19,7 @@ export interface Task<TContext extends TaskContext = TaskContext> {
     canUndo?(): boolean;
     undo?(context: TContext): FireflyAsyncResult<void>;
     compensate?(context: TContext): FireflyAsyncResult<void>;
-    // Tasks that need to be completed before this one can run
     getDependencies?(): string[];
-    // Tasks that depend on this task
     getDependents?(): string[];
     getRequiredFeatures?(): string[];
     isEnabled?(features: Set<string>): boolean;
@@ -37,6 +35,7 @@ export interface Task<TContext extends TaskContext = TaskContext> {
 export interface ConditionalTask<TContext extends TaskContext = TaskContext> extends Task<TContext> {
     shouldExecute(context?: TContext): FireflyResult<boolean>;
     getNextTasks?(context?: TContext): FireflyResult<string[]>;
+    getSkipThroughTasks?(context?: TContext): FireflyResult<string[]>;
 }
 
 export function isConditionalTask(task: Task): task is ConditionalTask {

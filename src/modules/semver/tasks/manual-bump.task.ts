@@ -15,10 +15,12 @@ export class ManualBumpTask implements ConditionalTask<ReleaseTaskContext> {
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
-        const strategy = config.bumpStrategy;
 
-        // Only execute if bump strategy is specifically "manual"
-        return ok(strategy === "manual");
+        if (config.skipBump) {
+            return ok(false);
+        }
+
+        return ok(config.bumpStrategy === "manual");
     }
 
     getNextTasks(): FireflyResult<string[]> {

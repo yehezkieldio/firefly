@@ -92,6 +92,21 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
                 if (!shouldExecute) {
                     skippedTasks.push(task.id);
                     this.removeFromQueue(executionQueue, nextTaskId);
+
+                    if (isConditionalTask(task) && task.getSkipThroughTasks) {
+                        const skipThroughResult = task.getSkipThroughTasks(context);
+                        if (skipThroughResult.isOk()) {
+                            for (const skipTaskId of skipThroughResult.value) {
+                                if (this.taskMap.has(skipTaskId) && !executionQueue.includes(skipTaskId)) {
+                                    executionQueue.push(skipTaskId);
+                                    logger.verbose(
+                                        `SequentialExecutionStrategy: Added skip-through task '${skipTaskId}' from skipped task '${task.id}'`,
+                                    );
+                                }
+                            }
+                        }
+                    }
+
                     return executeNext();
                 }
 

@@ -2,6 +2,7 @@ import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { BumpVersionTask } from "#/modules/semver/tasks/bump-version.task";
 import { InitializeCurrentVersionTask } from "#/modules/semver/tasks/initialize-current-version.task";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -16,7 +17,10 @@ export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
 
-        // If releaseType is specified, we are doing a straight bump - skipping bump strategy and manual version prompts
+        if (config.skipBump) {
+            return ok(false);
+        }
+
         if (config.releaseType !== undefined) {
             return ok(true);
         }
@@ -25,7 +29,7 @@ export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
     }
 
     getNextTasks(): FireflyResult<string[]> {
-        return ok(["bump-version"]);
+        return ok([taskRef(BumpVersionTask)]);
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {

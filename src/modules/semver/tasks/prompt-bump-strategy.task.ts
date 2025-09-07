@@ -2,6 +2,7 @@ import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { ExecuteBumpStrategyTask } from "#/modules/semver/tasks/execute-bump-strategy.task";
 import { InitializeCurrentVersionTask } from "#/modules/semver/tasks/initialize-current-version.task";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -15,14 +16,16 @@ export class PromptBumpStrategyTask implements ConditionalTask<ReleaseTaskContex
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
-        const hasBumpStrategy = Boolean(config.bumpStrategy);
-        const hasReleaseType = Boolean(config.releaseType);
 
-        return ok(!(hasBumpStrategy || hasReleaseType));
+        if (config.skipBump) {
+            return ok(false);
+        }
+
+        return ok(!(Boolean(config.bumpStrategy) || Boolean(config.releaseType)));
     }
 
     getNextTasks(): FireflyResult<string[]> {
-        return ok(["execute-bump-strategy"]);
+        return ok([taskRef(ExecuteBumpStrategyTask)]);
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
