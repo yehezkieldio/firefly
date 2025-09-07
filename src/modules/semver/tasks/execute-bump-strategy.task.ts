@@ -1,15 +1,23 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
-import type { Task } from "#/modules/orchestration/contracts/task.interface";
+import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
-export class ExecuteBumpStrategyTask implements Task<ReleaseTaskContext> {
+export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskContext> {
     readonly id = "execute-bump-strategy";
     readonly name = "Execute Bump Strategy";
     readonly description = "Executes the selected bump strategy to determine the new version.";
 
     getDependencies(): string[] {
         return ["prompt-bump-strategy"];
+    }
+
+    shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
+        const config = context.getConfig();
+        const hasReleaseType = Boolean(config.releaseType);
+
+        // Don't execute if releaseType is defined (goes straight to bump)
+        return ok(!hasReleaseType);
     }
 
     getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
@@ -23,7 +31,7 @@ export class ExecuteBumpStrategyTask implements Task<ReleaseTaskContext> {
             return ok(["automatic-bump"]);
         }
 
-        return ok(["execute-bump-strategy"]);
+        return ok([]);
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {

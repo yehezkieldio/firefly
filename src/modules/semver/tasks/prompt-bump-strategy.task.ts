@@ -13,7 +13,7 @@ export class PromptBumpStrategyTask implements ConditionalTask<ReleaseTaskContex
     }
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
-        const hasStraightBumpParams = context.getConfig().releaseType;
+        const hasStraightBumpParams = context.getConfig().releaseType && context.getConfig().bumpStrategy;
 
         return ok(!hasStraightBumpParams);
     }
