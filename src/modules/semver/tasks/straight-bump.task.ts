@@ -17,10 +17,6 @@ export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
 
-        if (config.skipBump) {
-            return ok(false);
-        }
-
         if (config.releaseType !== undefined) {
             return ok(true);
         }

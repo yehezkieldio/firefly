@@ -16,10 +16,6 @@ export class PromptManualVersionTask implements ConditionalTask<ReleaseTaskConte
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
 
-        if (config.skipBump) {
-            return ok(false);
-        }
-
         return ok(config.bumpStrategy === "manual");
     }
 

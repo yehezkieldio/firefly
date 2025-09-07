@@ -17,10 +17,6 @@ export class PromptBumpStrategyTask implements ConditionalTask<ReleaseTaskContex
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
 
-        if (config.skipBump) {
-            return ok(false);
-        }
-
         return ok(!(Boolean(config.bumpStrategy) || Boolean(config.releaseType)));
     }
 

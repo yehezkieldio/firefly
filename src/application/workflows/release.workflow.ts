@@ -5,6 +5,9 @@ import { CommitChangesTask, CreateTagTask, PushCommitTask, PushTagTask, StageCha
 import { PublishGitHubReleaseTask } from "#/modules/github/tasks";
 import type { Task } from "#/modules/orchestration/contracts/task.interface";
 import type { Workflow } from "#/modules/orchestration/contracts/workflow.interface";
+import { ChangelogFlowControllerTask, VersionFlowControllerTask } from "#/modules/orchestration/tasks";
+import { GitFlowControllerTask } from "#/modules/orchestration/tasks/git-flow-controller.task";
+import { PlatformPublishControllerTask } from "#/modules/orchestration/tasks/platform-publish-controller.task";
 import {
     AutomaticBumpTask,
     BumpVersionTask,
@@ -26,6 +29,8 @@ export function createReleaseWorkflow(): Workflow<"release"> {
             const tasks: Task[] = [
                 new ReleasePreflightCheckTask(),
                 new InitializeCurrentVersionTask(),
+
+                new VersionFlowControllerTask(),
                 new StraightBumpTask(),
                 new PromptBumpStrategyTask(),
                 new ExecuteBumpStrategyTask(),
@@ -33,13 +38,19 @@ export function createReleaseWorkflow(): Workflow<"release"> {
                 new PromptManualVersionTask(),
                 new ManualBumpTask(),
                 new BumpVersionTask(),
+
+                new ChangelogFlowControllerTask(),
                 new GenerateChangelogTask(),
                 new WriteChangelogFileTask(),
+
+                new GitFlowControllerTask(),
                 new StageChangesTask(),
                 new CommitChangesTask(),
                 new CreateTagTask(),
                 new PushCommitTask(),
                 new PushTagTask(),
+
+                new PlatformPublishControllerTask(),
                 new PublishGitHubReleaseTask(),
             ];
 
