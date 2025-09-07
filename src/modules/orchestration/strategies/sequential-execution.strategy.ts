@@ -247,6 +247,16 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
             }
         }
 
+        for (const [taskId, taskNode] of this.taskMap) {
+            const dependencies = taskNode.task.getDependencies?.() ?? [];
+            if (dependencies.includes(task.id) && !queue.includes(taskId) && !taskNode.visited) {
+                queue.push(taskId);
+                logger.verbose(
+                    `SequentialExecutionStrategy: Added dependent task ${taskId} after completing ${task.name}`,
+                );
+            }
+        }
+
         const dependents = task.getDependents?.() ?? [];
         for (const dependentId of dependents) {
             if (this.taskMap.has(dependentId) && !queue.includes(dependentId)) {
