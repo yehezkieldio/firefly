@@ -19,18 +19,13 @@ export function createReleaseWorkflow(): Workflow<"release"> {
             const tasks: Task[] = [
                 new InitializeCurrentVersionTask(),
 
-                // If params are provided skip all tasks below and straight to straight bump
                 new StraightBumpTask(),
 
-                // If no bump params are provided, run the interactive tasks
                 new PromptBumpStrategyTask(),
-
-                // If strategy is auto then run just the automatic bump task
-                // If strategy is manual then run the prompt and manual bump tasks
                 new ExecuteBumpStrategyTask(),
+
                 new AutomaticBumpTask(),
 
-                // If manual then we need to prompt for the version and then bump
                 new PromptManualVersionTask(),
                 new ManualBumpTask(),
             ];

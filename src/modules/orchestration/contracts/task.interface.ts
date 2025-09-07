@@ -32,9 +32,9 @@ export interface Task<TContext extends TaskContext = TaskContext> {
     onRollbackError?(error: FireflyError, context: TContext): FireflyAsyncResult<void>;
 }
 
-export interface ConditionalTask extends Task {
-    shouldExecute(context?: OrchestrationContext): FireflyResult<boolean>;
-    getNextTasks?(context?: OrchestrationContext): FireflyResult<string[]>;
+export interface ConditionalTask<TContext extends TaskContext = TaskContext> extends Task<TContext> {
+    shouldExecute(context?: TContext): FireflyResult<boolean>;
+    getNextTasks?(context?: TContext): FireflyResult<string[]>;
 }
 
 export function isConditionalTask(task: Task): task is ConditionalTask {
