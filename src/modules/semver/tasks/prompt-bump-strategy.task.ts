@@ -14,11 +14,10 @@ export class PromptBumpStrategyTask implements ConditionalTask<ReleaseTaskContex
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
-        const hasReleaseType = Boolean(config.releaseType);
         const hasBumpStrategy = Boolean(config.bumpStrategy);
+        const hasReleaseType = Boolean(config.releaseType);
 
-        const shouldExecute = !(hasReleaseType || hasBumpStrategy);
-        return ok(shouldExecute);
+        return ok(!(hasBumpStrategy || hasReleaseType));
     }
 
     getNextTasks(): FireflyResult<string[]> {

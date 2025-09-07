@@ -10,4 +10,4 @@ export const BUMP_STRATEGY_MANUAL = "manual" as const;
 
 export const BumpStrategyValues = [BUMP_STRATEGY_AUTO, BUMP_STRATEGY_MANUAL] as const;
 
-export const BumpStrategySchema = z.enum(BumpStrategyValues).default(BUMP_STRATEGY_AUTO);
+export const BumpStrategySchema = z.enum(BumpStrategyValues).or(z.literal("")).default("");
