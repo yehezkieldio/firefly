@@ -31,3 +31,12 @@ export interface Task<TContext extends TaskContext = TaskContext> {
     afterRollback?(context: TContext): FireflyAsyncResult<void>;
     onRollbackError?(error: FireflyError, context: TContext): FireflyAsyncResult<void>;
 }
+
+export interface ConditionalTask extends Task {
+    shouldExecute(context?: OrchestrationContext): FireflyResult<boolean>;
+    getNextTasks?(context?: OrchestrationContext): FireflyResult<string[]>;
+}
+
+export function isConditionalTask(task: Task): task is ConditionalTask {
+    return "shouldExecute" in task && typeof task.shouldExecute === "function";
+}

@@ -1,6 +1,7 @@
 import z from "zod";
 import { type CommandName, ConfigSchemaProvider } from "#/modules/configuration/config-schema.provider";
 import { ContextDataSchemas } from "#/modules/orchestration/contracts/context-data";
+import type { TaskContext } from "#/modules/orchestration/contracts/task.interface";
 
 export const ReleaseContextDataSchema = z.object({
     command: z.literal("release"),
@@ -11,5 +12,6 @@ export const ReleaseContextDataSchema = z.object({
 });
 
 export type ReleaseContextData = z.infer<typeof ReleaseContextDataSchema>;
+export type ReleaseTaskContext = TaskContext<ReleaseContextData>;
 
 ContextDataSchemas["release" satisfies CommandName] = ReleaseContextDataSchema;
