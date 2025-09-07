@@ -20,19 +20,23 @@ export function createReleaseWorkflow(): Workflow<"release"> {
         command: "release",
         buildTasks() {
             const tasks: Task[] = [
+                // new ReleasePreflightTask(),
                 new InitializeCurrentVersionTask(),
-
                 new StraightBumpTask(),
-
                 new PromptBumpStrategyTask(),
                 new ExecuteBumpStrategyTask(),
-
                 new AutomaticBumpTask(),
-
                 new PromptManualVersionTask(),
                 new ManualBumpTask(),
-
                 new BumpVersionTask(),
+                // new PrepareChangelogDataTask(),
+                // new WriteChangelogFileTask(),
+                // new StageChangesTask(),
+                // new CommitChangesTask(),
+                // new CreateTagTask(),
+                // new PushCommitTask(),
+                // new PushTagTask(),
+                // new PublishGitHubReleaseTask(),
             ];
 
             return ok(tasks);
