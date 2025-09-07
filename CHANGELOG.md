@@ -6,6 +6,31 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.12 (September 7, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`fd40abe`](https://github.com/yehezkieldio/firefly/commit/fd40abe0b554655515cc908e8ff100304b777071) semver: Add initial version retrieval and version bump tasks
+- [`4dcd950`](https://github.com/yehezkieldio/firefly/commit/4dcd95003f5c47749f50623852e10f1f112da1b0) release: Add tasks for automatic and manual version bumping
+- [`04f0427`](https://github.com/yehezkieldio/firefly/commit/04f0427e86c1160906754a919eea83427b6933fc) orchestration: Enhance task execution with dynamic handling
+- [`2fdfa70`](https://github.com/yehezkieldio/firefly/commit/2fdfa7073d25040443a37f57f8c556167c278528) orchestration: Add dynamic task dependency handling
+- [`c65c5ab`](https://github.com/yehezkieldio/firefly/commit/c65c5abc8ce72e59bc2ad5d9ebf43533f86266e0) release: Enhance bump strategy task handling
+- [`d859d43`](https://github.com/yehezkieldio/firefly/commit/d859d43b100aa4ce859003ea01fbf4e552656dd3) semver: Implement conditional execution for bump tasks
+- [`d397aff`](https://github.com/yehezkieldio/firefly/commit/d397affc5390f4f264cdde17f55dc0899639fa2e) semver: Add bump version task and update workflows
+- [`3187ce0`](https://github.com/yehezkieldio/firefly/commit/3187ce0a253c5a9aa0ce70174a9666bb81c9d7aa) orchestration: Add isEntryPoint method to task interface
+
+### <!-- 7 -->🚜 Refactor
+- [`4db505b`](https://github.com/yehezkieldio/firefly/commit/4db505becb1990016babb102a1e62997cc367950)  Remove unused versioning tasks and services
+- [`b3972f5`](https://github.com/yehezkieldio/firefly/commit/b3972f5dd1348c384bee926e7122e8dcffe744f7) semver: Add comments to clarify execution conditions
+- [`8d69aae`](https://github.com/yehezkieldio/firefly/commit/8d69aae605d84901e38948bfcbae27bf893b4706) semver: Remove unused next task from straight bump
+- [`0d7b288`](https://github.com/yehezkieldio/firefly/commit/0d7b2886de7ba0d90847c252f1af21f9f48bd5cf) orchestration: Remove verbose logging from services
+- [`71f7663`](https://github.com/yehezkieldio/firefly/commit/71f7663f8623b4afc3df585814118c4c0a79ffb7) orchestration: Exclude bump-version from entry tasks
+- [`7a0fe27`](https://github.com/yehezkieldio/firefly/commit/7a0fe27cda1c7cc941c714c8f9f4bff8f53fd403) semver: Streamline bump strategy task execution
+- [`796dbe9`](https://github.com/yehezkieldio/firefly/commit/796dbe99c0fc66233ba29fc2b70dc880873e4cd1) rollback: Remove verbose logging from rollback checks
+- [`461860f`](https://github.com/yehezkieldio/firefly/commit/461860fc74f3c63fd05648acd21c983c4fcb98a7) semver: Simplify bump strategy schema definition
+- [`1b2220b`](https://github.com/yehezkieldio/firefly/commit/1b2220b1c1b72d61456ee3763aae691f4809d41f) workflow: Remove redundant comments in release tasks
+- [`6f31655`](https://github.com/yehezkieldio/firefly/commit/6f31655d126d29b1614170d2c74fa8bab6bc23b8) orchestration: Move services to its own folder
+- [`102a055`](https://github.com/yehezkieldio/firefly/commit/102a05530d3cd3b7186929767c716000288853d1) semver: Consolidate task imports in release workflow
+- [`be61979`](https://github.com/yehezkieldio/firefly/commit/be619791517a3abb5350447f7e56fce3e830bf4f) schema: Update bumpStrategy to allow empty string
 ## firefly@3.0.0-alpha.11 (September 6, 2025)
 
 ### <!-- 3 -->🚀 New Features
