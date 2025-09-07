@@ -1,6 +1,7 @@
 import { ok } from "neverthrow";
 import type { Task } from "#/modules/orchestration/contracts/task.interface";
 import type { Workflow } from "#/modules/orchestration/contracts/workflow.interface";
+import { ReleasePreflightCheckTask } from "#/modules/orchestration/tasks";
 import {
     AutomaticBumpTask,
     BumpVersionTask,
@@ -20,7 +21,7 @@ export function createReleaseWorkflow(): Workflow<"release"> {
         command: "release",
         buildTasks() {
             const tasks: Task[] = [
-                // new ReleasePreflightTask(),
+                new ReleasePreflightCheckTask(),
                 new InitializeCurrentVersionTask(),
                 new StraightBumpTask(),
                 new PromptBumpStrategyTask(),

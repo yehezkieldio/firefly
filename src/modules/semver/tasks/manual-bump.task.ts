@@ -1,6 +1,8 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
+import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { PromptManualVersionTask } from "#/modules/semver/tasks/prompt-manual-version.task";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
 export class ManualBumpTask implements ConditionalTask<ReleaseTaskContext> {
@@ -9,7 +11,7 @@ export class ManualBumpTask implements ConditionalTask<ReleaseTaskContext> {
     readonly description = "Handles manual version bumping based on user input.";
 
     getDependencies(): string[] {
-        return ["prompt-manual-version"];
+        return [taskRef(PromptManualVersionTask)];
     }
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {

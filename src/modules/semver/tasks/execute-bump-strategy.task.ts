@@ -1,6 +1,8 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
+import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { InitializeCurrentVersionTask } from "#/modules/semver/tasks/initialize-current-version.task";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
 export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskContext> {
@@ -9,7 +11,7 @@ export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskConte
     readonly description = "Executes the selected bump strategy to determine the new version.";
 
     getDependencies(): string[] {
-        return ["initialize-current-version"];
+        return [taskRef(InitializeCurrentVersionTask)];
     }
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
