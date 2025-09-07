@@ -15,6 +15,7 @@ export class PromptBumpStrategyTask implements ConditionalTask<ReleaseTaskContex
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const hasStraightBumpParams = context.getConfig().releaseType && context.getConfig().bumpStrategy;
 
+        // Only execute if neither releaseType nor bumpStrategy is specified (indicating a need to prompt)
         return ok(!hasStraightBumpParams);
     }
 

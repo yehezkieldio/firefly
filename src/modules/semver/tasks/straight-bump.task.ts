@@ -15,6 +15,7 @@ export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const hasStraightBumpParams = context.getConfig().releaseType;
 
+        // Only execute if releaseType is specified (indicating a straight bump)
         return ok(Boolean(hasStraightBumpParams));
     }
 
