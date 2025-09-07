@@ -1,6 +1,7 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
+import { ChangelogFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import { ExecuteBumpStrategyTask } from "#/modules/semver/tasks/execute-bump-strategy.task";
 import { InitializeCurrentVersionTask } from "#/modules/semver/tasks/initialize-current-version.task";
@@ -21,6 +22,14 @@ export class PromptBumpStrategyTask implements ConditionalTask<ReleaseTaskContex
     }
 
     getNextTasks(): FireflyResult<string[]> {
+        return ok([taskRef(ExecuteBumpStrategyTask)]);
+    }
+
+    getSkipThroughTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
+        const config = context.getConfig();
+        if (config.skipBump) {
+            return ok([taskRef(ChangelogFlowControllerTask)]);
+        }
         return ok([taskRef(ExecuteBumpStrategyTask)]);
     }
 

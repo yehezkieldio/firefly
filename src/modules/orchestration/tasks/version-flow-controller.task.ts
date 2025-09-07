@@ -28,7 +28,7 @@ export class VersionFlowControllerTask implements ConditionalTask<ReleaseTaskCon
         const nextTasks: string[] = [];
         if (config.releaseType !== undefined) {
             nextTasks.push(taskRef(StraightBumpTask));
-        } else {
+        } else if (!config.bumpStrategy) {
             nextTasks.push(taskRef(PromptBumpStrategyTask));
         }
 
