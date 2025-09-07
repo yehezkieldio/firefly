@@ -7,7 +7,6 @@ import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.ut
 
 export class AutomaticBumpTask implements ConditionalTask<ReleaseTaskContext> {
     readonly id = "automatic-bump";
-    readonly name = "Automatic Version Bump";
     readonly description = "Uses semantic analysis/recommendation to decide and set the next version automatically.";
 
     getDependencies(): string[] {

@@ -185,7 +185,7 @@ export class TaskOrchestratorService {
                 filteredTasks.push(task);
             } else {
                 logger.verbose(
-                    `TaskOrchestratorService: Task ${task.name} disabled due to missing features: ${requiredFeatures.join(", ")}`,
+                    `TaskOrchestratorService: Task ${task.id} disabled due to missing features: ${requiredFeatures.join(", ")}`,
                 );
             }
         }

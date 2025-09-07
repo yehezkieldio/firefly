@@ -7,7 +7,6 @@ import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.ut
 
 export class ManualBumpTask implements ConditionalTask<ReleaseTaskContext> {
     readonly id = "manual-bump";
-    readonly name = "Manual Version Bump";
     readonly description = "Handles manual version bumping based on user input.";
 
     getDependencies(): string[] {

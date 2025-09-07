@@ -1,23 +1,20 @@
 import { okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
+import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
 import type { Task } from "#/modules/orchestration/contracts/task.interface";
-import { ReleasePreflightCheckTask } from "#/modules/orchestration/tasks/release-preflight-check.task";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import type { FireflyAsyncResult } from "#/shared/utils/result.util";
 
-export class InitializeCurrentVersionTask implements Task<ReleaseTaskContext> {
-    readonly id = "initialize-current-version";
-    readonly description = "Loads the current version from package.json or initializes it to 0.0.0.";
+export class StageChangesTask implements Task<ReleaseTaskContext> {
+    readonly id = "stage-changes";
+    readonly name = "Stage Changes";
+    readonly description = "Stages the changes for the release.";
 
     getDependencies(): string[] {
-        return [taskRef(ReleasePreflightCheckTask)];
+        return [taskRef(WriteChangelogFileTask)];
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
         return okAsync();
-    }
-
-    canUndo(): boolean {
-        return false;
     }
 }

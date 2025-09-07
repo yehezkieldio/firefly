@@ -26,7 +26,6 @@ export const RollbackStrategySchema = z.enum([
 
 export const RollbackEntrySchema = z.object({
     taskId: z.string().min(1),
-    taskName: z.string().min(1),
     task: z.custom<Task>(),
     executionTime: z.date(),
     compensationId: z.string().optional(),

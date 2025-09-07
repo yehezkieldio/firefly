@@ -60,7 +60,6 @@ export class RollbackManagerService {
         return this.validateTask(task).andThen(() => {
             const entry: RollbackEntry = {
                 taskId: task.id,
-                taskName: task.name,
                 task,
                 executionTime: new Date(),
                 compensationId: undefined,
@@ -72,7 +71,7 @@ export class RollbackManagerService {
 
             this.rollbackStack.push(entry);
 
-            logger.verbose(`RollbackManagerService: Added task to rollback stack: ${task.name} (${task.id})`);
+            logger.verbose(`RollbackManagerService: Added task to rollback stack: '${task.id}'`);
             return ok();
         });
     }
@@ -166,7 +165,7 @@ export class RollbackManagerService {
     }
 
     private handleRollbackError(result: RollbackResult, entry: RollbackEntry, error: FireflyError): void {
-        result.failedTasks.push(entry.taskName);
+        result.failedTasks.push(entry.taskId);
         result.errors.push(error);
         result.success = false;
     }
@@ -191,7 +190,7 @@ export class RollbackManagerService {
 
             return this.executeWithRetries(() => executeFn(entry, context), this.config.maxRetries ?? 1)
                 .andThen(() => {
-                    result.rolledBackTasks.push(entry.taskName);
+                    result.rolledBackTasks.push(entry.taskId);
                     return processSequentially(index + 1);
                 })
                 .orElse((error) => {
@@ -265,14 +264,14 @@ export class RollbackManagerService {
         const { task } = entry;
 
         if (!task.canUndo?.()) {
-            logger.verbose(`RollbackManagerService: Task '${task.name}' cannot be undone. Skipping rollback.`);
+            logger.verbose(`RollbackManagerService: Task '${task.id}' cannot be undone. Skipping rollback.`);
             return okAsync();
         }
 
-        logger.verbose(`RollbackManagerService: Executing rollback for task '${task.name}'`);
+        logger.verbose(`RollbackManagerService: Executing rollback for task '${task.id}'`);
 
         if (!task.undo) {
-            logger.warn(`RollbackManagerService: Task '${task.name}' does not have an undo method. Skipping rollback.`);
+            logger.warn(`RollbackManagerService: Task '${task.id}' does not have an undo method. Skipping rollback.`);
             return okAsync();
         }
 
@@ -302,16 +301,6 @@ export class RollbackManagerService {
             return err(
                 createFireflyError({
                     message: "Task must have a valid 'id' of type string.",
-                    code: "VALIDATION",
-                    source: "orchestration/rollback-manager-service",
-                }),
-            );
-        }
-
-        if (!task.name || typeof task.name !== "string") {
-            return err(
-                createFireflyError({
-                    message: "Task must have a valid 'name' of type string.",
                     code: "VALIDATION",
                     source: "orchestration/rollback-manager-service",
                 }),

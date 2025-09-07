@@ -7,7 +7,6 @@ import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.ut
 
 export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
     readonly id = "straight-bump";
-    readonly name = "Straight Version Bump";
     readonly description = "Handles direct version bumping without any prompts or strategies.";
 
     getDependencies(): string[] {

@@ -13,7 +13,6 @@ export type TaskContext<TState extends Record<string, unknown> = Record<string, 
  */
 export interface Task<TContext extends TaskContext = TaskContext> {
     readonly id: string;
-    readonly name: string;
     readonly description: string;
     execute(context: TContext): FireflyAsyncResult<void>;
     validate?(context: TContext): FireflyResult<void>;

@@ -7,7 +7,6 @@ import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.ut
 
 export class PromptManualVersionTask implements ConditionalTask<ReleaseTaskContext> {
     readonly id = "prompt-manual-version";
-    readonly name = "Prompt for Manual Version";
     readonly description = "Prompts the user to input the desired version when manual bump strategy is selected.";
 
     getDependencies(): string[] {

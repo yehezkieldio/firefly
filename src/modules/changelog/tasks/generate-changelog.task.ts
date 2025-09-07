@@ -7,7 +7,6 @@ import type { FireflyAsyncResult } from "#/shared/utils/result.util";
 
 export class GenerateChangelogTask implements Task<ReleaseTaskContext> {
     readonly id = "generate-changelog";
-    readonly name = "Generate Changelog";
     readonly description = "Generates the changelog based on the current release context.";
 
     getDependencies(): string[] {

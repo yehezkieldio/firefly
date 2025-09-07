@@ -7,7 +7,6 @@ import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.ut
 
 export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskContext> {
     readonly id = "execute-bump-strategy";
-    readonly name = "Execute Bump Strategy";
     readonly description = "Executes the selected bump strategy to determine the new version.";
 
     getDependencies(): string[] {

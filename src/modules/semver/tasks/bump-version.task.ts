@@ -5,7 +5,6 @@ import type { FireflyAsyncResult } from "#/shared/utils/result.util";
 
 export class BumpVersionTask implements Task<ReleaseTaskContext> {
     readonly id = "bump-version";
-    readonly name = "Bump Version";
     readonly description = "Writes the new version to package.json.";
 
     isEntryPoint(): boolean {

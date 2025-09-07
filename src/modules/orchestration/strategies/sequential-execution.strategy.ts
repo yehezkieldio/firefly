@@ -269,7 +269,7 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
     }
 
     private shouldExecuteTask(task: Task, context?: OrchestrationContext): FireflyResult<boolean> {
-        if (!task || typeof task.name !== "string" || typeof task.id !== "string") {
+        if (!task || typeof task.id !== "string") {
             logger.warn(`SequentialExecutionStrategy: Invalid task structure for task ${task?.id || "unknown"}`);
             return ok(false);
         }
