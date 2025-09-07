@@ -7,7 +7,7 @@ import {
     type OrchestratorOptions,
     OrchestratorOptionsSchema,
 } from "#/modules/orchestration/contracts/orchestration.interface";
-import type { Task } from "#/modules/orchestration/contracts/task.interface";
+import { type Task, isConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import type { Workflow, WorkflowResult } from "#/modules/orchestration/contracts/workflow.interface";
 import { FeatureManagerService } from "#/modules/orchestration/feature-manager.service";
 import { createExecutionStrategy } from "#/modules/orchestration/strategies/execution-strategy.factory";
@@ -82,12 +82,7 @@ export class TaskOrchestratorService {
     run(): FireflyAsyncResult<WorkflowResult> {
         logger.verbose(`TaskOrchestratorService: Starting orchestration with execution ID: ${this.executionId}`);
 
-        const orderedTasks = this.resolveDependencies();
-        if (orderedTasks.isErr()) {
-            return errAsync(orderedTasks.error);
-        }
-
-        const enabledTasks = this.filterTasksByFeatures(orderedTasks.value);
+        const enabledTasks = this.filterTasksByFeatures(Array.from(this.tasks));
         if (enabledTasks.isErr()) {
             return errAsync(enabledTasks.error);
         }
@@ -139,29 +134,41 @@ export class TaskOrchestratorService {
                 }
             }
 
-            const visited = new Set<string>();
-            const recursionStack = new Set<string>();
-
-            const hasCircularMap = (taskId: string): boolean => {
-                if (recursionStack.has(taskId)) return true;
-                if (visited.has(taskId)) return false;
-
-                visited.add(taskId);
-                recursionStack.add(taskId);
-
-                const currentTask = tasks.find((t) => t.id === taskId);
-                if (currentTask) {
-                    for (const neighbor of currentTask.getDependencies?.() ?? []) {
-                        if (hasCircularMap(neighbor)) return true;
-                    }
+            for (const depId of task.getDependents?.() ?? []) {
+                if (!taskIds.has(depId)) {
+                    errors.push(`Task ${task.id} has a missing dependent: ${depId}`);
                 }
+            }
 
-                recursionStack.delete(taskId);
-                return false;
-            };
+            if (isConditionalTask(task)) {
+                logger.verbose(`TaskOrchestratorService: Found conditional task: ${task.name}`);
+            }
+        }
 
-            if (hasCircularMap(task.id)) {
-                errors.push(`Task ${task.id} is part of a circular dependency`);
+        const visited = new Set<string>();
+        const recursionStack = new Set<string>();
+
+        const hasCircularDependency = (taskId: string): boolean => {
+            if (recursionStack.has(taskId)) return true;
+            if (visited.has(taskId)) return false;
+
+            visited.add(taskId);
+            recursionStack.add(taskId);
+
+            const currentTask = tasks.find((t) => t.id === taskId);
+            if (currentTask) {
+                for (const neighbor of currentTask.getDependencies?.() ?? []) {
+                    if (hasCircularDependency(neighbor)) return true;
+                }
+            }
+
+            recursionStack.delete(taskId);
+            return false;
+        };
+
+        for (const task of tasks) {
+            if (hasCircularDependency(task.id)) {
+                errors.push(`Task ${task.id} is part of a circular dependency in static dependencies`);
             }
         }
 
@@ -176,67 +183,6 @@ export class TaskOrchestratorService {
         }
 
         return ok();
-    }
-
-    private resolveDependencies(): FireflyResult<Task[]> {
-        const taskMap = new Map(this.tasks.map((task) => [task.id, task]));
-        const resolved: Task[] = [];
-        const resolving = new Set<string>();
-        const resolvedIds = new Set<string>();
-
-        const resolveDependenciesRecursive = (taskId: string): FireflyResult<void> => {
-            if (resolvedIds.has(taskId)) {
-                return ok();
-            }
-
-            if (resolving.has(taskId)) {
-                return err(
-                    createFireflyError({
-                        code: "VALIDATION",
-                        message: `Circular dependency detected for task: ${taskId}`,
-                        source: "orchestration/task-orchestrator-service",
-                    }),
-                );
-            }
-
-            const task = taskMap.get(taskId);
-            if (!task) {
-                return err(
-                    createFireflyError({
-                        code: "VALIDATION",
-                        message: `Task not found: ${taskId}`,
-                        source: "orchestration/task-orchestrator-service",
-                    }),
-                );
-            }
-
-            resolving.add(taskId);
-
-            // Resolve all dependencies first
-            for (const depId of task.getDependencies?.() ?? []) {
-                const result = resolveDependenciesRecursive(depId);
-                if (result.isErr()) {
-                    return result;
-                }
-            }
-
-            resolving.delete(taskId);
-            resolvedIds.add(taskId);
-            resolved.push(task);
-
-            return ok();
-        };
-
-        // Resolve all tasks
-        for (const task of this.tasks) {
-            const result = resolveDependenciesRecursive(task.id);
-            if (result.isErr()) {
-                return err(result.error);
-            }
-        }
-
-        logger.verbose(`TaskOrchestratorService: Resolved dependencies for ${resolved.length} tasks`);
-        return ok(resolved);
     }
 
     private filterTasksByFeatures(tasks: Task[]): FireflyResult<Task[]> {

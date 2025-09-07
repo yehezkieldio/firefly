@@ -4,7 +4,7 @@ import type {
     OrchestrationContext,
     OrchestratorOptions,
 } from "#/modules/orchestration/contracts/orchestration.interface";
-import type { Task } from "#/modules/orchestration/contracts/task.interface";
+import { type Task, isConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import type { WorkflowResult } from "#/modules/orchestration/contracts/workflow.interface";
 import { FeatureManagerService } from "#/modules/orchestration/feature-manager.service";
 import { RollbackManagerService } from "#/modules/orchestration/rollback-manager.service";
@@ -13,16 +13,24 @@ import { logger } from "#/shared/logger";
 import { type FireflyError, createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
+interface ExecutionNode {
+    task: Task;
+    visited: boolean;
+    nextTaskIds?: string[];
+}
+
 export class SequentialExecutionStrategy implements IExecutionStrategy {
     private readonly options: OrchestratorOptions;
     private readonly startTime: Date;
     private readonly taskExecutor: TaskExecutorService;
     private readonly featureManager!: FeatureManagerService;
     private readonly rollbackManager!: RollbackManagerService;
+    private readonly taskMap: Map<string, ExecutionNode>;
 
     constructor(options: OrchestratorOptions) {
         this.options = options;
         this.startTime = new Date();
+        this.taskMap = new Map();
 
         const rollbackManagerOptions = {
             strategy: options.rollbackStrategy,
@@ -46,60 +54,77 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
     execute(tasks: readonly Task[], context?: OrchestrationContext): FireflyAsyncResult<WorkflowResult> {
         logger.verbose(`SequentialExecutionStrategy: Starting execution of ${tasks.length} tasks`);
 
+        this.initializeTaskMap(tasks);
+
         const executedTasks: string[] = [];
         const failedTasks: string[] = [];
         const skippedTasks: string[] = [];
         let rollbackExecuted = false;
         let compensationExecuted = false;
 
-        const executeNext = (index: number): FireflyAsyncResult<WorkflowResult> => {
-            if (index >= tasks.length) {
+        const executionQueue: string[] = this.getInitialExecutionQueue(tasks);
+
+        const executeNext = (): FireflyAsyncResult<WorkflowResult> => {
+            const nextTaskId = this.getNextExecutableTask(executionQueue);
+
+            if (!nextTaskId) {
                 return this.createResult(true, executedTasks, failedTasks, skippedTasks, {
                     rollbackExecuted,
                     compensationExecuted,
                 });
             }
 
-            const task = tasks[index];
-            if (!task) {
+            const taskNode = this.taskMap.get(nextTaskId);
+            if (!taskNode) {
                 return errAsync(
                     createFireflyError({
                         code: "VALIDATION",
-                        message: `Task at index ${index} is undefined`,
+                        message: `Task node not found for ID: ${nextTaskId}`,
                         source: "orchestration/sequential-execution-strategy",
                     }),
                 );
             }
 
-            const shouldExecuteResult = this.shouldExecuteTask(task);
+            const task = taskNode.task;
+
+            taskNode.visited = true;
+
+            const shouldExecuteResult = this.shouldExecuteTask(task, context);
             return shouldExecuteResult.asyncAndThen((shouldExecute) => {
                 if (!shouldExecute) {
-                    logger.verbose(`SequentialExecutionStrategy: Skipping task ${task.name}`);
+                    logger.verbose(
+                        `SequentialExecutionStrategy: Skipping task ${task.name} based on runtime conditions`,
+                    );
                     skippedTasks.push(task.id);
-                    return executeNext(index + 1);
+                    this.removeFromQueue(executionQueue, nextTaskId);
+                    return executeNext();
                 }
 
-                logger.verbose(
-                    `SequentialExecutionStrategy: Executing task ${task.name} (${index + 1}/${tasks.length})`,
-                );
+                logger.verbose(`SequentialExecutionStrategy: Executing task ${task.name}`);
 
                 return this.taskExecutor
                     .executeTask(task, context)
                     .andThen(() => {
-                        // Add successfully executed task to rollback stack
                         const addResult = this.rollbackManager.addTask(task);
                         if (addResult.isErr()) {
                             logger.warn(`Failed to add task ${task.name} to rollback stack`, addResult.error);
                         }
 
                         executedTasks.push(task.id);
-                        return executeNext(index + 1);
+                        this.removeFromQueue(executionQueue, nextTaskId);
+
+                        // Handle dynamic next tasks for conditional tasks
+                        const addNextTasksResult = this.addDynamicNextTasks(task, executionQueue, context);
+                        if (addNextTasksResult.isErr()) {
+                            logger.warn(`Failed to resolve next tasks for ${task.name}`, addNextTasksResult.error);
+                        }
+
+                        return executeNext();
                     })
                     .orElse((error) => {
                         failedTasks.push(task.id);
                         logger.error(`SequentialExecutionStrategy: Task ${task.name} failed`, error);
 
-                        // Execute rollback if strategy is not 'none'
                         if (this.options.rollbackStrategy !== "none") {
                             logger.info(
                                 `SequentialExecutionStrategy: Executing rollback with strategy: ${this.options.rollbackStrategy}`,
@@ -149,10 +174,90 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
             });
         };
 
-        return executeNext(0);
+        return executeNext();
     }
 
-    private shouldExecuteTask(task: Task): FireflyResult<boolean> {
+    private initializeTaskMap(tasks: readonly Task[]): void {
+        this.taskMap.clear();
+        for (const task of tasks) {
+            this.taskMap.set(task.id, {
+                task,
+                visited: false,
+            });
+        }
+    }
+
+    private getInitialExecutionQueue(tasks: readonly Task[]): string[] {
+        const entryTasks = tasks.filter((task) => {
+            const dependencies = task.getDependencies?.() ?? [];
+            return dependencies.length === 0;
+        });
+
+        if (entryTasks.length === 0) {
+            const firstTask = tasks[0];
+            return firstTask ? [firstTask.id] : [];
+        }
+
+        return entryTasks.map((task) => task.id);
+    }
+
+    private getNextExecutableTask(queue: string[]): string | null {
+        for (const taskId of queue) {
+            const taskNode = this.taskMap.get(taskId);
+            if (!taskNode || taskNode.visited) {
+                continue;
+            }
+
+            const dependencies = taskNode.task.getDependencies?.() ?? [];
+            const allDependenciesExecuted = dependencies.every((depId) => {
+                const depNode = this.taskMap.get(depId);
+                return depNode?.visited === true;
+            });
+
+            if (allDependenciesExecuted) {
+                return taskId;
+            }
+        }
+
+        return null;
+    }
+
+    private removeFromQueue(queue: string[], taskId: string): void {
+        const index = queue.indexOf(taskId);
+        if (index > -1) {
+            queue.splice(index, 1);
+        }
+    }
+
+    private addDynamicNextTasks(task: Task, queue: string[], context?: OrchestrationContext): FireflyResult<void> {
+        if (isConditionalTask(task)) {
+            const nextTasksResult = task.getNextTasks?.(context);
+            if (nextTasksResult?.isOk()) {
+                const nextTasks = nextTasksResult.value;
+                for (const nextTaskId of nextTasks) {
+                    if (this.taskMap.has(nextTaskId) && !queue.includes(nextTaskId)) {
+                        queue.push(nextTaskId);
+                        logger.verbose(
+                            `SequentialExecutionStrategy: Added dynamic next task ${nextTaskId} from ${task.name}`,
+                        );
+                    }
+                }
+            } else if (nextTasksResult?.isErr()) {
+                logger.warn(`Failed to get next tasks from ${task.name}`, nextTasksResult.error);
+            }
+        }
+
+        const dependents = task.getDependents?.() ?? [];
+        for (const dependentId of dependents) {
+            if (this.taskMap.has(dependentId) && !queue.includes(dependentId)) {
+                queue.push(dependentId);
+            }
+        }
+
+        return ok();
+    }
+
+    private shouldExecuteTask(task: Task, context?: OrchestrationContext): FireflyResult<boolean> {
         if (!task || typeof task.name !== "string" || typeof task.id !== "string") {
             logger.warn(`SequentialExecutionStrategy: Invalid task structure for task ${task?.id || "unknown"}`);
             return ok(false);
@@ -167,6 +272,22 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
                 logger.verbose(
                     `SequentialExecutionStrategy: Task ${task.name} disabled due to missing required features: ${requiredFeatures.join(", ")}`,
                 );
+                return ok(false);
+            }
+        }
+
+        if (isConditionalTask(task)) {
+            const shouldExecuteResult = task.shouldExecute(context);
+            if (shouldExecuteResult.isErr()) {
+                logger.warn(
+                    `SequentialExecutionStrategy: Error evaluating conditions for task ${task.name}`,
+                    shouldExecuteResult.error,
+                );
+                return ok(false);
+            }
+
+            if (!shouldExecuteResult.value) {
+                logger.verbose(`SequentialExecutionStrategy: Task ${task.name} skipped due to runtime conditions`);
                 return ok(false);
             }
         }
