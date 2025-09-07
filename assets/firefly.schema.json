@@ -55,9 +55,17 @@
         },
         "bumpStrategy": {
             "description": "\"auto\" (from commits) or \"manual\" (user-specified).",
-            "default": "auto",
-            "type": "string",
-            "enum": ["auto", "manual"]
+            "default": "",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "enum": ["auto", "manual"]
+                },
+                {
+                    "type": "string",
+                    "const": ""
+                }
+            ]
         },
         "releaseType": {
             "description": "The release type to bump.",
