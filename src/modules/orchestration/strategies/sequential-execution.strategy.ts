@@ -90,9 +90,6 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
             const shouldExecuteResult = this.shouldExecuteTask(task, context);
             return shouldExecuteResult.asyncAndThen((shouldExecute) => {
                 if (!shouldExecute) {
-                    logger.verbose(
-                        `SequentialExecutionStrategy: Skipping task '${task.id}' based on runtime conditions`,
-                    );
                     skippedTasks.push(task.id);
                     this.removeFromQueue(executionQueue, nextTaskId);
                     return executeNext();
@@ -253,9 +250,7 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
                 const dependencies = taskNode.task.getDependencies?.() ?? [];
                 if (dependencies.includes(task.id) && !queue.includes(taskId) && !taskNode.visited) {
                     queue.push(taskId);
-                    logger.verbose(
-                        `SequentialExecutionStrategy: Added dependent task '${taskId}' after completing '${task.id}'`,
-                    );
+                    logger.verbose(`SequentialExecutionStrategy: Added dependent task '${taskId}' from '${task.id}'`);
                 }
             }
 
@@ -263,6 +258,9 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
             for (const dependentId of dependents) {
                 if (this.taskMap.has(dependentId) && !queue.includes(dependentId)) {
                     queue.push(dependentId);
+                    logger.verbose(
+                        `SequentialExecutionStrategy: Added dependent task '${dependentId}' from '${task.id}'`,
+                    );
                 }
             }
         }
@@ -300,7 +298,7 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
             }
 
             if (!shouldExecuteResult.value) {
-                logger.verbose(`SequentialExecutionStrategy: Task '${task.id}' skipped due to runtime conditions`);
+                logger.verbose(`SequentialExecutionStrategy: Skipping task '${task.id}' due to runtime conditions`);
                 return ok(false);
             }
         }

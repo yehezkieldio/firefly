@@ -82,8 +82,6 @@ export class TaskOrchestratorService {
     }
 
     run(): FireflyAsyncResult<WorkflowResult> {
-        logger.verbose(`TaskOrchestratorService: Starting orchestration for execution ID: ${this.executionId}`);
-
         const enabledTasks = this.filterTasksByFeatures(Array.from(this.tasks));
         if (enabledTasks.isErr()) {
             return errAsync(enabledTasks.error);
@@ -92,16 +90,9 @@ export class TaskOrchestratorService {
         return this.executionStrategy
             .execute(enabledTasks.value, this.context)
             .map((result) => {
-                logger.verbose(
-                    `TaskOrchestratorService: Orchestration completed for execution ID: ${this.executionId}`,
-                );
                 return result;
             })
             .mapErr((error) => {
-                logger.error(
-                    `TaskOrchestratorService: Orchestration failed for execution ID: ${this.executionId}`,
-                    error,
-                );
                 return error;
             });
     }

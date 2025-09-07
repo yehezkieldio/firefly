@@ -67,9 +67,6 @@ export class RollbackManagerService {
             };
 
             if (!task.canUndo?.()) {
-                logger.verbose(
-                    `RollbackManagerService: Task '${task.id}' cannot be undone. Not adding to rollback stack.`,
-                );
                 return ok();
             }
 

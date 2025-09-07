@@ -30,4 +30,8 @@ export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
         return okAsync();
     }
+
+    canUndo(): boolean {
+        return false;
+    }
 }
