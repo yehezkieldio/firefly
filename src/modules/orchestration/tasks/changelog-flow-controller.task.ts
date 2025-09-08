@@ -3,6 +3,7 @@ import type { ReleaseTaskContext } from "#/application/context";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks/generate-changelog.task";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { GitFlowControllerTask } from "#/modules/orchestration/tasks/git-flow-controller.task";
+import { VersionFlowControllerTask } from "#/modules/orchestration/tasks/version-flow-controller.task";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import { BumpVersionTask } from "#/modules/semver/tasks";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
@@ -12,11 +13,8 @@ export class ChangelogFlowControllerTask implements ConditionalTask<ReleaseTaskC
     readonly description = "Controls the flow for changelog generation based on configuration.";
 
     getDependencies(context?: ReleaseTaskContext): string[] {
-        const config = context?.getConfig();
-
-        // If bump is skipped, we don't depend on BumpVersionTask
-        if (config?.skipBump) {
-            return [];
+        if (context?.getConfig().skipBump) {
+            return [taskRef(VersionFlowControllerTask)];
         }
 
         return [taskRef(BumpVersionTask)];
