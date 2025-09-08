@@ -47,7 +47,7 @@ export class TaskOrchestratorService {
             return err(validateOptions.error);
         }
 
-        const validateOptionsTaskConfig = TaskOrchestratorService.validateTaskConfiguration(tasks);
+        const validateOptionsTaskConfig = TaskOrchestratorService.validateTaskConfiguration(tasks, context);
         if (validateOptionsTaskConfig.isErr()) {
             return err(validateOptionsTaskConfig.error);
         }
@@ -73,7 +73,7 @@ export class TaskOrchestratorService {
             return err(tasks.error);
         }
 
-        const validateOptionsTaskConfig = TaskOrchestratorService.validateTaskConfiguration(tasks.value);
+        const validateOptionsTaskConfig = TaskOrchestratorService.validateTaskConfiguration(tasks.value, context);
         if (validateOptionsTaskConfig.isErr()) {
             return err(validateOptionsTaskConfig.error);
         }
@@ -117,12 +117,12 @@ export class TaskOrchestratorService {
         return this.executionId;
     }
 
-    private static validateTaskConfiguration(tasks: Task[]): FireflyResult<void> {
+    private static validateTaskConfiguration(tasks: Task[], context?: OrchestrationContext): FireflyResult<void> {
         const taskIds = new Set(tasks.map((task) => task.id));
         const errors: string[] = [];
 
         for (const task of tasks) {
-            for (const depId of task.getDependencies?.() ?? []) {
+            for (const depId of task.getDependencies?.(context) ?? []) {
                 if (!taskIds.has(depId)) {
                     errors.push(`Task ${task.id} has a missing dependency: ${depId}`);
                 }
@@ -147,7 +147,7 @@ export class TaskOrchestratorService {
 
             const currentTask = tasks.find((t) => t.id === taskId);
             if (currentTask) {
-                for (const neighbor of currentTask.getDependencies?.() ?? []) {
+                for (const neighbor of currentTask.getDependencies?.(context) ?? []) {
                     if (hasCircularDependency(neighbor)) return true;
                 }
             }

@@ -21,12 +21,12 @@ export class GitFlowControllerTask implements ConditionalTask<ReleaseTaskContext
 
     getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
         const config = context.getConfig();
-        const nextTasks: string[] = [];
 
         if (config.skipGit) {
             return ok([taskRef(PlatformPublishControllerTask)]);
         }
 
+        const nextTasks: string[] = [];
         const shouldStage = !config.skipCommit;
         const shouldPush = !config.skipPush && shouldStage;
 
@@ -38,7 +38,9 @@ export class GitFlowControllerTask implements ConditionalTask<ReleaseTaskContext
             nextTasks.push(taskRef(PushCommitTask));
         }
 
+        // Always add PlatformPublishControllerTask as the final step
         nextTasks.push(taskRef(PlatformPublishControllerTask));
+
         return ok(nextTasks);
     }
 

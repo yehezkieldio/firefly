@@ -60,10 +60,10 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
         let rollbackExecuted = false;
         let compensationExecuted = false;
 
-        const executionQueue: string[] = this.getInitialExecutionQueue(tasks);
+        const executionQueue: string[] = this.getInitialExecutionQueue(tasks, context);
 
         const executeNext = (): FireflyAsyncResult<WorkflowResult> => {
-            const nextTaskId = this.getNextExecutableTask(executionQueue);
+            const nextTaskId = this.getNextExecutableTask(executionQueue, context);
 
             if (!nextTaskId) {
                 return this.createResult(true, executedTasks, failedTasks, skippedTasks, {
@@ -194,9 +194,9 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
         }
     }
 
-    private getInitialExecutionQueue(tasks: readonly Task[]): string[] {
+    private getInitialExecutionQueue(tasks: readonly Task[], context?: OrchestrationContext): string[] {
         const entryTasks = tasks.filter((task) => {
-            const deps = task.getDependencies?.() ?? [];
+            const deps = task.getDependencies?.(context) ?? [];
             return deps.length === 0 && (task.isEntryPoint?.() ?? true);
         });
 
@@ -208,14 +208,12 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
         return entryTasks.map((task) => task.id);
     }
 
-    private getNextExecutableTask(queue: string[]): string | null {
+    private getNextExecutableTask(queue: string[], context?: OrchestrationContext): string | null {
         for (const taskId of queue) {
             const taskNode = this.taskMap.get(taskId);
-            if (!taskNode || taskNode.visited) {
-                continue;
-            }
+            if (!taskNode || taskNode.visited) continue;
 
-            const dependencies = taskNode.task.getDependencies?.() ?? [];
+            const dependencies = taskNode.task.getDependencies?.(context) ?? [];
             const allDependenciesExecuted = dependencies.every((depId) => {
                 const depNode = this.taskMap.get(depId);
                 return depNode?.visited === true;

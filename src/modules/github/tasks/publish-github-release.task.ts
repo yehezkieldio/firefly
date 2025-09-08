@@ -1,7 +1,7 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
-import { PushTagTask } from "#/modules/git/tasks";
-import type { ConditionalTask, Task } from "#/modules/orchestration/contracts/task.interface";
+import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
+import { PlatformPublishControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -10,10 +10,14 @@ export class PublishGitHubReleaseTask implements ConditionalTask<ReleaseTaskCont
     readonly description = "Publishes the release on GitHub.";
 
     getDependencies(): string[] {
-        return [taskRef(PushTagTask)];
+        return [taskRef(PlatformPublishControllerTask)];
     }
 
-    shouldExecute(): FireflyResult<boolean> {
+    shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
+        if (context.getConfig().skipGitHubRelease) {
+            return ok(false);
+        }
+
         return ok(true);
     }
 
