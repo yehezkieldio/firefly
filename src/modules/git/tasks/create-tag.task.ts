@@ -16,13 +16,13 @@ export class CreateTagTask implements ConditionalTask<ReleaseTaskContext> {
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
-        return ok(!(config.skipTag || config.skipGit));
+        return ok(!config.skipGit);
     }
 
     getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
         const config = context.getConfig();
 
-        if (config.skipTag || config.skipGit || config.skipPush) {
+        if (config.skipGit) {
             return ok([]);
         }
 

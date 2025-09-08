@@ -11,7 +11,14 @@ export class ChangelogFlowControllerTask implements ConditionalTask<ReleaseTaskC
     readonly id = "changelog-flow-controller";
     readonly description = "Controls the flow for changelog generation based on configuration.";
 
-    getDependencies(): string[] {
+    getDependencies(context?: ReleaseTaskContext): string[] {
+        const config = context?.getConfig();
+
+        // If bump is skipped, we don't depend on BumpVersionTask
+        if (config?.skipBump) {
+            return [];
+        }
+
         return [taskRef(BumpVersionTask)];
     }
 
@@ -22,6 +29,7 @@ export class ChangelogFlowControllerTask implements ConditionalTask<ReleaseTaskC
     getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
         const config = context.getConfig();
 
+        // If changelog generation is skipped, go directly to git flow
         if (config.skipChangelog) {
             return ok([taskRef(GitFlowControllerTask)]);
         }

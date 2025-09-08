@@ -27,8 +27,6 @@ export const ReleaseConfigSchema = z.object({
 
     skipBump: z.coerce.boolean().default(false).describe("Skip version bump step."),
     skipChangelog: z.coerce.boolean().default(false).describe("Skip changelog generation step."),
-    skipCommit: z.coerce.boolean().default(false).describe("Skip commit step."),
-    skipTag: z.coerce.boolean().default(false).describe("Skip tag creation step."),
     skipPush: z.coerce.boolean().default(false).describe("Skip push step."),
     skipGitHubRelease: z.coerce.boolean().default(false).describe("Skip GitHub release step."),
     skipGit: z.coerce.boolean().default(false).describe("Skip all git-related steps."),

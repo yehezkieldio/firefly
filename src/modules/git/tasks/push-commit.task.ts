@@ -3,6 +3,7 @@ import type { ReleaseTaskContext } from "#/application/context";
 import { CreateTagTask } from "#/modules/git/tasks/create-tag.task";
 import { PushTagTask } from "#/modules/git/tasks/push-tag.task";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
+import { PlatformPublishControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -16,17 +17,36 @@ export class PushCommitTask implements ConditionalTask<ReleaseTaskContext> {
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
-        return ok(!(config.skipPush || config.skipGit));
+
+        if (config.skipPush) {
+            return ok(false);
+        }
+
+        return ok(!config.skipGit);
     }
 
     getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
         const config = context.getConfig();
 
-        if (config.skipPush || config.skipGit) {
+        if (config.skipGit) {
             return ok([]);
         }
 
         return ok([taskRef(PushTagTask)]);
+    }
+
+    getSkipThroughTasks(context?: ReleaseTaskContext | undefined): FireflyResult<string[]> {
+        const config = context?.getConfig();
+
+        if (config?.skipPush) {
+            return ok([taskRef(PlatformPublishControllerTask)]);
+        }
+
+        if (config?.skipGit) {
+            return ok([]);
+        }
+
+        return ok([taskRef(PushCommitTask)]);
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {

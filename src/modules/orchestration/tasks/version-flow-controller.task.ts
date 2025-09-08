@@ -21,6 +21,7 @@ export class VersionFlowControllerTask implements ConditionalTask<ReleaseTaskCon
     getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
         const config = context.getConfig();
 
+        // If bump is skipped, go directly to changelog flow
         if (config.skipBump) {
             return ok([taskRef(ChangelogFlowControllerTask)]);
         }

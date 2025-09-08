@@ -16,13 +16,13 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
-        return ok(!(config.skipCommit || config.skipGit));
+        return ok(!config.skipGit);
     }
 
     getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
         const config = context.getConfig();
 
-        if (config.skipCommit || config.skipGit) {
+        if (config.skipGit) {
             return ok([]);
         }
 

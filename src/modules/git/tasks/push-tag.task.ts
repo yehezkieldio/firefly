@@ -15,7 +15,8 @@ export class PushTagTask implements ConditionalTask<ReleaseTaskContext> {
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
-        return ok(!(config.skipPush || config.skipGit));
+
+        return ok(!config.skipGit);
     }
 
     getNextTasks(_context: ReleaseTaskContext): FireflyResult<string[]> {
