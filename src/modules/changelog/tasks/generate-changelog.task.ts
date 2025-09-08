@@ -14,8 +14,9 @@ export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext
         return [taskRef(BumpVersionTask)];
     }
 
-    shouldExecute(): FireflyResult<boolean> {
-        return ok(true);
+    shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
+        const config = context.getConfig();
+        return ok(!config.skipChangelog);
     }
 
     getNextTasks(): FireflyResult<string[]> {

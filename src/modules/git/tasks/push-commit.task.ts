@@ -14,11 +14,18 @@ export class PushCommitTask implements ConditionalTask<ReleaseTaskContext> {
         return [taskRef(CreateTagTask)];
     }
 
-    shouldExecute(): FireflyResult<boolean> {
-        return ok(true);
+    shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
+        const config = context.getConfig();
+        return ok(!(config.skipPush || config.skipGit));
     }
 
-    getNextTasks(): FireflyResult<string[]> {
+    getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
+        const config = context.getConfig();
+
+        if (config.skipPush || config.skipGit) {
+            return ok([]);
+        }
+
         return ok([taskRef(PushTagTask)]);
     }
 

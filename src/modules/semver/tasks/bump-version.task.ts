@@ -21,8 +21,9 @@ export class BumpVersionTask implements ConditionalTask<ReleaseTaskContext> {
         return [];
     }
 
-    shouldExecute(): FireflyResult<boolean> {
-        return ok(true);
+    shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
+        const config = context.getConfig();
+        return ok(!config.skipBump);
     }
 
     getNextTasks(): FireflyResult<string[]> {

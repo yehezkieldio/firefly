@@ -1,7 +1,7 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
-import { PushCommitTask, StageChangesTask } from "#/modules/git/tasks";
+import { CommitChangesTask, CreateTagTask, PushCommitTask, PushTagTask, StageChangesTask } from "#/modules/git/tasks";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { PlatformPublishControllerTask } from "#/modules/orchestration/tasks/platform-publish-controller.task";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
@@ -27,18 +27,33 @@ export class GitFlowControllerTask implements ConditionalTask<ReleaseTaskContext
         }
 
         const nextTasks: string[] = [];
+
         const shouldStage = !config.skipCommit;
-        const shouldPush = !config.skipPush && shouldStage;
+        const shouldCommit = !config.skipCommit && shouldStage;
+        const shouldTag = !config.skipTag && shouldCommit;
+        const shouldPushCommit = !config.skipPush && shouldCommit;
+        const shouldPushTag = !config.skipPush && shouldTag;
 
         if (shouldStage) {
             nextTasks.push(taskRef(StageChangesTask));
         }
 
-        if (shouldPush) {
+        if (shouldCommit) {
+            nextTasks.push(taskRef(CommitChangesTask));
+        }
+
+        if (shouldTag) {
+            nextTasks.push(taskRef(CreateTagTask));
+        }
+
+        if (shouldPushCommit) {
             nextTasks.push(taskRef(PushCommitTask));
         }
 
-        // Always add PlatformPublishControllerTask as the final step
+        if (shouldPushTag) {
+            nextTasks.push(taskRef(PushTagTask));
+        }
+
         nextTasks.push(taskRef(PlatformPublishControllerTask));
 
         return ok(nextTasks);

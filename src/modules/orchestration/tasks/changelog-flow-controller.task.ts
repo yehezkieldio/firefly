@@ -2,6 +2,7 @@ import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks/generate-changelog.task";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
+import { GitFlowControllerTask } from "#/modules/orchestration/tasks/git-flow-controller.task";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import { BumpVersionTask } from "#/modules/semver/tasks";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
@@ -22,7 +23,7 @@ export class ChangelogFlowControllerTask implements ConditionalTask<ReleaseTaskC
         const config = context.getConfig();
 
         if (config.skipChangelog) {
-            return ok(["test"]);
+            return ok([taskRef(GitFlowControllerTask)]);
         }
 
         return ok([taskRef(GenerateChangelogTask)]);
