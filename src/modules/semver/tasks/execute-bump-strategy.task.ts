@@ -21,7 +21,8 @@ export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskConte
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
 
-        return ok(!config.releaseType && Boolean(config.bumpStrategy));
+        const shouldRun = !config.releaseType && Boolean(config.bumpStrategy) && !config.skipBump;
+        return ok(shouldRun);
     }
 
     getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
