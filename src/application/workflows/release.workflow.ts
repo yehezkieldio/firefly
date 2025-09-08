@@ -2,11 +2,13 @@ import { ok } from "neverthrow";
 import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks/generate-changelog.task";
 import { CommitChangesTask, CreateTagTask, PushCommitTask, PushTagTask, StageChangesTask } from "#/modules/git/tasks";
+import { PublishGitHubReleaseTask } from "#/modules/github/tasks";
 import type { Task } from "#/modules/orchestration/contracts/task.interface";
 import type { Workflow } from "#/modules/orchestration/contracts/workflow.interface";
 import {
     ChangelogFlowControllerTask,
     GitFlowControllerTask,
+    PlatformPublishControllerTask,
     VersionFlowControllerTask,
 } from "#/modules/orchestration/tasks";
 import { ReleasePreflightCheckTask } from "#/modules/preflight/tasks";
@@ -48,8 +50,8 @@ export function createReleaseWorkflow(): Workflow<"release"> {
                 new CreateTagTask(),
                 new PushCommitTask(),
                 new PushTagTask(),
-                // new PlatformPublishControllerTask(),
-                // new PublishGitHubReleaseTask(),
+                new PlatformPublishControllerTask(),
+                new PublishGitHubReleaseTask(),
             ];
 
             return ok(tasks);
