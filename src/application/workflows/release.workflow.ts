@@ -4,10 +4,13 @@ import type { Workflow } from "#/modules/orchestration/contracts/workflow.interf
 import { ChangelogFlowControllerTask, VersionFlowControllerTask } from "#/modules/orchestration/tasks";
 import { ReleasePreflightCheckTask } from "#/modules/preflight/tasks";
 import {
+    AutomaticBumpTask,
     BumpVersionTask,
     ExecuteBumpStrategyTask,
     InitializeCurrentVersionTask,
+    ManualBumpTask,
     PromptBumpStrategyTask,
+    PromptManualVersionTask,
     StraightBumpTask,
 } from "#/modules/semver/tasks";
 
@@ -25,9 +28,9 @@ export function createReleaseWorkflow(): Workflow<"release"> {
                 new StraightBumpTask(),
                 new PromptBumpStrategyTask(),
                 new ExecuteBumpStrategyTask(),
-                // new AutomaticBumpTask(),
-                // new PromptManualVersionTask(),
-                // new ManualBumpTask(),
+                new AutomaticBumpTask(),
+                new PromptManualVersionTask(),
+                new ManualBumpTask(),
                 new BumpVersionTask(),
                 new ChangelogFlowControllerTask(),
                 // new GenerateChangelogTask(),
