@@ -8,7 +8,7 @@ if (!process.versions.bun) {
 }
 
 import "#/application/context";
-import { createCLI } from "#/platform/cli/cli-commander";
+import { createCLI } from "#/platform/cli/commander";
 import pkg from "../../../package.json" with { type: "json" };
 
 async function main(): Promise<void> {
@@ -17,9 +17,11 @@ async function main(): Promise<void> {
         process.argv.push("-h");
     }
 
+    process.env.FIREFLY_VERSION = pkg.version;
+    process.env.FIREFLY_DESCRIPTION = pkg.description;
     process.env.FIREFLY_GIT_CLIFF_VERSION = pkg.dependencies["git-cliff"].replace("^", "");
 
-    const cli = createCLI(pkg.description, pkg.version);
+    const cli = createCLI();
     await cli.parseAsync(process.argv);
 }
 
