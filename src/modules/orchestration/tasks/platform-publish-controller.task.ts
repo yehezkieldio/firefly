@@ -1,6 +1,5 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
-import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
 import { PushTagTask } from "#/modules/git/tasks";
 import { PublishGitHubReleaseTask } from "#/modules/github/tasks";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";

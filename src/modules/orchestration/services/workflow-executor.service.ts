@@ -119,7 +119,8 @@ export class WorkflowExecutorService {
         if (workflowResult.success) {
             this.logSuccess(workflowResult);
         } else {
-            logger.error(workflowResult.error?.message);
+            const error = process.env.FIREFLY_DEBUG === "true" ? workflowResult.error : workflowResult.error?.message;
+            logger.error(error);
             process.exitCode = 1;
         }
     }
