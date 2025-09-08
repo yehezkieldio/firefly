@@ -90,6 +90,7 @@ export class TaskOrchestratorService {
         return this.executionStrategy
             .execute(enabledTasks.value, this.context)
             .map((result) => {
+                logger.verbose("TaskOrchestratorService: Workflow execution completed.");
                 return result;
             })
             .mapErr((error) => {

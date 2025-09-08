@@ -30,6 +30,7 @@ export class WorkflowExecutorService {
     private logSuccess(result: WorkflowResult): void {
         const summary = {
             executionId: result.executionId,
+            executionTime: result.executionTime,
             executedTasks: result.executedTasks,
             skippedTasks: result.skippedTasks,
         };
