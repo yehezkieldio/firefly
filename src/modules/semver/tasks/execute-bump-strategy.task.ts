@@ -3,6 +3,7 @@ import type { ReleaseTaskContext } from "#/application/context";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { ChangelogFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { BUMP_STRATEGY_AUTO, BUMP_STRATEGY_MANUAL } from "#/modules/semver/constants/bump-strategy.constant";
 import { AutomaticBumpTask } from "#/modules/semver/tasks/automatic-bump.task";
 import { BumpVersionTask } from "#/modules/semver/tasks/bump-version.task";
 import { InitializeCurrentVersionTask } from "#/modules/semver/tasks/initialize-current-version.task";
@@ -26,10 +27,10 @@ export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskConte
     getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
         const strategy = context.getConfig().bumpStrategy;
 
-        if (strategy === "manual") {
+        if (strategy === BUMP_STRATEGY_MANUAL) {
             return ok([taskRef(PromptManualVersionTask)]);
         }
-        if (strategy === "auto") {
+        if (strategy === BUMP_STRATEGY_AUTO) {
             return ok([taskRef(AutomaticBumpTask)]);
         }
 
@@ -45,10 +46,10 @@ export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskConte
 
         const strategy = config.bumpStrategy;
 
-        if (strategy === "manual") {
+        if (strategy === BUMP_STRATEGY_MANUAL) {
             return ok([taskRef(PromptManualVersionTask)]);
         }
-        if (strategy === "auto") {
+        if (strategy === BUMP_STRATEGY_AUTO) {
             return ok([taskRef(AutomaticBumpTask)]);
         }
 
