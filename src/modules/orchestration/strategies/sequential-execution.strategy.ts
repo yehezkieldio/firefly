@@ -239,7 +239,6 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
     private addDynamicNextTasks(task: Task, queue: string[], context?: OrchestrationContext): FireflyResult<void> {
         let hasExplicitNextTasks = false;
 
-        // First, handle explicit next tasks from conditional tasks
         if (isConditionalTask(task)) {
             const nextTasksResult = task.getNextTasks?.(context);
             if (nextTasksResult?.isOk()) {
@@ -259,7 +258,6 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
             }
         }
 
-        // Only add implicit dependents if there are no explicit next tasks
         if (!hasExplicitNextTasks) {
             for (const [taskId, taskNode] of this.taskMap) {
                 const dependencies = taskNode.task.getDependencies?.() ?? [];

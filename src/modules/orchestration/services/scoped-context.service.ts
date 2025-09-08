@@ -1,11 +1,8 @@
 import { err, ok } from "neverthrow";
 import type { CommandName, FinalConfigFor } from "#/modules/configuration/config-schema.provider";
-import {
-    type ContextDataFor,
-    ContextDataSchemas,
-    getContextSchema,
-} from "#/modules/orchestration/contracts/context-data";
+import type { ContextDataFor } from "#/modules/orchestration/contracts/context-data";
 import type { OrchestrationContext } from "#/modules/orchestration/contracts/orchestration.interface";
+import { ContextDataSchemas, getContextSchema } from "#/modules/orchestration/utils/context-schema.util";
 import { createFireflyError } from "#/shared/utils/error.util";
 import { type FireflyResult, parseSchema } from "#/shared/utils/result.util";
 
