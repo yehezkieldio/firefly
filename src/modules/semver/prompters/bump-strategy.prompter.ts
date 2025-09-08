@@ -33,6 +33,7 @@ export class BumpStrategyPrompter {
             );
         }
 
+        logger.verbose("BumpStrategyPrompter: Prompting user for version bump strategy.");
         const prompt = await this.prompt(defaultStrategy.value);
         if (prompt.isErr()) {
             return err(prompt.error);
@@ -48,6 +49,7 @@ export class BumpStrategyPrompter {
                 }),
             );
         }
+        logger.verbose(`BumpStrategyPrompter: User selected version bump strategy: '${selectedStrategy}'`);
 
         return ok(selectedStrategy);
     }
