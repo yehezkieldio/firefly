@@ -6,6 +6,31 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.13 (September 8, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`35eba15`](https://github.com/yehezkieldio/firefly/commit/35eba1513b2c66a7ac55e912ee1a7fff167ec753) orchestration/utils: Add task reference utility function
+- [`868ff4c`](https://github.com/yehezkieldio/firefly/commit/868ff4cc9f842ca4adf8884d6ea7d2e8cb96c3b6) workflow: Add release preflight check task
+- [`314589b`](https://github.com/yehezkieldio/firefly/commit/314589b83ba604b183d2c75673d833bc19580d0e) changelog: Add tasks to generate and write changelog
+- [`fa0bd5d`](https://github.com/yehezkieldio/firefly/commit/fa0bd5dc12b1c854412672fd9df4dae1e5a993f4) tasks: Add biome check task for file safety
+- [`fec6e03`](https://github.com/yehezkieldio/firefly/commit/fec6e038e984afbd8985927ffe1f52320a6a204f) workflow: Add git tasks for release process
+- [`6bc9f27`](https://github.com/yehezkieldio/firefly/commit/6bc9f274738a3766c6129f936cafa8d7a1d7c698) semver: Add skip bump logic to versioning tasks
+- [`5979c7b`](https://github.com/yehezkieldio/firefly/commit/5979c7b81116b22f833aa2ab147ebc4296cbeeb8) workflow: Add release preflight check task
+- [`6353106`](https://github.com/yehezkieldio/firefly/commit/6353106526c3ab1f0a302979fceb61ae5be4014b) workflow: Add changelog and git flow controller tasks
+- [`2590fa0`](https://github.com/yehezkieldio/firefly/commit/2590fa09e0529f2b4921a907b82aa7db9e4246c0) semver: Add skip bump logic to versioning tasks
+- [`6c12ed4`](https://github.com/yehezkieldio/firefly/commit/6c12ed4ded8f372d5ac4d814bca886dfd43fbd38) cli: Restructure command handling and option registration
+- [`c6ce20d`](https://github.com/yehezkieldio/firefly/commit/c6ce20da8d1b030317d805193856da57302b3ea6) workflow: Add release preflight check task
+- [`b5206d7`](https://github.com/yehezkieldio/firefly/commit/b5206d7d233eab866504cfe5cf76e9acdb888a03) workflow: Add initialize current version task
+- [`f6548ab`](https://github.com/yehezkieldio/firefly/commit/f6548ab6a2984b59b5c61b52cfbcb7b5d2dd3d97) workflow: Add release workflow tasks and controllers
+- [`913b729`](https://github.com/yehezkieldio/firefly/commit/913b7295484e947947320b8da544a95ff62aff21) semver: Add bump strategy prompter for version selection
+- [`8327ca9`](https://github.com/yehezkieldio/firefly/commit/8327ca948968b1f552088fb42c6c7d682191c6fc) semver: Log user prompts for version bump strategy
+
+### <!-- 7 -->🚜 Refactor
+- [`2f433f1`](https://github.com/yehezkieldio/firefly/commit/2f433f1c0ddefc700ed26bdcc318fa45adf92606) orchestration: Improve task interface comments
+- [`875c05e`](https://github.com/yehezkieldio/firefly/commit/875c05ef7e66bbc34e59301a70263cb2596691a4) workflow: Clean up release workflow tasks
+- [`179b2f1`](https://github.com/yehezkieldio/firefly/commit/179b2f16daf58b58c8ae4930e4d99da0e07dcf79) orchestration: Remove task name property from tasks
+- [`bec2a86`](https://github.com/yehezkieldio/firefly/commit/bec2a86a438327bfc53b0ac7d55a2bf834d464b5) workflow: Remove deprecated release tasks
+- [`f14030f`](https://github.com/yehezkieldio/firefly/commit/f14030fb8ff9d4870dc9dfde11d9524a848137d5) contracts: Move context data schemas to utils
 ## firefly@3.0.0-alpha.12 (September 7, 2025)
 
 ### <!-- 3 -->🚀 New Features
