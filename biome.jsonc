@@ -770,10 +770,7 @@
                 "noImportantInKeyframe": "error",
                 // Disallow shorthand properties that override related longhand properties.
                 "noShorthandPropertyOverrides": "error",
-                // TODO: Re-enable this rule once we upgrade past Biome 2.2.0.
-                // Currently, Biome 2.2.0 has a regression where valid Tailwind CSS at-rules (e.g., @apply)
-                // are incorrectly flagged as unknown. This was valid in earlier versions
-                // and should be valid again once the regression is fixed in a future release.
+                // Disallow unknown at-rules.
                 "noUnknownAtRules": "off"
             }
         }

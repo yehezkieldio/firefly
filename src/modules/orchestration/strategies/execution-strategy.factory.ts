@@ -3,9 +3,9 @@ import type { OrchestratorOptions } from "#/modules/orchestration/contracts/orch
 import { SequentialExecutionStrategy } from "#/modules/orchestration/strategies/sequential-execution.strategy";
 
 export function createExecutionStrategy(options: OrchestratorOptions): IExecutionStrategy {
-    // TODO: Migrate to DAG based execution strategy because sequential is too limiting, and we using conditional tasks.
-    // For now, we can just use sequential as it works for our current workflows.
-    // Once we have the project is more stable, we can consider implementing a DAG based execution strategy.
+    // TODO: Replace with a DAG-based execution strategy to better support conditional task execution.
+    // Sequential execution is sufficient for current workflows, but limits flexibility and scalability.
+    // Once the project stabilizes, revisit and implement the DAG approach for improved orchestration.
 
     return new SequentialExecutionStrategy(options);
 }
