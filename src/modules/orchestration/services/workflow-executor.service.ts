@@ -103,15 +103,12 @@ export class WorkflowExecutorService {
 
         this.orchestrator = orchestratorResult.value;
         const result = await this.orchestrator.run();
-
         if (result.isErr()) {
             await this.handleWorkflowError(workflow, result.error, context);
-            this.logFailure(workflow.name, "Workflow execution failed unexpectedly.", result.error);
             return;
         }
 
         const workflowResult = result.value;
-
         if (workflow.afterExecute) {
             const afterResult = await workflow.afterExecute(workflowResult, context);
             if (afterResult.isErr()) {
@@ -122,8 +119,8 @@ export class WorkflowExecutorService {
         if (workflowResult.success) {
             this.logSuccess(workflowResult);
         } else {
-            await this.handleWorkflowError(workflow, workflowResult.error, context);
-            this.logFailure(workflow.name, "Workflow execution failed.", workflowResult.error, workflowResult);
+            logger.error(workflowResult.error?.message);
+            process.exitCode = 1;
         }
     }
 
@@ -139,26 +136,5 @@ export class WorkflowExecutorService {
                 logger.warn("Workflow error handler failed", errorResult.error);
             }
         }
-    }
-
-    private logFailure(workflowName: string, message: string, error?: FireflyError, result?: WorkflowResult): void {
-        logger.error(message);
-
-        if (result != null) {
-            logger.error(`Workflow '${workflowName}' failed after ${result.executionTime}ms.`);
-            logger.info("Execution summary:", {
-                executionId: result.executionId,
-                executedTasks: result.executedTasks,
-                failedTasks: result.failedTasks,
-                skippedTasks: result.skippedTasks,
-                rollbackExecuted: result.rollbackExecuted,
-            });
-        }
-
-        if (error) {
-            logger.error("Reason:", error);
-        }
-
-        process.exitCode = 1;
     }
 }

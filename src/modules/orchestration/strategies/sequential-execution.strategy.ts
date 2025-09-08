@@ -130,10 +130,9 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
                     })
                     .orElse((error) => {
                         failedTasks.push(task.id);
-                        logger.error(`SequentialExecutionStrategy: Task '${task.id}' failed`, error);
 
                         if (this.options.rollbackStrategy !== "none") {
-                            logger.info(
+                            logger.verbose(
                                 `SequentialExecutionStrategy: Executing rollback with strategy: ${this.options.rollbackStrategy}`,
                             );
 
@@ -145,7 +144,7 @@ export class SequentialExecutionStrategy implements IExecutionStrategy {
                                         this.options.rollbackStrategy === "compensation" && rollbackResult.success;
 
                                     if (rollbackResult.success) {
-                                        logger.info("SequentialExecutionStrategy: Rollback completed successfully");
+                                        logger.verbose("SequentialExecutionStrategy: Rollback completed successfully");
                                     } else {
                                         logger.error(
                                             "SequentialExecutionStrategy: Rollback failed",
