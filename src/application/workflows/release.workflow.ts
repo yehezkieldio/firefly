@@ -1,4 +1,6 @@
 import { ok } from "neverthrow";
+import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
+import { GenerateChangelogTask } from "#/modules/changelog/tasks/generate-changelog.task";
 import type { Task } from "#/modules/orchestration/contracts/task.interface";
 import type { Workflow } from "#/modules/orchestration/contracts/workflow.interface";
 import { ChangelogFlowControllerTask, VersionFlowControllerTask } from "#/modules/orchestration/tasks";
@@ -33,8 +35,8 @@ export function createReleaseWorkflow(): Workflow<"release"> {
                 new ManualBumpTask(),
                 new BumpVersionTask(),
                 new ChangelogFlowControllerTask(),
-                // new GenerateChangelogTask(),
-                // new WriteChangelogFileTask(),
+                new GenerateChangelogTask(),
+                new WriteChangelogFileTask(),
                 // new GitFlowControllerTask(),
                 // new StageChangesTask(),
                 // new CommitChangesTask(),

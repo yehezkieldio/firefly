@@ -1,14 +1,14 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
-import { GenerateChangelogTask } from "#/modules/changelog/tasks/generate-changelog.task";
+import { WriteChangelogFileTask } from "#/modules/changelog/tasks/write-changelog-file.task";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import { BumpVersionTask } from "#/modules/semver/tasks";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
-export class ChangelogFlowControllerTask implements ConditionalTask<ReleaseTaskContext> {
-    readonly id = "changelog-flow-controller";
-    readonly description = "Controls the flow for changelog generation based on configuration.";
+export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext> {
+    readonly id = "generate-changelog";
+    readonly description = "Generates the changelog based on the current release context.";
 
     getDependencies(): string[] {
         return [taskRef(BumpVersionTask)];
@@ -18,14 +18,8 @@ export class ChangelogFlowControllerTask implements ConditionalTask<ReleaseTaskC
         return ok(true);
     }
 
-    getNextTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
-        const config = context.getConfig();
-
-        if (config.skipChangelog) {
-            return ok(["test"]);
-        }
-
-        return ok([taskRef(GenerateChangelogTask)]);
+    getNextTasks(): FireflyResult<string[]> {
+        return ok([taskRef(WriteChangelogFileTask)]);
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
