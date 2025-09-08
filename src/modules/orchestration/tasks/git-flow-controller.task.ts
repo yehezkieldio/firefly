@@ -3,9 +3,9 @@ import type { ReleaseTaskContext } from "#/application/context";
 import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
 import { StageChangesTask } from "#/modules/git/tasks";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
+import { ChangelogFlowControllerTask } from "#/modules/orchestration/tasks/changelog-flow-controller.task";
 import { PlatformPublishControllerTask } from "#/modules/orchestration/tasks/platform-publish-controller.task";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
-import { BumpVersionTask } from "#/modules/semver/tasks";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
 export class GitFlowControllerTask implements ConditionalTask<ReleaseTaskContext> {
@@ -16,7 +16,7 @@ export class GitFlowControllerTask implements ConditionalTask<ReleaseTaskContext
         const config = context?.getConfig();
 
         if (config?.skipChangelog) {
-            return config.skipBump ? [] : [taskRef(BumpVersionTask)];
+            return [taskRef(ChangelogFlowControllerTask)];
         }
 
         return [taskRef(WriteChangelogFileTask)];
