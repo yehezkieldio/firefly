@@ -1,6 +1,7 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
+import { PushCommitTask, StageChangesTask } from "#/modules/git/tasks";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { PlatformPublishControllerTask } from "#/modules/orchestration/tasks/platform-publish-controller.task";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
@@ -26,18 +27,18 @@ export class GitFlowControllerTask implements ConditionalTask<ReleaseTaskContext
             return ok([taskRef(PlatformPublishControllerTask)]);
         }
 
-        if (!config.skipCommit) {
-            nextTasks.push("");
+        const shouldStage = !config.skipCommit;
+        const shouldPush = !config.skipPush && shouldStage;
+
+        if (shouldStage) {
+            nextTasks.push(taskRef(StageChangesTask));
         }
 
-        if (!(config.skipPush || config.skipCommit)) {
-            nextTasks.push("");
+        if (shouldPush) {
+            nextTasks.push(taskRef(PushCommitTask));
         }
 
-        if (nextTasks.length === 0) {
-            return ok([taskRef(PlatformPublishControllerTask)]);
-        }
-
+        nextTasks.push(taskRef(PlatformPublishControllerTask));
         return ok(nextTasks);
     }
 

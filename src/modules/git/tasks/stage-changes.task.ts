@@ -1,17 +1,17 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
+import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
+import { CommitChangesTask } from "#/modules/git/tasks/commit-changes.task";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
-import { GitFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
-import { BumpVersionTask } from "#/modules/semver/tasks";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
-export class WriteChangelogFileTask implements ConditionalTask<ReleaseTaskContext> {
-    readonly id = "write-changelog-file";
-    readonly description = "Writes the changelog file based on the current release context.";
+export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
+    readonly id = "stage-changes";
+    readonly description = "Stages the changes for the release.";
 
     getDependencies(): string[] {
-        return [taskRef(BumpVersionTask)];
+        return [taskRef(WriteChangelogFileTask)];
     }
 
     shouldExecute(): FireflyResult<boolean> {
@@ -19,7 +19,7 @@ export class WriteChangelogFileTask implements ConditionalTask<ReleaseTaskContex
     }
 
     getNextTasks(): FireflyResult<string[]> {
-        return ok([taskRef(GitFlowControllerTask)]);
+        return ok([taskRef(CommitChangesTask)]);
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
