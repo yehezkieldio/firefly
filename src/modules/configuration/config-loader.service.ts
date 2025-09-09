@@ -50,7 +50,10 @@ export class ConfigLoaderService {
     }
 
     private validateConfig(config: FireflyConfig): FireflyAsyncResult<FireflyConfig> {
-        return parseSchemaAsync(ConfigSchemaProvider.get(this.options.commandName), config);
+        if (!this.options.commandName) {
+            return parseSchemaAsync(ConfigSchemaProvider.getEffect(), config);
+        }
+        return parseSchemaAsync(ConfigSchemaProvider.getEffect(this.options.commandName), config);
     }
 
     private normalizeFields(config: FireflyConfig): FireflyConfig {

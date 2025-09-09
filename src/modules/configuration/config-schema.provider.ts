@@ -28,6 +28,21 @@ export class ConfigSchemaProvider {
 
         return BaseConfigSchema.extend(mergedShape);
     }
+
+    static getEffect<C extends CommandName>(command: C): z.ZodType<BaseConfig & CommandConfigMap[C]>;
+
+    static getEffect(): z.ZodType<BaseConfig & CommandConfigMap[CommandName]>;
+
+    static getEffect(command?: CommandName) {
+        if (command) {
+            return BaseConfigSchema.and(ConfigSchemaProvider.schemas[command]);
+        }
+
+        return Object.values(ConfigSchemaProvider.schemas).reduce(
+            (acc, schema) => acc.and(schema),
+            BaseConfigSchema as z.ZodType<BaseConfig>,
+        );
+    }
 }
 
 export type BaseConfig = z.infer<typeof BaseConfigSchema>;
