@@ -118,16 +118,6 @@
             "default": false,
             "type": "boolean"
         },
-        "skipCommit": {
-            "description": "Skip commit step.",
-            "default": false,
-            "type": "boolean"
-        },
-        "skipTag": {
-            "description": "Skip tag creation step.",
-            "default": false,
-            "type": "boolean"
-        },
         "skipPush": {
             "description": "Skip push step.",
             "default": false,

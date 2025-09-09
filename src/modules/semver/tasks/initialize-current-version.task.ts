@@ -25,11 +25,11 @@ export class InitializeCurrentVersionTask implements ConditionalTask<ReleaseTask
         return ok([taskRef(VersionFlowControllerTask)]);
     }
 
-    execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
-        return okAsync();
-    }
-
     canUndo(): boolean {
         return false;
+    }
+
+    execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        return okAsync();
     }
 }
