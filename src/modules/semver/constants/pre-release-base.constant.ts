@@ -6,3 +6,4 @@ import z from "zod";
  * This field is optional to allow flexibility in pre-release versioning.
  */
 export const PreReleaseBaseSchema = z.union([z.number(), z.literal("0"), z.literal("1")]).optional();
+export type PreReleaseBase = z.infer<typeof PreReleaseBaseSchema>;

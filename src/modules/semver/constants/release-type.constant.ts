@@ -18,4 +18,5 @@ export const ReleaseTypeValues = [
     "graduate",
 ] as const;
 
-export const ReleaseTypeSchema = z.enum(ReleaseTypeValues).optional();
+export const ReleaseTypeSchema = z.enum(ReleaseTypeValues);
+export type ReleaseType = z.infer<typeof ReleaseTypeSchema>;
