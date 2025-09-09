@@ -118,11 +118,11 @@ export class WorkflowExecutorService {
 
         if (workflowResult.success) {
             this.logSuccess(workflowResult);
-        } else {
-            const error = process.env.FIREFLY_DEBUG === "true" ? workflowResult.error : workflowResult.error?.message;
-            logger.error(error);
-            process.exitCode = 1;
+            return;
         }
+
+        const error = process.env.FIREFLY_DEBUG === "true" ? workflowResult.error : workflowResult.error?.message;
+        logger.error(error);
     }
 
     private async handleWorkflowError<TCommand extends CommandName>(
