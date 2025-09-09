@@ -6,6 +6,35 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.14 (September 9, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`835ce8b`](https://github.com/yehezkieldio/firefly/commit/835ce8ba0bbaffe86a90ce193d904269d662e835) workflow: Add automatic and manual version bump tasks
+- [`9d5565c`](https://github.com/yehezkieldio/firefly/commit/9d5565c1814db31e3ac9d3eb0a01ab82473f81f6) semver: Use constants for bump strategy comparisons
+- [`e690c6b`](https://github.com/yehezkieldio/firefly/commit/e690c6b5423117b6606a420e4e5f667dd55a5c8d) version-flow: Integrate changelog flow controller task
+- [`269aaa2`](https://github.com/yehezkieldio/firefly/commit/269aaa294932bd9e63026f7c195679cc35c4570f) changelog: Add tasks for generating and writing changelog
+- [`eadc4fa`](https://github.com/yehezkieldio/firefly/commit/eadc4fa5d251e710dc54d6ebeb2bafed3018827a) release: Add git flow tasks for release workflow
+- [`df3afe1`](https://github.com/yehezkieldio/firefly/commit/df3afe112f005e201dcd664fb274ab1491df63b1) release: Add GitHub release publishing tasks
+- [`6f59e57`](https://github.com/yehezkieldio/firefly/commit/6f59e57f0296d90110be934c7e4a598c0b3386b3) release: Integrate platform publish and version flow tasks
+- [`7c46399`](https://github.com/yehezkieldio/firefly/commit/7c46399492ae0f1396e0cb69a3c93559ffa4c71a) changelog: Update task dependencies for changelog flow
+- [`6414a0a`](https://github.com/yehezkieldio/firefly/commit/6414a0a84f11f9481918ac267b461f772cf6c081) git: Update stage changes task to handle skipChangelog
+- [`771c283`](https://github.com/yehezkieldio/firefly/commit/771c2838cc9c0ee03dccdf98c10b6238af4cc72d) configuration: Add command effect retrieval method
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`1d1ae67`](https://github.com/yehezkieldio/firefly/commit/1d1ae67c04356a5dab4f6405e799de95697769e8) task-executor: Improve error logging for task execution
+- [`65258a6`](https://github.com/yehezkieldio/firefly/commit/65258a62bc3d00f94f258ec173d002b1d0110ad1) workflow-executor: Enhance error logging for workflow execution
+- [`ebfa227`](https://github.com/yehezkieldio/firefly/commit/ebfa227211ddcab200fc6628e7a5b417d400d2f5) tasks: Update task execution conditions based on config
+- [`3b0bd46`](https://github.com/yehezkieldio/firefly/commit/3b0bd46d2dfa6b77078b04e3afb6bcbf4a355f4f) git: Remove skipped commit and tag options from config
+- [`407d36f`](https://github.com/yehezkieldio/firefly/commit/407d36ff8444fb101495b41aa9d61469f3313b1a) semver: Update shouldExecute logic to include skipBump
+- [`92828cd`](https://github.com/yehezkieldio/firefly/commit/92828cdb5ecd2034d987c7fc03b819ed20bee651) workflow-executor: Improve error handling on workflow failure
+
+### <!-- 7 -->🚜 Refactor
+- [`3f9df79`](https://github.com/yehezkieldio/firefly/commit/3f9df7995aa48465340ac1d52a6ac0c275c0f90e) execution-strategy: Update TODO comments for clarity
+- [`34415db`](https://github.com/yehezkieldio/firefly/commit/34415db88c9b4bb38fd53ae87b63f48ccf0d8a4c) utils: Restructure schema parsing functions
+- [`eee2b51`](https://github.com/yehezkieldio/firefly/commit/eee2b51ece7770c4115146c28eb196258e72c891) configuration: Improve release config schema validation
+- [`b0904ce`](https://github.com/yehezkieldio/firefly/commit/b0904cea18fa9b83b13d3d113dd9cef8961cc53f) cli: Improve config loading and error handling
+- [`e6d6ff1`](https://github.com/yehezkieldio/firefly/commit/e6d6ff1567c3d21812e4fda8bf4f38a47062f4dd) orchestration: Enhance task execution conditions
+- [`ceedcaa`](https://github.com/yehezkieldio/firefly/commit/ceedcaaa2c5cffa31d51c8afe3748ecd8a349dd0) workflows: Rename release workflow function
 ## firefly@3.0.0-alpha.13 (September 8, 2025)
 
 ### <!-- 3 -->🚀 New Features
