@@ -1,27 +1,13 @@
 import { err, ok } from "neverthrow";
 import { executeGitCommand } from "#/modules/git/utils/git-command-executor.util";
+import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
-export interface CommitInfo {
-    hash: string;
-    shortHash: string;
-    subject: string;
-    body: string;
-    author: {
-        name: string;
-        email: string;
-        date: string;
-    };
-    committer: {
-        name: string;
-        email: string;
-        date: string;
-    };
-}
-
 export class GitHistoryService {
     async lastTagOrNull(): Promise<FireflyResult<string | null>> {
+        logger.verbose("GitHistoryService: Fetching last tag (or null if none exist)");
+
         const tagResult = await executeGitCommand(["describe", "--tags", "--abbrev=0"]);
         if (tagResult.isErr()) {
             // If no tags found, return null instead of error
@@ -32,10 +18,14 @@ export class GitHistoryService {
         }
 
         const tag = tagResult.value.trim();
+
+        logger.verbose(`GitHistoryService: Last tag found - ${tag}`);
         return ok(tag || null);
     }
 
     async commitsSince(tagOrCommit?: string | null): Promise<FireflyResult<string[]>> {
+        logger.verbose(`GitHistoryService: Fetching commits since ${tagOrCommit || "the beginning"}`);
+
         let args: string[];
 
         if (tagOrCommit) {
@@ -54,11 +44,11 @@ export class GitHistoryService {
             .map((line) => line.trim())
             .filter((line) => line.length > 0);
 
+        logger.verbose(`GitHistoryService: Found ${commits.length} commits since ${tagOrCommit || "the beginning"}`);
         return ok(commits);
     }
 
-    async commitDetails(hash: string): Promise<FireflyResult<CommitInfo>> {
-        // Verify commit exists first
+    async commitDetails(hash: string): Promise<FireflyResult<string>> {
         const existsResult = await this.commitExists(hash);
         if (existsResult.isErr()) return err(existsResult.error);
 
@@ -72,53 +62,13 @@ export class GitHistoryService {
             );
         }
 
-        // Get detailed commit information
-        const format = [
-            "%H", // full hash
-            "%h", // abbreviated hash
-            "%s", // subject
-            "%b", // body
-            "%an", // author name
-            "%ae", // author email
-            "%ad", // author date
-            "%cn", // committer name
-            "%ce", // committer email
-            "%cd", // committer date
-        ].join("%n");
+        const format = ["hash:%H", "date:%ci", "author:%an <%ae>", "subject:%s", "body:%b", "notes:%N"].join("%n");
 
         const detailsResult = await executeGitCommand(["show", "--no-patch", `--format=${format}`, hash]);
         if (detailsResult.isErr()) return err(detailsResult.error);
 
-        const lines = detailsResult.value.trim().split("\n");
-
-        if (lines.length < 10) {
-            return err(
-                createFireflyError({
-                    code: "UNEXPECTED",
-                    message: `Invalid git show output for commit "${hash}".`,
-                    source: "git/git-history-service",
-                }),
-            );
-        }
-
-        const commitInfo: CommitInfo = {
-            hash: lines[0] || "",
-            shortHash: lines[1] || "",
-            subject: lines[2] || "",
-            body: lines[3] || "",
-            author: {
-                name: lines[4] || "",
-                email: lines[5] || "",
-                date: lines[6] || "",
-            },
-            committer: {
-                name: lines[7] || "",
-                email: lines[8] || "",
-                date: lines[9] || "",
-            },
-        };
-
-        return ok(commitInfo);
+        logger.verbose(`GitHistoryService: Fetched details for commit ${hash}`);
+        return ok(detailsResult.value.trim());
     }
 
     async commitExists(hash: string): Promise<FireflyResult<boolean>> {
@@ -132,6 +82,7 @@ export class GitHistoryService {
     }
 
     async getCommitsBetween(fromCommit: string, toCommit: string): Promise<FireflyResult<string[]>> {
+        logger.verbose(`GitHistoryService: Fetching commits between ${fromCommit} and ${toCommit}`);
         const commitsResult = await executeGitCommand(["rev-list", `${fromCommit}..${toCommit}`]);
         if (commitsResult.isErr()) return err(commitsResult.error);
 
@@ -141,10 +92,13 @@ export class GitHistoryService {
             .map((line) => line.trim())
             .filter((line) => line.length > 0);
 
+        logger.verbose(`GitHistoryService: Found ${commits.length} commits between ${fromCommit} and ${toCommit}`);
         return ok(commits);
     }
 
     async getTagsContainingCommit(hash: string): Promise<FireflyResult<string[]>> {
+        logger.verbose(`GitHistoryService: Fetching tags containing commit ${hash}`);
+
         const tagsResult = await executeGitCommand(["tag", "--contains", hash]);
         if (tagsResult.isErr()) return err(tagsResult.error);
 
@@ -154,10 +108,13 @@ export class GitHistoryService {
             .map((line) => line.trim())
             .filter((line) => line.length > 0);
 
+        logger.verbose(`GitHistoryService: Found ${tags.length} tags containing commit ${hash}`);
         return ok(tags);
     }
 
     async getCommitCount(since?: string): Promise<FireflyResult<number>> {
+        logger.verbose(`GitHistoryService: Fetching commit count since ${since || "the beginning"}`);
+
         let args: string[];
 
         if (since) {
@@ -180,16 +137,20 @@ export class GitHistoryService {
             );
         }
 
+        logger.verbose(`GitHistoryService: Commit count since ${since || "the beginning"} is ${count}`);
         return ok(count);
     }
 
     async isAncestor(ancestor: string, descendant: string): Promise<FireflyResult<boolean>> {
+        logger.verbose(`GitHistoryService: Checking if ${ancestor} is an ancestor of ${descendant}`);
+
         const mergeBaseResult = await executeGitCommand(["merge-base", "--is-ancestor", ancestor, descendant]);
         if (mergeBaseResult.isErr()) {
             // If merge-base fails, it's not an ancestor
             return ok(false);
         }
 
+        logger.verbose(`GitHistoryService: ${ancestor} is an ancestor of ${descendant}`);
         return ok(true);
     }
 }

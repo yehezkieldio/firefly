@@ -2,6 +2,7 @@ import { err, ok } from "neverthrow";
 import type { GitPushService } from "#/modules/git/services/git-push.service";
 import type { GitTagService } from "#/modules/git/services/git-tag.service";
 import { executeGitCommand } from "#/modules/git/utils/git-command-executor.util";
+import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
@@ -12,6 +13,8 @@ export class GitRollbackService {
     ) {}
 
     async rollbackPushedTags(tagNames: string[], remote = "origin", dryRun?: boolean): Promise<FireflyResult<void>> {
+        logger.verbose(`GitRollbackService: Rolling back pushed tags: ${tagNames.join(", ")}`);
+
         // First, verify all tags exist locally before attempting rollback
         for (const tagName of tagNames) {
             const tagExistsResult = await this.tagService.exists(tagName);
@@ -58,6 +61,7 @@ export class GitRollbackService {
             }
         }
 
+        logger.verbose(`GitRollbackService: Successfully rolled back tags: ${tagNames.join(", ")}`);
         return ok();
     }
 
@@ -67,6 +71,8 @@ export class GitRollbackService {
         remote = "origin",
         dryRun?: boolean,
     ): Promise<FireflyResult<void>> {
+        logger.verbose(`GitRollbackService: Rolling back to commit ${commitHash} on branch ${branch}`);
+
         // Verify the commit exists
         const commitExistsResult = await this.verifyCommitExists(commitHash);
         if (commitExistsResult.isErr()) return err(commitExistsResult.error);
@@ -107,6 +113,7 @@ export class GitRollbackService {
             );
         }
 
+        logger.verbose(`GitRollbackService: Rollback to commit ${commitHash} on branch ${branch} successful`);
         return ok();
     }
 
@@ -117,6 +124,8 @@ export class GitRollbackService {
         force = false,
         dryRun?: boolean,
     ): Promise<FireflyResult<void>> {
+        logger.verbose(`GitRollbackService: Rolling back to commit ${commitHash} on branch ${branch}`);
+
         // Verify the commit exists
         const commitExistsResult = await this.verifyCommitExists(commitHash);
         if (commitExistsResult.isErr()) return err(commitExistsResult.error);
@@ -172,16 +181,20 @@ export class GitRollbackService {
             }
         }
 
+        logger.verbose(`GitRollbackService: Rollback to commit ${commitHash} on branch ${branch} successful`);
         return ok();
     }
 
     private async verifyCommitExists(commitHash: string): Promise<FireflyResult<boolean>> {
+        logger.verbose(`GitRollbackService: Verifying commit exists: ${commitHash}`);
+
         const catFileResult = await executeGitCommand(["cat-file", "-e", commitHash]);
         if (catFileResult.isErr()) {
             // If cat-file fails, the commit doesn't exist
             return ok(false);
         }
 
+        logger.verbose(`GitRollbackService: Commit exists: ${commitHash}`);
         return ok(true);
     }
 }

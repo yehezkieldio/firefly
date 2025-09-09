@@ -1,10 +1,13 @@
 import { err, ok } from "neverthrow";
 import { executeGitCommand } from "#/modules/git/utils/git-command-executor.util";
+import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
 export class GitRemoteService {
     async hasUnpushedCommits(): Promise<FireflyResult<boolean>> {
+        logger.verbose("GitRemoteService: Checking for unpushed commits...");
+
         const upstreamResult = await executeGitCommand(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
         if (upstreamResult.isErr()) return err(upstreamResult.error);
 
@@ -23,6 +26,8 @@ export class GitRemoteService {
         if (compareResult.isErr()) return err(compareResult.error);
 
         const hasUnpushed = this.hasUnpushedFromOutput(compareResult.value);
+
+        logger.verbose(`GitRemoteService: Unpushed commits present: ${hasUnpushed}`);
         return ok(hasUnpushed);
     }
 

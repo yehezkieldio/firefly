@@ -34,6 +34,7 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
 
     execute(): FireflyAsyncResult<void> {
         logger.verbose("ReleasePreflightCheckTask: Starting preflight checks...");
+
         return this.cleanWorkingDirectory(new GitProvider())
             .andThen(this.ensureNoUnpushedCommits)
             .map(() => logger.verbose("ReleasePreflightCheckTask: All preflight checks passed."));
@@ -41,6 +42,7 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
 
     private cleanWorkingDirectory(gitProvider: GitProvider): FireflyAsyncResult<GitProvider> {
         logger.verbose("ReleasePreflightCheckTask: Checking if working directory is clean...");
+
         return ResultAsync.fromPromise(gitProvider.status.isWorkingDirectoryClean(), toFireflyError).andThen(
             (isCleanResult) => {
                 if (isCleanResult.isErr()) {
@@ -48,7 +50,6 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
                 }
 
                 if (!isCleanResult.value) {
-                    logger.verbose("ReleasePreflightCheckTask: Working directory is not clean.");
                     return err(
                         createFireflyError({
                             code: "FAILED",
@@ -57,7 +58,7 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
                     );
                 }
 
-                logger.verbose("ReleasePreflightCheckTask: Working directory is clean.");
+                logger.verbose("ReleasePreflightCheckTask: Working directory is clean");
                 return ok(gitProvider);
             },
         );
@@ -65,6 +66,7 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
 
     private ensureNoUnpushedCommits(gitProvider: GitProvider): FireflyAsyncResult<void> {
         logger.verbose("ReleasePreflightCheckTask: Checking for unpushed commits...");
+
         return ResultAsync.fromPromise(gitProvider.remote.hasUnpushedCommits(), toFireflyError).andThen(
             (unpushedResult) => {
                 if (unpushedResult.isErr()) {
@@ -72,7 +74,7 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
                 }
 
                 if (unpushedResult.value) {
-                    logger.verbose("ReleasePreflightCheckTask: There are unpushed commits.");
+                    logger.verbose("ReleasePreflightCheckTask: There are unpushed commits");
                     return err(
                         createFireflyError({
                             code: "FAILED",
@@ -81,7 +83,7 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
                     );
                 }
 
-                logger.verbose("ReleasePreflightCheckTask: No unpushed commits found.");
+                logger.verbose("ReleasePreflightCheckTask: No unpushed commits found");
                 return ok(undefined);
             },
         );

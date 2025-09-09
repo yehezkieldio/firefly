@@ -1,5 +1,6 @@
 import { err, ok } from "neverthrow";
 import { executeGitCommand } from "#/modules/git/utils/git-command-executor.util";
+import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
@@ -36,6 +37,8 @@ export class GitConfigService {
     }
 
     async canSign(): Promise<FireflyResult<boolean>> {
+        logger.verbose("GitConfigService: Checking if Git is configured for signing...");
+
         const gpgSignResult = await this.getWithFallback("commit.gpgSign");
         if (gpgSignResult.isErr()) {
             if (gpgSignResult.error.code === "NOT_FOUND") return ok(false);
@@ -52,6 +55,8 @@ export class GitConfigService {
         const signingKey = signingKeyResult.value;
 
         const canSign = (gpgSign === "true" || gpgSign === "1") && signingKey.length > 0;
+
+        logger.verbose(`GitConfigService: Git signing configured: ${canSign}`);
         return ok(canSign);
     }
 

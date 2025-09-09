@@ -1,5 +1,6 @@
 import { err, ok } from "neverthrow";
 import { executeGitCommand } from "#/modules/git/utils/git-command-executor.util";
+import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
@@ -15,6 +16,8 @@ export interface BranchInfo {
 
 export class GitBranchService {
     async currentBranch(): Promise<FireflyResult<string>> {
+        logger.verbose("GitBranchService: Getting current branch...");
+
         const branchResult = await executeGitCommand(["branch", "--show-current"]);
         if (branchResult.isErr()) return err(branchResult.error);
 
@@ -29,10 +32,13 @@ export class GitBranchService {
             );
         }
 
+        logger.verbose(`GitBranchService: Current branch is "${branch}"`);
         return ok(branch);
     }
 
     async listBranches(includeRemote = false): Promise<FireflyResult<BranchInfo[]>> {
+        logger.verbose(`GitBranchService: Listing ${includeRemote ? "all" : "local"} branches...`);
+
         const args = ["branch"];
         if (includeRemote) {
             args.push("-a");
@@ -48,10 +54,13 @@ export class GitBranchService {
             .filter((line) => line.length > 0)
             .map((line) => this.parseBranchLine(line));
 
+        logger.verbose(`GitBranchService: Found ${branches.length} ${includeRemote ? "total" : "local"} branches.`);
         return ok(branches);
     }
 
     async isProvidedBranchValid(branchName: string): Promise<FireflyResult<boolean>> {
+        logger.verbose(`GitBranchService: Checking if branch "${branchName}" is valid...`);
+
         // Check if branch exists locally
         const localBranchesResult = await this.listBranches(false);
         if (localBranchesResult.isErr()) return err(localBranchesResult.error);
@@ -70,6 +79,7 @@ export class GitBranchService {
             (branch) => branch.name === branchName || (branch.isRemote && branch.name.endsWith(`/${branchName}`)),
         );
 
+        logger.verbose(`GitBranchService: Branch "${branchName}" is ${remoteExists ? "valid" : "invalid"}.`);
         return ok(remoteExists);
     }
 
