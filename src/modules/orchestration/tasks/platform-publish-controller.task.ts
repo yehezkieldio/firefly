@@ -4,6 +4,7 @@ import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
 import { CreateTagTask, PushTagTask } from "#/modules/git/tasks";
 import { PublishGitHubReleaseTask } from "#/modules/github/tasks";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
+import { ChangelogFlowControllerTask } from "#/modules/orchestration/tasks/changelog-flow-controller.task";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -14,19 +15,21 @@ export class PlatformPublishControllerTask implements ConditionalTask<ReleaseTas
     getDependencies(context?: ReleaseTaskContext): string[] {
         const config = context?.getConfig();
 
+        if (config?.skipBump && config?.skipChangelog && config?.skipGit) {
+            return [taskRef(ChangelogFlowControllerTask)];
+        }
+
         // If GitHub release is skipped, no dependencies needed
         if (config?.skipGitHubRelease) {
             return [];
         }
 
         // If git operations are skipped, depend on WriteChangelogFileTask instead
-        // since all git-related tasks will be skipped
         if (config?.skipGit) {
             return [taskRef(WriteChangelogFileTask)];
         }
 
         // If push is skipped, depend on CreateTagTask instead
-        // since PushCommitTask and PushTagTask will be skipped
         if (config?.skipPush) {
             return [taskRef(CreateTagTask)];
         }

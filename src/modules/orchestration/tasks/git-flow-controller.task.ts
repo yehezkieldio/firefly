@@ -15,6 +15,11 @@ export class GitFlowControllerTask implements ConditionalTask<ReleaseTaskContext
     getDependencies(context?: ReleaseTaskContext): string[] {
         const config = context?.getConfig();
 
+        // if skipbump, skipchangelog, and skipgit are all true, skip this task entirely
+        if (config?.skipBump && config?.skipChangelog && config?.skipGit) {
+            return [taskRef(ChangelogFlowControllerTask)];
+        }
+
         if (config?.skipChangelog) {
             return [taskRef(ChangelogFlowControllerTask)];
         }
@@ -22,7 +27,11 @@ export class GitFlowControllerTask implements ConditionalTask<ReleaseTaskContext
         return [taskRef(WriteChangelogFileTask)];
     }
 
-    shouldExecute(): FireflyResult<boolean> {
+    shouldExecute(context?: ReleaseTaskContext): FireflyResult<boolean> {
+        const config = context?.getConfig();
+        if (config?.skipBump && config?.skipChangelog && config?.skipGit) {
+            return ok(false);
+        }
         return ok(true);
     }
 
@@ -34,6 +43,16 @@ export class GitFlowControllerTask implements ConditionalTask<ReleaseTaskContext
         }
 
         return ok([taskRef(StageChangesTask)]);
+    }
+
+    getSkipThroughTasks(context?: ReleaseTaskContext | undefined): FireflyResult<string[]> {
+        const config = context?.getConfig();
+
+        if (config?.skipBump && config?.skipChangelog && config?.skipGit) {
+            return ok([taskRef(PlatformPublishControllerTask)]);
+        }
+
+        return ok([]);
     }
 
     execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {

@@ -20,7 +20,12 @@ export class ChangelogFlowControllerTask implements ConditionalTask<ReleaseTaskC
         return [taskRef(BumpVersionTask)];
     }
 
-    shouldExecute(): FireflyResult<boolean> {
+    shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
+        const config = context?.getConfig();
+        if (config?.skipBump && config?.skipChangelog && config?.skipGit && config?.skipGitHubRelease) {
+            return ok(false);
+        }
+
         return ok(true);
     }
 
