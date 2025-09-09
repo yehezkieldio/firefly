@@ -11,7 +11,10 @@ import {
 import type { CLIOptions } from "#/platform/cli/commander";
 import { OptionNormalizer } from "#/platform/cli/options/normalizer";
 import { OptionRegistrar } from "#/platform/cli/options/registrar";
+import type { FireflyConfig } from "#/platform/config";
 import { logger } from "#/shared/logger";
+import type { FireflyError } from "#/shared/utils/error.util";
+import type { FireflyAsyncResult } from "#/shared/utils/result.util";
 
 export class CommandRegistry {
     private readonly normalizer = new OptionNormalizer();
@@ -89,17 +92,19 @@ export class CommandRegistry {
         };
     }
 
-    private loadConfig(commandName: CommandName, mergedOptions: CLIOptions) {
-        return new ConfigLoaderService({
+    private loadConfig(commandName: CommandName, mergedOptions: CLIOptions): FireflyAsyncResult<FireflyConfig> {
+        const configLoader = new ConfigLoaderService({
             configFile: mergedOptions.config,
             overrides: mergedOptions,
             commandName,
-        }).load();
+        });
+
+        return configLoader.load();
     }
 
-    private handleConfigError(error: unknown): void {
-        if (error instanceof ZodError) {
-            logger.error(error.issues.map((i) => i.message).join("; "));
+    private handleConfigError(error: FireflyError): void {
+        if (error.cause instanceof ZodError) {
+            logger.error(error.cause.issues.map((i) => i.message).join("; "));
         }
     }
 }
