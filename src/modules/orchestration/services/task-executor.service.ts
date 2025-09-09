@@ -14,9 +14,8 @@ export class TaskExecutorService {
                 return okAsync();
             })
             .mapErr((error) => {
-                logger.verbose(
-                    `TaskExecutorService: Failed to execute task '${task.id}' with reason: ${error.message}`,
-                );
+                logger.verbose(`TaskExecutorService: Failed to execute task '${task.id}'`);
+                logger.verbose(`TaskExecutorService: Reason: ${error.message}`);
                 return error;
             });
     }

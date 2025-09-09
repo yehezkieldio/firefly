@@ -74,7 +74,7 @@ export function executeGitCommand(args: string[], options: GitCommandOptions = {
     const useStreaming = shouldUseStreaming(validatedArgs) && !options.forceBuffered;
     const executionMode = useStreaming ? "streaming" : "buffered";
 
-    logger.verbose(`Executing git command (${executionMode}): ${commandStr}`);
+    logger.verbose(`GitCommandExecutor: Executing git command (${executionMode}): ${commandStr}`);
 
     const spawnOptions = {
         cwd: options.cwd ?? process.cwd(),

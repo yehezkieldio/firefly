@@ -19,7 +19,7 @@ export const ReleaseConfigSchema = z
         changelogPath: z.string().default("CHANGELOG.md").describe("Changelog file path, relative to project root."),
 
         bumpStrategy: BumpStrategySchema.describe('"auto" (from commits) or "manual" (user-specified).'),
-        releaseType: ReleaseTypeSchema.describe("The release type to bump."),
+        releaseType: ReleaseTypeSchema.optional().describe("The release type to bump."),
 
         preReleaseId: z.string().default("alpha").describe('Pre-release ID (e.g., "alpha", "beta").'),
         preReleaseBase: PreReleaseBaseSchema.describe("Starting version for pre-releases."),
