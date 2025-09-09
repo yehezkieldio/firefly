@@ -1,3 +1,4 @@
+import { GitCommitService } from "#/modules/git/services/git-commit.service";
 import { GitConfigService } from "#/modules/git/services/git-config.service";
 import { GitRemoteService } from "#/modules/git/services/git-remote.service";
 import { GitStagingService } from "#/modules/git/services/git-staging.service";
@@ -8,6 +9,7 @@ export class GitProvider {
     private _remote?: GitRemoteService;
     private _status?: GitStatusService;
     private _staging?: GitStagingService;
+    private _commit?: GitCommitService;
 
     get config(): GitConfigService {
         if (!this._config) {
@@ -35,5 +37,12 @@ export class GitProvider {
             this._staging = new GitStagingService();
         }
         return this._staging;
+    }
+
+    get commit(): GitCommitService {
+        if (!this._commit) {
+            this._commit = new GitCommitService(this.config);
+        }
+        return this._commit;
     }
 }
