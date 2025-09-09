@@ -23,7 +23,7 @@ import {
     StraightBumpTask,
 } from "#/modules/semver/tasks";
 
-export function createReleaseWorkflow(): Workflow<"release"> {
+export function createReleaseWorkflow_sequential(): Workflow<"release"> {
     return {
         id: "release-workflow",
         name: "Release Workflow",
