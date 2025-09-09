@@ -60,7 +60,7 @@
         "@types/bun": "^1.2.21",
         "@types/node": "^24.3.1",
         "@types/semver": "^7.7.1",
-        "tsdown": "^0.14.2",
+        "tsdown": "^0.15.0",
         "typescript": "^5.9.2"
     },
     "homepage": "https://github.com/yehezkieldio/firefly#readme",
