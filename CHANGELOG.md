@@ -6,6 +6,29 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.15 (September 9, 2025)
+
+### <!-- 17 -->🛠️ Miscellaneous
+- [`a30187d`](https://github.com/yehezkieldio/firefly/commit/a30187d81836e888d79c428ca164f298d2ed3700)  Merge branch 'master' of github.com:yehezkieldio/firefly
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`b2ab817`](https://github.com/yehezkieldio/firefly/commit/b2ab817a168c542dc90d76d89eed10ed8ad17375) deps: Update dependency tsdown to ^0.15.0 ([#73](https://github.com/yehezkieldio/firefly/issues/73)) by renovate[bot]
+
+### <!-- 3 -->🚀 New Features
+- [`8547e90`](https://github.com/yehezkieldio/firefly/commit/8547e90dc29123159a3d7ad79d72c805cea1981d) semver: Add version class for semantic versioning
+- [`9c329ee`](https://github.com/yehezkieldio/firefly/commit/9c329ee6db28d042aae52ae5b543e3d8e350839e) semver: Implement version bumping and choice generation
+- [`ef73b63`](https://github.com/yehezkieldio/firefly/commit/ef73b630e80ded347217ac76ac6db357a700074d) git: Add git remote and status services
+- [`33319f4`](https://github.com/yehezkieldio/firefly/commit/33319f436ec16bbe1aaca1663fb38dcc6ab31944) preflight: Implement release preflight checks
+- [`b6f0738`](https://github.com/yehezkieldio/firefly/commit/b6f07381d677c5eed5f5ddad5b47c247464c2843) git: Add staging service and refactor git provider
+- [`26f8a07`](https://github.com/yehezkieldio/firefly/commit/26f8a076554a1f828fee9b1de5d141e84c135ad3) git: Add git config service for managing settings
+- [`0b5520a`](https://github.com/yehezkieldio/firefly/commit/0b5520affd68b93f3d59bac6a86070a018ac9955) git: Add git commit service for managing commits
+- [`cfdd2e5`](https://github.com/yehezkieldio/firefly/commit/cfdd2e51b1f159320557289c9f6019ff04e287f5)  Add git services for branch, history, push, repository, rollback, and tag management
+- [`8f46e42`](https://github.com/yehezkieldio/firefly/commit/8f46e42502f0f71320f834213a55ace837be336c) git: Add logging to git services for better traceability
+- [`962f1d7`](https://github.com/yehezkieldio/firefly/commit/962f1d7fb750284d3615d2bd84ffc325fbbfc7c6) config: Add config hydrator service
+- [`c24c3c4`](https://github.com/yehezkieldio/firefly/commit/c24c3c4748cd8785b60318f080f0bc07bb804cb7) filesystem: Add file and package.json services
+
+### <!-- 7 -->🚜 Refactor
+- [`1057e5f`](https://github.com/yehezkieldio/firefly/commit/1057e5f8ce442ee59bbadf1903d2405390d9ed7e) semver: Remove unused version and bump services
 ## firefly@3.0.0-alpha.14 (September 9, 2025)
 
 ### <!-- 3 -->🚀 New Features
