@@ -40,6 +40,7 @@ export class InitializeCurrentVersionTask implements ConditionalTask<ReleaseTask
 
         return ResultAsync.fromPromise(packageJsonService.read(), toFireflyError).andThen((pkg) => {
             const version = pkg.isErr() || !pkg.value.version ? "0.0.0" : pkg.value.version;
+            logger.verbose(`InitializeCurrentVersionTask: Current version is "${version}"`);
 
             context.set("currentVersion", version);
 
