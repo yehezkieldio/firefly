@@ -3,7 +3,6 @@ import semver from "semver";
 import type { PreReleaseBase } from "#/modules/semver/constants/pre-release-base.constant";
 import type { ReleaseType } from "#/modules/semver/constants/release-type.constant";
 import { Version } from "#/modules/semver/version.domain";
-import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
@@ -17,8 +16,6 @@ export interface VersionBumpOptions {
 export class VersionManager {
     static bumpVersion(options: VersionBumpOptions): FireflyResult<Version> {
         const { currentVersion, releaseType, prereleaseIdentifier, prereleaseBase } = options;
-
-        logger.verbose(`VersionManager: Bumping version '${currentVersion.raw}' as '${releaseType}'...`);
 
         if (releaseType === "major" || releaseType === "minor" || releaseType === "patch") {
             return VersionManager.bumpStandard(currentVersion, releaseType);
@@ -59,7 +56,6 @@ export class VersionManager {
             );
         }
 
-        logger.verbose(`VersionManager: Bumped ${releaseType} version to '${newVersionString}'.`);
         return Version.fromClean(newVersionString);
     }
 
@@ -69,10 +65,6 @@ export class VersionManager {
         identifier?: string,
         base?: PreReleaseBase,
     ): FireflyResult<Version> {
-        logger.verbose(
-            `VersionManager: Bumping ${releaseType} for '${currentVersion.raw}' (identifier: '${identifier}', base: '${base}')...`,
-        );
-
         const normalizedBaseResult = VersionManager.normalizeBase(base);
         if (normalizedBaseResult.isErr()) {
             return err(normalizedBaseResult.error);
@@ -100,7 +92,6 @@ export class VersionManager {
             );
         }
 
-        logger.verbose(`VersionManager: Bumped ${releaseType} version to '${newVersionString}'.`);
         return Version.fromClean(newVersionString);
     }
 
@@ -109,10 +100,6 @@ export class VersionManager {
         identifier?: string,
         base?: PreReleaseBase,
     ): FireflyResult<Version> {
-        logger.verbose(
-            `VersionManager: Bumping prerelease for '${currentVersion.raw}' (identifier: '${identifier}', base: '${base}')...`,
-        );
-
         let newVersionString: string | null = null;
 
         // Case 1: Complex identifier with dots (e.g., "canary.abc123")
@@ -153,7 +140,6 @@ export class VersionManager {
             );
         }
 
-        logger.verbose(`VersionManager: Bumped prerelease version to '${newVersionString}'.`);
         return Version.fromClean(newVersionString);
     }
 
@@ -167,16 +153,12 @@ export class VersionManager {
             );
         }
 
-        logger.verbose(`VersionManager: Graduating prerelease version '${currentVersion.raw}' to stable...`);
-
         const stableVersionResult = currentVersion.toStable();
         if (stableVersionResult.isErr()) {
             return err(stableVersionResult.error);
         }
 
         const stableVersion = stableVersionResult.value;
-        logger.verbose(`VersionManager: Graduated to stable version '${stableVersion.raw}'.`);
-
         return ok(stableVersion);
     }
 
