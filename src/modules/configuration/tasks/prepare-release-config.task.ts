@@ -29,11 +29,7 @@ export class PrepareReleaseConfigTask implements ConditionalTask<ReleaseTaskCont
         if (basePath.isErr()) return errAsync(basePath.error);
 
         const configHydrator = new ConfigHydratorService(basePath.value);
-
-        const existingConfigRes = context.get("config");
-        if (existingConfigRes.isErr()) return errAsync(existingConfigRes.error);
-
-        const existingConfig = existingConfigRes.value ?? {};
+        const existingConfig = context.getConfig();
 
         return ResultAsync.fromPromise(configHydrator.hydrateConfig(existingConfig), toFireflyError)
             .andThen((hydratedConfig) => {
