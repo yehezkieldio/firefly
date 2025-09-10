@@ -274,6 +274,7 @@ export class ConfigHydratorService {
             return ok({ name: extractedName.value });
         }
 
+        logger.verbose(`ConfigHydratorService: name explicitly provided in config: "${hydratedConfig.name}"`);
         return ok({});
     }
 
