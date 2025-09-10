@@ -36,7 +36,11 @@ export class VersionFlowControllerTask implements ConditionalTask<ReleaseTaskCon
         return ok(nextTasks);
     }
 
-    execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
+    canUndo(): boolean {
+        return false;
+    }
+
+    execute(): FireflyAsyncResult<void> {
         return okAsync();
     }
 }

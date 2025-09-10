@@ -3,6 +3,7 @@ import type { ReleaseTaskContext } from "#/application/context";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { ChangelogFlowControllerTask, VersionFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { BumpVersionTask } from "#/modules/semver/tasks/bump-version.task";
 import { InitializeCurrentVersionTask } from "#/modules/semver/tasks/initialize-current-version.task";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -25,7 +26,7 @@ export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
     }
 
     getNextTasks(): FireflyResult<string[]> {
-        return ok(["bump-version"]);
+        return ok([taskRef(BumpVersionTask)]);
     }
 
     getSkipThroughTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
