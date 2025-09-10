@@ -73,7 +73,8 @@ export class CommandRegistry {
             return;
         }
 
-        const executorOptions = this.buildExecutorOptions(mergedOptions);
+        const finalConfig = { ...configResult.value, ...mergedOptions };
+        const executorOptions = this.buildExecutorOptions(finalConfig);
         await new WorkflowExecutorService().run(commandName, executorOptions, workflowFactory);
     }
 
