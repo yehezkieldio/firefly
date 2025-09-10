@@ -1,5 +1,7 @@
-import { ResultAsync, err, ok } from "neverthrow";
+import { join } from "node:path";
+import { ResultAsync, err, errAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
+import { FileSystemService } from "#/modules/filesystem/file-system.service";
 import { GitProvider } from "#/modules/git/git.provider";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
@@ -32,12 +34,38 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
         return false;
     }
 
-    execute(): FireflyAsyncResult<void> {
+    execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
         logger.verbose("ReleasePreflightCheckTask: Starting preflight checks...");
 
-        return this.cleanWorkingDirectory(new GitProvider())
+        const basePath = context.get("basePath");
+        if (basePath.isErr()) return errAsync(basePath.error);
+
+        return this.checkGitCliffConfig(basePath.value)
+            .andThen(this.cleanWorkingDirectory)
             .andThen(this.ensureNoUnpushedCommits)
             .map(() => logger.verbose("ReleasePreflightCheckTask: All preflight checks passed."));
+    }
+
+    private checkGitCliffConfig(basePath: string): FireflyAsyncResult<GitProvider> {
+        logger.verbose("ReleasePreflightCheckTask: Checking for git-cliff configuration...");
+
+        const existsResult = FileSystemService.exists(join(basePath, "cliff.toml"));
+        return ResultAsync.fromPromise(existsResult, toFireflyError).andThen((exists) => {
+            if (exists.isErr()) {
+                return errAsync(exists.error);
+            }
+
+            if (!exists.value) {
+                return errAsync(
+                    createFireflyError({
+                        code: "NOT_FOUND",
+                        message: "No git-cliff configuration found!",
+                    }),
+                );
+            }
+
+            return okAsync(new GitProvider());
+        });
     }
 
     private cleanWorkingDirectory(gitProvider: GitProvider): FireflyAsyncResult<GitProvider> {
