@@ -139,4 +139,12 @@ export class ScopedContextService<TCommand extends CommandName>
         }
         return basePath;
     }
+
+    getCurrentVersion(): string | null {
+        const currentVersion = (this.state as Record<string, unknown>).currentVersion;
+        if (typeof currentVersion === "string") {
+            return currentVersion;
+        }
+        return null;
+    }
 }
