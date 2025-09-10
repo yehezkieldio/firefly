@@ -1,8 +1,10 @@
-import { ok, okAsync } from "neverthrow";
+import { ResultAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
+import { PackageJsonService } from "#/modules/filesystem/package-json.service";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { ChangelogFlowControllerTask, VersionFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { toFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
 export class InitializeCurrentVersionTask implements ConditionalTask<ReleaseTaskContext> {
@@ -29,7 +31,16 @@ export class InitializeCurrentVersionTask implements ConditionalTask<ReleaseTask
         return false;
     }
 
-    execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
-        return okAsync();
+    execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        const basePath = context.getBasePath();
+        const packageJsonService = PackageJsonService.getInstance(basePath);
+
+        return ResultAsync.fromPromise(packageJsonService.read(), toFireflyError).andThen((pkg) => {
+            const version = pkg.isErr() || !pkg.value.version ? "0.0.0" : pkg.value.version;
+
+            context.set("currentVersion", version);
+
+            return okAsync();
+        });
     }
 }

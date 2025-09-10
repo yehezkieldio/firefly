@@ -5,7 +5,7 @@ import { FileSystemService } from "#/modules/filesystem/file-system.service";
 import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";
 import { jsonParse } from "#/shared/utils/json-parse.util";
-import { type FireflyAsyncResult, parseSchema } from "#/shared/utils/result.util";
+import { type FireflyAsyncResult, type FireflyResult, parseSchema } from "#/shared/utils/result.util";
 
 export const PackageJsonSchema = z
     // Minimal structure of package.json as we don't need the full schema
@@ -33,7 +33,7 @@ export class PackageJsonService {
         return PackageJsonService.instance;
     }
 
-    async read(): Promise<FireflyAsyncResult<PackageJson>> {
+    async read(): Promise<FireflyResult<PackageJson>> {
         const contentResult = await FileSystemService.read(this.pathToPackageJson);
         if (contentResult.isErr()) {
             return errAsync(contentResult.error);
@@ -42,7 +42,7 @@ export class PackageJsonService {
         return this.parseAndValidatePackageJson(contentResult.value);
     }
 
-    async updateVersion(version: string, dryRun?: boolean): Promise<FireflyAsyncResult<void>> {
+    async updateVersion(version: string, dryRun?: boolean): Promise<FireflyResult<void>> {
         const contentResult = await FileSystemService.read(this.pathToPackageJson);
         if (contentResult.isErr()) {
             return errAsync(contentResult.error);

@@ -130,4 +130,13 @@ export class ScopedContextService<TCommand extends CommandName>
         this.state = validation.value as ContextDataFor<TCommand>;
         return ok();
     }
+
+    getBasePath(): string {
+        const basePath = (this.state as Record<string, unknown>).basePath;
+
+        if (typeof basePath !== "string") {
+            return process.cwd();
+        }
+        return basePath;
+    }
 }
