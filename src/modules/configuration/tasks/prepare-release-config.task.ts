@@ -25,10 +25,8 @@ export class PrepareReleaseConfigTask implements ConditionalTask<ReleaseTaskCont
     execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
         logger.verbose("PrepareReleaseConfigTask: Preparing and hydrating release configuration...");
 
-        const basePath = context.get("basePath");
-        if (basePath.isErr()) return errAsync(basePath.error);
-
-        const configHydrator = new ConfigHydratorService(basePath.value);
+        const basePath = context.getBasePath();
+        const configHydrator = new ConfigHydratorService(basePath);
         const existingConfig = context.getConfig();
 
         return ResultAsync.fromPromise(configHydrator.hydrateConfig(existingConfig), toFireflyError)

@@ -37,10 +37,8 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
     execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
         logger.verbose("ReleasePreflightCheckTask: Starting preflight checks...");
 
-        const basePath = context.get("basePath");
-        if (basePath.isErr()) return errAsync(basePath.error);
-
-        return this.checkGitCliffConfig(basePath.value)
+        const basePath = context.getBasePath();
+        return this.checkGitCliffConfig(basePath)
             .andThen(this.cleanWorkingDirectory)
             .andThen(this.ensureNoUnpushedCommits)
             .map(() => logger.verbose("ReleasePreflightCheckTask: All preflight checks passed."));
