@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.16 (September 10, 2025)
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`cddada7`](https://github.com/yehezkieldio/firefly/commit/cddada7e9e6f7e328568d6ccf1df4b869c958084) deps: Update dependency @biomejs/biome to v2.2.4 ([#74](https://github.com/yehezkieldio/firefly/issues/74)) by renovate[bot]
+
+### <!-- 3 -->🚀 New Features
+- [`22d1986`](https://github.com/yehezkieldio/firefly/commit/22d198608a861616ed43af9a363c768812544317) config: Enrich configuration from git and package.json
+- [`454bebf`](https://github.com/yehezkieldio/firefly/commit/454bebf8d551731d23c31808fbd7e4a8db18baf5) config: Rename enrich methods to hydrate for clarity
+- [`bd91705`](https://github.com/yehezkieldio/firefly/commit/bd917053154d81181c2b7cfdf2d87f4ac0fce563) config: Add prepare release config task and hydrate logic
+- [`6ef78f2`](https://github.com/yehezkieldio/firefly/commit/6ef78f28e2112465e10bf9717cb34f0b4b833394) config: Log provided name in config hydration
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`4f5c3ad`](https://github.com/yehezkieldio/firefly/commit/4f5c3ad659169de3b6f4e8ccbf5acfa0e617c4c3) cli: Merge config options before execution
+
+### <!-- 7 -->🚜 Refactor
+- [`0d65176`](https://github.com/yehezkieldio/firefly/commit/0d65176e62cdb8902bd54362a5b93a4ffeb0af5b) config: Simplify existing config retrieval logic
+- [`2232f5c`](https://github.com/yehezkieldio/firefly/commit/2232f5c0c58640ff74b0b722c9e4f5bcfaa09d1e) orchestration: Restructure version flow controller task
 ## firefly@3.0.0-alpha.15 (September 9, 2025)
 
 ### <!-- 17 -->🛠️ Miscellaneous
