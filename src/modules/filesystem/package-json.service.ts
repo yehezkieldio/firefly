@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { errAsync, okAsync } from "neverthrow";
 import z from "zod";
 import { FileSystemService } from "#/modules/filesystem/file-system.service";
@@ -17,11 +18,19 @@ export const PackageJsonSchema = z
 export type PackageJson = z.infer<typeof PackageJsonSchema>;
 
 export class PackageJsonService {
+    private static instance: PackageJsonService | null = null;
     private static readonly VERSION_REGEX = /^(\s*"version"\s*:\s*)"[^"]*"(.*)$/m;
-    private readonly pathToPackageJson;
+    private readonly pathToPackageJson: string;
 
-    constructor(pathToPackageJson: string) {
+    private constructor(pathToPackageJson: string) {
         this.pathToPackageJson = pathToPackageJson;
+    }
+
+    static getInstance(basePath: string): PackageJsonService {
+        if (!PackageJsonService.instance) {
+            PackageJsonService.instance = new PackageJsonService(join(basePath, "package.json"));
+        }
+        return PackageJsonService.instance;
     }
 
     async read(): Promise<FireflyAsyncResult<PackageJson>> {

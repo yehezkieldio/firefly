@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import { err, ok } from "neverthrow";
 import semver from "semver";
 import { type PackageJson, PackageJsonService } from "#/modules/filesystem/package-json.service";
@@ -14,7 +13,7 @@ export class ConfigHydratorService {
     private readonly packageJsonService: PackageJsonService;
 
     constructor(basePath: string) {
-        this.packageJsonService = new PackageJsonService(join(basePath, "package.json"));
+        this.packageJsonService = PackageJsonService.getInstance(basePath);
     }
 
     async hydrateConfig(config: Partial<FireflyConfig>): Promise<FireflyResult<FireflyConfig>> {
