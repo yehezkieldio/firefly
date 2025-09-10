@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { err, ok } from "neverthrow";
 import semver from "semver";
 import { type PackageJson, PackageJsonService } from "#/modules/filesystem/package-json.service";
@@ -12,8 +13,8 @@ export class ConfigHydratorService {
     private readonly gitProvider: GitProvider = new GitProvider();
     private readonly packageJsonService: PackageJsonService;
 
-    constructor(packageJsonPath: string) {
-        this.packageJsonService = new PackageJsonService(packageJsonPath);
+    constructor(basePath: string) {
+        this.packageJsonService = new PackageJsonService(join(basePath, "package.json"));
     }
 
     async hydrateConfig(config: Partial<FireflyConfig>): Promise<FireflyResult<FireflyConfig>> {
@@ -98,7 +99,7 @@ export class ConfigHydratorService {
                 }),
             );
         }
-        logger.verbose("ConfigHydratorService: Inside a Git repository, hydrateing configuration...");
+        logger.verbose("ConfigHydratorService: Inside a Git repository, hydrating configuration...");
 
         return this.hydrateRepositoryFromGit(config);
     }
@@ -260,14 +261,14 @@ export class ConfigHydratorService {
 
         // Case 2: hydrate the config name from package.json if not provided (undefined)
         if (hydratedConfig.name === undefined && packageJson.name) {
-            logger.verbose("ConfigHydratorService: hydrateing name from package.json...");
+            logger.verbose("ConfigHydratorService: hydrating name from package.json...");
             const extractedName = this.extractPackageName(packageJson.name);
             if (extractedName.isErr()) {
                 return err(extractedName.error);
             }
 
             logger.verbose(
-                `ConfigHydratorService: hydrateed name from package.json: ${packageJson.name} -> ${extractedName.value}`,
+                `ConfigHydratorService: hydrating name from package.json: ${packageJson.name} -> ${extractedName.value}`,
             );
 
             return ok({ name: extractedName.value });
@@ -287,7 +288,7 @@ export class ConfigHydratorService {
 
         if (scopeExplicitlyProvided) {
             logger.verbose(
-                `ConfigHydratorService: Scope explicitly provided in config: "${originalConfig.scope}" - not hydrateing from package.json`,
+                `ConfigHydratorService: Scope explicitly provided in config: "${originalConfig.scope}" - not hydrating from package.json`,
             );
             return ok({});
         }

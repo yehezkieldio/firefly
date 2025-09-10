@@ -6,6 +6,7 @@ import { ContextDataSchemas } from "#/modules/orchestration/utils/context-schema
 export const ReleaseContextDataSchema = z.object({
     command: z.literal("release"),
     currentVersion: z.string().optional(),
+    basePath: z.string().default(process.cwd()),
     nextVersion: z.string().optional(),
     changelogContent: z.string().optional(),
     config: ConfigSchemaProvider.get("release").optional(),

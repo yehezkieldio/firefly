@@ -1,6 +1,7 @@
 import { ok } from "neverthrow";
 import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks/generate-changelog.task";
+import { PrepareReleaseConfigTask } from "#/modules/configuration/tasks/prepare-release-config.task";
 import { CommitChangesTask, CreateTagTask, PushCommitTask, PushTagTask, StageChangesTask } from "#/modules/git/tasks";
 import { PublishGitHubReleaseTask } from "#/modules/github/tasks";
 import type { Task } from "#/modules/orchestration/contracts/task.interface";
@@ -32,6 +33,7 @@ export function createReleaseWorkflow_sequential(): Workflow<"release"> {
         buildTasks() {
             const tasks: Task[] = [
                 new ReleasePreflightCheckTask(),
+                new PrepareReleaseConfigTask(),
                 new InitializeCurrentVersionTask(),
 
                 new VersionFlowControllerTask(),
