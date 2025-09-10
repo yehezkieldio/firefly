@@ -16,38 +16,38 @@ export class ConfigHydratorService {
         this.packageJsonService = new PackageJsonService(packageJsonPath);
     }
 
-    async enrichConfig(config: Partial<FireflyConfig>): Promise<FireflyResult<FireflyConfig>> {
-        let enrichedConfig = { ...config };
+    async hydrateConfig(config: Partial<FireflyConfig>): Promise<FireflyResult<FireflyConfig>> {
+        let hydratedConfig = { ...config };
 
-        const gitResult = await this.enrichFromGitRepository(enrichedConfig);
+        const gitResult = await this.hydrateFromGitRepository(hydratedConfig);
         if (gitResult.isErr()) {
             return err(gitResult.error);
         }
-        enrichedConfig = gitResult.value;
+        hydratedConfig = gitResult.value;
 
-        const branchResult = await this.enrichBranchFromGit(enrichedConfig);
+        const branchResult = await this.hydrateBranchFromGit(hydratedConfig);
         if (branchResult.isErr()) {
             return err(branchResult.error);
         }
-        enrichedConfig = branchResult.value;
+        hydratedConfig = branchResult.value;
 
-        const packageJsonResult = await this.enrichFromPackageJson(enrichedConfig);
+        const packageJsonResult = await this.hydrateFromPackageJson(hydratedConfig);
         if (packageJsonResult.isErr()) {
             return err(packageJsonResult.error);
         }
-        enrichedConfig = packageJsonResult.value;
+        hydratedConfig = packageJsonResult.value;
 
-        return ok(enrichedConfig as FireflyConfig);
+        return ok(hydratedConfig as FireflyConfig);
     }
 
-    private async enrichFromPackageJson(
+    private async hydrateFromPackageJson(
         config: Partial<FireflyConfig>,
     ): Promise<FireflyResult<Partial<FireflyConfig>>> {
         if (!this.packageJsonService) {
             return err(
                 createFireflyError({
                     code: "NOT_FOUND",
-                    message: "packageJsonService is not available for enrichment",
+                    message: "packageJsonService is not available for hydration.",
                 }),
             );
         }
@@ -62,7 +62,7 @@ export class ConfigHydratorService {
             );
         }
 
-        logger.verbose("ConfigHydratorService: package.json found, enriching configuration...");
+        logger.verbose("ConfigHydratorService: package.json found, hydrating configuration...");
 
         const packageJson = packageJsonResult.value;
         if (!packageJson) {
@@ -74,15 +74,15 @@ export class ConfigHydratorService {
             );
         }
 
-        const enrichResult = this.enrichFromPackageData(config, packageJson);
-        if (enrichResult.isErr()) {
-            return err(enrichResult.error);
+        const hydrateResult = this.hydrateFromPackageData(config, packageJson);
+        if (hydrateResult.isErr()) {
+            return err(hydrateResult.error);
         }
 
-        return ok(enrichResult.value);
+        return ok(hydrateResult.value);
     }
 
-    private async enrichFromGitRepository(
+    private async hydrateFromGitRepository(
         config: Partial<FireflyConfig>,
     ): Promise<FireflyResult<Partial<FireflyConfig>>> {
         const isGitRepoResult = await this.gitProvider.repository.isInsideWorkTree();
@@ -98,12 +98,12 @@ export class ConfigHydratorService {
                 }),
             );
         }
-        logger.verbose("ConfigHydratorService: Inside a Git repository, enriching configuration...");
+        logger.verbose("ConfigHydratorService: Inside a Git repository, hydrateing configuration...");
 
-        return this.enrichRepositoryFromGit(config);
+        return this.hydrateRepositoryFromGit(config);
     }
 
-    private async enrichRepositoryFromGit(
+    private async hydrateRepositoryFromGit(
         config: Partial<FireflyConfig>,
     ): Promise<FireflyResult<Partial<FireflyConfig>>> {
         if (!this.gitProvider) {
@@ -135,7 +135,7 @@ export class ConfigHydratorService {
         });
     }
 
-    private async enrichBranchFromGit(config: Partial<FireflyConfig>): Promise<FireflyResult<Partial<FireflyConfig>>> {
+    private async hydrateBranchFromGit(config: Partial<FireflyConfig>): Promise<FireflyResult<Partial<FireflyConfig>>> {
         if (!this.gitProvider) {
             return ok(config);
         }
@@ -171,37 +171,37 @@ export class ConfigHydratorService {
         });
     }
 
-    private enrichFromPackageData(
+    private hydrateFromPackageData(
         config: Partial<FireflyConfig>,
         packageJson: PackageJson,
     ): FireflyResult<Partial<FireflyConfig>> {
-        const enrichedConfig = { ...config };
+        const hydratedConfig = { ...config };
 
-        // Enrich name from package.json if not provided
-        const nameEnrichmentResult = this.enrichNameFromPackageJson(enrichedConfig, packageJson);
-        if (nameEnrichmentResult.isErr()) {
-            return err(nameEnrichmentResult.error);
+        // hydrate name from package.json if not provided
+        const nameHydrationResult = this.hydrateNameFromPackageJson(hydratedConfig, packageJson);
+        if (nameHydrationResult.isErr()) {
+            return err(nameHydrationResult.error);
         }
-        Object.assign(enrichedConfig, nameEnrichmentResult.value);
+        Object.assign(hydratedConfig, nameHydrationResult.value);
 
-        // Enrich scope from package.json if not explicitly provided
-        const scopeEnrichmentResult = this.enrichScopeFromPackageJson(config, packageJson);
-        if (scopeEnrichmentResult.isErr()) {
-            return err(scopeEnrichmentResult.error);
+        // hydrate scope from package.json if not explicitly provided
+        const scopeHydrationResult = this.hydrateScopeFromPackageJson(config, packageJson);
+        if (scopeHydrationResult.isErr()) {
+            return err(scopeHydrationResult.error);
         }
-        Object.assign(enrichedConfig, scopeEnrichmentResult.value);
+        Object.assign(hydratedConfig, scopeHydrationResult.value);
 
-        // Enrich preReleaseId from package.json if not explicitly provided
-        const preReleaseEnrichmentResult = this.enrichPreReleaseIdFromPackageJson(config, packageJson);
-        if (preReleaseEnrichmentResult.isErr()) {
-            return err(preReleaseEnrichmentResult.error);
+        // hydrate preReleaseId from package.json if not explicitly provided
+        const preReleaseHydrationResult = this.hydratePreReleaseIdFromPackageJson(config, packageJson);
+        if (preReleaseHydrationResult.isErr()) {
+            return err(preReleaseHydrationResult.error);
         }
-        Object.assign(enrichedConfig, preReleaseEnrichmentResult.value);
+        Object.assign(hydratedConfig, preReleaseHydrationResult.value);
 
-        return ok(enrichedConfig);
+        return ok(hydratedConfig);
     }
 
-    private enrichPreReleaseIdFromPackageJson(
+    private hydratePreReleaseIdFromPackageJson(
         originalConfig: FireflyConfig,
         packageJson: PackageJson,
     ): FireflyResult<FireflyConfig> {
@@ -244,12 +244,12 @@ export class ConfigHydratorService {
         });
     }
 
-    private enrichNameFromPackageJson(
-        enrichedConfig: FireflyConfig,
+    private hydrateNameFromPackageJson(
+        hydratedConfig: FireflyConfig,
         packageJson: PackageJson,
     ): FireflyResult<FireflyConfig> {
         // Case 1: If config.name is undefined (not provided) and package.json.name is also missing
-        if (enrichedConfig.name === undefined && !packageJson.name) {
+        if (hydratedConfig.name === undefined && !packageJson.name) {
             return err(
                 createFireflyError({
                     code: "NOT_FOUND",
@@ -258,16 +258,16 @@ export class ConfigHydratorService {
             );
         }
 
-        // Case 2: Enrich the config name from package.json if not provided (undefined)
-        if (enrichedConfig.name === undefined && packageJson.name) {
-            logger.verbose("ConfigHydratorService: Enriching name from package.json...");
+        // Case 2: hydrate the config name from package.json if not provided (undefined)
+        if (hydratedConfig.name === undefined && packageJson.name) {
+            logger.verbose("ConfigHydratorService: hydrateing name from package.json...");
             const extractedName = this.extractPackageName(packageJson.name);
             if (extractedName.isErr()) {
                 return err(extractedName.error);
             }
 
             logger.verbose(
-                `ConfigHydratorService: Enriched name from package.json: ${packageJson.name} -> ${extractedName.value}`,
+                `ConfigHydratorService: hydrateed name from package.json: ${packageJson.name} -> ${extractedName.value}`,
             );
 
             return ok({ name: extractedName.value });
@@ -276,7 +276,7 @@ export class ConfigHydratorService {
         return ok({});
     }
 
-    private enrichScopeFromPackageJson(
+    private hydrateScopeFromPackageJson(
         originalConfig: FireflyConfig,
         packageJson: PackageJson,
     ): FireflyResult<FireflyConfig> {
@@ -287,12 +287,12 @@ export class ConfigHydratorService {
 
         if (scopeExplicitlyProvided) {
             logger.verbose(
-                `ConfigHydratorService: Scope explicitly provided in config: "${originalConfig.scope}" - not enriching from package.json`,
+                `ConfigHydratorService: Scope explicitly provided in config: "${originalConfig.scope}" - not hydrateing from package.json`,
             );
             return ok({});
         }
 
-        // Case 2: Only enrich scope if package.json has a scoped name and scope wasn't explicitly provided
+        // Case 2: Only hydrate scope if package.json has a scoped name and scope wasn't explicitly provided
         if (packageJson.name && this.isScopedPackage(packageJson.name)) {
             const extractedScopeResult = this.extractScope(packageJson.name);
             if (extractedScopeResult.isErr()) {
