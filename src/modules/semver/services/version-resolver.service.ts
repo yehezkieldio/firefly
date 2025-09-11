@@ -3,6 +3,7 @@ import type { PreReleaseBase } from "#/modules/semver/constants/pre-release-base
 import type { ReleaseType } from "#/modules/semver/constants/release-type.constant";
 import { type VersionBumpOptions, VersionManagerService } from "#/modules/semver/services/version-manager.service";
 import type { Version } from "#/modules/semver/version.domain";
+import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
@@ -56,6 +57,8 @@ export class VersionResolverService {
         options: VersionDecisionOptions,
         recommendation?: VersionRecommendation,
     ): FireflyResult<Version> {
+        logger.verbose("VersionResolverService: Deciding next version...");
+
         const preReleaseContext = VersionResolverService.analyzePreReleaseContext(
             options.currentVersion,
             recommendation,
@@ -63,20 +66,24 @@ export class VersionResolverService {
 
         // Handle explicit prerelease request
         if (options.releaseType === "prerelease") {
+            logger.verbose("VersionResolverService: Handling prerelease request...");
             return VersionResolverService.handlePreReleaseRequest(options, preReleaseContext);
         }
 
         // Handle transition from pre-release to stable
         if (preReleaseContext.isCurrentPreRelease && preReleaseContext.hasStableTransition) {
+            logger.verbose("VersionResolverService: Handling pre-release to stable transition...");
             return VersionResolverService.handlePreReleaseToStableTransition(options, recommendation);
         }
 
         // Handle recommendation-based versioning
         if (recommendation) {
+            logger.verbose("VersionResolverService: Handling recommendation-based versioning...");
             return VersionResolverService.createRecommendationBasedVersion(options, recommendation, preReleaseContext);
         }
 
         // Default to standard bump
+        logger.verbose("VersionResolverService: Handling standard version bump...");
         return VersionResolverService.bumpVersion(options);
     }
 
@@ -113,6 +120,7 @@ export class VersionResolverService {
             prereleaseBase: options.prereleaseBase,
         };
 
+        logger.verbose("VersionResolverService: Bumping to prerelease version...");
         return VersionManagerService.bumpVersion(bumpOptions);
     }
 
@@ -143,6 +151,7 @@ export class VersionResolverService {
 
         // If recommendation suggests further bumping after graduation
         if (recommendation.level < 2) {
+            logger.verbose("VersionResolverService: Further bumping after graduation...");
             const releaseType = VersionResolverService.LEVEL_TO_RELEASE_TYPE[recommendation.level];
             return VersionManagerService.bumpVersion({
                 currentVersion: stableVersion,
@@ -150,6 +159,7 @@ export class VersionResolverService {
             });
         }
 
+        logger.verbose("VersionResolverService: Graduated to stable version:", stableVersion.raw);
         return ok(stableVersion);
     }
 
@@ -162,6 +172,7 @@ export class VersionResolverService {
 
         // If currently in prerelease and no explicit transition, continue prerelease
         if (context.isCurrentPreRelease && !context.hasStableTransition) {
+            logger.verbose("VersionResolverService: Continuing prerelease versioning...");
             const prereleaseOptions: VersionBumpOptions = {
                 currentVersion: options.currentVersion,
                 releaseType: "prerelease",
@@ -172,6 +183,7 @@ export class VersionResolverService {
         }
 
         // Standard release based on recommendation
+        logger.verbose("VersionResolverService: Bumping version based on recommendation...");
         return VersionResolverService.bumpVersion({
             ...options,
             releaseType,

@@ -8,6 +8,7 @@ import { type VersionChoicesArgs, VersionChoicesService } from "#/modules/semver
 import { BumpVersionTask } from "#/modules/semver/tasks/bump-version.task";
 import { ExecuteBumpStrategyTask } from "#/modules/semver/tasks/execute-bump-strategy.task";
 import { Version } from "#/modules/semver/version.domain";
+import { logger } from "#/shared/logger";
 import { toFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -51,6 +52,7 @@ export class PromptManualVersionTask implements ConditionalTask<ReleaseTaskConte
             }
 
             context.setNextVersion(choice.value);
+            logger.verbose(`PromptManualVersionTask: From '${versionResult.value.raw}' to '${choice.value}'`);
             return okAsync();
         });
     }

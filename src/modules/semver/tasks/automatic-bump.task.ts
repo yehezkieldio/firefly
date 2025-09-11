@@ -11,6 +11,7 @@ import {
 import { BumpVersionTask } from "#/modules/semver/tasks/bump-version.task";
 import { ExecuteBumpStrategyTask } from "#/modules/semver/tasks/execute-bump-strategy.task";
 import { Version } from "#/modules/semver/version.domain";
+import { logger } from "#/shared/logger";
 import { toFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -56,6 +57,7 @@ export class AutomaticBumpTask implements ConditionalTask<ReleaseTaskContext> {
             }
 
             context.setNextVersion(decision.value.raw);
+            logger.verbose(`AutomaticBumpTask: From '${currentVersion.value.raw}' to '${decision.value.raw}'`);
             return okAsync();
         });
     }

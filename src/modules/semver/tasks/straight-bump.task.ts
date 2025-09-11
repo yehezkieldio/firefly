@@ -10,6 +10,7 @@ import {
 import { BumpVersionTask } from "#/modules/semver/tasks/bump-version.task";
 import { InitializeCurrentVersionTask } from "#/modules/semver/tasks/initialize-current-version.task";
 import { Version } from "#/modules/semver/version.domain";
+import { logger } from "#/shared/logger";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
 export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
@@ -60,6 +61,7 @@ export class StraightBumpTask implements ConditionalTask<ReleaseTaskContext> {
 
         context.setNextVersion(decision.value.raw);
 
+        logger.verbose(`StraightBumpTask: From '${currentVersion.value.raw}' to '${decision.value.raw}'`);
         return okAsync();
     }
 
