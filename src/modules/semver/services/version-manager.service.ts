@@ -50,13 +50,23 @@ export class VersionManagerService {
         currentVersion: Version,
         releaseType: "major" | "minor" | "patch",
     ): FireflyResult<Version> {
-        const newVersionString = semver.inc(currentVersion.raw, releaseType);
+        let baseVersionString = currentVersion.raw;
+
+        if (currentVersion.isPrerelease) {
+            const stableResult = currentVersion.toStable();
+            if (stableResult.isErr()) {
+                return err(stableResult.error);
+            }
+            baseVersionString = stableResult.value.raw;
+        }
+
+        const newVersionString = semver.inc(baseVersionString, releaseType);
 
         if (!newVersionString) {
             return err(
                 createFireflyError({
                     code: "INVALID",
-                    message: `Failed to bump ${releaseType} version from '${currentVersion.raw}'.`,
+                    message: `Failed to bump ${releaseType} version from '${baseVersionString}'.`,
                 }),
             );
         }
