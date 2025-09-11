@@ -1,10 +1,13 @@
-import { ok, okAsync } from "neverthrow";
+import { join } from "node:path";
+import { ResultAsync, errAsync, ok } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks";
+import { GitProvider } from "#/modules/git/git.provider";
 import { CommitChangesTask } from "#/modules/git/tasks/commit-changes.task";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { GitFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { createFireflyError, toFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
 export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
@@ -34,7 +37,37 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
         return ok([taskRef(CommitChangesTask)]);
     }
 
-    execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
-        return okAsync();
+    execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        const changelogPath = join(process.cwd(), context.getConfig().changelogPath || "CHANGELOG.md");
+        const gitProvider = GitProvider.getInstance();
+
+        const getModifiedFiles = ResultAsync.fromPromise(
+            gitProvider.status.getModifiedFilesByNames(["package.json", changelogPath], context.getConfig().dryRun),
+            toFireflyError,
+        );
+
+        return getModifiedFiles.andThen((files) => {
+            if (files.isErr()) {
+                return errAsync(files.error);
+            }
+
+            if (files.value.length === 0) {
+                return errAsync(
+                    createFireflyError({
+                        message: "No changes detected to stage.",
+                        code: "NOT_FOUND",
+                    }),
+                );
+            }
+
+            const stageResults = files.value.map((file) =>
+                ResultAsync.fromPromise(
+                    gitProvider.staging.stageFile(file, context.getConfig().dryRun),
+                    toFireflyError,
+                ),
+            );
+
+            return ResultAsync.combine(stageResults).map(() => {});
+        });
     }
 }

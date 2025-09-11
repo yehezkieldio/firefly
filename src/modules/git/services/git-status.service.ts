@@ -18,4 +18,37 @@ export class GitStatusService {
         logger.verbose(`GitStatusService: Working directory ${isClean ? "clean" : "not clean"}`);
         return ok(isClean);
     }
+
+    async getModifiedFiles(dryRun?: boolean): Promise<FireflyResult<string[]>> {
+        logger.verbose("GitStatusService: Retrieving modified files");
+
+        const statusResult = await executeGitCommand(["status", "--porcelain"], { dryRun });
+        if (statusResult.isErr()) {
+            return err(statusResult.error);
+        }
+
+        const statusOutput = statusResult.value.trim();
+        if (statusOutput.length === 0) {
+            logger.verbose("GitStatusService: No modified files found");
+            return ok([]);
+        }
+
+        const modifiedFiles = statusOutput.split("\n").map((line) => line.slice(3).trim());
+
+        logger.verbose(`GitStatusService: Found modified files: ${modifiedFiles.join(", ")}`);
+        return ok(modifiedFiles);
+    }
+
+    async getModifiedFilesByNames(fileNames: string[], dryRun?: boolean): Promise<FireflyResult<string[]>> {
+        const modifiedFilesResult = await this.getModifiedFiles(dryRun);
+        if (modifiedFilesResult.isErr()) {
+            return err(modifiedFilesResult.error);
+        }
+
+        const modifiedFiles = modifiedFilesResult.value;
+        const filteredFiles = modifiedFiles.filter((file) => fileNames.includes(file));
+
+        logger.verbose(`GitStatusService: Filtered modified files: ${filteredFiles.join(", ")}`);
+        return ok(filteredFiles);
+    }
 }
