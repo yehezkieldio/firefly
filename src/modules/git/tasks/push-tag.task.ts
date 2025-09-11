@@ -51,4 +51,34 @@ export class PushTagTask implements ConditionalTask<ReleaseTaskContext> {
                 logger.success("Pushed tag to remote repository");
             });
     }
+
+    canUndo(): boolean {
+        return true;
+    }
+
+    undo(context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        const gitProvider = GitProvider.getInstance();
+        const config = context.getConfig();
+        const releaseTemplateResolverService = new ReleaseTemplateResolverService().withContext({
+            version: context.getNextVersion(),
+            config: context.getConfig(),
+        });
+        const tagName = releaseTemplateResolverService.tagName(config.tagName);
+        const remoteResultAsync = wrapPromise(gitProvider.remote.getCurrentRemote());
+
+        return remoteResultAsync
+            .andThen((remoteName) => {
+                if (remoteName.isErr()) {
+                    return errAsync(remoteName.error);
+                }
+
+                return wrapPromise(gitProvider.push.pushDeleteRemoteTag(tagName, remoteName.value, config.dryRun));
+            })
+            .orElse(() => {
+                return wrapPromise(gitProvider.push.pushDeleteRemoteTag(tagName, "origin", config.dryRun));
+            })
+            .map(() => {
+                logger.success(`Rolled back tag '${tagName}' from remote and local`);
+            });
+    }
 }

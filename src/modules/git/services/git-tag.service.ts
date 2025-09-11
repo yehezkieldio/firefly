@@ -46,6 +46,16 @@ export class GitTagService {
         return ok();
     }
 
+    async pushDeleteRemoteTag(tagName: string, remote: string, dryRun?: boolean): Promise<FireflyResult<void>> {
+        logger.verbose(`GitPushService: Deleting remote tag ${tagName} from ${remote}`);
+
+        const deleteResult = await executeGitCommand(["push", remote, "--delete", `refs/tags/${tagName}`], { dryRun });
+        if (deleteResult.isErr()) return err(deleteResult.error);
+
+        logger.verbose(`GitPushService: Remote tag ${tagName} deleted successfully from ${remote}`);
+        return ok();
+    }
+
     async exists(tagName: string): Promise<FireflyResult<boolean>> {
         logger.verbose(`GitTagService: Checking if tag ${tagName} exists`);
 
