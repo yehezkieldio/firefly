@@ -56,16 +56,9 @@ export class SemanticVersionAnalyzer {
     };
 
     private static readonly TRANSITION_KEYWORDS = [
-        "stable",
-        "release",
-        "production",
-        "final",
-        "ga",
         "general availability",
         "promote to stable",
         "move to stable",
-        "release candidate",
-        "rc",
     ] as const;
 
     private static readonly PATTERN_MATCHERS = {
