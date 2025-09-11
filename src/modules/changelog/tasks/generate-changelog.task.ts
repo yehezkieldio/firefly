@@ -33,6 +33,7 @@ export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext
     execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
         const changelogPath = join(process.cwd(), context.getConfig().changelogPath || "CHANGELOG.md");
         const isChangelogFileExists = ResultAsync.fromPromise(FileSystemService.exists(changelogPath), toFireflyError);
+        const startTime = Date.now();
 
         const releaseTemplateResolverService = new ReleaseTemplateResolverService().withContext({
             version: context.getNextVersion(),
@@ -59,7 +60,8 @@ export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext
                     return errAsync(result.error);
                 }
 
-                logger.success(`Changelog generated at ${colors.blueBright(changelogPath)}`);
+                const elapsedMs = Date.now() - startTime;
+                logger.success(`Generation complete in ${colors.greenBright(`${elapsedMs}ms`)}`);
                 context.set("changelogContent", result.value);
                 return okAsync();
             });

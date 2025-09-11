@@ -1,4 +1,3 @@
-import { colors } from "consola/utils";
 import { ResultAsync, errAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { PackageJsonService } from "#/modules/filesystem/package-json.service";
@@ -45,7 +44,7 @@ export class BumpVersionTask implements ConditionalTask<ReleaseTaskContext> {
         const packageJsonService = PackageJsonService.getInstance(basePath);
         const updateVersionResult = packageJsonService.updateVersion(nextVersion, dryRun);
 
-        logger.info(`Version is now ${colors.blueBright(nextVersion)}`);
+        logger.info(`Updating version to ${nextVersion}`);
         return ResultAsync.fromPromise(updateVersionResult, toFireflyError).andThen(() => okAsync());
     }
 

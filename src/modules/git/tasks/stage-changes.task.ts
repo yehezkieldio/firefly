@@ -1,4 +1,5 @@
-import { resolve } from "node:path";
+import { basename, resolve } from "node:path";
+import { colors } from "consola/utils";
 import { ResultAsync, errAsync, ok } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks";
@@ -47,6 +48,9 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
 
         const gitProvider = GitProvider.getInstance();
 
+        logger.info(
+            `Staging changes for ${colors.underline(basename(packageJsonPath))} and ${colors.underline(basename(fullChangelogPath))}`,
+        );
         return wrapPromise(
             gitProvider.status.getUnstagedFilesByNames([fullChangelogPath, packageJsonPath], config.dryRun),
         ).andThen((filesResult) => {

@@ -52,7 +52,15 @@ export class AutomaticBumpTask implements ConditionalTask<ReleaseTaskContext> {
             }
 
             const { reason } = recommendation.value;
-            logger.info(reason);
+            if (reason) {
+                if (reason.startsWith("Analysis found:")) {
+                    const prefix = "Analysis found:";
+                    const details = reason.slice(prefix.length).trim();
+                    logger.info(`${prefix} ${details}`);
+                } else {
+                    logger.info(reason);
+                }
+            }
 
             const decision = VersionResolverService.decideNextVersion(options, recommendation.value);
             if (decision.isErr()) {
