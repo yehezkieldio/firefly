@@ -6,6 +6,25 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.18 (September 11, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`00ea788`](https://github.com/yehezkieldio/firefly/commit/00ea788efbc99df4135c8aaadfccdba2b8e913ed) filesystem: Add cliff.toml service for parsing TOML files
+- [`2c78a14`](https://github.com/yehezkieldio/firefly/commit/2c78a14cfcac31b22e193ab0d2b48d22197722f7) github: Add GitHub provider and token service
+- [`cd8eb1e`](https://github.com/yehezkieldio/firefly/commit/cd8eb1e38a86d0dca5dc53cd0614ff74026702c9) changelog: Add changelog generator options interface
+- [`5a43a12`](https://github.com/yehezkieldio/firefly/commit/5a43a1257012f0c2887530d4cca6a93052520226) configuration: Add release template resolver service
+- [`ec17115`](https://github.com/yehezkieldio/firefly/commit/ec1711575c2b90471353cdd80726d1e9a3b4a7ae) configuration: Add release template resolver service
+- [`15c76ca`](https://github.com/yehezkieldio/firefly/commit/15c76cae57a301579d7562d21c067f5b07a670b8) changelog: Implement changelog generation service
+- [`d4f99a0`](https://github.com/yehezkieldio/firefly/commit/d4f99a03f68113375af1c3c8017032b2b1081505) changelog: Add changelog post processor service
+- [`5a495d3`](https://github.com/yehezkieldio/firefly/commit/5a495d3bbeab3fa9d703946061df1afc15aa4f3f) changelog: Remove write changelog file task
+- [`a9dd1e9`](https://github.com/yehezkieldio/firefly/commit/a9dd1e94d74470a983454afec9258327f0aa2faa) changelog: Add undo functionality for changelog generation
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`a22cfb3`](https://github.com/yehezkieldio/firefly/commit/a22cfb302d643ed43ecb137698082b2fc1cd08a5) changelog: Require tag name in GitCliff options
+- [`5a5a97c`](https://github.com/yehezkieldio/firefly/commit/5a5a97ced8fa4aece9170662689331b544ef5ac7) changelog: Update method to get git root direction
+
+### <!-- 7 -->🚜 Refactor
+- [`8285978`](https://github.com/yehezkieldio/firefly/commit/8285978253b3e2e3a8f6d866a3ae49dfc2325bf4) semver: Change getNextVersion return type to string
 ## firefly@3.0.0-alpha.17 (September 11, 2025)
 
 ### <!-- 3 -->🚀 New Features
