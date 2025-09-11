@@ -1,14 +1,10 @@
 import { err, ok } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { GitCliffAdapter } from "#/modules/changelog/git-cliff.adapter";
-import type {
-    ReleaseTemplateResolverService,
-    ResolvedTemplates,
-} from "#/modules/configuration/services/release-template-resolver.service";
+import type { ResolvedTemplates } from "#/modules/configuration/services/release-template-resolver.service";
 import { GitProvider } from "#/modules/git/git.provider";
-import { GitHubProvider } from "#/modules/github/github.provider";
 import { logger } from "#/shared/logger";
-import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
+import type { FireflyResult } from "#/shared/utils/result.util";
 
 export interface ChangelogGeneratorOptions {
     dryRun?: boolean;
