@@ -4,6 +4,7 @@ import type { ReleaseTaskContext } from "#/application/context";
 import { ChangelogGeneratorService } from "#/modules/changelog/services/changelog-generator.service";
 import { ReleaseTemplateResolverService } from "#/modules/configuration/services/release-template-resolver.service";
 import { FileSystemService } from "#/modules/filesystem/file-system.service";
+import { GitProvider } from "#/modules/git/git.provider";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { ChangelogFlowControllerTask, GitFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
@@ -59,5 +60,27 @@ export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext
                 return okAsync();
             });
         });
+    }
+
+    canUndo(): boolean {
+        return true;
+    }
+
+    undo(context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        const changelogPath = join(process.cwd(), context.getConfig().changelogPath || "CHANGELOG.md");
+        const changelogContent = context.get("changelogContent");
+        if (!changelogContent) {
+            return errAsync(
+                toFireflyError({
+                    code: "NOT_FOUND",
+                    message: "Changelog content not found in context, cannot undo changelog generation.",
+                }),
+            );
+        }
+
+        return ResultAsync.fromPromise(
+            GitProvider.getInstance().commit.restoreFileToHead(changelogPath),
+            toFireflyError,
+        ).andThen(() => okAsync());
     }
 }
