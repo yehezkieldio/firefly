@@ -52,7 +52,7 @@ export class SemanticVersionService {
         };
     }
 
-    async recommendVersion(): Promise<FireflyAsyncResult<VersionRecommendation>> {
+    async recommendVersion(): Promise<FireflyResult<VersionRecommendation>> {
         logger.verbose("SemanticVersionService: Starting version recommendation process...");
         const startTime = Date.now();
 

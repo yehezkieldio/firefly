@@ -48,9 +48,12 @@ export interface GitCommandOptions {
     dryRun?: boolean;
     cwd?: string;
     forceBuffered?: boolean;
+    verbose?: boolean;
 }
 
 export function executeGitCommand(args: string[], options: GitCommandOptions = {}): ResultAsync<string, FireflyError> {
+    options.verbose = options.verbose ?? true;
+
     const parseResult = gitArgsSchema.safeParse(args);
     if (!parseResult.success) {
         return errAsync(
@@ -67,14 +70,18 @@ export function executeGitCommand(args: string[], options: GitCommandOptions = {
 
     if (options.dryRun && hasSideEffects(validatedArgs)) {
         const dryRunMessage = `Dry run: Skipping ${commandStr}`;
-        logger.verbose(dryRunMessage);
+        if (options.verbose) {
+            logger.verbose(dryRunMessage);
+        }
         return okAsync(dryRunMessage);
     }
 
     const useStreaming = shouldUseStreaming(validatedArgs) && !options.forceBuffered;
     const executionMode = useStreaming ? "streaming" : "buffered";
 
-    logger.verbose(`GitCommandExecutor: Executing git command (${executionMode}): ${commandStr}`);
+    if (options.verbose) {
+        logger.verbose(`GitCommandExecutor: Executing git command (${executionMode}): ${commandStr}`);
+    }
 
     const spawnOptions = {
         cwd: options.cwd ?? process.cwd(),

@@ -38,11 +38,15 @@ export function createReleaseWorkflow_sequential(): Workflow<"release"> {
 
                 new VersionFlowControllerTask(),
                 new StraightBumpTask(),
+
                 new PromptBumpStrategyTask(),
                 new ExecuteBumpStrategyTask(),
+
                 new AutomaticBumpTask(),
+
                 new PromptManualVersionTask(),
                 new ManualBumpTask(),
+
                 new BumpVersionTask(),
 
                 new ChangelogFlowControllerTask(),

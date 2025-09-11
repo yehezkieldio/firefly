@@ -13,24 +13,29 @@ export interface VersionBumpOptions {
     prereleaseBase?: PreReleaseBase;
 }
 
-export class VersionManager {
+export class VersionManagerService {
     static bumpVersion(options: VersionBumpOptions): FireflyResult<Version> {
         const { currentVersion, releaseType, prereleaseIdentifier, prereleaseBase } = options;
 
         if (releaseType === "major" || releaseType === "minor" || releaseType === "patch") {
-            return VersionManager.bumpStandard(currentVersion, releaseType);
+            return VersionManagerService.bumpStandard(currentVersion, releaseType);
         }
 
         if (releaseType === "premajor" || releaseType === "preminor" || releaseType === "prepatch") {
-            return VersionManager.bumpPreStandard(currentVersion, releaseType, prereleaseIdentifier, prereleaseBase);
+            return VersionManagerService.bumpPreStandard(
+                currentVersion,
+                releaseType,
+                prereleaseIdentifier,
+                prereleaseBase,
+            );
         }
 
         if (releaseType === "prerelease") {
-            return VersionManager.bumpPrerelease(currentVersion, prereleaseIdentifier, prereleaseBase);
+            return VersionManagerService.bumpPrerelease(currentVersion, prereleaseIdentifier, prereleaseBase);
         }
 
         if (releaseType === "graduate") {
-            return VersionManager.graduatePrerelease(currentVersion);
+            return VersionManagerService.graduatePrerelease(currentVersion);
         }
 
         return err(
@@ -65,7 +70,7 @@ export class VersionManager {
         identifier?: string,
         base?: PreReleaseBase,
     ): FireflyResult<Version> {
-        const normalizedBaseResult = VersionManager.normalizeBase(base);
+        const normalizedBaseResult = VersionManagerService.normalizeBase(base);
         if (normalizedBaseResult.isErr()) {
             return err(normalizedBaseResult.error);
         }
@@ -103,13 +108,13 @@ export class VersionManager {
         let newVersionString: string | null = null;
 
         // Case 1: Complex identifier with dots (e.g., "canary.abc123")
-        if (VersionManager.isComplexIdentifier(identifier)) {
-            newVersionString = VersionManager.bumpWithComplexIdentifier(currentVersion, identifier);
+        if (VersionManagerService.isComplexIdentifier(identifier)) {
+            newVersionString = VersionManagerService.bumpWithComplexIdentifier(currentVersion, identifier);
         }
 
         // Case 2: Explicit base provided
         else if (base !== undefined && base !== null) {
-            const normalizedBaseResult = VersionManager.normalizeBase(base);
+            const normalizedBaseResult = VersionManagerService.normalizeBase(base);
             if (normalizedBaseResult.isErr()) {
                 return err(normalizedBaseResult.error);
             }
@@ -122,7 +127,7 @@ export class VersionManager {
 
         // Case 3: Continuing existing prerelease
         else if (currentVersion.isPrerelease) {
-            newVersionString = VersionManager.bumpExistingPrerelease(currentVersion, identifier);
+            newVersionString = VersionManagerService.bumpExistingPrerelease(currentVersion, identifier);
         }
 
         // Case 4: Starting new prerelease from stable
