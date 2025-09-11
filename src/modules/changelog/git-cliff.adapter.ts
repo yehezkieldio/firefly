@@ -26,7 +26,7 @@ export class GitCliffAdapter {
     }
 
     private createGitCliffOptions(options: ChangelogGeneratorOptions): FireflyResult<GitCliffOptions> {
-        if (options.tagName?.trim()) {
+        if (!options.tagName?.trim()) {
             return err(
                 createFireflyError({
                     message: "GitCliffAdapter: Tag name is required but was provided in options.",
