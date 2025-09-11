@@ -10,7 +10,7 @@ const DEBUG_TASK_LIFECYCLE = process.env.FIREFLY_DEBUG_TASK_LIFECYCLE === "true"
 export class TaskExecutorService {
     executeTask(task: Task, context?: TaskContext): FireflyAsyncResult<void> {
         const startMsg = `TaskExecutorService: Executing task '${task.id}'`;
-        logger.verbose(DEBUG_TASK_LIFECYCLE ? colors.blueBright(startMsg) : startMsg);
+        logger.verbose(DEBUG_TASK_LIFECYCLE ? colors.redBright(startMsg) : startMsg);
 
         return this.executeWithLifecycle(task, context)
             .andThen(() => {
