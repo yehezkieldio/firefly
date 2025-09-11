@@ -54,10 +54,10 @@ export class GitStagingService {
         return ok();
     }
 
-    async unstageFiles(filePaths: string[]): Promise<FireflyResult<void>> {
+    async unstageFiles(filePaths: string[], dryRun?: boolean): Promise<FireflyResult<void>> {
         logger.verbose(`GitStagingService: Unstaging files: ${filePaths.join(", ")}`);
 
-        const resetResult = await executeGitCommand(["reset", "HEAD", "--", ...filePaths]);
+        const resetResult = await executeGitCommand(["reset", "HEAD", "--", ...filePaths], { dryRun });
         if (resetResult.isErr()) return err(resetResult.error);
 
         logger.verbose("GitStagingService: Files unstaged successfully");
