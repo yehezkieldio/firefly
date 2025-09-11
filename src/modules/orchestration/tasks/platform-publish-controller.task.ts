@@ -1,6 +1,6 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
-import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
+import { GenerateChangelogTask } from "#/modules/changelog/tasks";
 import { CreateTagTask, PushTagTask } from "#/modules/git/tasks";
 import { PublishGitHubReleaseTask } from "#/modules/github/tasks";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
@@ -24,9 +24,9 @@ export class PlatformPublishControllerTask implements ConditionalTask<ReleaseTas
             return [];
         }
 
-        // If git operations are skipped, depend on WriteChangelogFileTask instead
+        // If git operations are skipped, depend on GenerateChangelogTask instead
         if (config?.skipGit) {
-            return [taskRef(WriteChangelogFileTask)];
+            return [taskRef(GenerateChangelogTask)];
         }
 
         // If push is skipped, depend on CreateTagTask instead

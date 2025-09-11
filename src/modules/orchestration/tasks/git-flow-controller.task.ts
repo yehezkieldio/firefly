@@ -1,6 +1,6 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
-import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
+import { GenerateChangelogTask } from "#/modules/changelog/tasks";
 import { StageChangesTask } from "#/modules/git/tasks";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { ChangelogFlowControllerTask } from "#/modules/orchestration/tasks/changelog-flow-controller.task";
@@ -24,7 +24,7 @@ export class GitFlowControllerTask implements ConditionalTask<ReleaseTaskContext
             return [taskRef(ChangelogFlowControllerTask)];
         }
 
-        return [taskRef(WriteChangelogFileTask)];
+        return [taskRef(GenerateChangelogTask)];
     }
 
     shouldExecute(context?: ReleaseTaskContext): FireflyResult<boolean> {

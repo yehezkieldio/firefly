@@ -1,5 +1,4 @@
 import { ok } from "neverthrow";
-import { WriteChangelogFileTask } from "#/modules/changelog/tasks";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks/generate-changelog.task";
 import { PrepareReleaseConfigTask } from "#/modules/configuration/tasks/prepare-release-config.task";
 import { CommitChangesTask, CreateTagTask, PushCommitTask, PushTagTask, StageChangesTask } from "#/modules/git/tasks";
@@ -49,7 +48,6 @@ export function createReleaseWorkflow_sequential(): Workflow<"release"> {
 
                 new ChangelogFlowControllerTask(),
                 new GenerateChangelogTask(),
-                new WriteChangelogFileTask(),
 
                 new GitFlowControllerTask(),
                 new StageChangesTask(),

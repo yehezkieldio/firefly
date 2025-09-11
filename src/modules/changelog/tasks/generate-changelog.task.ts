@@ -1,9 +1,13 @@
-import { ok, okAsync } from "neverthrow";
+import { join } from "node:path";
+import { ResultAsync, errAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
-import { WriteChangelogFileTask } from "#/modules/changelog/tasks/write-changelog-file.task";
+import { ChangelogGeneratorService } from "#/modules/changelog/services/changelog-generator.service";
+import { ReleaseTemplateResolverService } from "#/modules/configuration/services/release-template-resolver.service";
+import { FileSystemService } from "#/modules/filesystem/file-system.service";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
-import { ChangelogFlowControllerTask } from "#/modules/orchestration/tasks";
+import { ChangelogFlowControllerTask, GitFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { toFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
 export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext> {
@@ -20,10 +24,40 @@ export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext
     }
 
     getNextTasks(): FireflyResult<string[]> {
-        return ok([taskRef(WriteChangelogFileTask)]);
+        return ok([taskRef(GitFlowControllerTask)]);
     }
 
-    execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
-        return okAsync();
+    execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        const changelogPath = join(process.cwd(), context.getConfig().changelogPath || "CHANGELOG.md");
+        const isChangelogFileExists = ResultAsync.fromPromise(FileSystemService.exists(changelogPath), toFireflyError);
+
+        const releaseTemplateResolverService = new ReleaseTemplateResolverService().withContext({
+            version: context.getNextVersion(),
+            config: context.getConfig(),
+        });
+
+        const changelogGeneratorService = new ChangelogGeneratorService(releaseTemplateResolverService);
+
+        return isChangelogFileExists.andThen((exists) => {
+            if (exists.isErr()) {
+                return errAsync(exists.error);
+            }
+
+            if (!exists.value) {
+                return FileSystemService.write(changelogPath, "");
+            }
+
+            return ResultAsync.fromPromise(
+                changelogGeneratorService.generateChangelog(context.getConfig()),
+                toFireflyError,
+            ).andThen((result) => {
+                if (result.isErr()) {
+                    return errAsync(result.error);
+                }
+
+                context.set("changelogContent", result.value);
+                return okAsync();
+            });
+        });
     }
 }
