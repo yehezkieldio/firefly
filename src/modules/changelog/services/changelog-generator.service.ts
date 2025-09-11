@@ -100,7 +100,7 @@ export class ChangelogGeneratorService {
             logger.verbose("ChangelogGeneratorService: Release notes added to changelog options.");
         }
 
-        const gitRootDirectionResult = await this.gitProvider.repository.getGitDirectory();
+        const gitRootDirectionResult = await this.gitProvider.repository.getRootDirection();
         if (gitRootDirectionResult.isErr()) {
             return err(gitRootDirectionResult.error);
         }
