@@ -57,7 +57,7 @@ export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskConte
         return ok([taskRef(BumpVersionTask)]);
     }
 
-    execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
+    execute(): FireflyAsyncResult<void> {
         return okAsync();
     }
 }
