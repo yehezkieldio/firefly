@@ -1,3 +1,4 @@
+import { colors } from "consola/utils";
 import { ResultAsync, errAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
@@ -56,7 +57,7 @@ export class AutomaticBumpTask implements ConditionalTask<ReleaseTaskContext> {
                 if (reason.startsWith("Analysis found:")) {
                     const prefix = "Analysis found:";
                     const details = reason.slice(prefix.length).trim();
-                    logger.info(`${prefix} ${details}`);
+                    logger.info(`${prefix} ${colors.bold(details)}`);
                 } else {
                     logger.info(reason);
                 }
