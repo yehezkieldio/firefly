@@ -1,4 +1,4 @@
-import { join } from "node:path";
+import { basename } from "node:path";
 import { ResultAsync, errAsync, ok } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks";
@@ -38,11 +38,12 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
     }
 
     execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
-        const changelogPath = join(process.cwd(), context.getConfig().changelogPath || "CHANGELOG.md");
+        const changelogPath = context.getConfig().changelogPath || "CHANGELOG.md";
+        const changelogFileName = basename(changelogPath);
         const gitProvider = GitProvider.getInstance();
 
         const getModifiedFiles = ResultAsync.fromPromise(
-            gitProvider.status.getModifiedFilesByNames(["package.json", changelogPath], context.getConfig().dryRun),
+            gitProvider.status.getModifiedFilesByNames(["package.json", changelogFileName], context.getConfig().dryRun),
             toFireflyError,
         );
 
