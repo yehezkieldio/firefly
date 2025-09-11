@@ -128,19 +128,19 @@ export function executeGhCommand(args: string[], options: GhCommandOptions = {})
     const validatedArgs = parseResult.data;
     const commandStr = `gh ${validatedArgs.join(" ")}`;
 
+    const useStreaming = shouldUseStreaming(validatedArgs) && !options.forceBuffered;
+    const executionMode = useStreaming ? "streaming" : "buffered";
+
+    if (options.verbose) {
+        logger.verbose(`GhCommandExecutor: Executing gh command (${executionMode}): ${commandStr}`);
+    }
+
     if (options.dryRun && hasSideEffects(validatedArgs)) {
         const dryRunMessage = `Dry run: Skipping ${commandStr}`;
         if (options.verbose) {
             logger.verbose(dryRunMessage);
         }
         return okAsync(dryRunMessage);
-    }
-
-    const useStreaming = shouldUseStreaming(validatedArgs) && !options.forceBuffered;
-    const executionMode = useStreaming ? "streaming" : "buffered";
-
-    if (options.verbose) {
-        logger.verbose(`GhCommandExecutor: Executing gh command (${executionMode}): ${commandStr}`);
     }
 
     const spawnOptions = {

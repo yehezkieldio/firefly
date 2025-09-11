@@ -68,19 +68,19 @@ export function executeGitCommand(args: string[], options: GitCommandOptions = {
     const validatedArgs = parseResult.data;
     const commandStr = `git ${validatedArgs.join(" ")}`;
 
+    const useStreaming = shouldUseStreaming(validatedArgs) && !options.forceBuffered;
+    const executionMode = useStreaming ? "streaming" : "buffered";
+
+    if (options.verbose) {
+        logger.verbose(`GitCommandExecutor: Executing git command (${executionMode}): ${commandStr}`);
+    }
+
     if (options.dryRun && hasSideEffects(validatedArgs)) {
         const dryRunMessage = `Dry run: Skipping ${commandStr}`;
         if (options.verbose) {
             logger.verbose(dryRunMessage);
         }
         return okAsync(dryRunMessage);
-    }
-
-    const useStreaming = shouldUseStreaming(validatedArgs) && !options.forceBuffered;
-    const executionMode = useStreaming ? "streaming" : "buffered";
-
-    if (options.verbose) {
-        logger.verbose(`GitCommandExecutor: Executing git command (${executionMode}): ${commandStr}`);
     }
 
     const spawnOptions = {
