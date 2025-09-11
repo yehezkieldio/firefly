@@ -5,13 +5,19 @@ export interface TemplateContext {
     config: FireflyConfig;
 }
 
+export interface ResolvedTemplates {
+    commitMessage: (message: string) => string;
+    tagName: (tag: string) => string;
+    releaseTitle: (title: string) => string;
+}
+
 export class ReleaseTemplateResolverService {
     private static readonly TEMPLATE_PATTERNS = {
         VERSION: /\{\{version\}\}/g,
         NAME: /\{\{name\}\}/g,
     } as const;
 
-    withContext(ctx: TemplateContext) {
+    withContext(ctx: TemplateContext): ResolvedTemplates {
         const variables = {
             version: ctx.version,
             name: this.getFullPackageName(ctx.config),
