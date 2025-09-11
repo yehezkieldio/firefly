@@ -48,8 +48,8 @@ export class GitHistoryService {
         return ok(commits);
     }
 
-    async commitDetails(hash: string): Promise<FireflyResult<string>> {
-        const existsResult = await this.commitExists(hash);
+    async commitDetails(hash: string, verbose = false): Promise<FireflyResult<string>> {
+        const existsResult = await this.commitExists(hash, verbose);
         if (existsResult.isErr()) return err(existsResult.error);
 
         if (!existsResult.value) {
@@ -64,15 +64,14 @@ export class GitHistoryService {
 
         const format = ["hash:%H", "date:%ci", "author:%an <%ae>", "subject:%s", "body:%b", "notes:%N"].join("%n");
 
-        const detailsResult = await executeGitCommand(["show", "--no-patch", `--format=${format}`, hash]);
+        const detailsResult = await executeGitCommand(["show", "--no-patch", `--format=${format}`, hash], { verbose });
         if (detailsResult.isErr()) return err(detailsResult.error);
 
-        logger.verbose(`GitHistoryService: Fetched details for commit ${hash}`);
         return ok(detailsResult.value.trim());
     }
 
-    async commitExists(hash: string): Promise<FireflyResult<boolean>> {
-        const catFileResult = await executeGitCommand(["cat-file", "-e", hash]);
+    async commitExists(hash: string, verbose = false): Promise<FireflyResult<boolean>> {
+        const catFileResult = await executeGitCommand(["cat-file", "-e", hash], { verbose });
         if (catFileResult.isErr()) {
             // If cat-file fails, the commit doesn't exist
             return ok(false);

@@ -1,16 +1,21 @@
+import { colors } from "consola/utils";
 import { errAsync, okAsync } from "neverthrow";
 import type { Task, TaskContext } from "#/modules/orchestration/contracts/task.interface";
 import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult } from "#/shared/utils/result.util";
 
+const DEBUG_TASK_LIFECYCLE = process.env.FIREFLY_DEBUG_TASK_LIFECYCLE === "true";
+
 export class TaskExecutorService {
     executeTask(task: Task, context?: TaskContext): FireflyAsyncResult<void> {
-        logger.verbose(`TaskExecutorService: Executing task '${task.id}'`);
+        const startMsg = `TaskExecutorService: Executing task '${task.id}'`;
+        logger.verbose(DEBUG_TASK_LIFECYCLE ? colors.blueBright(startMsg) : startMsg);
 
         return this.executeWithLifecycle(task, context)
             .andThen(() => {
-                logger.verbose(`TaskExecutorService: Successfully executed task '${task.id}'`);
+                const successMsg = `TaskExecutorService: Successfully executed task '${task.id}'`;
+                logger.verbose(DEBUG_TASK_LIFECYCLE ? colors.redBright(successMsg) : successMsg);
                 return okAsync();
             })
             .mapErr((error) => {

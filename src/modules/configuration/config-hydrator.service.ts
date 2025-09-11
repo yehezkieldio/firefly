@@ -9,10 +9,11 @@ import type { FireflyResult } from "#/shared/utils/result.util";
 
 export class ConfigHydratorService {
     private static readonly SCOPED_PACKAGE_REGEX = /^@[^/]+\//;
-    private readonly gitProvider: GitProvider = new GitProvider();
+    private readonly gitProvider: GitProvider;
     private readonly packageJsonService: PackageJsonService;
 
     constructor(basePath: string) {
+        this.gitProvider = GitProvider.getInstance();
         this.packageJsonService = PackageJsonService.getInstance(basePath);
     }
 

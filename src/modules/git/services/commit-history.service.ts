@@ -29,7 +29,7 @@ export class CommitHistoryService {
     private readonly gitProvider: GitProvider;
 
     constructor(gitProvider?: GitProvider) {
-        this.gitProvider = gitProvider ?? new GitProvider();
+        this.gitProvider = gitProvider ?? GitProvider.getInstance();
     }
 
     async getCommitsSinceLastTag(): Promise<FireflyAsyncResult<Commit[]>> {
@@ -93,7 +93,7 @@ export class CommitHistoryService {
     private async parseCommitDetails(commitHashes: string[]): Promise<FireflyAsyncResult<Commit[]>> {
         const commits: Commit[] = [];
         const commitDetailsPromises = commitHashes.map(async (hash) => {
-            const result = await this.gitProvider.history.commitDetails(hash);
+            const result = await this.gitProvider.history.commitDetails(hash, false);
             return { hash, result };
         });
 

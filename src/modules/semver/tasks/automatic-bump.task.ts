@@ -35,7 +35,6 @@ export class AutomaticBumpTask implements ConditionalTask<ReleaseTaskContext> {
                     return errAsync(recommendedVersion.error);
                 }
 
-                console.log(`Recommended version bump: ${JSON.stringify(recommendedVersion.value)}`);
                 return okAsync();
             },
         );

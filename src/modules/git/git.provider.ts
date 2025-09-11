@@ -12,6 +12,8 @@ import { GitTagService } from "#/modules/git/services/git-tag.service";
 import { RepositoryParseService } from "#/modules/git/utils/repository-parse.service";
 
 export class GitProvider {
+    private static _instance: GitProvider;
+
     private _config?: GitConfigService;
     private _remote?: GitRemoteService;
     private _status?: GitStatusService;
@@ -24,6 +26,15 @@ export class GitProvider {
     private _branch?: GitBranchService;
     private _history?: GitHistoryService;
     private _repositoryParse?: RepositoryParseService;
+
+    private constructor() {}
+
+    static getInstance(): GitProvider {
+        if (!GitProvider._instance) {
+            GitProvider._instance = new GitProvider();
+        }
+        return GitProvider._instance;
+    }
 
     get config(): GitConfigService {
         if (!this._config) {

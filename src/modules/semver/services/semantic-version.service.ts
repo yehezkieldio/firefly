@@ -37,15 +37,17 @@ export class SemanticVersionService {
     private readonly versionAnalyzer: SemanticVersionAnalyzer;
     private readonly configuration: SemanticVersionServiceConfiguration;
 
-    constructor(gitProvider?: GitProvider, configuration: SemanticVersionServiceConfiguration = {}) {
-        this.gitProvider = gitProvider ?? new GitProvider();
+    constructor(configuration: SemanticVersionServiceConfiguration = {}) {
+        this.gitProvider = GitProvider.getInstance();
         this.commitHistoryService = new CommitHistoryService(this.gitProvider);
+
         this.versionAnalyzer = new SemanticVersionAnalyzer({
             major: configuration.additionalCommitTypes?.major,
             minor: configuration.additionalCommitTypes?.minor,
             patch: configuration.additionalCommitTypes?.patch,
             scopeRules: configuration.scopeRules,
         });
+
         this.configuration = {
             includeAllCommitsWhenNoTags: false,
             ...configuration,
@@ -138,7 +140,7 @@ export class SemanticVersionService {
             return ok([]);
         }
 
-        logger.verbose("SemanticVersionService: Tags found, retrieving commits since last tag");
+        logger.verbose("SemanticVersionService: Retrieving commits since last tag");
         return this.commitHistoryService.getCommitsSinceLastTag();
     }
 

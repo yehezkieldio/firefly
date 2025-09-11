@@ -93,8 +93,6 @@ export class SemanticVersionAnalyzer {
             return ok(this.createDefaultPatchRecommendation([]));
         }
 
-        logger.verbose(`SemanticVersionAnalyzer: Analyzing ${commits.length} commits...`);
-
         const analysis = this.performDetailedAnalysis(commits);
         const versionLevel = this.determineVersionLevel(analysis);
         const recommendation = this.buildVersionRecommendation(versionLevel, commits, analysis);

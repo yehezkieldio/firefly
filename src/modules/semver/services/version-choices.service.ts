@@ -1,7 +1,7 @@
 import { Result, err, ok } from "neverthrow";
 import type { PreReleaseBase } from "#/modules/semver/constants/pre-release-base.constant";
 import type { ReleaseType } from "#/modules/semver/constants/release-type.constant";
-import { type VersionBumpOptions, VersionManager } from "#/modules/semver/services/version-manager.service";
+import { type VersionBumpOptions, VersionManagerService } from "#/modules/semver/services/version-manager.service";
 import type { Version } from "#/modules/semver/version.domain";
 import { logger } from "#/shared/logger";
 import type { PromptSelectChoice } from "#/shared/types/prompt-select-choice.type";
@@ -120,7 +120,7 @@ export class VersionChoicesService {
             prereleaseBase: options.prereleaseBase,
         };
 
-        return VersionManager.bumpVersion(bumpOptions);
+        return VersionManagerService.bumpVersion(bumpOptions);
     }
 
     private getVersionDescription(releaseType: ReleaseType): string {
