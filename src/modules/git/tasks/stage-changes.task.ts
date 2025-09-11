@@ -1,5 +1,5 @@
 import { basename } from "node:path";
-import { ResultAsync, errAsync, ok } from "neverthrow";
+import { ResultAsync, errAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks";
 import { GitProvider } from "#/modules/git/git.provider";
@@ -44,7 +44,13 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
 
         const getModifiedFiles = ResultAsync.fromPromise(
             gitProvider.status.getModifiedFilesByNames(["package.json", changelogFileName], context.getConfig().dryRun),
-            toFireflyError,
+            (error) =>
+                toFireflyError(error) ||
+                createFireflyError({
+                    message: "Unknown error occurred while getting modified files",
+                    code: "UNEXPECTED",
+                    cause: error,
+                }),
         );
 
         return getModifiedFiles.andThen((files) => {
@@ -64,11 +70,29 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
             const stageResults = files.value.map((file) =>
                 ResultAsync.fromPromise(
                     gitProvider.staging.stageFile(file, context.getConfig().dryRun),
-                    toFireflyError,
+                    (error) =>
+                        toFireflyError(error) ||
+                        createFireflyError({
+                            message: "Unknown error occurred while staging file",
+                            code: "UNEXPECTED",
+                            cause: error,
+                        }),
                 ),
             );
 
-            return ResultAsync.combine(stageResults).map(() => {});
+            ResultAsync.combineWithAllErrors(stageResults)
+                .map(() => {})
+                .mapErr((errors) =>
+                    errors.length === 1
+                        ? errors[0]
+                        : createFireflyError({
+                              message: "Multiple errors occurred while staging files.",
+                              code: "FAILED",
+                              details: errors,
+                          }),
+                );
+
+            return okAsync();
         });
     }
 }
