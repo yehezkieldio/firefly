@@ -45,4 +45,23 @@ export class CommitChangesTask implements ConditionalTask<ReleaseTaskContext> {
             logger.info(`Committed changes with message: ${colors.gray(commitMessage)}`);
         });
     }
+
+    canUndo(): boolean {
+        return true;
+    }
+
+    undo(context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        const gitProvider = GitProvider.getInstance();
+        const config = context.getConfig();
+
+        return wrapPromise(gitProvider.commit.resetLast(false, config.dryRun))
+            .andTee((result) => {
+                if (result.isErr()) {
+                    logger.error(`Failed to reset last commit: ${result.error.message}`);
+                } else {
+                    logger.verbose("CommitChangesTask: Last commit reset successfully.");
+                }
+            })
+            .map(() => {});
+    }
 }
