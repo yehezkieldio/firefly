@@ -6,6 +6,30 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.20 (September 11, 2025)
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`6fafb0d`](https://github.com/yehezkieldio/firefly/commit/6fafb0d8b42617cb533408fd2d859d76c46f01cc) deps: Update dependency zod to ^4.1.7 ([#76](https://github.com/yehezkieldio/firefly/issues/76)) by renovate[bot]
+
+### <!-- 3 -->🚀 New Features
+- [`0715afb`](https://github.com/yehezkieldio/firefly/commit/0715afb8dd265474c7052685171912ff515d1da8) semver: Add logging for version initialization and bump
+- [`cbfa541`](https://github.com/yehezkieldio/firefly/commit/cbfa54112237f7e351127129671c323c61d98d35) changelog: Add execution time logging for changelog generation
+- [`e87cbf3`](https://github.com/yehezkieldio/firefly/commit/e87cbf3806b0a614af5eb2183e04ea75435f146a) git-status: Add methods to retrieve staged files
+- [`f4587fa`](https://github.com/yehezkieldio/firefly/commit/f4587fa9a3c7832bc33385c787a530c75ad4ebd0) git-staging: Add dry run option for unstageFiles
+- [`569e486`](https://github.com/yehezkieldio/firefly/commit/569e4860fc7b628429830a4b72454ed46ef14094) stage-changes: Add undo functionality for staging changes
+- [`1130cf0`](https://github.com/yehezkieldio/firefly/commit/1130cf045c7acaff3b07a8521ad8bceab43f758b) commit-changes: Implement commit with dynamic message
+- [`13f2e38`](https://github.com/yehezkieldio/firefly/commit/13f2e38156966909ecb297a0875803f3c0eed3d2) automatic-bump: Enhance logging with bold details
+- [`7aec2f0`](https://github.com/yehezkieldio/firefly/commit/7aec2f032adc5af9fa0ec8fe1f2de39dec549bbd) commit-changes: Add undo functionality for commits
+- [`e0a8e60`](https://github.com/yehezkieldio/firefly/commit/e0a8e60b3d3266e42810a46cfaeef3f3c6fc95c3) github: Implement GitHub release creation service
+- [`7b21b17`](https://github.com/yehezkieldio/firefly/commit/7b21b175f7105292fefeee182e2be2f5ad2d9fef) github: Add release service to GitHub provider
+- [`f69943f`](https://github.com/yehezkieldio/firefly/commit/f69943f1bd68d55ec3f6f940827250c07db61dea) git: Implement create and delete tag functionality
+- [`ebd9d68`](https://github.com/yehezkieldio/firefly/commit/ebd9d68caef2287baa05d510b86eb56d87d4941d) git: Add rollback functionality for latest commit
+- [`e95a408`](https://github.com/yehezkieldio/firefly/commit/e95a4083cad6de107fb53f14bfabda5de0647ee3) git: Add verbose logging for git command execution
+- [`58ebdea`](https://github.com/yehezkieldio/firefly/commit/58ebdea23bdb0c7474ce09afca082fa709a30e64) git: Implement tag pushing to remote repository
+- [`3960621`](https://github.com/yehezkieldio/firefly/commit/3960621cf9f77e4677ce51ca299067498e0562b9) git: Add remote tag deletion functionality
+
+### <!-- 7 -->🚜 Refactor
+- [`f2212e1`](https://github.com/yehezkieldio/firefly/commit/f2212e19245c6c0fe29e6dd042a4ab570abd71cf) semver: Remove unused transition keywords
 ## firefly@3.0.0-alpha.19 (September 11, 2025)
 
 ### <!-- 17 -->🛠️ Miscellaneous
