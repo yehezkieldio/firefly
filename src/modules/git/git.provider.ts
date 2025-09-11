@@ -87,7 +87,7 @@ export class GitProvider {
 
     get rollback(): GitRollbackService {
         if (!this._rollback) {
-            this._rollback = new GitRollbackService(this.push, this.tag);
+            this._rollback = new GitRollbackService(this.push, this.tag, this.history);
         }
         return this._rollback;
     }

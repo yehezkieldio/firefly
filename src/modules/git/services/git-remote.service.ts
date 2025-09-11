@@ -5,6 +5,47 @@ import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
 export class GitRemoteService {
+    async getCurrentRemote(): Promise<FireflyResult<string>> {
+        logger.verbose("GitRemoteService: Getting current remote...");
+
+        const upstreamResult = await executeGitCommand(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
+        if (upstreamResult.isErr()) {
+            return err(
+                createFireflyError({
+                    code: "NOT_FOUND",
+                    message: "No upstream branch found to determine current remote.",
+                    source: "git/git-remote-service",
+                }),
+            );
+        }
+
+        const upstreamBranch = upstreamResult.value.trim();
+        if (!upstreamBranch) {
+            return err(
+                createFireflyError({
+                    code: "NOT_FOUND",
+                    message: "No upstream branch found.",
+                    source: "git/git-remote-service",
+                }),
+            );
+        }
+
+        // Extract remote name from upstream (e.g., "origin/main" -> "origin")
+        const remoteName = upstreamBranch.split("/")[0];
+        if (!remoteName) {
+            return err(
+                createFireflyError({
+                    code: "INVALID",
+                    message: `Invalid upstream branch format: ${upstreamBranch}`,
+                    source: "git/git-remote-service",
+                }),
+            );
+        }
+
+        logger.verbose(`GitRemoteService: Current remote is "${remoteName}"`);
+        return ok(remoteName);
+    }
+
     async hasUnpushedCommits(): Promise<FireflyResult<boolean>> {
         logger.verbose("GitRemoteService: Checking for unpushed commits...");
 

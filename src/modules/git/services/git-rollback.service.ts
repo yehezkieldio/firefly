@@ -1,4 +1,5 @@
 import { err, ok } from "neverthrow";
+import type { GitHistoryService } from "#/modules/git/services/git-history.service";
 import type { GitPushService } from "#/modules/git/services/git-push.service";
 import type { GitTagService } from "#/modules/git/services/git-tag.service";
 import { executeGitCommand } from "#/modules/git/utils/git-command-executor.util";
@@ -10,6 +11,7 @@ export class GitRollbackService {
     constructor(
         private readonly pushService: GitPushService,
         private readonly tagService: GitTagService,
+        private readonly historyService: GitHistoryService,
     ) {}
 
     async rollbackPushedTags(tagNames: string[], remote = "origin", dryRun?: boolean): Promise<FireflyResult<void>> {
@@ -196,5 +198,32 @@ export class GitRollbackService {
 
         logger.verbose(`GitRollbackService: Commit exists: ${commitHash}`);
         return ok(true);
+    }
+
+    async rollbackLatestCommitIfMessageMatches(
+        expectedMessage: string,
+        branch: string,
+        remote = "origin",
+        force = false,
+        dryRun?: boolean,
+    ): Promise<FireflyResult<void>> {
+        logger.verbose(`GitRollbackService: Attempting safe rollback if latest commit matches "${expectedMessage}"`);
+
+        const latestCommitResult = await this.historyService.getLatestCommitIfMessageMatches(expectedMessage);
+        if (latestCommitResult.isErr()) return err(latestCommitResult.error);
+
+        const commitHash = latestCommitResult.value;
+        if (!commitHash) {
+            return err(
+                createFireflyError({
+                    code: "NOT_FOUND",
+                    message: `Latest commit does not match expected message "${expectedMessage}". Rollback aborted.`,
+                    source: "git/git-rollback-service",
+                }),
+            );
+        }
+
+        logger.verbose(`GitRollbackService: Latest commit matches. Proceeding with rollback to ${commitHash}`);
+        return this.rollbackToCommit(`${commitHash}^`, branch, remote, force, dryRun);
     }
 }

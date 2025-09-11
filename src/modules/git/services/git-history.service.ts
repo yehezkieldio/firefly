@@ -152,4 +152,37 @@ export class GitHistoryService {
         logger.verbose(`GitHistoryService: ${ancestor} is an ancestor of ${descendant}`);
         return ok(true);
     }
+
+    async getLatestCommitIfMessageMatches(expectedMessage: string): Promise<FireflyResult<string | null>> {
+        logger.verbose(`GitHistoryService: Checking if latest commit message matches "${expectedMessage}"`);
+
+        const latestCommitResult = await executeGitCommand([
+            "log",
+            "-1",
+            "--pretty=format:%H%n%s", // hash on first line, subject on second
+        ]);
+
+        if (latestCommitResult.isErr()) return err(latestCommitResult.error);
+
+        const [hash, subject] = latestCommitResult.value.trim().split("\n");
+
+        if (!(hash && subject)) {
+            return err(
+                createFireflyError({
+                    code: "UNEXPECTED",
+                    message: "Failed to parse latest commit information.",
+                    source: "git/git-history-service",
+                }),
+            );
+        }
+
+        const matches = subject.trim() === expectedMessage.trim();
+        logger.verbose(
+            matches
+                ? `GitHistoryService: Latest commit matches expected message. Hash: ${hash}`
+                : "GitHistoryService: Latest commit does not match expected message.",
+        );
+
+        return ok(matches ? hash : null);
+    }
 }
