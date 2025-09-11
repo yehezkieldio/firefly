@@ -62,7 +62,7 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
                 );
             }
 
-            return okAsync(new GitProvider());
+            return okAsync(GitProvider.getInstance());
         });
     }
 
