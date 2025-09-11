@@ -78,4 +78,32 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
                 .map(() => {});
         });
     }
+
+    canUndo(): boolean {
+        return true;
+    }
+
+    undo(context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        const config = context.getConfig();
+        const changelogPath = config.changelogPath || "CHANGELOG.md";
+
+        const packageJsonPath = resolve(context.getBasePath(), "package.json");
+        const fullChangelogPath = resolve(context.getBasePath(), changelogPath);
+
+        const gitProvider = GitProvider.getInstance();
+
+        return wrapPromise(gitProvider.staging.unstageFiles([fullChangelogPath, packageJsonPath], config.dryRun))
+            .andTee((result) => {
+                if (result.isErr()) {
+                    logger.error(
+                        `Failed to unstage files: ${[fullChangelogPath, packageJsonPath].join(", ")}. Error: ${result.error.message}`,
+                    );
+                } else {
+                    logger.verbose(
+                        `StageChangesTask: Unstaged files: ${[fullChangelogPath, packageJsonPath].join(", ")}`,
+                    );
+                }
+            })
+            .map(() => {});
+    }
 }
