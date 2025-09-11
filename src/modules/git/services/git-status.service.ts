@@ -33,7 +33,7 @@ export class GitStatusService {
             return ok([]);
         }
 
-        const modifiedFiles = statusOutput.split("\n").map((line) => line.slice(3).trim());
+        const modifiedFiles = statusOutput.split("\n").map((line) => line.slice(2).trim());
 
         logger.verbose(`GitStatusService: Found modified files: ${modifiedFiles.join(", ")}`);
         return ok(modifiedFiles);
