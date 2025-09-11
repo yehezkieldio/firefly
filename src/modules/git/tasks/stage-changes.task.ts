@@ -1,5 +1,5 @@
 import { basename } from "node:path";
-import { ResultAsync, errAsync, ok, okAsync } from "neverthrow";
+import { ResultAsync, errAsync, ok } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks";
 import { GitProvider } from "#/modules/git/git.provider";
@@ -7,8 +7,9 @@ import { CommitChangesTask } from "#/modules/git/tasks/commit-changes.task";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { GitFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
-import { createFireflyError, toFireflyError } from "#/shared/utils/error.util";
+import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
+import { wrapPromise } from "#/shared/utils/result.util";
 
 export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
     readonly id = "stage-changes";
@@ -42,23 +43,15 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
         const changelogFileName = basename(changelogPath);
         const gitProvider = GitProvider.getInstance();
 
-        const getModifiedFiles = ResultAsync.fromPromise(
+        return wrapPromise(
             gitProvider.status.getModifiedFilesByNames(["package.json", changelogFileName], context.getConfig().dryRun),
-            (error) =>
-                toFireflyError(error) ||
-                createFireflyError({
-                    message: "Unknown error occurred while getting modified files",
-                    code: "UNEXPECTED",
-                    cause: error,
-                }),
-        );
-
-        return getModifiedFiles.andThen((files) => {
-            if (files.isErr()) {
-                return errAsync(files.error);
+        ).andThen((filesResult) => {
+            if (filesResult.isErr()) {
+                return errAsync(filesResult.error);
             }
 
-            if (files.value.length === 0) {
+            const files = filesResult.value;
+            if (files.length === 0) {
                 return errAsync(
                     createFireflyError({
                         message: "No changes detected to stage.",
@@ -67,32 +60,12 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
                 );
             }
 
-            const stageResults = files.value.map((file) =>
-                ResultAsync.fromPromise(
-                    gitProvider.staging.stageFile(file, context.getConfig().dryRun),
-                    (error) =>
-                        toFireflyError(error) ||
-                        createFireflyError({
-                            message: "Unknown error occurred while staging file",
-                            code: "UNEXPECTED",
-                            cause: error,
-                        }),
-                ),
+            // Stage files sequentially
+            const stagePromises = files.map((file) =>
+                wrapPromise(gitProvider.staging.stageFile(file, context.getConfig().dryRun)),
             );
 
-            ResultAsync.combineWithAllErrors(stageResults)
-                .map(() => {})
-                .mapErr((errors) =>
-                    errors.length === 1
-                        ? errors[0]
-                        : createFireflyError({
-                              message: "Multiple errors occurred while staging files.",
-                              code: "FAILED",
-                              details: errors,
-                          }),
-                );
-
-            return okAsync();
+            return ResultAsync.combine(stagePromises).map(() => {});
         });
     }
 }
