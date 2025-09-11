@@ -1,4 +1,4 @@
-import { basename } from "node:path";
+import { resolve } from "node:path";
 import { ResultAsync, errAsync, ok } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { GenerateChangelogTask } from "#/modules/changelog/tasks";
@@ -7,7 +7,7 @@ import { CommitChangesTask } from "#/modules/git/tasks/commit-changes.task";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { GitFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
-import { createFireflyError } from "#/shared/utils/error.util";
+import { logger } from "#/shared/logger";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 import { wrapPromise } from "#/shared/utils/result.util";
 
@@ -39,33 +39,39 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
     }
 
     execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
-        const changelogPath = context.getConfig().changelogPath || "CHANGELOG.md";
-        const changelogFileName = basename(changelogPath);
+        const config = context.getConfig();
+        const changelogPath = config.changelogPath || "CHANGELOG.md";
+
+        const packageJsonPath = resolve(context.getBasePath(), "package.json");
+        const fullChangelogPath = resolve(context.getBasePath(), changelogPath);
+
         const gitProvider = GitProvider.getInstance();
 
         return wrapPromise(
-            gitProvider.status.getModifiedFilesByNames(["package.json", changelogFileName], context.getConfig().dryRun),
+            gitProvider.status.getUnstagedFilesByNames([fullChangelogPath, packageJsonPath], config.dryRun),
         ).andThen((filesResult) => {
             if (filesResult.isErr()) {
                 return errAsync(filesResult.error);
             }
 
             const files = filesResult.value;
+
+            logger.verbose(`StageChangesTask: Found ${files.length} files to stage: ${files.join(", ")}`);
+
             if (files.length === 0) {
-                return errAsync(
-                    createFireflyError({
-                        message: "No changes detected to stage.",
-                        code: "NOT_FOUND",
-                    }),
-                );
+                logger.verbose("StageChangesTask: No changes detected to stage, continuing...");
+                return ResultAsync.fromSafePromise(Promise.resolve());
             }
 
-            // Stage files sequentially
-            const stagePromises = files.map((file) =>
-                wrapPromise(gitProvider.staging.stageFile(file, context.getConfig().dryRun)),
-            );
-
-            return ResultAsync.combine(stagePromises).map(() => {});
+            return wrapPromise(gitProvider.staging.stageFiles(files, config.dryRun))
+                .andTee((result) => {
+                    if (result.isErr()) {
+                        logger.error(`Failed to stage files: ${files.join(", ")}. Error: ${result.error.message}`);
+                    } else {
+                        logger.verbose(`StageChangesTask: Staged files: ${files.join(", ")}`);
+                    }
+                })
+                .map(() => {});
         });
     }
 }

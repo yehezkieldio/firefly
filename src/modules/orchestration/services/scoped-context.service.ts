@@ -133,7 +133,6 @@ export class ScopedContextService<TCommand extends CommandName>
 
     getBasePath(): string {
         const basePath = (this.state as Record<string, unknown>).basePath;
-
         if (typeof basePath !== "string") {
             return process.cwd();
         }

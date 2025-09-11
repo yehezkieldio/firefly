@@ -24,10 +24,10 @@ export class GitStagingService {
         return ok();
     }
 
-    async stageFiles(filePaths: string[]): Promise<FireflyResult<void>> {
+    async stageFiles(filePaths: string[], dryRun?: boolean): Promise<FireflyResult<void>> {
         logger.verbose(`GitStagingService: Staging files: ${filePaths.join(", ")}`);
 
-        const addResult = await executeGitCommand(["add", ...filePaths]);
+        const addResult = await executeGitCommand(["add", ...filePaths], { dryRun });
         if (addResult.isErr()) return err(addResult.error);
 
         logger.verbose("GitStagingService: Files staged successfully");
