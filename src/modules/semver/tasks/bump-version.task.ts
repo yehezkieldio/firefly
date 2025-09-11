@@ -3,6 +3,7 @@ import type { ReleaseTaskContext } from "#/application/context";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { ChangelogFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { logger } from "#/shared/logger";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
 export class BumpVersionTask implements ConditionalTask<ReleaseTaskContext> {
@@ -30,7 +31,10 @@ export class BumpVersionTask implements ConditionalTask<ReleaseTaskContext> {
         return ok([taskRef(ChangelogFlowControllerTask)]);
     }
 
-    execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
+    execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        logger.log("Current version is", context.getCurrentVersion());
+        logger.log("Bumping version to", context.getNextVersion());
+
         return okAsync();
     }
 }

@@ -18,7 +18,6 @@ import {
     BumpVersionTask,
     ExecuteBumpStrategyTask,
     InitializeCurrentVersionTask,
-    ManualBumpTask,
     PromptBumpStrategyTask,
     PromptManualVersionTask,
     StraightBumpTask,
@@ -45,7 +44,6 @@ export function createReleaseWorkflow_sequential(): Workflow<"release"> {
                 new AutomaticBumpTask(),
 
                 new PromptManualVersionTask(),
-                new ManualBumpTask(),
 
                 new BumpVersionTask(),
 

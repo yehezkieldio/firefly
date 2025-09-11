@@ -4,8 +4,13 @@ import type { ConditionalTask } from "#/modules/orchestration/contracts/task.int
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import { BUMP_STRATEGY_AUTO } from "#/modules/semver/constants/bump-strategy.constant";
 import { SemanticVersionService } from "#/modules/semver/services/semantic-version.service";
+import {
+    type VersionDecisionOptions,
+    VersionResolverService,
+} from "#/modules/semver/services/version-resolver.service";
 import { BumpVersionTask } from "#/modules/semver/tasks/bump-version.task";
 import { ExecuteBumpStrategyTask } from "#/modules/semver/tasks/execute-bump-strategy.task";
+import { Version } from "#/modules/semver/version.domain";
 import { toFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -26,17 +31,32 @@ export class AutomaticBumpTask implements ConditionalTask<ReleaseTaskContext> {
         return ok([taskRef(BumpVersionTask)]);
     }
 
-    execute(_context: ReleaseTaskContext): FireflyAsyncResult<void> {
+    execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
+        const currentVersion = Version.from(context.getCurrentVersion());
+        if (currentVersion.isErr()) return errAsync(currentVersion.error);
+
+        const options: VersionDecisionOptions = {
+            currentVersion: currentVersion.value,
+            releaseType: context.getConfig().releaseType,
+            prereleaseIdentifier: context.getConfig().preReleaseId,
+            prereleaseBase: context.getConfig().preReleaseBase,
+        };
+
         const semanticVersionService = new SemanticVersionService();
+        const recommendVersion = ResultAsync.fromPromise(semanticVersionService.recommendVersion(), toFireflyError);
 
-        return ResultAsync.fromPromise(semanticVersionService.recommendVersion(), toFireflyError).andThen(
-            (recommendedVersion) => {
-                if (recommendedVersion.isErr()) {
-                    return errAsync(recommendedVersion.error);
-                }
+        return recommendVersion.andThen((recommendation) => {
+            if (recommendation.isErr()) {
+                return errAsync(recommendation.error);
+            }
 
-                return okAsync();
-            },
-        );
+            const decision = VersionResolverService.decideNextVersion(options, recommendation.value);
+            if (decision.isErr()) {
+                return errAsync(decision.error);
+            }
+
+            context.setNextVersion(decision.value.raw);
+            return okAsync();
+        });
     }
 }

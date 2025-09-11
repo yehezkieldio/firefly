@@ -19,7 +19,7 @@ interface VersionRecommendation {
     };
 }
 
-interface VersionDecisionOptions {
+export interface VersionDecisionOptions {
     readonly currentVersion: Version;
     readonly releaseType?: ReleaseType;
     readonly prereleaseIdentifier?: string;
@@ -32,7 +32,7 @@ interface PreReleaseContext {
     readonly hasStableTransition: boolean;
 }
 
-export class VersionDeciderService {
+export class VersionResolverService {
     private static readonly TRANSITION_KEYWORDS = [
         "stable",
         "release",
@@ -56,28 +56,28 @@ export class VersionDeciderService {
         options: VersionDecisionOptions,
         recommendation?: VersionRecommendation,
     ): FireflyResult<Version> {
-        const preReleaseContext = VersionDeciderService.analyzePreReleaseContext(
+        const preReleaseContext = VersionResolverService.analyzePreReleaseContext(
             options.currentVersion,
             recommendation,
         );
 
         // Handle explicit prerelease request
         if (options.releaseType === "prerelease") {
-            return VersionDeciderService.handlePreReleaseRequest(options, preReleaseContext);
+            return VersionResolverService.handlePreReleaseRequest(options, preReleaseContext);
         }
 
         // Handle transition from pre-release to stable
         if (preReleaseContext.isCurrentPreRelease && preReleaseContext.hasStableTransition) {
-            return VersionDeciderService.handlePreReleaseToStableTransition(options, recommendation);
+            return VersionResolverService.handlePreReleaseToStableTransition(options, recommendation);
         }
 
         // Handle recommendation-based versioning
         if (recommendation) {
-            return VersionDeciderService.createRecommendationBasedVersion(options, recommendation, preReleaseContext);
+            return VersionResolverService.createRecommendationBasedVersion(options, recommendation, preReleaseContext);
         }
 
         // Default to standard bump
-        return VersionDeciderService.bumpVersion(options);
+        return VersionResolverService.bumpVersion(options);
     }
 
     private static analyzePreReleaseContext(
@@ -86,7 +86,7 @@ export class VersionDeciderService {
     ): PreReleaseContext {
         const isCurrentPreRelease = currentVersion.isPrerelease;
         const prereleaseIdentifier = currentVersion.prereleaseIdentifier;
-        const hasStableTransition = VersionDeciderService.detectStableTransition(recommendation);
+        const hasStableTransition = VersionResolverService.detectStableTransition(recommendation);
 
         return {
             isCurrentPreRelease,
@@ -99,7 +99,7 @@ export class VersionDeciderService {
         if (!recommendation) return false;
 
         const reason = recommendation.reason.toLowerCase();
-        return VersionDeciderService.TRANSITION_KEYWORDS.some((keyword) => reason.includes(keyword));
+        return VersionResolverService.TRANSITION_KEYWORDS.some((keyword) => reason.includes(keyword));
     }
 
     private static handlePreReleaseRequest(
@@ -143,7 +143,7 @@ export class VersionDeciderService {
 
         // If recommendation suggests further bumping after graduation
         if (recommendation.level < 2) {
-            const releaseType = VersionDeciderService.LEVEL_TO_RELEASE_TYPE[recommendation.level];
+            const releaseType = VersionResolverService.LEVEL_TO_RELEASE_TYPE[recommendation.level];
             return VersionManagerService.bumpVersion({
                 currentVersion: stableVersion,
                 releaseType,
@@ -158,7 +158,7 @@ export class VersionDeciderService {
         recommendation: VersionRecommendation,
         context: PreReleaseContext,
     ): FireflyResult<Version> {
-        const releaseType = VersionDeciderService.LEVEL_TO_RELEASE_TYPE[recommendation.level];
+        const releaseType = VersionResolverService.LEVEL_TO_RELEASE_TYPE[recommendation.level];
 
         // If currently in prerelease and no explicit transition, continue prerelease
         if (context.isCurrentPreRelease && !context.hasStableTransition) {
@@ -172,7 +172,7 @@ export class VersionDeciderService {
         }
 
         // Standard release based on recommendation
-        return VersionDeciderService.bumpVersion({
+        return VersionResolverService.bumpVersion({
             ...options,
             releaseType,
         });

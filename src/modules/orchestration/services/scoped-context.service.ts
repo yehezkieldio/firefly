@@ -140,11 +140,33 @@ export class ScopedContextService<TCommand extends CommandName>
         return basePath;
     }
 
-    getCurrentVersion(): string | null {
+    getCurrentVersion(): string {
         const currentVersion = (this.state as Record<string, unknown>).currentVersion;
         if (typeof currentVersion === "string") {
             return currentVersion;
         }
-        return null;
+        return "0.0.0";
+    }
+
+    getNextVersion(): string {
+        const nextVersion = (this.state as Record<string, unknown>).nextVersion;
+        if (typeof nextVersion === "string") {
+            return nextVersion;
+        }
+        return "0.0.0";
+    }
+
+    setCurrentVersion(version: string): FireflyResult<void> {
+        return this.set(
+            "currentVersion" as keyof ContextDataFor<TCommand>,
+            version as ContextDataFor<TCommand>[keyof ContextDataFor<TCommand>],
+        );
+    }
+
+    setNextVersion(version: string): FireflyResult<void> {
+        return this.set(
+            "nextVersion" as keyof ContextDataFor<TCommand>,
+            version as ContextDataFor<TCommand>[keyof ContextDataFor<TCommand>],
+        );
     }
 }

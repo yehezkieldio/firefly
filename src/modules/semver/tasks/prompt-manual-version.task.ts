@@ -5,8 +5,8 @@ import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import { BUMP_STRATEGY_MANUAL } from "#/modules/semver/constants/bump-strategy.constant";
 import { VersionChoicePrompter } from "#/modules/semver/prompters/version-choice.prompter";
 import { type VersionChoicesArgs, VersionChoicesService } from "#/modules/semver/services/version-choices.service";
+import { BumpVersionTask } from "#/modules/semver/tasks/bump-version.task";
 import { ExecuteBumpStrategyTask } from "#/modules/semver/tasks/execute-bump-strategy.task";
-import { ManualBumpTask } from "#/modules/semver/tasks/manual-bump.task";
 import { Version } from "#/modules/semver/version.domain";
 import { toFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
@@ -25,7 +25,7 @@ export class PromptManualVersionTask implements ConditionalTask<ReleaseTaskConte
     }
 
     getNextTasks(): FireflyResult<string[]> {
-        return ok([taskRef(ManualBumpTask)]);
+        return ok([taskRef(BumpVersionTask)]);
     }
 
     execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
@@ -50,6 +50,7 @@ export class PromptManualVersionTask implements ConditionalTask<ReleaseTaskConte
                 return errAsync(choice.error);
             }
 
+            context.setNextVersion(choice.value);
             return okAsync();
         });
     }

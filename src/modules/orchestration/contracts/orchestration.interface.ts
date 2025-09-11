@@ -16,7 +16,10 @@ export interface OrchestrationContext<TData = Record<string, unknown>, TCommand 
     getConfig(): TCommand extends CommandName ? FinalConfigFor<TCommand> : never;
     setConfig(config: TCommand extends CommandName ? FinalConfigFor<TCommand> : never): FireflyResult<void>;
     getBasePath(): string;
-    getCurrentVersion(): string | null;
+    getCurrentVersion(): string;
+    getNextVersion(): string | null;
+    setCurrentVersion(version: string): FireflyResult<void>;
+    setNextVersion(version: string): FireflyResult<void>;
 }
 
 export const RollbackStrategySchema = z.enum([
