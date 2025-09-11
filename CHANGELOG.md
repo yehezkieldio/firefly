@@ -6,6 +6,31 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.17 (September 11, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`0cd023c`](https://github.com/yehezkieldio/firefly/commit/0cd023c2d8f2153a3f3e1884a586132a35a6d81a) preflight: Add git-cliff config check in preflight task
+- [`bf4db72`](https://github.com/yehezkieldio/firefly/commit/bf4db727ec2c82af4a39f313b269306b4ffb71a2) orchestration: Add getBasePath method to context
+- [`7faef2c`](https://github.com/yehezkieldio/firefly/commit/7faef2c9a4efcffca3202d9dc22b8ea438978499) semver: Implement version bumping functionality
+- [`885870a`](https://github.com/yehezkieldio/firefly/commit/885870a4de5b524c0452d9512493852b3eb0aef8) semver: Implement version bumping methods in VersionManager
+- [`c4b526b`](https://github.com/yehezkieldio/firefly/commit/c4b526b8c6bfcad15004ee94777ea76e4b297548) semver: Add version choice prompting functionality
+- [`36f7d39`](https://github.com/yehezkieldio/firefly/commit/36f7d39b14c022d5dabdc53c7bfcf8cef461e54c) types: Add commit reference and note interfaces
+- [`cb76736`](https://github.com/yehezkieldio/firefly/commit/cb76736eb9948464c08fee67342c59bcfb6f41c8) semver: Implement semantic versioning analysis service
+- [`2b6adca`](https://github.com/yehezkieldio/firefly/commit/2b6adca506e9ead779a3ad3ef60e4437138cb9c1) semver: Enhance version recommendation and bump tasks
+- [`bd423b5`](https://github.com/yehezkieldio/firefly/commit/bd423b5d2287f694826f202a2b6cb6efefc3639e) semver: Enhance version decision and bump tasks
+
+### <!-- 7 -->🚜 Refactor
+- [`d9fa04e`](https://github.com/yehezkieldio/firefly/commit/d9fa04e3ea532333ead13da24c498ea1a7555d0d) config: Use singleton pattern for packageJsonService
+- [`5833ffd`](https://github.com/yehezkieldio/firefly/commit/5833ffdca126579524427dd6c7af3a6eef567e25) preflight: Simplify basePath retrieval in tasks
+- [`db2376b`](https://github.com/yehezkieldio/firefly/commit/db2376bc2f6819598c39b2ce74ca85e296c84710) semver: Log current version during initialization
+- [`57d3ec8`](https://github.com/yehezkieldio/firefly/commit/57d3ec88d01066c686eaa7abe4da9128538b24e1) semver: Remove verbose logging in version manager
+- [`f4b01d7`](https://github.com/yehezkieldio/firefly/commit/f4b01d7ce02145071f052c337514c31ee6386a95) git: Implement singleton pattern for GitProvider
+- [`df8a9a2`](https://github.com/yehezkieldio/firefly/commit/df8a9a2bf75a8c9dccbb25e963597873d1cd5524) task-executor: Change log color for task execution
+- [`5e67ec3`](https://github.com/yehezkieldio/firefly/commit/5e67ec3d6eb29f504a6ef1cd07a8d17252b09991) semver: Simplify execute method signature
+- [`d6680d2`](https://github.com/yehezkieldio/firefly/commit/d6680d236218a8b091c43a429fc00eb076bf5b65) semver: Update version bump logic for prereleases
+- [`47850b3`](https://github.com/yehezkieldio/firefly/commit/47850b3d0fdfeae8a0c162c6c65e202c973719a2) semver: Restructure execute method for clarity
+- [`576302f`](https://github.com/yehezkieldio/firefly/commit/576302f0951d9ae2095d55131f58f11fcc7fa460) semver: Add logging to version decision processes
+- [`cdec41e`](https://github.com/yehezkieldio/firefly/commit/cdec41e28ed08c0775c4e1fdb4f5ff3bc98094c2) preflight: Use singleton for GitProvider instance
 ## firefly@3.0.0-alpha.16 (September 10, 2025)
 
 ### <!-- 2 -->🧩 Dependencies Updates
