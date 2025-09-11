@@ -92,4 +92,42 @@ export class GitStatusService {
         logger.verbose(`GitStatusService: Filtered unstaged files: ${filteredFiles.join(", ")}`);
         return ok(filteredFiles);
     }
+
+    async getStagedFiles(dryRun?: boolean): Promise<FireflyResult<string[]>> {
+        logger.verbose("GitStatusService: Retrieving staged files");
+
+        const statusResult = await executeGitCommand(["status", "--porcelain"], { dryRun });
+        if (statusResult.isErr()) {
+            return err(statusResult.error);
+        }
+
+        const statusOutput = statusResult.value;
+        if (statusOutput.length === 0) {
+            logger.verbose("GitStatusService: No staged files found");
+            return ok([]);
+        }
+
+        const stagedFiles = statusOutput
+            .split("\n")
+            .filter((line) => line.charAt(0) !== " ")
+            .map((line) => line.slice(2).trim());
+
+        logger.verbose(`GitStatusService: Found staged files: ${stagedFiles.join(", ")}`);
+        return ok(stagedFiles);
+    }
+
+    async getStagedFilesByNames(fileNames: string[], dryRun?: boolean): Promise<FireflyResult<string[]>> {
+        const stagedFilesResult = await this.getStagedFiles(dryRun);
+        if (stagedFilesResult.isErr()) {
+            return err(stagedFilesResult.error);
+        }
+
+        const stagedFiles = stagedFilesResult.value;
+        const filteredFiles = stagedFiles.filter((file) =>
+            fileNames.some((fileName) => file === fileName || basename(file) === basename(fileName)),
+        );
+
+        logger.verbose(`GitStatusService: Filtered staged files: ${filteredFiles.join(", ")}`);
+        return ok(filteredFiles);
+    }
 }
