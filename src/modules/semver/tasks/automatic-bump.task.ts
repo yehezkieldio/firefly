@@ -51,6 +51,9 @@ export class AutomaticBumpTask implements ConditionalTask<ReleaseTaskContext> {
                 return errAsync(recommendation.error);
             }
 
+            const { reason } = recommendation.value;
+            logger.info(reason);
+
             const decision = VersionResolverService.decideNextVersion(options, recommendation.value);
             if (decision.isErr()) {
                 return errAsync(decision.error);

@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import { colors } from "consola/utils";
 import { ResultAsync, errAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { ChangelogGeneratorService } from "#/modules/changelog/services/changelog-generator.service";
@@ -8,6 +9,7 @@ import { GitProvider } from "#/modules/git/git.provider";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { ChangelogFlowControllerTask, GitFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { logger } from "#/shared/logger";
 import { toFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -48,6 +50,7 @@ export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext
                 return FileSystemService.write(changelogPath, "");
             }
 
+            logger.info("Generating changelog...");
             return ResultAsync.fromPromise(
                 changelogGeneratorService.generateChangelog(context.getConfig()),
                 toFireflyError,
@@ -56,6 +59,7 @@ export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext
                     return errAsync(result.error);
                 }
 
+                logger.success(`Changelog generated at ${colors.blueBright(changelogPath)}`);
                 context.set("changelogContent", result.value);
                 return okAsync();
             });

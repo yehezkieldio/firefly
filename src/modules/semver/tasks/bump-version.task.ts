@@ -1,9 +1,11 @@
+import { colors } from "consola/utils";
 import { ResultAsync, errAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { PackageJsonService } from "#/modules/filesystem/package-json.service";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { ChangelogFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
+import { logger } from "#/shared/logger";
 import { createFireflyError, toFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
@@ -43,6 +45,7 @@ export class BumpVersionTask implements ConditionalTask<ReleaseTaskContext> {
         const packageJsonService = PackageJsonService.getInstance(basePath);
         const updateVersionResult = packageJsonService.updateVersion(nextVersion, dryRun);
 
+        logger.info(`Version is now ${colors.blueBright(nextVersion)}`);
         return ResultAsync.fromPromise(updateVersionResult, toFireflyError).andThen(() => okAsync());
     }
 

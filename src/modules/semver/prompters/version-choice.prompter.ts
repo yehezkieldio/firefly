@@ -42,6 +42,7 @@ export class VersionChoicePrompter {
         if (prompt.isErr()) {
             return err(prompt.error);
         }
+        if (logger.level !== LogLevels.verbose) logger.log("");
 
         const selectedVersion = prompt.value;
         if (!selectedVersion || selectedVersion === "") {

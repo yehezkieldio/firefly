@@ -38,6 +38,7 @@ export class BumpStrategyPrompter {
         if (prompt.isErr()) {
             return err(prompt.error);
         }
+        if (logger.level !== LogLevels.verbose) logger.log("");
 
         const selectedStrategy = prompt.value;
         if (!selectedStrategy || selectedStrategy === "") {
