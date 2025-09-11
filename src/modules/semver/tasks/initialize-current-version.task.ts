@@ -1,3 +1,4 @@
+import { colors } from "consola/utils";
 import { ResultAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { PackageJsonService } from "#/modules/filesystem/package-json.service";
@@ -41,7 +42,7 @@ export class InitializeCurrentVersionTask implements ConditionalTask<ReleaseTask
         return ResultAsync.fromPromise(packageJsonService.read(), toFireflyError).andThen((pkg) => {
             const version = pkg.isErr() || !pkg.value.version ? "0.0.0" : pkg.value.version;
             logger.verbose(`InitializeCurrentVersionTask: Current version is "${version}"`);
-            logger.info(`Current version is ${version}`);
+            logger.info(`Current version is ${colors.cyanBright(version)}`);
 
             context.set("currentVersion", version);
 
