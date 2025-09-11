@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.19 (September 11, 2025)
+
+### <!-- 17 -->🛠️ Miscellaneous
+- [`b5b451d`](https://github.com/yehezkieldio/firefly/commit/b5b451d0f1a1fa0192c507f0ed0309fea150e691)  Merge branch 'master' of github.com:yehezkieldio/firefly
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`a710dd4`](https://github.com/yehezkieldio/firefly/commit/a710dd47d2c3028089d5f1a5e6f7e638a7709c14) deps: Update dependency zod to ^4.1.6 ([#75](https://github.com/yehezkieldio/firefly/issues/75)) by renovate[bot]
+
+### <!-- 3 -->🚀 New Features
+- [`5b03944`](https://github.com/yehezkieldio/firefly/commit/5b0394490fdf2a7a40bd24dae430a987351d4b09) git: Add dry run option for staging and status commands
+- [`45b5a29`](https://github.com/yehezkieldio/firefly/commit/45b5a296cab9e072c1dfee1424d477f8bf69abd0) git: Add dry run option for staging and status commands
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`b557276`](https://github.com/yehezkieldio/firefly/commit/b557276fb8b47ceb995c157dae547f8f522838b0) git: Correct index for modified files extraction
+- [`97facc5`](https://github.com/yehezkieldio/firefly/commit/97facc55bcbae1634e6023b75fb6a508feaeb287) git: Correct changelog file name in staging task
+- [`f388fb8`](https://github.com/yehezkieldio/firefly/commit/f388fb83ba00d1ff0d6c030ca43bdbb2d354b352) git: Improve error handling for staging files
+- [`ba6218f`](https://github.com/yehezkieldio/firefly/commit/ba6218fabf8c6410c76ab1f667607f006a37d8d1) git: Simplify error handling in staging task
 ## firefly@3.0.0-alpha.18 (September 11, 2025)
 
 ### <!-- 3 -->🚀 New Features
