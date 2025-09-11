@@ -17,7 +17,7 @@ export interface OrchestrationContext<TData = Record<string, unknown>, TCommand 
     setConfig(config: TCommand extends CommandName ? FinalConfigFor<TCommand> : never): FireflyResult<void>;
     getBasePath(): string;
     getCurrentVersion(): string;
-    getNextVersion(): string | null;
+    getNextVersion(): string;
     setCurrentVersion(version: string): FireflyResult<void>;
     setNextVersion(version: string): FireflyResult<void>;
 }
