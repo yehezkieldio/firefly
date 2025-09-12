@@ -1,6 +1,4 @@
-<div align="center">
-
-<img src=".github/assets/firefly.jpg" align="center" width="150px" height="200px">
+<div align="left">
 
 <h3>Firefly</h3>
 <p>Automatic semantic versioning, changelog generation, and creating GitHub releases via a CLI.</p>
