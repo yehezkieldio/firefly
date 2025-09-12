@@ -44,34 +44,39 @@ export const ReleaseConfigSchema = z
         releasePreRelease: z.coerce.boolean().default(false).describe("Mark as pre-release."),
         releaseDraft: z.coerce.boolean().default(false).describe("Release as draft version."),
     })
-    .superRefine((data, ctx) => {
+    .check((ctx) => {
         const flagNames = ["releaseLatest", "releasePreRelease", "releaseDraft"] as const;
-        const setFlags = flagNames.filter((k) => Boolean((data as Record<string, unknown>)[k]));
+        const setFlags = flagNames.filter((k) => Boolean((ctx.value as Record<string, unknown>)[k]));
 
         // Only one of releaseLatest, releasePreRelease, or releaseDraft may be true.
         if (setFlags.length > 1) {
-            ctx.addIssue({
-                code: "invalid_type",
-                message: "Only one of releaseLatest, releasePreRelease, or releaseDraft may be true.",
-                expected: "boolean",
+            ctx.issues.push({
+                code: "custom",
+                message: `Only one of ${flagNames.join(", ")} can be set to true.`,
+                input: ctx.value,
+                path: ["releaseLatest"],
             });
         }
 
         // When skipGit is true, skipPush is redundant and should not be set.
-        if (data.skipGit && data.skipPush) {
-            ctx.addIssue({
-                code: "invalid_type",
+        if (ctx.value.skipGit && ctx.value.skipPush) {
+            ctx.issues.push({
+                code: "custom",
                 message: "skipPush should not be set when skipGit is true.",
-                expected: "boolean",
+                input: ctx.value,
             });
         }
 
         // When bumpStrategy is "auto", explicit releaseType values (other than allowed ones) are invalid.
-        if (data.bumpStrategy === "auto" && data.releaseType !== undefined && data.releaseType !== "prerelease") {
-            ctx.addIssue({
-                code: "invalid_value",
-                message: "releaseType should not be specified when bumpStrategy is 'auto', except for 'prerelease'",
-                values: ["prerelease"],
+        if (
+            ctx.value.bumpStrategy === "auto" &&
+            ctx.value.releaseType !== undefined &&
+            ctx.value.releaseType !== "prerelease"
+        ) {
+            ctx.issues.push({
+                code: "custom",
+                message: "When bumpStrategy is 'auto', releaseType can only be 'prerelease' if specified.",
+                input: ctx.value,
             });
         }
     });
