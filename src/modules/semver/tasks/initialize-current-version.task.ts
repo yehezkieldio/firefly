@@ -3,7 +3,7 @@ import { ResultAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { PackageJsonService } from "#/modules/filesystem/package-json.service";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
-import { ChangelogFlowControllerTask, VersionFlowControllerTask } from "#/modules/orchestration/tasks";
+import { VersionFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import { logger } from "#/shared/logger";
 import { toFireflyError } from "#/shared/utils/error.util";
@@ -21,11 +21,7 @@ export class InitializeCurrentVersionTask implements ConditionalTask<ReleaseTask
         return ok(true);
     }
 
-    getSkipThroughTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
-        const config = context.getConfig();
-        if (config.skipBump) {
-            return ok([taskRef(ChangelogFlowControllerTask)]);
-        }
+    getSkipThroughTasks(): FireflyResult<string[]> {
         return ok([taskRef(VersionFlowControllerTask)]);
     }
 

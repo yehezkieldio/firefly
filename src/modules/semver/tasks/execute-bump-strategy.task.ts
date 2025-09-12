@@ -1,7 +1,6 @@
 import { ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
-import { ChangelogFlowControllerTask } from "#/modules/orchestration/tasks";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import { BUMP_STRATEGY_AUTO, BUMP_STRATEGY_MANUAL } from "#/modules/semver/constants/bump-strategy.constant";
 import { AutomaticBumpTask } from "#/modules/semver/tasks/automatic-bump.task";
@@ -21,7 +20,7 @@ export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskConte
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
         const config = context.getConfig();
 
-        const shouldRun = !config.releaseType && Boolean(config.bumpStrategy) && !config.skipBump;
+        const shouldRun = !config.releaseType && Boolean(config.bumpStrategy);
         return ok(shouldRun);
     }
 
@@ -40,10 +39,6 @@ export class ExecuteBumpStrategyTask implements ConditionalTask<ReleaseTaskConte
 
     getSkipThroughTasks(context: ReleaseTaskContext): FireflyResult<string[]> {
         const config = context.getConfig();
-
-        if (config.skipBump) {
-            return ok([taskRef(ChangelogFlowControllerTask)]);
-        }
 
         const strategy = config.bumpStrategy;
 
