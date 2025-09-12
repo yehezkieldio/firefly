@@ -6,6 +6,37 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0-alpha.21 (September 12, 2025)
+
+### <!-- 16 -->🤖 CI/CD
+- [`8da8206`](https://github.com/yehezkieldio/firefly/commit/8da820686e04c607272150d6b27f411ba45fce9e)  Update publish-next and publish-pre-release conditions
+
+### <!-- 17 -->🛠️ Miscellaneous
+- [`0a46f95`](https://github.com/yehezkieldio/firefly/commit/0a46f95cba9b25075182886ece5e0c6496ffe293)  Merge branch 'master' of github.com:yehezkieldio/firefly
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`a5424bc`](https://github.com/yehezkieldio/firefly/commit/a5424bc9b2b851d605cb968b9d17298707607c79) deps: Update dependency zod to ^4.1.8 ([#77](https://github.com/yehezkieldio/firefly/issues/77)) by renovate[bot]
+
+### <!-- 3 -->🚀 New Features
+- [`77b6dae`](https://github.com/yehezkieldio/firefly/commit/77b6dae3f26bb3875391d6ec720ff8a7cffa2c1b) github: Implement GitHub release publishing logic
+- [`859389d`](https://github.com/yehezkieldio/firefly/commit/859389dabb3241256f4bbfa718e3926e61d9e91a) git: Add logging for release command arguments
+- [`9d6ea7b`](https://github.com/yehezkieldio/firefly/commit/9d6ea7b70204f40a7e2976438d1f4c74515372a7) cli: Add shorthand options for command registration
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`40a289b`](https://github.com/yehezkieldio/firefly/commit/40a289b8cd9a6d2d1ec72826a47e436518d90a35) cli: Adjust option normalization for release flags
+- [`8630a81`](https://github.com/yehezkieldio/firefly/commit/8630a8131d0f6f00760c94cf07088ac9400f06fb) schema: Improve validation for release flags
+- [`9c3d39e`](https://github.com/yehezkieldio/firefly/commit/9c3d39e4e27295531c37fcf1f3b409f1a00d87ce) git: Pass release title to createTag method
+- [`2b83cea`](https://github.com/yehezkieldio/firefly/commit/2b83cea1df22ce516fe7a3d3c055219e5bac1a5b) git: Ensure tag creation uses annotated tags
+- [`ba9b5fd`](https://github.com/yehezkieldio/firefly/commit/ba9b5fdec3d249291678b92cf7e1ec845147223b) github: Handle empty changelog content gracefully
+
+### <!-- 7 -->🚜 Refactor
+- [`fec2226`](https://github.com/yehezkieldio/firefly/commit/fec22267b11bc1fd2486adf0f987a04838d08ae4) github: Update success message for release logging
+- [`4119233`](https://github.com/yehezkieldio/firefly/commit/411923324d1b778b122faf22cedce398aec4d133)  Enhance template resolution with unscoped name
+- [`8fd530b`](https://github.com/yehezkieldio/firefly/commit/8fd530b1d9209ae1d2bbef8f70886bddf952ee76) semver: Remove skipBump logic from tasks
+
+### <!-- 9 -->🎨 Code Styling
+- [`48b4bbe`](https://github.com/yehezkieldio/firefly/commit/48b4bbe27f3dfaff7b6239117def0ffcb8c0cb46)  Align logo to the left in README
+- [`4e82d27`](https://github.com/yehezkieldio/firefly/commit/4e82d27aa2e67b54d0acd52b9b499342dfa6ef85)  Remove unnecessary comment in README
 ## firefly@3.0.0-alpha.20 (September 11, 2025)
 
 ### <!-- 2 -->🧩 Dependencies Updates
