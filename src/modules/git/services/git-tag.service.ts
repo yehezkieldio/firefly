@@ -15,12 +15,10 @@ export class GitTagService {
         if (canSignTagResult.isErr()) return err(canSignTagResult.error);
         const shouldSign = canSignTagResult.value;
 
-        const args = ["tag"];
+        const args = ["tag", "-a"];
 
         if (shouldSign) {
             args.push("-s");
-        } else {
-            args.push("-a");
         }
 
         args.push(tagName);
