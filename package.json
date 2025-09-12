@@ -47,7 +47,7 @@
     },
     "dependencies": {
         "c12": "^3.2.0",
-        "commander": "^14.0.0",
+        "commander": "^14.0.1",
         "consola": "^3.4.2",
         "git-cliff": "^2.10.0",
         "neverthrow": "^8.2.0",
