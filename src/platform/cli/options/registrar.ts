@@ -7,6 +7,11 @@ import { parseSchema } from "#/shared/utils/result.util";
 type ValidationResult<T> = Result<T, string>;
 
 export class OptionRegistrar {
+    private readonly shorthandMap = new Map<string, string>([
+        ["bumpStrategy", "bs"],
+        ["releaseType", "rt"],
+    ]);
+
     /**
      * Registers CLI options for a given Commander command based on a Zod schema.
      *
@@ -32,9 +37,12 @@ export class OptionRegistrar {
 
             const field = this.unwrapSchema(rawField as unknown as z.ZodType);
             const optionName = OptionNormalizer.toKebab(key);
+            const shorthand = this.shorthandMap.get(key);
+
+            const optionFlag = shorthand ? `--${shorthand}, --${optionName}` : `--${optionName}`;
 
             const existingOption = cmd.options.find(
-                (opt) => opt.long === `--${optionName}` || opt.short === `-${optionName.charAt(0)}`,
+                (opt) => opt.long === `--${optionName}` || (shorthand && opt.short === `-${shorthand}`),
             );
 
             if (existingOption) {
@@ -51,7 +59,7 @@ export class OptionRegistrar {
             const description = (rawField as unknown as { description?: string }).description ?? "";
 
             if (this.isBooleanField(rawField as unknown as z.ZodType)) {
-                cmd.option(`--${optionName}`, description);
+                cmd.option(optionFlag, description);
                 continue;
             }
 
@@ -66,7 +74,7 @@ export class OptionRegistrar {
                     return result.value;
                 };
                 cmd.option(
-                    `--${optionName} <${optionName}>`,
+                    `${optionFlag} <${optionName}>`,
                     description,
                     wrappedParser,
                     parsedDefault as number | undefined,
@@ -86,7 +94,7 @@ export class OptionRegistrar {
                     return result.value;
                 };
                 cmd.option(
-                    `--${optionName} <${optionName}>`,
+                    `${optionFlag} <${optionName}>`,
                     `${description}${choices.length ? ` (choices: ${choices.join(", ")})` : ""}`,
                     wrappedParser,
                     parsedDefault as string | undefined,
@@ -105,7 +113,7 @@ export class OptionRegistrar {
                     return result.value;
                 };
                 cmd.option(
-                    `--${optionName} <${optionName}>`,
+                    `${optionFlag} <${optionName}>`,
                     description,
                     wrappedParser,
                     parsedDefault as string | undefined,
@@ -122,7 +130,7 @@ export class OptionRegistrar {
                 }
                 return result.value;
             };
-            cmd.option(`--${optionName} <${optionName}>`, description, wrappedParser, parsedDefault as unknown);
+            cmd.option(`${optionFlag} <${optionName}>`, description, wrappedParser, parsedDefault as unknown);
         }
     }
 
