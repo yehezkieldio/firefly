@@ -80,7 +80,18 @@ export class CommandRegistry {
 
     private mergeAndNormalizeOptions(options: CLIOptions, commandName: CommandName): CLIOptions {
         const rawOptions = { ...program.opts(), ...options };
-        return this.normalizer.normalize(rawOptions, commandName);
+        const normalized = this.normalizer.normalize(rawOptions, commandName);
+
+        const { releaseLatest, releasePreRelease, releaseDraft } = normalized;
+        if (releasePreRelease === true || releaseDraft === true) {
+            normalized.releaseLatest = false;
+        }
+        if (releaseLatest === true) {
+            normalized.releasePreRelease = false;
+            normalized.releaseDraft = false;
+        }
+
+        return normalized;
     }
 
     private buildExecutorOptions(mergedOptions: CLIOptions): WorkflowExecutorOptions {
