@@ -103,6 +103,20 @@ function shouldUseStreaming(args: string[]): boolean {
     });
 }
 
+function createLogArgs(args: string[]): string {
+    const dontTruncateNotes = Boolean(process.env.FIREFLY_DEBUG_DONT_TRUNCATE_RELEASE_NOTES);
+
+    if (args[0] === "release" && args[1] === "create" && !dontTruncateNotes) {
+        const notesIdx = args.indexOf("--notes");
+        if (notesIdx !== -1) {
+            const trailingFlags = args.slice(notesIdx + 2).filter((a) => a.startsWith("--"));
+            return [...args.slice(0, notesIdx + 1), "NOTES_TRUNCATED", ...trailingFlags].join(" ");
+        }
+    }
+
+    return args.join(" ");
+}
+
 export interface GhCommandOptions {
     dryRun?: boolean;
     cwd?: string;
@@ -126,7 +140,8 @@ export function executeGhCommand(args: string[], options: GhCommandOptions = {})
     }
 
     const validatedArgs = parseResult.data;
-    const commandStr = `gh ${validatedArgs.join(" ")}`;
+    const logArgs = createLogArgs(validatedArgs);
+    const commandStr = `gh ${logArgs}`;
 
     const useStreaming = shouldUseStreaming(validatedArgs) && !options.forceBuffered;
     const executionMode = useStreaming ? "streaming" : "buffered";
@@ -154,10 +169,10 @@ export function executeGhCommand(args: string[], options: GhCommandOptions = {})
     };
 
     if (useStreaming) {
-        return executeGhCommandStreaming(validatedArgs, spawnOptions, commandStr);
+        return executeGhCommandStreaming(validatedArgs, spawnOptions, validatedArgs.join(" "));
     }
 
-    return executeGhCommandBuffered(validatedArgs, spawnOptions, commandStr);
+    return executeGhCommandBuffered(validatedArgs, spawnOptions, validatedArgs.join(" "));
 }
 
 function executeGhCommandBuffered(

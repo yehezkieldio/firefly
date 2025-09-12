@@ -121,7 +121,7 @@ export class WorkflowExecutorService {
             return;
         }
 
-        const error = process.env.FIREFLY_DEBUG === "true" ? workflowResult.error : workflowResult.error?.message;
+        const error = process.env.FIREFLY_DEBUG_ERROR === "true" ? workflowResult.error : workflowResult.error?.message;
         logger.error(error);
     }
 
