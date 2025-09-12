@@ -40,8 +40,9 @@ export class CreateTagTask implements ConditionalTask<ReleaseTaskContext> {
             config: context.getConfig(),
         });
         const tagName = releaseTemplateResolverService.tagName(context.getConfig().tagName);
+        const releaseTitle = releaseTemplateResolverService.commitMessage(context.getConfig().releaseTitle);
 
-        return wrapPromise(gitProvider.tag.createTag(tagName, undefined, context.getConfig().dryRun)).map(() => {
+        return wrapPromise(gitProvider.tag.createTag(tagName, releaseTitle, context.getConfig().dryRun)).map(() => {
             logger.info(`Created tag: ${colors.gray(tagName)}`);
         });
     }
