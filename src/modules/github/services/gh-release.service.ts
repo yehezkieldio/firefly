@@ -20,14 +20,16 @@ export class GitHubReleaseService {
             input.tag,
             "--title",
             input.title,
-            "--notes",
-            input.content,
             input.latest ? "--latest" : "",
             input.draft ? "--draft" : "",
             input.prerelease ? "--prerelease" : "",
-        ].filter(Boolean);
+        ];
 
-        const result = await executeGhCommand(args, { dryRun: input.dryRun });
+        if (input.content.trim()) {
+            args.push("--notes", input.content);
+        }
+
+        const result = await executeGhCommand(args.filter(Boolean), { dryRun: input.dryRun });
         if (result.isErr()) {
             return err(result.error);
         }

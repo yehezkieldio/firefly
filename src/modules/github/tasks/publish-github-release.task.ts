@@ -46,7 +46,6 @@ export class PublishGitHubReleaseTask implements ConditionalTask<ReleaseTaskCont
         const releaseTitle = releaseTemplateResolverService.releaseTitle(context.getConfig().releaseTitle);
         const tagName = releaseTemplateResolverService.tagName(context.getConfig().tagName);
         const changelogPostProcessor = new ChangelogPostProcessorService(cliffTomlParse);
-        const processChangelog = wrapPromise(changelogPostProcessor.process(changelogContent));
 
         const releaseStatus =
             [
@@ -59,23 +58,43 @@ export class PublishGitHubReleaseTask implements ConditionalTask<ReleaseTaskCont
 
         logger.info(`Publishing a ${colors.gray(releaseStatus)} GitHub release.`);
 
-        return processChangelog
-            .andThen((changelog) => {
-                if (changelog.isErr()) {
-                    return errAsync(changelog.error);
-                }
-
-                const release = ghProvider.release.createRelease({
+        const createRelease = (content: string) =>
+            wrapPromise(
+                ghProvider.release.createRelease({
                     title: releaseTitle,
                     tag: tagName,
-                    content: changelog.value,
+                    content,
                     latest: config.releaseLatest,
                     draft: config.releaseDraft,
                     prerelease: config.releasePreRelease,
                     dryRun: config.dryRun,
-                });
+                }),
+            );
 
-                return wrapPromise(release);
+        if (!changelogContent.trim()) {
+            return createRelease("").map(() => {
+                logger.success("Pushed GitHub release to remote repository.");
+            });
+        }
+
+        return wrapPromise(changelogPostProcessor.process(changelogContent))
+            .andThen((changelog) => {
+                if (changelog.isErr()) {
+                    return errAsync(changelog.error);
+                }
+                if (process.env.FIREFLY_DEBUG_SHOW_CHANGELOG_CONTENT) {
+                    logger.verbose(`PublishGitHubReleaseTask: Postprocessed changelog content:\n${changelog.value}\n`);
+                }
+
+                let changelogValue = changelog.value;
+                if (changelog.value.trim() === "") {
+                    logger.warn(
+                        "Changelog post-processing resulted in an empty changelog. Proceeding with an empty changelog.",
+                    );
+                    changelogValue = "";
+                }
+
+                return createRelease(changelogValue);
             })
             .map(() => {
                 logger.success("Pushed GitHub release to remote repository.");

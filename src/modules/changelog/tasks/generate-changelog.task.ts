@@ -62,6 +62,10 @@ export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext
 
                 const elapsedMs = Date.now() - startTime;
                 logger.success(`Generation complete in ${colors.greenBright(`${elapsedMs}ms`)}`);
+                if (process.env.FIREFLY_DEBUG_SHOW_CHANGELOG_CONTENT) {
+                    logger.verbose(`GenerateChangelogTask: Generated changelog content:\n${result.value}\n`);
+                }
+
                 context.set("changelogContent", result.value);
                 return okAsync();
             });

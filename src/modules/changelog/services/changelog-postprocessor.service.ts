@@ -15,7 +15,21 @@ export class ChangelogPostProcessorService {
 
         logger.verbose("ChangelogPostProcessor: Cliff TOML config parsed successfully, processing changelog...");
         const config = cliffConfig.value;
-        return this.extractChangesSection(rawChangelog, config);
+        const extracted = this.extractChangesSection(rawChangelog, config);
+
+        if (extracted.isErr()) {
+            return extracted;
+        }
+
+        const cleaned = extracted.value.trim();
+
+        const hasCommitEntries = cleaned.includes("###");
+        if (!hasCommitEntries) {
+            logger.verbose("ChangelogPostProcessorService: No commit entries found, returning empty changelog.");
+            return ok("");
+        }
+
+        return ok(cleaned);
     }
 
     private extractChangesSection(rawChangelog: string, config: CliffToml): FireflyResult<string> {
