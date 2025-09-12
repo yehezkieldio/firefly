@@ -75,7 +75,7 @@ export class PublishGitHubReleaseTask implements ConditionalTask<ReleaseTaskCont
                 return wrapPromise(release);
             })
             .map(() => {
-                logger.info("GitHub release published successfully.");
+                logger.success("Pushed GitHub release to remote repository.");
             });
     }
 }
