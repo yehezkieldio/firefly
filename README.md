@@ -150,8 +150,6 @@ The analyzer performs deep inspection of commit metadata:
 > [!NOTE]
 > Analyzer customization is planned for future releases, allowing tailored commit parsing rules and more.
 
----
-
 ##### Manual Strategy (`--bump-strategy manual`)
 
 The manual strategy presents you with a generated list of potential version increments based on your current version.
