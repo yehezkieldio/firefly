@@ -205,7 +205,7 @@ firefly release --bump-strategy manual --release-type preminor --pre-release-id 
 # Result: 1.0.0 → 1.1.0-beta.0
 ```
 
-**Advanced Pre-release Configuration:**
+**Pre-release Base Numbering:**
 
 Use `--pre-release-base` to control the starting number for pre-releases (defaults to 0):
 
@@ -214,7 +214,7 @@ firefly release --release-type prepatch --pre-release-id rc --pre-release-base 1
 # Result: 1.0.0 → 1.0.1-rc.1
 ```
 
-## Advanced Configuration & Customization
+## Configuration & Customization
 
 ### The Configuration File
 
