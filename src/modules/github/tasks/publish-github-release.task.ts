@@ -29,9 +29,12 @@ export class PublishGitHubReleaseTask implements ConditionalTask<ReleaseTaskCont
 
     execute(context: ReleaseTaskContext): FireflyAsyncResult<void> {
         const config = context.getConfig();
-        const changelogContent = context.get("changelogContent");
-        if (changelogContent.isErr()) {
-            return errAsync(changelogContent.error);
+        const changelogContentResult = context.get("changelogContent");
+        let changelogContent = "";
+        if (changelogContentResult.isErr()) {
+            logger.warn("Changelog content is not available. Proceeding with an empty changelog.");
+        } else {
+            changelogContent = changelogContentResult.value as string;
         }
 
         const ghProvider = GitHubProvider.getInstance();
@@ -43,7 +46,7 @@ export class PublishGitHubReleaseTask implements ConditionalTask<ReleaseTaskCont
         const releaseTitle = releaseTemplateResolverService.releaseTitle(context.getConfig().releaseTitle);
         const tagName = releaseTemplateResolverService.tagName(context.getConfig().tagName);
         const changelogPostProcessor = new ChangelogPostProcessorService(cliffTomlParse);
-        const processChangelog = wrapPromise(changelogPostProcessor.process(changelogContent.value as string));
+        const processChangelog = wrapPromise(changelogPostProcessor.process(changelogContent));
 
         const releaseStatus =
             [
