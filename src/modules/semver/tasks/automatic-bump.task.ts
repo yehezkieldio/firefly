@@ -44,6 +44,9 @@ export class AutomaticBumpTask implements ConditionalTask<ReleaseTaskContext> {
             prereleaseBase: context.getConfig().preReleaseBase,
         };
 
+        // TODO: Allow customization of the semantic version service via config
+        // Currently we use default settings, but in the future we might want to allow users
+        // to specify additional commit types or scope rules.
         const semanticVersionService = new SemanticVersionService();
         const recommendVersion = ResultAsync.fromPromise(semanticVersionService.recommendVersion(), toFireflyError);
 

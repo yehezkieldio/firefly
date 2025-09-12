@@ -15,12 +15,14 @@ export class ReleaseTemplateResolverService {
     private static readonly TEMPLATE_PATTERNS = {
         VERSION: /\{\{version\}\}/g,
         NAME: /\{\{name\}\}/g,
+        UNSCOPED_NAME: /\{\{unscopedName\}\}/g,
     } as const;
 
     withContext(ctx: TemplateContext): ResolvedTemplates {
         const variables = {
             version: ctx.version,
             name: this.getFullPackageName(ctx.config),
+            unscopedName: ctx.config.name || "",
         };
 
         return {
@@ -35,7 +37,10 @@ export class ReleaseTemplateResolverService {
         return config.scope ? `@${config.scope}/${config.name}` : config.name;
     }
 
-    private resolveTemplate(template: string, variables: { version?: string; name: string }): string {
+    private resolveTemplate(
+        template: string,
+        variables: { version?: string; name: string; unscopedName: string },
+    ): string {
         if (!template?.trim()) return template;
 
         let resolved = template;
@@ -43,6 +48,10 @@ export class ReleaseTemplateResolverService {
             resolved = resolved.replace(ReleaseTemplateResolverService.TEMPLATE_PATTERNS.VERSION, variables.version);
         }
         resolved = resolved.replace(ReleaseTemplateResolverService.TEMPLATE_PATTERNS.NAME, variables.name);
+        resolved = resolved.replace(
+            ReleaseTemplateResolverService.TEMPLATE_PATTERNS.UNSCOPED_NAME,
+            variables.unscopedName,
+        );
         return resolved;
     }
 }
