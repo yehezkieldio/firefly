@@ -6,6 +6,27 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.0 (September 12, 2025)
+### 📝 Release Notes
+This rewrite delivers a full architectural rewrite compared to the 2.x series. This stable release consolidates the entire alpha cycle, introducing a task-oriented orchestration engine, richer CLI ergonomics, GitHub release publishing, and rollback functionality. Users gain a more seamless end-to-end release workflow, while internally the codebase has been refactored for modularity, consistency, and long-term maintainability.
+
+Compared to Firefly 2.x, which focused on basic semantic versioning and changelog automation, 3.0.0 expands into a robust release automation platform that tightly integrates semantic versioning, changelog pipelines, Git operations, and publishing flows under a unified orchestration layer.
+
+#### What's New
+
+##### For Users
+- **Improved Release Process:** The new release pipeline includes a release preflight check that validates everything before a release, which should make the process more reliable.
+- **Smarter Version Bumping:** The new semantic versioning analysis service and an interactive bump strategy prompter give you more control and smarter recommendations for version increments.
+- **Robust Rollbacks:** The new system features a rollback manager service that can undo changes if a task fails, providing a safer, more stable release experience.
+
+##### For Developers
+- **Complete Architectural Rework:** The entire project architecture has been rewritten around a new CLI and a modular task orchestration engine. This new foundation makes the codebase more scalable and maintainable. *(i hope so)*
+
+### <!-- 16 -->🤖 CI/CD
+- [`df02a5f`](https://github.com/yehezkieldio/firefly/commit/df02a5ff9477030eefa2f54b86855e252f331307)  Update fetch depth for repository checkout
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`562c966`](https://github.com/yehezkieldio/firefly/commit/562c966abf9f27192c50e127173c09ae76ba9c82) changelog: Handle empty changelog and commit entries
 ## firefly@3.0.0-alpha.21 (September 12, 2025)
 
 ### <!-- 16 -->🤖 CI/CD
