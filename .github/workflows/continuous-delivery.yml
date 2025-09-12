@@ -95,6 +95,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch All Tags
+        run: git fetch --tags
 
       - name: Setup Bun Runtime
         uses: oven-sh/setup-bun@v2
