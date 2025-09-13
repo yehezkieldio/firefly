@@ -2,11 +2,6 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-        "ci": {
-            "description": "Run in CI environment.",
-            "default": false,
-            "type": "boolean"
-        },
         "repository": {
             "description": "Repo in 'owner/repo' format, auto-detected if omitted.",
             "default": "",
