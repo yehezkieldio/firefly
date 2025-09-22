@@ -70,25 +70,54 @@ export class GitCliffAdapter {
     }
 
     private executeGitCliff(options: GitCliffOptions): FireflyAsyncResult<string> {
-        return ResultAsync.fromPromise(this.addGitHubToken(options), toFireflyError).andThen((opts) => {
-            if (opts.isErr()) {
-                return err(opts.error);
+        const addTokenResult = ResultAsync.fromPromise(this.addGitHubToken(options), toFireflyError);
+
+        return addTokenResult.andThen((tokenResult) => {
+            if (tokenResult.isErr()) {
+                return err(tokenResult.error);
             }
 
-            const safeOpts = { ...opts.value };
-            const tokenRef = safeOpts.githubToken;
+            const safeOpts = { ...tokenResult.value };
+            const hasToken = Boolean(safeOpts.githubToken);
 
-            return ResultAsync.fromPromise(runGitCliff(safeOpts, { stdio: "pipe" }), toFireflyError)
-                .andTee((r) =>
-                    logger.verbose(`GitCliffAdapter: Executing ${this.redactTokenFromCommand(r.escapedCommand)}`),
-                )
-                .map((result) => {
-                    if (tokenRef) {
-                        safeOpts.githubToken = "";
-                    }
+            logger.verbose(`GitCliffAdapter: Executing git-cliff with tag: ${safeOpts.tag}`);
 
-                    return result.stdout;
-                });
+            const gitCliffResult = ResultAsync.fromPromise(runGitCliff(safeOpts, { stdio: "pipe" }), toFireflyError);
+
+            return gitCliffResult.andThen((result) => {
+                const isValidExitCode = result.exitCode === 0;
+                if (!isValidExitCode) {
+                    return err(
+                        createFireflyError({
+                            code: "FAILED",
+                            message: `GitCliffAdapter: git-cliff failed with exit code ${result.exitCode}`,
+                        }),
+                    );
+                }
+
+                const escapedCommand = (result as { escapedCommand?: string }).escapedCommand;
+                if (escapedCommand) {
+                    logger.verbose(`GitCliffAdapter: Executing ${this.redactTokenFromCommand(escapedCommand)}`);
+                }
+
+                const hasStdout = Boolean(result.stdout);
+                if (!hasStdout) {
+                    return err(
+                        createFireflyError({
+                            code: "FAILED",
+                            message: "GitCliffAdapter: git-cliff returned no stdout content",
+                        }),
+                    );
+                }
+
+                const changelog = String(result.stdout);
+
+                if (hasToken) {
+                    safeOpts.githubToken = "";
+                }
+
+                return ok(changelog);
+            });
         });
     }
 
