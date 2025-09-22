@@ -6,6 +6,34 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.1 (September 22, 2025)
+
+### <!-- 17 -->🛠️ Miscellaneous
+- [`dc16e91`](https://github.com/yehezkieldio/firefly/commit/dc16e912e0dc7acfc13a6622102994cacaa51b67)  Merge branch 'master' of github.com:yehezkieldio/firefly
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`d9749ac`](https://github.com/yehezkieldio/firefly/commit/d9749acccaff1096a25762f9904244561caf1ec2) deps: Update dependency commander to ^14.0.1 ([#78](https://github.com/yehezkieldio/firefly/issues/78)) by renovate[bot]
+- [`33e4f10`](https://github.com/yehezkieldio/firefly/commit/33e4f10a1a56e70876aabe71dd664e7ccaf55b79) deps: Update dependency @types/node to ^24.3.3 ([#79](https://github.com/yehezkieldio/firefly/issues/79)) by renovate[bot]
+- [`3ebdb3a`](https://github.com/yehezkieldio/firefly/commit/3ebdb3abd174f081207501bd3cdbf0eb9ac917b3) deps: Update dependency tsdown to ^0.15.1 ([#80](https://github.com/yehezkieldio/firefly/issues/80)) by renovate[bot]
+- [`030949c`](https://github.com/yehezkieldio/firefly/commit/030949c5ce3cc313b038c7eadc8afbf2f2c5bd58) deps: Update dependency @types/node to ^24.4.0 ([#81](https://github.com/yehezkieldio/firefly/issues/81)) by renovate[bot]
+- [`b85ad00`](https://github.com/yehezkieldio/firefly/commit/b85ad0007adb0ad6d36d06e475660e95f53bcbab) deps: Update dependency @types/bun to ^1.2.22 ([#82](https://github.com/yehezkieldio/firefly/issues/82)) by renovate[bot]
+- [`5580f27`](https://github.com/yehezkieldio/firefly/commit/5580f27db5d7e729e6132e91c466e6a8737c7498) deps: Update dependency @types/node to ^24.5.0 ([#83](https://github.com/yehezkieldio/firefly/issues/83)) by renovate[bot]
+- [`d074229`](https://github.com/yehezkieldio/firefly/commit/d0742295163fd5471127450918c3699c6b53a19d) deps: Update dependency c12 to ^3.3.0 ([#84](https://github.com/yehezkieldio/firefly/issues/84)) by renovate[bot]
+- [`38ba619`](https://github.com/yehezkieldio/firefly/commit/38ba61929be42ec5a81f117770974c98951f7fcf) deps: Update dependency @types/node to ^24.5.1 ([#85](https://github.com/yehezkieldio/firefly/issues/85)) by renovate[bot]
+- [`e157495`](https://github.com/yehezkieldio/firefly/commit/e15749570986828be53319bd5dc4e7813affbadc) deps: Update dependency tsdown to ^0.15.2 ([#86](https://github.com/yehezkieldio/firefly/issues/86)) by renovate[bot]
+- [`463feaa`](https://github.com/yehezkieldio/firefly/commit/463feaa500ad0c4976569eac7fe8fedca2ca32a1) deps: Update dependency zod to ^4.1.9 ([#87](https://github.com/yehezkieldio/firefly/issues/87)) by renovate[bot]
+- [`2d7bfa7`](https://github.com/yehezkieldio/firefly/commit/2d7bfa7ddb1899818c6beeb9c5e02e5826d1863b) deps: Update dependency @types/node to ^24.5.2 ([#88](https://github.com/yehezkieldio/firefly/issues/88)) by renovate[bot]
+- [`9b3f220`](https://github.com/yehezkieldio/firefly/commit/9b3f220eca4f813e5f8154bc194114c1a2216897) deps: Update dependency tsdown to ^0.15.3 ([#89](https://github.com/yehezkieldio/firefly/issues/89)) by renovate[bot]
+- [`ef5fec3`](https://github.com/yehezkieldio/firefly/commit/ef5fec34131c9fa422dd4f71ba7d1939c03fccdc) deps: Update dependency zod to ^4.1.10 ([#90](https://github.com/yehezkieldio/firefly/issues/90)) by renovate[bot]
+- [`1af946c`](https://github.com/yehezkieldio/firefly/commit/1af946c65e61f4ef0b356535e51baa0464cb97af) deps: Update dependency tsdown to ^0.15.4 ([#91](https://github.com/yehezkieldio/firefly/issues/91)) by renovate[bot]
+- [`0ceeafe`](https://github.com/yehezkieldio/firefly/commit/0ceeafef8f429bd8865e14446742166f67d17724) deps: Update dependency zod to ^4.1.11 ([#92](https://github.com/yehezkieldio/firefly/issues/92)) by renovate[bot]
+- [`f6ea0dc`](https://github.com/yehezkieldio/firefly/commit/f6ea0dc4fa9817caec44731b08c74e0311588e75) deps: Update dependency git-cliff to ^2.10.1 ([#93](https://github.com/yehezkieldio/firefly/issues/93)) by renovate[bot]
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`cc8d223`](https://github.com/yehezkieldio/firefly/commit/cc8d2235dae101cb49a6fcaa1ed0e30e5ef7f958) changelog: Improve error handling in executeGitCliff
+
+### <!-- 7 -->🚜 Refactor
+- [`0788c58`](https://github.com/yehezkieldio/firefly/commit/0788c580e84d45a00d8eeaa33f413719132a3661) config: Remove ci property from schema
 ## firefly@3.0.0 (September 12, 2025)
 ### 📝 Release Notes
 This rewrite delivers a full architectural rewrite compared to the 2.x series. This stable release consolidates the entire alpha cycle, introducing a task-oriented orchestration engine, richer CLI ergonomics, GitHub release publishing, and rollback functionality. Users gain a more seamless end-to-end release workflow, while internally the codebase has been refactored for modularity, consistency, and long-term maintainability.
