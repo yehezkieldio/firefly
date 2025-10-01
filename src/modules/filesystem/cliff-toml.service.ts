@@ -1,9 +1,9 @@
 import { join } from "node:path";
 import { err, ok } from "neverthrow";
-import { type TomlValue, parse } from "smol-toml";
 import { FileSystemService } from "#/modules/filesystem/file-system.service";
 import { logger } from "#/shared/logger";
 import type { CliffToml } from "#/shared/types/cliff-toml.type";
+import type { TomlValue } from "#/shared/types/toml-types";
 import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
@@ -33,7 +33,8 @@ export class CliffTomlService {
     }
 
     private parseContent(content: string): FireflyResult<CliffToml> {
-        const parsedResult = parse(content);
+        const parsedResult = Bun.TOML.parse(content);
+
         if (!CliffTomlService.isCliffToml(parsedResult)) {
             return err(
                 createFireflyError({
