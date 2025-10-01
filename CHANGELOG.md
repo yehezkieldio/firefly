@@ -6,6 +6,20 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.2 (October 1, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`53571e4`](https://github.com/yehezkieldio/firefly/commit/53571e40f6846519ebd43ec9404a8ed644cdda35) readme: Update changelog template and commit filters
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`3ae2515`](https://github.com/yehezkieldio/firefly/commit/3ae2515d7c12fa8fe2c3816236f6e2be7c96f116) deps: Update dependency tsdown to ^0.15.5 ([#94](https://github.com/yehezkieldio/firefly/issues/94)) by renovate[bot]
+- [`609922d`](https://github.com/yehezkieldio/firefly/commit/609922d33dba2663cebc82b3a9b64aa234347363) deps: Update dependency @types/bun to ^1.2.23 ([#95](https://github.com/yehezkieldio/firefly/issues/95)) by renovate[bot]
+- [`1ade57c`](https://github.com/yehezkieldio/firefly/commit/1ade57c7da977281408db9972434b3bab9aba046) deps: Update dependency @types/node to ^24.6.0 ([#96](https://github.com/yehezkieldio/firefly/issues/96)) by renovate[bot]
+- [`aabdfc7`](https://github.com/yehezkieldio/firefly/commit/aabdfc7000c7afe696294de77da6996ffd64491f) deps: Update dependency tsdown to ^0.15.6 ([#97](https://github.com/yehezkieldio/firefly/issues/97)) by renovate[bot]
+- [`1a389c5`](https://github.com/yehezkieldio/firefly/commit/1a389c5e3b5c420e18fffe593f60241149f3f19b) deps: Update dependency typescript to ^5.9.3 ([#98](https://github.com/yehezkieldio/firefly/issues/98)) by renovate[bot]
+- [`4db5062`](https://github.com/yehezkieldio/firefly/commit/4db5062c9b0ac60745c801594526437a4a30bc6f) deps: Update dependency @types/node to ^24.6.1 ([#99](https://github.com/yehezkieldio/firefly/issues/99)) by renovate[bot]
+- [`adab980`](https://github.com/yehezkieldio/firefly/commit/adab980fc522b6b29c19df8558ccba950ffc479a) deps: Update actions/checkout action to v5
+- [`2149c78`](https://github.com/yehezkieldio/firefly/commit/2149c7840f38b640ee6f282e36c2f8a11416e227) deps: Update actions/checkout action to v5 ([#100](https://github.com/yehezkieldio/firefly/issues/100)) by [@yehezkieldio](https://github.com/yehezkieldio)
 ## firefly@3.0.1 (September 22, 2025)
 
 ### <!-- 17 -->🛠️ Miscellaneous
