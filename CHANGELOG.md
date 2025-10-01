@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.3 (October 1, 2025)
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`7267c05`](https://github.com/yehezkieldio/firefly/commit/7267c0556e5f0b4ae9e5a3a12beb7f2d17edcbf7) deps: Remove `smol-toml` dependency
+
+### <!-- 7 -->🚜 Refactor
+- [`4fcf2c9`](https://github.com/yehezkieldio/firefly/commit/4fcf2c9f4f1d13950d31191f7e4bfd658001356e) cliff-toml-service: Replace `smol-toml` with `Bun.TOML` parser
 ## firefly@3.0.2 (October 1, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
