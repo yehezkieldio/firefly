@@ -57,7 +57,7 @@
     "devDependencies": {
         "@biomejs/biome": "^2.2.4",
         "@types/bun": "^1.2.23",
-        "@types/node": "^24.6.1",
+        "@types/node": "^24.6.2",
         "@types/semver": "^7.7.1",
         "tsdown": "^0.15.6",
         "typescript": "^5.9.3"
