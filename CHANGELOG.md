@@ -6,6 +6,18 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.4 (October 13, 2025)
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`a4087ab`](https://github.com/yehezkieldio/firefly/commit/a4087ab649536f7e7daf92709739ec952509b9d5) deps: Update dependency @types/node to ^24.6.2 ([#101](https://github.com/yehezkieldio/firefly/issues/101)) by renovate[bot]
+- [`26fe011`](https://github.com/yehezkieldio/firefly/commit/26fe01171cdab15fe2422738a88587fdd53f1047) deps: Update dependency @biomejs/biome to v2.2.5 ([#102](https://github.com/yehezkieldio/firefly/issues/102)) by renovate[bot]
+- [`c6f253d`](https://github.com/yehezkieldio/firefly/commit/c6f253d18fc1a58540c0bcdefc546559a6f8887a) deps: Update dependency @types/node to ^24.7.0 ([#103](https://github.com/yehezkieldio/firefly/issues/103)) by renovate[bot]
+- [`1f244e5`](https://github.com/yehezkieldio/firefly/commit/1f244e55a06142c708085d3ce5cdfce442886752) deps: Update dependency zod to ^4.1.12 ([#104](https://github.com/yehezkieldio/firefly/issues/104)) by renovate[bot]
+- [`eba46a0`](https://github.com/yehezkieldio/firefly/commit/eba46a0386d5477321965d8df7d27559f30e7369) deps: Update dependency semver to ^7.7.3 ([#105](https://github.com/yehezkieldio/firefly/issues/105)) by renovate[bot]
+- [`895add8`](https://github.com/yehezkieldio/firefly/commit/895add85a583d63a4b9df96bd46c370671c381bb) deps: Update dependency @types/node to ^24.7.1 ([#106](https://github.com/yehezkieldio/firefly/issues/106)) by renovate[bot]
+- [`8310823`](https://github.com/yehezkieldio/firefly/commit/83108232924eae8d71319552758abf342e2facb8) deps: Update dependency @types/bun to ^1.3.0 ([#107](https://github.com/yehezkieldio/firefly/issues/107)) by renovate[bot]
+- [`885fdbd`](https://github.com/yehezkieldio/firefly/commit/885fdbda7daaa9664b1e1911dc6e14f06b22bac5) deps: Update dependency @types/node to ^24.7.2 ([#108](https://github.com/yehezkieldio/firefly/issues/108)) by renovate[bot]
+- [`f0aae3e`](https://github.com/yehezkieldio/firefly/commit/f0aae3eaf01f6c76fd8b1273033c9e9c8fd6396f) deps: Update dependency @biomejs/biome to v2.2.6 ([#109](https://github.com/yehezkieldio/firefly/issues/109)) by renovate[bot]
 ## firefly@3.0.3 (October 1, 2025)
 
 ### <!-- 2 -->🧩 Dependencies Updates
