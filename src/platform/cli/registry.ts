@@ -20,6 +20,9 @@ export class CommandRegistry {
     private readonly normalizer = new OptionNormalizer();
     private readonly registrar = new OptionRegistrar();
 
+    /**
+     * Creates the base CLI program with global options.
+     */
     create<T extends ZodRawShape>(schema: ZodObject<T>): typeof program {
         program.name("firefly");
         program.description(String(process.env.FIREFLY_DESCRIPTION)).version(String(process.env.FIREFLY_VERSION));
