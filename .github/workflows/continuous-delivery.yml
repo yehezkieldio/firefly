@@ -80,11 +80,8 @@ jobs:
       - name: Build Firefly Package
         run: bun run build
 
-      - name: Update npm
-        run: npm install -g npm@latest
-
       - name: Publish Package to NPM (latest tag)
-        run: npm publish --tag=latest
+        run: bun publish --tag=latest
   publish-next:
     name: Publish Development
     needs: detect-changes
@@ -117,11 +114,8 @@ jobs:
       - name: Build Firefly Package
         run: bun run build
 
-      - name: Update npm
-        run: npm install -g npm@latest
-
       - name: Publish Package to NPM (next tag)
-        run: npm publish --tag=next
+        run: bun publish --tag=next
   publish-pre-release:
     name: Publish Pre-release
     needs: detect-changes
@@ -152,8 +146,5 @@ jobs:
       - name: Build Firefly Package
         run: bun run build
 
-      - name: Update npm
-        run: npm install -g npm@latest
-
       - name: Publish Package to NPM (prerelease tag)
-        run: npm publish --tag=${{ steps.prerelease.outputs.tag }}
+        run: bun publish --tag=${{ steps.prerelease.outputs.tag }}
