@@ -8,6 +8,9 @@ export interface CLIOptions extends FireflyConfig {
     config?: string;
 }
 
+/**
+ * Creates and configures the CLI application.
+ */
 export function createCLI(): Command {
     const registry = new CommandRegistry();
     registry.register(ConfigSchemaProvider.get("release"), createReleaseWorkflow_sequential);
