@@ -27,8 +27,8 @@
         }
     },
     "bin": {
-        "firefly": "./dist/main.js",
-        "ff": "./dist/main.js"
+        "firefly": "dist/main.js",
+        "ff": "dist/main.js"
     },
     "publishConfig": {
         "access": "public",
@@ -64,6 +64,18 @@
         "tsdown": "^0.15.7",
         "typescript": "^5.9.3"
     },
+    "keywords": [
+        "cli",
+        "changelog",
+        "git",
+        "github",
+        "gitlab",
+        "release",
+        "semver",
+        "versioning",
+        "automation",
+        "orchestrator"
+    ],
     "homepage": "https://github.com/yehezkieldio/firefly#readme",
     "bugs": {
         "url": "https://github.com/yehezkieldio/firefly/issues"
