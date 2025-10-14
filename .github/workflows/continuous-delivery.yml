@@ -5,6 +5,7 @@ on:
     branches:
       - master
 permissions:
+  id-token: write
   contents: read
   packages: write
 
@@ -80,7 +81,7 @@ jobs:
         run: bun run build
 
       - name: Publish Package to NPM (latest tag)
-        run: bun publish --registry=https://registry.npmjs.org --tag=latest
+        run: npm publish --provenance --tag=latest
         env:
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
   publish-next:
@@ -116,7 +117,7 @@ jobs:
         run: bun run build
 
       - name: Publish Package to NPM (next tag)
-        run: bun publish --registry=https://registry.npmjs.org --tag=next
+        run: npm publish --provenance --tag=next
         env:
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
   publish-pre-release:
@@ -150,6 +151,6 @@ jobs:
         run: bun run build
 
       - name: Publish Package to NPM (prerelease tag)
-        run: bun publish --registry=https://registry.npmjs.org --tag=${{ steps.prerelease.outputs.tag }}
+        run: npm publish --provenance --tag=${{ steps.prerelease.outputs.tag }}
         env:
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
