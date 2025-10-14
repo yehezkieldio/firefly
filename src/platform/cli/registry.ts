@@ -32,6 +32,9 @@ export class CommandRegistry {
         return program;
     }
 
+    /**
+     * Registers a command with its associated workflow factory and options schema.
+     */
     register<TCommand extends CommandName, TShape extends ZodRawShape>(
         schema: ZodObject<TShape>,
         workflowFactory: WorkflowFactory<TCommand>,

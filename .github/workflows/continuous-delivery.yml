@@ -105,6 +105,11 @@ jobs:
         with:
           bun-version: latest
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
       - name: Install Project Dependencies
         run: bun install --frozen-lockfile
 
@@ -114,8 +119,11 @@ jobs:
       - name: Build Firefly Package
         run: bun run build
 
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: Publish Package to NPM (next tag)
-        run: bun publish --tag=next
+        run: npm publish --tag=next
   publish-pre-release:
     name: Publish Pre-release
     needs: detect-changes
