@@ -11,6 +11,9 @@ import "#/application/context";
 import { createCLI } from "#/platform/cli/commander";
 import pkg from "../../../package.json" with { type: "json" };
 
+/**
+ * The entry point for the CLI application.
+ */
 async function main(): Promise<void> {
     // Ensure help is shown if no command is provided
     if (process.argv.length === 2) {
