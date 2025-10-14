@@ -6,6 +6,30 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.5 (October 14, 2025)
+
+### <!-- 16 -->🤖 CI/CD
+- [`860b20d`](https://github.com/yehezkieldio/firefly/commit/860b20decf126ba3fbae7e54eb9674feac8d4645)  Update npm publish commands in workflow
+- [`a79a56d`](https://github.com/yehezkieldio/firefly/commit/a79a56dc55fc9dcf515b4e68b0ca5cdf9f8d11ab)  Remove npm token from publish steps
+- [`3a9da70`](https://github.com/yehezkieldio/firefly/commit/3a9da70fefe84ebd2f9586763054bffeffb424c9)  Remove provenance flag from npm publish commands
+- [`9a2431b`](https://github.com/yehezkieldio/firefly/commit/9a2431b819cb797543e0bbf49484a9ea8efc2b60)  Update npm to latest version in workflows
+- [`7ccd5f2`](https://github.com/yehezkieldio/firefly/commit/7ccd5f27bdb73a265f5dc616c30d7d3f27d97119)  Replace npm publish with bun publish
+- [`9829f14`](https://github.com/yehezkieldio/firefly/commit/9829f149151575b9ace95729ac93d70790ac7cda)  Update continuous delivery workflow for npm usage
+- [`386efed`](https://github.com/yehezkieldio/firefly/commit/386efedccd06dab7e4f6fb672446bc9cf40d45c3)  Update continuous delivery workflow for bun and npm
+- [`046ebd7`](https://github.com/yehezkieldio/firefly/commit/046ebd79a8daf2951c1b44b4c278dd8d1f819e2b)  Switch from bun to npm for package publishing
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`bc8d40d`](https://github.com/yehezkieldio/firefly/commit/bc8d40d68bb938e27f00ebccff6ca5d738f714a8) deps: Update dependency tsdown to ^0.15.7 ([#110](https://github.com/yehezkieldio/firefly/issues/110)) by renovate[bot]
+- [`b2472f3`](https://github.com/yehezkieldio/firefly/commit/b2472f3c66d3f6225b4a7304657f85ea9cec8817) deps: Update dependency node to v22.20.0 ([#111](https://github.com/yehezkieldio/firefly/issues/111)) by renovate[bot]
+- [`1a2b55d`](https://github.com/yehezkieldio/firefly/commit/1a2b55d0583f6f0cd9bd81b509fbedacf8fa6d19) deps: Update dependency node to v22.20.0
+- [`a9212eb`](https://github.com/yehezkieldio/firefly/commit/a9212ebce3260441e6e47e259dba495131014876) deps: Update dependency node to v22.20.0 ([#112](https://github.com/yehezkieldio/firefly/issues/112)) by [@yehezkieldio](https://github.com/yehezkieldio)
+
+### <!-- 7 -->🚜 Refactor
+- [`48a5c0b`](https://github.com/yehezkieldio/firefly/commit/48a5c0b81518a274aa923bc9dfd86444e18f5f3c) cli: Improve main function documentation
+- [`9a9ae60`](https://github.com/yehezkieldio/firefly/commit/9a9ae6020eda58d608cf28c5fc51b9dea37c46fb) cli: Clarify environment variable setup
+- [`622bf2c`](https://github.com/yehezkieldio/firefly/commit/622bf2c7d5b0755ee202d6254987156167e4de3f) cli: Improve createCLI documentation
+- [`1b373a5`](https://github.com/yehezkieldio/firefly/commit/1b373a5af0099489245154885bfa6718f9f60443) cli: Improve create method documentation
+- [`cc9f1ed`](https://github.com/yehezkieldio/firefly/commit/cc9f1ed2ebddff2840b31954796fa5a09777df00) config: Update bin paths and keywords section
 ## firefly@3.0.4 (October 13, 2025)
 
 ### <!-- 2 -->🧩 Dependencies Updates
