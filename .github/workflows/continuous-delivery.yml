@@ -81,7 +81,7 @@ jobs:
         run: bun run build
 
       - name: Publish Package to NPM (latest tag)
-        run: npm publish --provenance --tag=latest
+        run: npm publish --tag=latest
   publish-next:
     name: Publish Development
     needs: detect-changes
@@ -115,7 +115,7 @@ jobs:
         run: bun run build
 
       - name: Publish Package to NPM (next tag)
-        run: npm publish --provenance --tag=next
+        run: npm publish --tag=next
   publish-pre-release:
     name: Publish Pre-release
     needs: detect-changes
@@ -147,4 +147,4 @@ jobs:
         run: bun run build
 
       - name: Publish Package to NPM (prerelease tag)
-        run: npm publish --provenance --tag=${{ steps.prerelease.outputs.tag }}
+        run: npm publish --tag=${{ steps.prerelease.outputs.tag }}

@@ -31,7 +31,9 @@
         "ff": "./dist/main.js"
     },
     "publishConfig": {
-        "access": "public"
+        "access": "public",
+        "registry": "https://registry.npmjs.org/",
+        "provenance": true
     },
     "scripts": {
         "postbuild": "bun scripts/generate-json-schema.ts assets/firefly.schema.json",
