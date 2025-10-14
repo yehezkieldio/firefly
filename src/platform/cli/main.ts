@@ -20,6 +20,7 @@ async function main(): Promise<void> {
         process.argv.push("-h");
     }
 
+    // Set environment variables for internal versions use
     process.env.FIREFLY_VERSION = pkg.version;
     process.env.FIREFLY_DESCRIPTION = pkg.description;
     process.env.FIREFLY_GIT_CLIFF_VERSION = pkg.dependencies["git-cliff"].replace("^", "");
