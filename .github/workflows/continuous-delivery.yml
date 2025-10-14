@@ -9,6 +9,17 @@ permissions:
   contents: read
   packages: write
 
+# Note on Runtime Dependencies:
+# This workflow currently uses both Bun and Node.js runtimes, which may seem redundant.
+# However, this dual-runtime approach is necessary because `bun publish` does not currently
+# support npm's trusted publishing feature (provenance and OIDC-based authentication).
+
+# So we are falling back to `npm publish` for the actual publishing step to leverage trusted publishing.
+#
+# TODO: Investigate whether Bun has added support for npm trusted publishing in newer versions.
+#       If support is available, we should consolidate to use only Bun runtime across the entire
+#       workflow to simplify the setup and reduce maintenance overhead.
+
 jobs:
   detect-changes:
     name: Detect Changes and Release Type
@@ -74,11 +85,19 @@ jobs:
         with:
           bun-version: latest
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
       - name: Install Project Dependencies
         run: bun install --frozen-lockfile
 
       - name: Build Firefly Package
         run: bun run build
+
+      - name: Update npm
+        run: npm install -g npm@latest
 
       - name: Publish Package to NPM (latest tag)
         run: bun publish --tag=latest
@@ -148,11 +167,19 @@ jobs:
         with:
           bun-version: latest
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
       - name: Install Project Dependencies
         run: bun install --frozen-lockfile
 
       - name: Build Firefly Package
         run: bun run build
+
+      - name: Update npm
+        run: npm install -g npm@latest
 
       - name: Publish Package to NPM (prerelease tag)
         run: bun publish --tag=${{ steps.prerelease.outputs.tag }}
