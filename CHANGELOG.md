@@ -6,6 +6,34 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.6 (October 28, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`c198a8b`](https://github.com/yehezkieldio/firefly/commit/c198a8b107e66fd910115aca73d3e13b2a2d8d9f) cliff.toml: Enhance commit grouping and release note formatting for clarity and broader keyword support
+
+### <!-- 16 -->🤖 CI/CD
+- [`15e7ff0`](https://github.com/yehezkieldio/firefly/commit/15e7ff07e4e2ed1b418eae3ea48c7cce7733015d) ci: Update comments on runtime dependencies
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`980f2bd`](https://github.com/yehezkieldio/firefly/commit/980f2bde297ba4b13248c1c135fef98f13c9cfed) deps: Update dependency @types/node to ^24.8.0 by renovate[bot] ([#113](https://github.com/yehezkieldio/firefly/issues/113))
+- [`507d980`](https://github.com/yehezkieldio/firefly/commit/507d9802efb42ad9e71cda1a4c5709a137a0abb1) deps: Update dependency @types/node to ^24.8.1 by renovate[bot] ([#114](https://github.com/yehezkieldio/firefly/issues/114))
+- [`4e7c15c`](https://github.com/yehezkieldio/firefly/commit/4e7c15c46964cca3a610bd22d0050a1d787befc4) deps: Update dependency c12 to ^3.3.1 by renovate[bot] ([#115](https://github.com/yehezkieldio/firefly/issues/115))
+- [`b029604`](https://github.com/yehezkieldio/firefly/commit/b0296045b5abd73e23df5c0510a302dd09f70f57) deps: Update dependency tsdown to ^0.15.8 by renovate[bot] ([#116](https://github.com/yehezkieldio/firefly/issues/116))
+- [`e9293d5`](https://github.com/yehezkieldio/firefly/commit/e9293d51447de2bddd08ab70f822ba431c40e862) deps: Update dependency tsdown to ^0.15.9 by renovate[bot] ([#117](https://github.com/yehezkieldio/firefly/issues/117))
+- [`7af698c`](https://github.com/yehezkieldio/firefly/commit/7af698c2960f072155dee146e42a102cd5232ed6) deps: Update dependency @types/node to ^24.9.0 by renovate[bot] ([#118](https://github.com/yehezkieldio/firefly/issues/118))
+- [`b1ce15a`](https://github.com/yehezkieldio/firefly/commit/b1ce15adcade97be9b64f09145f8b7c15fb8f3cc) deps: Update dependency @types/node to ^24.9.1 by renovate[bot] ([#119](https://github.com/yehezkieldio/firefly/issues/119))
+- [`a96a548`](https://github.com/yehezkieldio/firefly/commit/a96a548082642ff59c40364bc0095524e8ebc588) deps: Update dependency node to v22.21.0 by renovate[bot] ([#120](https://github.com/yehezkieldio/firefly/issues/120))
+- [`cd754dc`](https://github.com/yehezkieldio/firefly/commit/cd754dcfdbc10004fd66a1460aa102d5ff6d7ff6) deps: Update dependency @biomejs/biome to v2.2.7 by renovate[bot] ([#122](https://github.com/yehezkieldio/firefly/issues/122))
+- [`6f77b24`](https://github.com/yehezkieldio/firefly/commit/6f77b245125a96df9233d48ef67d6f6950d05171) deps: Update dependency @types/bun to ^1.3.1 by renovate[bot] ([#123](https://github.com/yehezkieldio/firefly/issues/123))
+- [`47a6d6b`](https://github.com/yehezkieldio/firefly/commit/47a6d6b47fece48d12175dc00da427c1a85828f7) deps: Update dependency @biomejs/biome to v2.3.0 by renovate[bot] ([#124](https://github.com/yehezkieldio/firefly/issues/124))
+- [`ed62cf2`](https://github.com/yehezkieldio/firefly/commit/ed62cf20ae0b207a8f6e4f32224d4cf1cc46e1ff) deps: Update biome to v2.3.0
+- [`ded2bf6`](https://github.com/yehezkieldio/firefly/commit/ded2bf6486ba7e27d535b80d266d3e4465e05f45) deps: Update dependency commander to ^14.0.2 by renovate[bot] ([#125](https://github.com/yehezkieldio/firefly/issues/125))
+- [`28a7ee8`](https://github.com/yehezkieldio/firefly/commit/28a7ee87d29be8e6f0d48adaa892c1735c2a9fdf) deps: Update dependency tsdown to ^0.15.10 by renovate[bot] ([#126](https://github.com/yehezkieldio/firefly/issues/126))
+- [`ed4f73e`](https://github.com/yehezkieldio/firefly/commit/ed4f73e3fe5ff9d81967c9d1a51e2d571b6588b8) deps: Update dependency @biomejs/biome to v2.3.1 by renovate[bot] ([#127](https://github.com/yehezkieldio/firefly/issues/127))
+- [`f67599a`](https://github.com/yehezkieldio/firefly/commit/f67599a257362d5ba204872d9f8ee46e4a948c86) deps: Update dependency tsdown to ^0.15.11 by renovate[bot] ([#128](https://github.com/yehezkieldio/firefly/issues/128))
+
+### <!-- 5 -->📚 Documentation
+- [`b8b79ca`](https://github.com/yehezkieldio/firefly/commit/b8b79ca25d8a738c4aa10646840965022a43a156) agents: Add agent overseer guide
 ## firefly@3.0.5 (October 14, 2025)
 
 ### <!-- 16 -->🤖 CI/CD
