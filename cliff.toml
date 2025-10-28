@@ -19,29 +19,45 @@ body = """
 {% if message -%}
   ### 📝 Release Notes
   {{ message | safe }}
-{% endif -%}\
+{% endif -%}
 
 {% for group, commits in commits | group_by(attribute="group") %}
-    ### {{ group | replace(from="<!-- \\d+ -->", to="") | trim | upper_first }}
-    {%- for commit in commits %}
-      - [`{{ commit.id | truncate(length=7, end="") }}`]({{ self::remote_url() }}/commit/{{ commit.id }}) {% if commit.scope %}{{ commit.scope }}:{% endif %} {{ commit.message | upper_first }}\
-      {% if commit.remote.pr_number %} \
-          {% if commit.remote.username != "renovate[bot]" and commit.remote.username != "github-actions[bot]" -%}
-            by [@{{ commit.remote.username }}](https://github.com/{{ commit.remote.username }})\
-          {% else -%}
-            by {{ commit.remote.username }}\
-          {% endif -%}
-      {%- endif %}\
-      {% if commit.breaking %}\
-        {% if commit.footers | length > 0 %}\
-          {% for breakingChange in commit.footers %}\
-            \n{% raw %}  {% endraw %} - 💥 **{{ breakingChange.token }}{{ breakingChange.separator }}** {{ breakingChange.value }}\
-          {% endfor %}\
-        {% else %}\
-          \n{% raw %}  {% endraw %} - 💥 **BREAKING CHANGE:** This commit introduces a breaking change.\
-        {% endif %}\
-      {% endif %}\
-    {% endfor %}
+### {{ group | replace(from="<!-- \\d+ -->", to="") | trim | upper_first }}
+{% for commit in commits -%}
+{%- set commit_title = commit.message | split(pat="\n") | first | trim -%}
+{%- set normalized_title = commit_title -%}
+{%- set pr_markup = "" -%}
+{%- if commit.remote.pr_number -%}
+  {%- set pr_url = "https://github.com/" ~ remote.github.owner ~ "/" ~ remote.github.repo ~ "/issues/" ~ commit.remote.pr_number -%}
+  {%- set pr_markup = "([#" ~ commit.remote.pr_number ~ "](" ~ pr_url ~ "))" -%}
+  {%- set normalized_title = normalized_title | replace(from=" " ~ pr_markup, to="") | replace(from=pr_markup, to="") | trim -%}
+{%- endif -%}
+{%- set author_segment = "" -%}
+{%- if commit.remote.pr_number and commit.remote.username -%}
+  {%- if commit.remote.username != "renovate[bot]" and commit.remote.username != "github-actions[bot]" and commit.remote.username != "yehezkieldio" and commit.remote.username != "Copilot" -%}
+    {%- set author_segment = " by [@" ~ commit.remote.username ~ "](https://github.com/" ~ commit.remote.username ~ ")" -%}
+  {%- else -%}
+    {%- set author_segment = " by " ~ commit.remote.username -%}
+  {%- endif -%}
+{%- endif -%}
+{%- set commit_url = "https://github.com/" ~ remote.github.owner ~ "/" ~ remote.github.repo ~ "/commit/" ~ commit.id -%}
+- [`{{ commit.id | truncate(length=7, end="") }}`]({{ commit_url }}){% if commit.scope %} {{ commit.scope }}:{% endif %} {{ normalized_title | upper_first }}{% if author_segment != "" %}{{ author_segment }}{% endif %}{% if pr_markup != "" %} {{ pr_markup }}{% endif %}
+{%- if commit.body %}
+{% for line in commit.body | split(pat="\n") %}
+  {{ line }}
+{% endfor %}
+{%- endif %}
+{%- if commit.breaking %}
+{% if commit.footers | length > 0 %}
+  {% for breakingChange in commit.footers %}
+  - 💥 **{{ breakingChange.token }}{{ breakingChange.separator }}** {{ breakingChange.value }}
+  {% endfor %}
+{% else %}
+  - 💥 **BREAKING CHANGE:** This commit introduces a breaking change.
+{% endif %}
+{%- endif %}
+{% endfor -%}
+
 {% endfor %}
 """
 footer = ""
@@ -56,28 +72,43 @@ commit_preprocessors = [
 ]
 commit_parsers = [
   { message = "^chore\\(release\\): release", skip = true },
+  { message = "^chore: release", skip = true },
+  { message = "^chore\\(version\\)", skip = true },
   { message = "^fix\\(deps\\)", group = "<!-- 2 -->🧩 Dependencies Updates" },
   { message = "^chore\\(deps\\)", group = "<!-- 2 -->🧩 Dependencies Updates" },
+  { message = "^build\\(deps\\)", group = "<!-- 2 -->🧩 Dependencies Updates" },
+  { message = "^style\\(deps\\)", group = "<!-- 2 -->🧩 Dependencies Updates" },
+  { message = "^perf\\(deps\\)", group = "<!-- 2 -->🧩 Dependencies Updates" },
+  { message = "^deps:", group = "<!-- 2 -->🧩 Dependencies Updates" },
   { message = "^feat!|^feat\\(.*\\)!", group = "<!-- 3 -->🚀 New Features", breaking = true },
-  { message = "^feat", group = "<!-- 3 -->🚀 New Features" },
   { message = "^fix!|^fix\\(.*\\)!", group = "<!-- 4 -->🐛 Bug Fixes", breaking = true },
+  { message = "^refactor!|^refactor\\(.*\\)!", group = "<!-- 7 -->🚜 Refactor", breaking = true },
+  { message = "^perf!|^perf\\(.*\\)!", group = "<!-- 6 -->⚡ Performance", breaking = true },
+  { message = "^feat", group = "<!-- 3 -->🚀 New Features" },
+  { message = "^feature", group = "<!-- 3 -->🚀 New Features" },
   { message = "^fix", group = "<!-- 4 -->🐛 Bug Fixes" },
   { message = "^docs", group = "<!-- 5 -->📚 Documentation" },
-  { message = "^perf", group = "<!-- 6 -->⚡ Performance" },
   { message = "^refactor", group = "<!-- 7 -->🚜 Refactor" },
+  { message = "^build\\(deps\\)", group = "<!-- 2 -->🧩 Dependencies Updates" },
+  { message = "^build", group = "<!-- 8 -->🏗️ Build System" },
   { message = "^style\\(deps\\)", group = "<!-- 2 -->🧩 Dependencies Updates" },
-  { message = "^style\\(.*\\)", group = "<!-- 9 -->🎨 Code Styling" },
   { message = "^style", group = "<!-- 9 -->🎨 Code Styling" },
+  { message = "^format", group = "<!-- 9 -->🎨 Code Styling" },
   { message = "^test", group = "<!-- 10 -->🧪 Test" },
+  { message = "^tests", group = "<!-- 10 -->🧪 Test" },
+  { message = "^chore\\(ci\\)", group = "<!-- 16 -->🤖 CI/CD" },
+  { message = "^ci", group = "<!-- 16 -->🤖 CI/CD" },
   { message = "^chore", group = "<!-- 11 -->🛠️ Miscellaneous" },
   { message = "^security", group = "<!-- 12 -->🔒 Security" },
   { message = "^compat", group = "<!-- 13 -->🔗 Compatibility" },
   { message = "^revert", group = "<!-- 14 -->⏪ Reverts" },
+  { message = "^Revert", group = "<!-- 14 -->⏪ Reverts" },
   { message = "^i18n", group = "<!-- 15 -->🌐 Internationalization" },
-  { message = "^chore\\(ci\\)", group = "<!-- 16 -->🤖 CI/CD" },
+  { message = "^locale", group = "<!-- 15 -->🌐 Internationalization" },
+  { message = "^translation", group = "<!-- 15 -->🌐 Internationalization" },
   { message = "^ci", group = "<!-- 16 -->🤖 CI/CD" },
-  { message = ".*", group = "<!-- 17 -->🛠️ Miscellaneous" },
-  { message = ".*deprecated", body = ".*deprecated", group = "⚠️ Deprecation" },
+  { message = ".*deprecated", body = ".*deprecated", group = "<!-- 30 -->⚠️ Deprecation" },
+  { message = ".*", group = "<!-- 99 -->🌀 Other" },
 ]
 filter_commits = false
 tag_pattern = "firefly@[0-9]"
