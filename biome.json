@@ -50,5 +50,8 @@
         "organizeImports": "on"
       }
     }
+  },
+  "javascript": {
+    "globals": ["Bun"]
   }
 }

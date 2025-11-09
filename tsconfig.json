@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2024",
+    "target": "esnext",
     "lib": ["ESNext"],
     "module": "ESNext",
     "moduleDetection": "force",
@@ -36,6 +36,5 @@
       "#/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
