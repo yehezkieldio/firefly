@@ -60,7 +60,8 @@
         "@types/node": "^24.9.1",
         "@types/semver": "^7.7.1",
         "tsdown": "^0.16.1",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "ultracite": "^6.3.2"
     },
     "keywords": [
         "cli",
