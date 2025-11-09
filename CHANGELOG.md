@@ -6,6 +6,20 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.7 (November 9, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`a4d599d`](https://github.com/yehezkieldio/firefly/commit/a4d599d67107078c2c3944b8fa99357a79ccadf3) renovate: Temporarily disable for to not distrupt major redesign
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`110f295`](https://github.com/yehezkieldio/firefly/commit/110f295ac7bb949c6533fc31f9c8066598000632) deps: Update dependency @biomejs/biome to v2.3.2 by renovate[bot] ([#129](https://github.com/yehezkieldio/firefly/issues/129))
+- [`76bbf53`](https://github.com/yehezkieldio/firefly/commit/76bbf5349ba6dc18e8bceb405a045dc25eba0feb) deps: Update dependency node to v22.21.1 by renovate[bot] ([#130](https://github.com/yehezkieldio/firefly/issues/130))
+- [`82d76fa`](https://github.com/yehezkieldio/firefly/commit/82d76fa8db3041a861243ea1e0b2db2f391a5e0f) deps: Update dependency tsdown to ^0.15.12 by renovate[bot] ([#131](https://github.com/yehezkieldio/firefly/issues/131))
+- [`131a55a`](https://github.com/yehezkieldio/firefly/commit/131a55af3f3e25eb2586570c879d2d06febc79ed) deps: Update dependency @biomejs/biome to v2.3.3 by renovate[bot] ([#132](https://github.com/yehezkieldio/firefly/issues/132))
+- [`4b883ec`](https://github.com/yehezkieldio/firefly/commit/4b883ec208d227ca5175ce3883000c92d9646731) deps: Update dependency tsdown to ^0.16.0 by renovate[bot] ([#133](https://github.com/yehezkieldio/firefly/issues/133))
+- [`110fa9d`](https://github.com/yehezkieldio/firefly/commit/110fa9dda0dbaef4119394ba9afcbd13abad8218) deps: Update dependency @biomejs/biome to v2.3.4 by renovate[bot] ([#134](https://github.com/yehezkieldio/firefly/issues/134))
+- [`4a8568e`](https://github.com/yehezkieldio/firefly/commit/4a8568e87b05647ca387e6823b47fb2a946ef639) deps: Update dependency tsdown to ^0.16.1 by renovate[bot] ([#135](https://github.com/yehezkieldio/firefly/issues/135))
+- [`f643860`](https://github.com/yehezkieldio/firefly/commit/f643860a214b08fa366af3861cc4e75807811199) deps: Update dependency @types/bun to ^1.3.2 by renovate[bot] ([#136](https://github.com/yehezkieldio/firefly/issues/136))
 ## firefly@3.0.6 (October 28, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
