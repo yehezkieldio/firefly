@@ -1,8 +1,8 @@
 import { ok } from "neverthrow";
 import type { z } from "zod";
 import type { WorkflowContext } from "#/rewrite/context/workflow-context";
-import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 import type { SkipCondition, Task, TaskMetadata } from "#/rewrite/task-system/task-types";
+import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.util";
 
 /**
  * Fluent builder for creating tasks with better DX.
@@ -130,7 +130,9 @@ export class TaskBuilder {
     /**
      * Set the undo/rollback function.
      */
-    withUndo(fn: (context: WorkflowContext<unknown, Record<string, unknown>>) => FireflyAsyncResult<void>): TaskBuilder {
+    withUndo(
+        fn: (context: WorkflowContext<unknown, Record<string, unknown>>) => FireflyAsyncResult<void>,
+    ): TaskBuilder {
         this.undoFn = fn;
         return this;
     }

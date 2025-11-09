@@ -11,12 +11,7 @@ import type { FireflyAsyncResult } from "#/shared/utils/result.util";
  * Create a test context with given config and data.
  */
 export function createTestContext<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>>(
-    options: {
-        config?: TConfig;
-        data?: Partial<TData>;
-        executionId?: string;
-        startTime?: Date;
-    } = {},
+    options: { config?: TConfig; data?: Partial<TData>; executionId?: string; startTime?: Date } = {},
 ): WorkflowContext<TConfig, TData> {
     const config = (options.config ?? {}) as TConfig;
     const data = (options.data ?? {}) as TData;

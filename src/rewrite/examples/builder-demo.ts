@@ -6,11 +6,11 @@
  */
 
 import { okAsync } from "neverthrow";
-import { logger } from "#/shared/logger";
-import { TaskBuilder } from "../task-system/task-builder";
-import { WorkflowOrchestrator } from "../execution/workflow-orchestrator";
-import { createCommand } from "../command-registry/command-types";
 import z from "zod";
+import { logger } from "#/shared/logger";
+import { createCommand } from "../command-registry/command-types";
+import { WorkflowOrchestrator } from "../execution/workflow-orchestrator";
+import { TaskBuilder } from "../task-system/task-builder";
 
 // Configuration schema
 const BuilderDemoConfigSchema = z.object({
