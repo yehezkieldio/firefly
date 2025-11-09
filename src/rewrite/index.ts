@@ -25,3 +25,14 @@ export { WorkflowOrchestrator } from "./execution/workflow-orchestrator";
 export { TaskRegistry } from "./task-system/task-registry";
 export type { SkipCondition, Task, TaskMetadata } from "./task-system/task-types";
 export { createTask } from "./task-system/task-types";
+export { TaskBuilder, buildTask } from "./task-system/task-builder";
+
+// Testing Utilities
+export {
+    createTestContext,
+    mockTask,
+    createTaskSpy,
+    TestWorkflow,
+    expect as testExpect,
+    type TaskSpy,
+} from "./testing";
