@@ -20,6 +20,5 @@
     "typescript.enablePromptUseWorkspaceTsdk": true,
     "typescript.preferences.autoImportFileExcludePatterns": ["assert", "node:assert"],
     "typescript.preferences.autoImportSpecifierExcludeRegexes": ["^(node:)?assert$"],
-    "typescript.preferences.importModuleSpecifier": "non-relative",
     "typescript.tsdk": "node_modules/typescript/lib"
 }

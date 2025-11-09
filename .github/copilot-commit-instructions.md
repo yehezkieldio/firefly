@@ -11,7 +11,6 @@ type(scope): description
 - **Voice**: imperative mood ("add" not "adds" or "added")
 - **Punctuation**: no period at end
 - **Style**: concise, direct, actionable
-- **Single Message Rule**: Even if a commit contains multiple changes that could warrant separate messages, **write only one commit message** that summarizes the most significant or combined change.
 
 ## 2. Type Classification (Priority Order)
 
@@ -83,8 +82,6 @@ type(scope): description
 - Be specific: "add user authentication" not "add auth stuff"
 - Use present tense imperative: "implement" not "implemented"
 - Focus on WHAT changed, not WHY
-- If multiple changes are in one commit, **summarize them into one clear message**:
-  - Example: `feat: add oauth login and user profile endpoints`
 
 ### DON'T:
 
@@ -92,9 +89,6 @@ type(scope): description
 - Add explanations: "fix bug (was causing crashes)"
 - Include ticket numbers: "fix USER-123"
 - Use gerunds: "adding" instead of "add"
-- Write multiple commit messages in one commit:
-  - ❌ `feat: add oauth login`
-    `feat: add user profile endpoints`
 
 ## 6. Common Patterns
 
@@ -114,7 +108,6 @@ feat(auth): add oauth2 google login
 feat(api): implement user profile endpoints
 feat(ui): add dark mode toggle
 feat: add email notifications
-feat: add oauth login and user profile endpoints
 ```
 
 ### Fixes
@@ -145,20 +138,10 @@ refactor: consolidate utility functions
 
 - Use parent scope if logical grouping exists
 - Omit scope if no clear parent
+- Consider splitting into multiple commits
 
 ### Configuration vs Feature:
 
 - New config enabling features → `feat`
 - Config changes only → `chore(config)`
 - Build process changes → `chore(build)` or `ci`
-
-## 8. Quality Checklist
-
-- ≤ 50 characters total
-- Imperative mood used
-- Type matches actual change
-- Scope is most specific applicable
-- Description is clear and actionable
-- No filler words or explanations
-- Would make sense to another developer
-- One commit message

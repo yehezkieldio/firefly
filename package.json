@@ -1,7 +1,7 @@
 {
     "name": "fireflyy",
     "version": "3.0.7",
-    "description": "CLI orchestrator for semantic versioning, changelog generation, and creating releases.",
+    "description": "WIP",
     "type": "module",
     "license": "MIT",
     "author": "Yehezkiel Dio Sinolungan <yehezkieldio@proton.me>",
@@ -36,9 +36,7 @@
         "provenance": true
     },
     "scripts": {
-        "postbuild": "bun scripts/generate-json-schema.ts assets/firefly.schema.json",
         "build": "tsdown",
-        "dev": "bun run src/platform/cli/main.ts",
         "check": "biome check .",
         "check:unsafe": "biome check --write --unsafe .",
         "check:write": "biome check --write .",

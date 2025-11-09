@@ -1,25 +1,13 @@
 name: Continuous Delivery
 
-on:
-  push:
-    branches:
-      - master
+# on:
+#   push:
+#     branches:
+#       - master
 permissions:
   id-token: write
   contents: read
   packages: write
-
-# Note on Runtime Dependencies:
-# This workflow currently uses both Bun and Node.js runtimes, which may seem redundant.
-# However, this dual-runtime approach is necessary because `bun publish` does not currently
-# support npm's trusted publishing feature (provenance and OIDC-based authentication) or
-# my current attempts to configure it to do so have been unsuccessful.
-#
-# So we are falling back to `npm publish` for the actual publishing step to leverage trusted publishing.
-#
-# TODO: Investigate whether Bun has added support for npm trusted publishing in newer versions.
-#       If support is available, we should consolidate to use only Bun runtime across the entire
-#       workflow to simplify the setup and reduce maintenance overhead.
 
 jobs:
   detect-changes:
