@@ -1,6 +1,7 @@
 import { loadConfig } from "c12";
 import { colors } from "consola/utils";
-import { ResultAsync } from "neverthrow";
+import { ResultAsync, errAsync } from "neverthrow";
+import { z } from "zod";
 import { logger } from "#/shared/logger";
 import { createFireflyError, toFireflyError } from "#/shared/utils/error.util";
 import type { FireflyAsyncResult } from "#/shared/utils/result.util";
@@ -24,6 +25,11 @@ export interface ConfigLoaderOptions {
      * Command name for loading command-specific config.
      */
     commandName?: string;
+
+    /**
+     * Zod schema for validation (optional).
+     */
+    schema?: z.ZodSchema;
 }
 
 /**
@@ -36,7 +42,7 @@ export class ConfigLoader {
      * Loads configuration from file using c12.
      */
     load(): FireflyAsyncResult<CommandConfig> {
-        const { cwd = process.cwd(), configFile } = this.options;
+        const { cwd = process.cwd(), configFile, schema } = this.options;
 
         return ResultAsync.fromPromise(
             loadConfig<CommandConfig>({
@@ -57,6 +63,7 @@ export class ConfigLoader {
             const config = result.config || {};
 
             // If commandName is provided, look for command-specific config
+            let finalConfig = config;
             if (this.options.commandName && config[this.options.commandName]) {
                 // Merge base config with command-specific config
                 const baseConfig = { ...config };
@@ -64,15 +71,33 @@ export class ConfigLoader {
 
                 const commandSpecificConfig = config[this.options.commandName];
 
-                return ResultAsync.fromSafePromise(
-                    Promise.resolve({
-                        ...baseConfig,
-                        ...commandSpecificConfig,
-                    }),
-                );
+                finalConfig = {
+                    ...baseConfig,
+                    ...commandSpecificConfig,
+                };
             }
 
-            return ResultAsync.fromSafePromise(Promise.resolve(config));
+            // Validate config against schema if provided
+            if (schema) {
+                const validation = schema.safeParse(finalConfig);
+                if (!validation.success) {
+                    const errors = validation.error.errors
+                        .map((e) => `  • ${e.path.join(".")}: ${e.message}`)
+                        .join("\n");
+                    
+                    logger.error("Config validation failed:");
+                    logger.error(errors);
+                    
+                    return errAsync(
+                        createFireflyError(
+                            toFireflyError(`Invalid configuration:\n${errors}`),
+                        ),
+                    );
+                }
+                return ResultAsync.fromSafePromise(Promise.resolve(validation.data));
+            }
+
+            return ResultAsync.fromSafePromise(Promise.resolve(finalConfig));
         });
     }
 }

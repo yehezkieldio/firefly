@@ -15,6 +15,7 @@ export { releaseCommand } from "./commands/release";
 export type { WorkflowContext } from "./context/workflow-context";
 // Context System
 export { ImmutableWorkflowContext } from "./context/workflow-context";
+export { ContextBuilder } from "./context/context-builder";
 
 // Examples
 export { demoCommand } from "./examples/demo-command";
@@ -31,6 +32,13 @@ export { TaskBuilder, buildTask } from "./task-system/task-builder";
 export { TaskRegistry } from "./task-system/task-registry";
 export type { SkipCondition, Task, TaskMetadata } from "./task-system/task-types";
 export { createTask } from "./task-system/task-types";
+// Task Composition
+export {
+    composeSequential,
+    composeConditional,
+    composeRetry,
+    composeGroup,
+} from "./task-system/task-composition";
 
 // Testing Utilities
 export {
@@ -41,3 +49,6 @@ export {
     expect as testExpect,
     mockTask,
 } from "./testing";
+
+// Shared Services
+export * from "./shared";
