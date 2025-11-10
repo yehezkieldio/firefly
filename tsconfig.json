@@ -28,6 +28,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
+    "isolatedDeclarations": true,
 
     "skipLibCheck": true,
     "incremental": true,
