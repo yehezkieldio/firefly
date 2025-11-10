@@ -1,0 +1,14 @@
+{
+    "name": "test-package",
+    "version": "1.0.0",
+    "description": "Test package for unit tests",
+    "scripts": {
+        "test": "bun test"
+    },
+    "dependencies": {
+        "neverthrow": "^6.0.0"
+    },
+    "devDependencies": {
+        "bun-types": "latest"
+    }
+}

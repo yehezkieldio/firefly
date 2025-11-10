@@ -1,0 +1,32 @@
+[
+    {
+        "hash": "abc123",
+        "message": "feat: add new authentication system",
+        "author": "Developer",
+        "date": "2024-01-01"
+    },
+    {
+        "hash": "def456",
+        "message": "fix(api): correct validation error",
+        "author": "Developer",
+        "date": "2024-01-02"
+    },
+    {
+        "hash": "ghi789",
+        "message": "feat(ui)!: redesign user interface",
+        "author": "Developer",
+        "date": "2024-01-03"
+    },
+    {
+        "hash": "jkl012",
+        "message": "docs: update README",
+        "author": "Developer",
+        "date": "2024-01-04"
+    },
+    {
+        "hash": "mno345",
+        "message": "chore: update dependencies",
+        "author": "Developer",
+        "date": "2024-01-05"
+    }
+]
