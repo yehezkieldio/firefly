@@ -1,3 +1,5 @@
+language js
+
 `$fn` where {
     $fn <: `try { $body } catch($err) { $catchBody }`,
     register_diagnostic(span=$fn, message="Avoid try/catch, use neverthrow Result or ResultAsync for error handling.")

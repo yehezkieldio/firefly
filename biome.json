@@ -21,6 +21,9 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "warn"
+      },
       "suspicious": {
         "noUnknownAtRules": "off",
         "useAwait": "off",
