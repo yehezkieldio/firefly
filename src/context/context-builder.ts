@@ -32,8 +32,7 @@ export class ContextBuilder<
     }
 
     withData<K extends string, V>(key: K, value: V): ContextBuilder<TConfig, TData & Record<K, V>> {
-        return new ContextBuilder(this.configValue, { ...this.dataValue, [key]: value } as TData &
-            Record<K, V>);
+        return new ContextBuilder(this.configValue, { ...this.dataValue, [key]: value } as TData & Record<K, V>);
     }
 
     withMockData<K extends string, V>(key: K, value: V): ContextBuilder<TConfig, TData & Record<K, V>> {
@@ -83,10 +82,7 @@ export class ContextBuilder<
                         }
                         return ok(updatedData[k]);
                     },
-                    fork: <K2 extends keyof TData>(
-                        key2: K2,
-                        value2: TData[K2]
-                    ): WorkflowContext<TConfig, TData> => {
+                    fork: <K2 extends keyof TData>(key2: K2, value2: TData[K2]): WorkflowContext<TConfig, TData> => {
                         const nestedUpdatedData = { ...updatedData, [key2]: value2 };
                         return createNestedContext(startTime, frozenConfig, nestedUpdatedData);
                     },
@@ -116,10 +112,7 @@ export class ContextBuilder<
                         }
                         return ok(updatedData[k]);
                     },
-                    fork: <K extends keyof TData>(
-                        key: K,
-                        value: TData[K]
-                    ): WorkflowContext<TConfig, TData> => {
+                    fork: <K extends keyof TData>(key: K, value: TData[K]): WorkflowContext<TConfig, TData> => {
                         const nestedUpdatedData = { ...updatedData, [key]: value };
                         return createNestedContext(startTime, frozenConfig, nestedUpdatedData);
                     },

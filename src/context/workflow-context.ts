@@ -2,10 +2,7 @@ import { err, ok } from "neverthrow";
 import { createFireflyError } from "#/utils/error";
 import type { FireflyResult } from "#/utils/result";
 
-export interface WorkflowContext<
-    TConfig = unknown,
-    TData extends Record<string, unknown> = Record<string, unknown>,
-> {
+export interface WorkflowContext<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>> {
     readonly startTime: Date;
     readonly config: Readonly<TConfig>;
     readonly data: Readonly<TData>;
@@ -17,10 +14,8 @@ export interface WorkflowContext<
     snapshot(): Readonly<TData>;
 }
 
-export class StaticWorkflowContext<
-    TConfig = unknown,
-    TData extends Record<string, unknown> = Record<string, unknown>,
-> implements WorkflowContext<TConfig, TData>
+export class StaticWorkflowContext<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>>
+    implements WorkflowContext<TConfig, TData>
 {
     readonly startTime: Date;
     readonly config: Readonly<TConfig>;

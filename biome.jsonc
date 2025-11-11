@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite/core"],
   "plugins": [".biome/no-try-catch.grit", ".biome/never-throw.grit"],
+  "extends": ["ultracite/core"],
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -15,7 +15,7 @@
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 4,
-    "lineWidth": 110
+    "lineWidth": 120
   },
   "linter": {
     "enabled": true,

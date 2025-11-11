@@ -77,17 +77,12 @@ export function parseSchemaAsync<TBase extends z.ZodObject<z.ZodRawShape>>(
     schemaOrDescriptor: ShapeDescriptor<TBase>,
     data: unknown
 ): FireflyAsyncResult<z.infer<ReturnType<typeof composeShape<TBase>>>>;
-export function parseSchemaAsync(
-    schemaOrDescriptor: EffectsDescriptor,
-    data: unknown
-): FireflyAsyncResult<unknown>;
+export function parseSchemaAsync(schemaOrDescriptor: EffectsDescriptor, data: unknown): FireflyAsyncResult<unknown>;
 
 export function parseSchemaAsync(
     schemaOrDescriptor: SchemaInput<z.ZodType<unknown>>,
     data: unknown
 ): FireflyAsyncResult<unknown> {
     const schema = toSchema(schemaOrDescriptor);
-    return ResultAsync.fromPromise(schema.parseAsync(data), (error) =>
-        createFireflyError(toFireflyError(error))
-    );
+    return ResultAsync.fromPromise(schema.parseAsync(data), (error) => createFireflyError(toFireflyError(error)));
 }
