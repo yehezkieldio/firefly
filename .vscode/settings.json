@@ -1,29 +1,25 @@
 {
-  "[javascript][typescript][javascriptreact][typescriptreact][json][jsonc][css][graphql]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[yaml]": {
-    "editor.defaultFormatter": "redhat.vscode-yaml",
-    "editor.tabSize": 4
-  },
-  "github.copilot.chat.commitMessageGeneration.instructions": [
-    {
-      "file": ".github/copilot-commit-instructions.md"
-    }
-  ],
-  "editor.codeActionsOnSave": {
-    "source.fixAll.biome": "explicit",
-    "source.organizeImports.biome": "explicit"
-  },
-  "editor.formatOnPaste": false,
-  "editor.formatOnSave": true,
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.preferences.autoImportFileExcludePatterns": [
-    "assert",
-    "node:assert"
-  ],
-  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
-    "^(node:)?assert$"
-  ],
-  "typescript.tsdk": "node_modules/typescript/lib"
+    "[javascript][typescript][javascriptreact][typescriptreact][json][jsonc][css][graphql]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[yaml]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml",
+        "editor.tabSize": 4
+    },
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "file": ".github/copilot-commit-instructions.md"
+        }
+    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll.biome": "explicit",
+        "source.organizeImports.biome": "explicit"
+    },
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": true,
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "typescript.preferences.autoImportFileExcludePatterns": ["assert", "node:assert"],
+    "typescript.preferences.autoImportSpecifierExcludeRegexes": ["^(node:)?assert$"],
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

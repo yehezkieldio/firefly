@@ -1,3 +1,3 @@
-> ⚠️ **Work In Progress** <br>
-> This project is undergoing a major rewrite from the ground up for v4. <br>
-> For the latest stable release, please check the v3 branch: [firefly/tree/v3](https://github.com/yehezkieldio/firefly/tree/v3)
+Please visit [firefly/tree/v3](https://github.com/yehezkieldio/firefly/tree/v3) for the latest stable release.
+
+Currently, the `master` branch is a under heavy development for a upcoming major release, and may be unstable or missing features.
