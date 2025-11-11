@@ -26,7 +26,6 @@ export type FireflyError = Readonly<z.infer<typeof FireflyErrorSchema>>;
 
 export function createFireflyError(error: FireflyError): FireflyError & { stack?: string | undefined } {
     const err = new Error(error.message);
-
     return Object.freeze({
         ...error,
         stack: err.stack,
@@ -44,6 +43,5 @@ export function toFireflyError(
         cause: e,
         source,
     };
-
     return createFireflyError(FireflyErrorSchema.parse(base));
 }
