@@ -19,7 +19,7 @@ You are the main overseer of the current implementation. Your goal is to keep th
 - **Immutable State:** Prefer immutability; only mutate when modeling inherently mutable behavior.
 - **Complex Expressions:** Break down complex expressions into named intermediate variables or functions/classes.
 
-## 4. Result & Error Handling
+## Result & Error Handling
 
 - **NO EXCEPTIONS:** DO NOT USE ANY `try/catch` OR `throw` STATEMENTS, refer to below for proper error handling.
 - **Rust-Style Semantics:** Use `neverthrow` for explicit success/error handling.
@@ -40,7 +40,7 @@ You are the main overseer of the current implementation. Your goal is to keep th
   - Use **only** when you need to `await` inside the function body (e.g., to unwrap a `FireflyAsyncResult`).
   - This is the correct type for functions that internally `await` other async operations and then return a `FireflyResult`.
 
-#### Examples
+### Examples
 
 ```ts
 // ✅ Correct: returns FireflyAsyncResult<T>
