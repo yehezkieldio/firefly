@@ -14,13 +14,13 @@ export class TaskBuilder {
 	private taskDependencies: string[] = [];
 	private taskConfigSchema?: z.ZodType;
 	private skipFn?: (
-		context: GenericWorkflowContext
+		context: GenericWorkflowContext,
 	) => FireflyResult<SkipCondition>;
 	private executeFn?: (
-		context: GenericWorkflowContext
+		context: GenericWorkflowContext,
 	) => FireflyAsyncResult<GenericWorkflowContext>;
 	private undoFn?: (
-		context: GenericWorkflowContext
+		context: GenericWorkflowContext,
 	) => FireflyAsyncResult<void>;
 
 	private constructor(id: string) {
@@ -52,7 +52,7 @@ export class TaskBuilder {
 	}
 
 	skipWhen(
-		predicate: (context: GenericWorkflowContext) => boolean
+		predicate: (context: GenericWorkflowContext) => boolean,
 	): TaskBuilder {
 		this.skipFn = (ctx) =>
 			ok({
@@ -64,7 +64,7 @@ export class TaskBuilder {
 
 	skipWhenWithReason(
 		predicate: (context: GenericWorkflowContext) => boolean,
-		reason: string
+		reason: string,
 	): TaskBuilder {
 		this.skipFn = (ctx) =>
 			ok({
@@ -76,7 +76,7 @@ export class TaskBuilder {
 
 	skipWhenAndJumpTo(
 		predicate: (context: GenericWorkflowContext) => boolean,
-		skipToTasks: string[]
+		skipToTasks: string[],
 	): TaskBuilder {
 		this.skipFn = (ctx) =>
 			ok({
@@ -88,7 +88,7 @@ export class TaskBuilder {
 	}
 
 	shouldSkip(
-		fn: (context: GenericWorkflowContext) => FireflyResult<SkipCondition>
+		fn: (context: GenericWorkflowContext) => FireflyResult<SkipCondition>,
 	): TaskBuilder {
 		this.skipFn = fn;
 		return this;
@@ -96,15 +96,15 @@ export class TaskBuilder {
 
 	execute(
 		fn: (
-			context: GenericWorkflowContext
-		) => FireflyAsyncResult<GenericWorkflowContext>
+			context: GenericWorkflowContext,
+		) => FireflyAsyncResult<GenericWorkflowContext>,
 	): TaskBuilder {
 		this.executeFn = fn;
 		return this;
 	}
 
 	withUndo(
-		fn: (context: GenericWorkflowContext) => FireflyAsyncResult<void>
+		fn: (context: GenericWorkflowContext) => FireflyAsyncResult<void>,
 	): TaskBuilder {
 		this.undoFn = fn;
 		return this;
