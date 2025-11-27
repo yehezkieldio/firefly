@@ -1,63 +1,65 @@
 {
-    "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-    "plugins": [".biome/no-try-catch.grit", ".biome/never-throw.grit"],
-    "vcs": {
-        "enabled": true,
-        "clientKind": "git",
-        "useIgnoreFile": true,
-        "defaultBranch": "master"
-    },
-    "files": {
-        "ignoreUnknown": true,
-        "includes": ["**", "!node_modules", "!!dist", "!!build", "!bun.lock"]
-    },
-    "formatter": {
-        "enabled": true,
-        "indentStyle": "space",
-        "indentWidth": 4,
-        "lineWidth": 120
-    },
-    "linter": {
-        "enabled": true,
-        "rules": {
-            "recommended": true,
-            "nursery": {
-                "noEmptySource": "off"
-            },
-            "correctness": {
-                "noUnusedVariables": "off"
-            },
-            "suspicious": {
-                "noUnknownAtRules": "off",
-                "useAwait": "off",
-                "noConsole": "off"
-            },
-            "style": {
-                "noMagicNumbers": "off",
-                "useConsistentTypeDefinitions": "off",
-                "useBlockStatements": "off"
-            },
-            "performance": {
-                "noNamespaceImport": "off"
-            },
-            "complexity": {
-                "noExcessiveCognitiveComplexity": {
-                    "level": "warn",
-                    "options": {
-                        "maxAllowedComplexity": 50
-                    }
-                }
-            }
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "plugins": [".biome/no-try-catch.grit", ".biome/never-throw.grit"],
+  "extends": ["ultracite/core"],
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "master"
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["**", "!node_modules", "!!dist", "!!build", "!bun.lock"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 4,
+    "lineWidth": 120
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "nursery": {
+        "noEmptySource": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "off"
+      },
+      "suspicious": {
+        "noUnknownAtRules": "off",
+        "useAwait": "off",
+        "noConsole": "off"
+      },
+      "style": {
+        "noMagicNumbers": "off",
+        "useConsistentTypeDefinitions": "off",
+        "useBlockStatements": "off"
+      },
+      "performance": {
+        "noNamespaceImport": "off"
+      },
+      "complexity": {
+        "noVoid": "off",
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": {
+            "maxAllowedComplexity": 50
+          }
         }
-    },
-    "assist": {
-        "actions": {
-            "source": {
-                "organizeImports": "on"
-            }
-        }
-    },
-    "javascript": {
-        "globals": ["Bun"]
+      }
     }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "javascript": {
+    "globals": ["Bun"]
+  }
 }
