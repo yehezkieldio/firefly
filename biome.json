@@ -1,65 +1,35 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "plugins": [".biome/no-try-catch.grit", ".biome/never-throw.grit"],
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
   "extends": ["ultracite/core"],
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true,
-    "defaultBranch": "master"
+    "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": true,
-    "includes": ["**", "!node_modules", "!!dist", "!!build", "!bun.lock"]
+    "ignoreUnknown": false
   },
   "formatter": {
     "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 4,
-    "lineWidth": 120
+    "indentStyle": "tab"
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "nursery": {
-        "noEmptySource": "off"
-      },
-      "correctness": {
-        "noUnusedVariables": "off"
-      },
-      "suspicious": {
-        "noUnknownAtRules": "off",
-        "useAwait": "off",
-        "noConsole": "off"
-      },
-      "style": {
-        "noMagicNumbers": "off",
-        "useConsistentTypeDefinitions": "off",
-        "useBlockStatements": "off"
-      },
-      "performance": {
-        "noNamespaceImport": "off"
-      },
-      "complexity": {
-        "noVoid": "off",
-        "noExcessiveCognitiveComplexity": {
-          "level": "warn",
-          "options": {
-            "maxAllowedComplexity": 50
-          }
-        }
-      }
+      "recommended": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
     }
   },
   "assist": {
+    "enabled": true,
     "actions": {
       "source": {
         "organizeImports": "on"
       }
     }
-  },
-  "javascript": {
-    "globals": ["Bun"]
   }
 }
