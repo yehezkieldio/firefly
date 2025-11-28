@@ -11,6 +11,9 @@ export interface CommandMetadata {
     readonly examples?: string[];
 }
 
+/**
+ * A type-safe command definition with specific config and data types.
+ */
 export interface Command<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>> {
     readonly meta: CommandMetadata;
     buildTasks: (context: WorkflowContext<TConfig, TData>) => FireflyAsyncResult<Task[]>;
@@ -18,6 +21,13 @@ export interface Command<TConfig = unknown, TData extends Record<string, unknown
     afterExecute?: (r: WorkflowExecutionResult, c: WorkflowContext<TConfig, TData>) => FireflyAsyncResult<void>;
     onError?: (error: Error, context: WorkflowContext<TConfig, TData>) => FireflyAsyncResult<void>;
 }
+
+/**
+ * Type-erased command interface for registry storage.
+ * Uses `any` internally but is only accessed through type-safe methods.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: Required for type erasure in registry
+export type AnyCommand = Command<any, any>;
 
 export function createCommand<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>>(
     command: Command<TConfig, TData>
