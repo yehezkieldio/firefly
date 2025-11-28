@@ -32,7 +32,8 @@
       "style": {
         "useBlockStatements": "off",
         "noMagicNumbers": "off",
-        "useConsistentTypeDefinitions": "off"
+        "useConsistentTypeDefinitions": "off",
+        "noParameterProperties": "off"
       },
       "performance": {
         "noNamespaceImport": "off"
