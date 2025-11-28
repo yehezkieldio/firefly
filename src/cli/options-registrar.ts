@@ -18,8 +18,8 @@ type OptionContext = {
 
 export class OptionsRegistrar {
     private readonly shorthandMap = new Map<string, string>([
-        ["bumpStrategy", "b"],
-        ["releaseType", "t"],
+        ["bumpStrategy", "bt"],
+        ["releaseType", "rt"],
     ]);
 
     private readonly skipFields = new Set(["dryRun", "verbose", "enableRollback"]);
@@ -44,10 +44,11 @@ export class OptionsRegistrar {
         const field = this.unwrapSchema(rawField);
         const optionName = this.camelToKebab(key);
         const shorthand = this.shorthandMap.get(key);
-        const optionFlag = shorthand ? `-${shorthand}, --${optionName}` : `--${optionName}`;
+        const shorthandPrefix = shorthand && shorthand.length === 1 ? "-" : "--";
+        const optionFlag = shorthand ? `${shorthandPrefix}${shorthand}, --${optionName}` : `--${optionName}`;
 
         const hasExistingOption = command.options.some(
-            (opt) => opt.long === `--${optionName}` || (shorthand && opt.short === `-${shorthand}`)
+            (opt) => opt.long === `--${optionName}` || (shorthand && opt.short === `${shorthandPrefix}${shorthand}`)
         );
 
         if (hasExistingOption) return null;

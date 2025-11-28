@@ -37,7 +37,7 @@ export class ConfigLoader {
 
     private logConfigFile(configFile: string | undefined): void {
         if (configFile && configFile !== "firefly.config") {
-            logger.info(`Using config: ${colors.underline(configFile)}`);
+            logger.info(`Using firefly config: ${colors.underline(configFile)}`);
         }
     }
 
