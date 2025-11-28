@@ -3,6 +3,7 @@ import { defineConfig } from "tsdown/config";
 export default defineConfig([
     {
         entry: "./src/cli/config.ts",
+        dts: true,
         platform: "neutral",
         nodeProtocol: "strip",
     },
@@ -11,6 +12,6 @@ export default defineConfig([
         platform: "neutral",
         dts: false,
         nodeProtocol: "strip",
-        minify: true,
+        minify: false,
     },
 ]);

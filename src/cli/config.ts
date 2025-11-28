@@ -1,9 +1,6 @@
 import z from "zod";
 import { ReleaseConfigSchema } from "#/commands/release/config";
 
-/**
- * Global CLI options available across all commands.
- */
 export const GlobalOptionsSchema = z.object({
     dryRun: z.boolean().optional().describe("Run without making actual changes."),
     verbose: z.boolean().optional().describe("Enable verbose logging output."),
@@ -12,10 +9,6 @@ export const GlobalOptionsSchema = z.object({
 
 export type GlobalOptions = z.infer<typeof GlobalOptionsSchema>;
 
-/**
- * Unified Firefly configuration schema.
- * Combines global options with command-specific configurations.
- */
 export const FireflyConfigSchema = z
     .object({
         ...GlobalOptionsSchema.shape,
@@ -32,10 +25,6 @@ export function toJSONSchema() {
     });
 }
 
-/**
- * Type-safe helper for defining Firefly configuration.
- * Provides IDE autocompletion and type checking.
- */
 export function defineConfig<T extends FireflyConfig>(options: T): T {
     return options;
 }

@@ -2,13 +2,45 @@
   "name": "fireflyy",
   "version": "3.0.7",
   "description": " CLI orchestrator for automatic semantic versioning, changelog generation, and creating releases. Built for my own use cases.",
+  "type": "module",
   "license": "MIT",
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "assets"
+  ],
+  "main": "./dist/config.js",
+  "module": "./dist/config.js",
+  "types": "./dist/config.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "config": [
+        "./dist/config.d.ts"
+      ]
+    }
+  },
+  "bin": {
+    "firefly": "./dist/main.js",
+    "ff": "./dist/main.js"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/",
     "provenance": true
   },
   "scripts": {
+    "build": "tsdown",
+    "build:json-schema": "bun run scripts/generate-json-schema.ts assets/firefly.schema.json",
     "dev": "bun run src/cli/main.ts",
     "check": "biome check .",
     "check:unsafe": "biome check --write --unsafe .",
