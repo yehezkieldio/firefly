@@ -1,46 +1,22 @@
 import { type ConfigLayerMeta, loadConfig, type ResolvedConfig } from "c12";
 import { colors } from "consola/utils";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import type { ZodIssue, z } from "zod";
+import type { z } from "zod";
 import type { CommandConfig } from "#/cli/types";
 import { createFireflyError, toFireflyError } from "#/utils/error";
 import { logger } from "#/utils/log";
 import type { FireflyAsyncResult } from "#/utils/result";
 
-/**
- * Options for loading configuration.
- */
 export interface ConfigLoaderOptions {
-    /**
-     * Current working directory.
-     */
     cwd?: string;
-
-    /**
-     * Path to config file (optional).
-     */
     configFile?: string;
-
-    /**
-     * Command name for loading command-specific config.
-     */
     commandName?: string;
-
-    /**
-     * Zod schema for validation (optional).
-     */
     schema?: z.ZodSchema;
 }
 
-/**
- * Loads and merges configuration from file.
- */
 export class ConfigLoader {
     constructor(private readonly options: ConfigLoaderOptions = {}) {}
 
-    /**
-     * Loads configuration from file using c12.
-     */
     load(): FireflyAsyncResult<CommandConfig> {
         const { cwd = process.cwd(), configFile, schema } = this.options;
 
@@ -59,18 +35,12 @@ export class ConfigLoader {
         });
     }
 
-    /**
-     * Logs the config file being used if not the default.
-     */
     private logConfigFile(configFile: string | undefined): void {
         if (configFile && configFile !== "firefly.config") {
             logger.info(`Using config: ${colors.underline(configFile)}`);
         }
     }
 
-    /**
-     * Extracts command-specific configuration, merging with base config.
-     */
     private extractCommandConfig(config: CommandConfig): CommandConfig {
         const commandName = this.options.commandName;
 
@@ -94,9 +64,6 @@ export class ConfigLoader {
         };
     }
 
-    /**
-     * Validates config against schema if provided.
-     */
     private validateConfig(config: CommandConfig, schema?: z.ZodSchema): FireflyAsyncResult<CommandConfig> {
         if (!schema) {
             return okAsync(config);
@@ -117,10 +84,7 @@ export class ConfigLoader {
         );
     }
 
-    /**
-     * Formats Zod validation issues into a readable string.
-     */
-    private formatValidationErrors(issues: ZodIssue[]): string {
+    private formatValidationErrors(issues: z.core.$ZodIssue[]): string {
         return issues.map((issue) => `  • ${issue.path.join(".")}: ${issue.message}`).join("\n");
     }
 }
