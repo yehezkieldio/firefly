@@ -9,6 +9,7 @@
     "provenance": true
   },
   "scripts": {
+    "dev": "bun run src/cli/main.ts",
     "check": "biome check .",
     "check:unsafe": "biome check --write --unsafe .",
     "check:write": "biome check --write .",
@@ -18,7 +19,10 @@
     "lint:fix": "biome lint . --fix --unsafe"
   },
   "dependencies": {
+    "c12": "^3.3.2",
+    "commander": "^14.0.2",
     "consola": "^3.4.2",
+    "git-cliff": "^2.10.1",
     "neverthrow": "^8.2.0",
     "zod": "^4.1.13"
   },
