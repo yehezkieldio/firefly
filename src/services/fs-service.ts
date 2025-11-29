@@ -1,9 +1,27 @@
+/**
+ * File System Service Implementation
+ *
+ * Provides file system operations with:
+ * - Path resolution relative to a base path
+ * - Dry-run support for safe testing
+ * - Async Result-based error handling
+ *
+ * @module services/fs-service
+ */
+
 import { errAsync, okAsync } from "neverthrow";
-import type { IFileSystemService, WriteJsonOptions, WriteOptions } from "#/shared/interfaces";
+import type { IFileSystemService, WriteJsonOptions, WriteOptions } from "#/services/interfaces";
 import { createFireflyError } from "#/utils/error";
 import { logger } from "#/utils/log";
 import { type FireflyAsyncResult, wrapPromise } from "#/utils/result";
 
+/**
+ * Default implementation of the file system service.
+ *
+ * Uses Bun's file APIs for high-performance file operations.
+ * All paths are resolved relative to the configured base path
+ * unless they start with "/".
+ */
 export class DefaultFileSystemService implements IFileSystemService {
     private readonly basePath: string;
 
@@ -11,6 +29,7 @@ export class DefaultFileSystemService implements IFileSystemService {
         this.basePath = basePath;
     }
 
+    /** Resolves a path relative to basePath, or returns absolute paths unchanged */
     private resolvePath(path: string): string {
         if (path.startsWith("/")) {
             return path;
@@ -33,7 +52,7 @@ export class DefaultFileSystemService implements IFileSystemService {
                     createFireflyError({
                         code: "NOT_FOUND",
                         message: `File not found: ${resolved}`,
-                        source: "shared/fs",
+                        source: "FileSystemService.read",
                     })
                 );
             }
@@ -51,7 +70,7 @@ export class DefaultFileSystemService implements IFileSystemService {
                     createFireflyError({
                         code: "NOT_FOUND",
                         message: `File not found: ${resolved}`,
-                        source: "shared/fs",
+                        source: "FileSystemService.readJson",
                     })
                 );
             }
@@ -63,7 +82,7 @@ export class DefaultFileSystemService implements IFileSystemService {
         const resolved = this.resolvePath(path);
 
         if (options?.dryRun) {
-            logger.verbose("FileSystemService: Dry run enabled, skipping write to", resolved);
+            logger.verbose(`FileSystemService: Dry run, skipping write to ${resolved}`);
             return okAsync(undefined);
         }
 
@@ -77,6 +96,10 @@ export class DefaultFileSystemService implements IFileSystemService {
     }
 }
 
+/**
+ * Creates a file system service instance.
+ * @param basePath - Base path for relative file resolution
+ */
 export function createFileSystemService(basePath: string): IFileSystemService {
     return new DefaultFileSystemService(basePath);
 }

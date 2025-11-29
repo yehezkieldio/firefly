@@ -1,73 +1,73 @@
-import { err, ok } from "neverthrow";
 import type { AnyCommand, Command } from "#/command-registry/command-types";
-import { createFireflyError } from "#/utils/error";
+import { BaseRegistry } from "#/core/registry";
 import type { FireflyResult } from "#/utils/result";
 
-export class CommandRegistry {
-    private readonly commands = new Map<string, AnyCommand>();
-
-    register<TConfig, TData extends Record<string, unknown>>(command: Command<TConfig, TData>): FireflyResult<void> {
-        const commandName = command.meta.name;
-
-        if (this.commands.has(commandName)) {
-            return err(
-                createFireflyError({
-                    code: "CONFLICT",
-                    message: `Command with name "${commandName}" is already registered`,
-                    source: "command-registry/command-registry",
-                })
-            );
-        }
-
-        this.commands.set(commandName, command as AnyCommand);
-        return ok();
+/**
+ * Registry for managing workflow commands.
+ *
+ * Extends `BaseRegistry` with command-specific functionality:
+ * - Type-safe command registration with generic support
+ * - Command name uniqueness enforcement
+ * - Retrieval of all registered command names
+ *
+ * @example
+ * ```typescript
+ * const registry = new CommandRegistry();
+ *
+ * // Register a command
+ * registry.register(releaseCommand);
+ *
+ * // Retrieve and execute
+ * const cmdResult = registry.get("release");
+ * if (cmdResult.isOk()) {
+ *   await orchestrator.executeCommand(cmdResult.value, config);
+ * }
+ * ```
+ */
+export class CommandRegistry extends BaseRegistry<AnyCommand> {
+    constructor() {
+        super({
+            name: "Command",
+            source: "CommandRegistry",
+            getKey: (command) => command.meta.name,
+            duplicateErrorCode: "CONFLICT",
+            notFoundErrorCode: "NOT_FOUND",
+        });
     }
 
-    registerAll<TConfig, TData extends Record<string, unknown>>(
+    /**
+     * Registers a typed command in the registry.
+     *
+     * @template TConfig - The command's configuration type
+     * @template TData - The command's data type
+     * @param command - The command to register
+     * @returns `Ok(void)` on success, `Err(FireflyError)` if command name already exists
+     */
+    registerCommand<TConfig, TData extends Record<string, unknown>>(
+        command: Command<TConfig, TData>
+    ): FireflyResult<void> {
+        return this.register(command as AnyCommand);
+    }
+
+    /**
+     * Registers multiple typed commands.
+     *
+     * @template TConfig - The commands' configuration type
+     * @template TData - The commands' data type
+     * @param commands - Array of commands to register
+     * @returns `Ok(void)` if all registered, `Err(FireflyError)` on first failure
+     */
+    registerAllCommands<TConfig, TData extends Record<string, unknown>>(
         commands: Command<TConfig, TData>[]
     ): FireflyResult<void> {
-        for (const command of commands) {
-            const result = this.register(command);
-            if (result.isErr()) {
-                return result;
-            }
-        }
-        return ok();
+        return this.registerAll(commands as AnyCommand[]);
     }
 
-    get(commandName: string): FireflyResult<AnyCommand> {
-        const command = this.commands.get(commandName);
-
-        if (!command) {
-            return err(
-                createFireflyError({
-                    code: "NOT_FOUND",
-                    message: `Command "${commandName}" not found in registry`,
-                    source: "command-registry/command-registry",
-                })
-            );
-        }
-
-        return ok(command);
-    }
-
-    getAll(): AnyCommand[] {
-        return Array.from(this.commands.values());
-    }
-
+    /**
+     * Returns all registered command names.
+     * @returns Array of command names in registration order
+     */
     getNames(): string[] {
-        return Array.from(this.commands.keys());
-    }
-
-    has(commandName: string): boolean {
-        return this.commands.has(commandName);
-    }
-
-    size(): number {
-        return this.commands.size;
-    }
-
-    clear(): void {
-        this.commands.clear();
+        return this.getKeys();
     }
 }

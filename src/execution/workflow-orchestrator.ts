@@ -1,3 +1,15 @@
+/**
+ * Workflow Orchestrator Module
+ *
+ * High-level orchestration of command execution. The orchestrator:
+ * - Creates workflow contexts with resolved services
+ * - Manages command lifecycle hooks (beforeExecute, afterExecute, onError)
+ * - Builds and orders tasks from commands
+ * - Delegates task execution to WorkflowExecutor
+ *
+ * @module execution/workflow-orchestrator
+ */
+
 import { errAsync, okAsync } from "neverthrow";
 import type { Command } from "#/command-registry/command-types";
 import { ImmutableWorkflowContext, type WorkflowContext } from "#/context/workflow-context";
@@ -12,20 +24,69 @@ import {
     type ServiceKey,
     type ServiceKeys,
     type ServiceKeysFromArray,
-} from "#/shared/service-resolver";
+} from "#/services/service-registry";
 import { TaskRegistry } from "#/task-system/task-registry";
 import type { Task } from "#/task-system/task-types";
 import { createFireflyError, type FireflyError } from "#/utils/error";
 import { logger } from "#/utils/log";
 import type { FireflyAsyncResult } from "#/utils/result";
 
+// ============================================================================
+// Orchestrator Options
+// ============================================================================
+
+/**
+ * Configuration options for the workflow orchestrator.
+ * Extends executor options with orchestrator-specific settings.
+ */
 export interface WorkflowOrchestratorOptions extends WorkflowExecutorOptions {
+    /** Enable verbose logging of orchestrator operations */
     readonly verbose?: boolean;
+    /** Base path for service instantiation (defaults to cwd) */
     readonly basePath?: string;
 }
 
+// ============================================================================
+// Internal Types
+// ============================================================================
+
+/** Resolved services type based on command requirements */
 type CommandServices<TServices extends ServiceKeys> = ResolvedServices<ServiceKeysFromArray<TServices>>;
 
+// ============================================================================
+// WorkflowOrchestrator Class
+// ============================================================================
+
+/**
+ * Orchestrates the execution of workflow commands.
+ *
+ * The orchestrator is the main entry point for executing commands.
+ * It coordinates:
+ * - Service resolution based on command requirements
+ * - Context creation with configuration and initial data
+ * - Task building, registration, and dependency ordering
+ * - Command lifecycle hook execution
+ * - Delegation to WorkflowExecutor for task execution
+ *
+ * @example
+ * ```typescript
+ * const orchestrator = new WorkflowOrchestrator({
+ *   basePath: "/path/to/project",
+ *   dryRun: false,
+ *   enableRollback: true,
+ * });
+ *
+ * const result = await orchestrator.executeCommand(
+ *   releaseCommand,
+ *   { version: "1.0.0", changelog: true },
+ *   { previousVersion: "0.9.0" }
+ * );
+ *
+ * if (result.isOk() && result.value.success) {
+ *   console.log("Release completed successfully!");
+ * }
+ * ```
+ */
 export class WorkflowOrchestrator {
     private readonly options: WorkflowOrchestratorOptions;
 
@@ -33,6 +94,17 @@ export class WorkflowOrchestrator {
         this.options = options;
     }
 
+    /**
+     * Executes a command with the given configuration.
+     *
+     * @template TConfig - Command configuration type
+     * @template TData - Workflow data type
+     * @template TServices - Required services tuple
+     * @param command - The command to execute
+     * @param config - Configuration for the command
+     * @param initialData - Optional initial data values
+     * @returns Execution result with success/failure status
+     */
     executeCommand<
         TConfig,
         TData extends Record<string, unknown> = Record<string, unknown>,
@@ -49,6 +121,7 @@ export class WorkflowOrchestrator {
         return this.runCommandLifecycle(command, context);
     }
 
+    /** Creates a workflow context with resolved services for the command */
     private createContext<TConfig, TData extends Record<string, unknown>, TServices extends ServiceKeys>(
         command: Command<TConfig, TData, TServices>,
         config: TConfig,
@@ -67,6 +140,7 @@ export class WorkflowOrchestrator {
         );
     }
 
+    /** Runs the complete command lifecycle: before → tasks → after / error */
     private runCommandLifecycle<TConfig, TData extends Record<string, unknown>, TServices extends ServiceKeys>(
         command: Command<TConfig, TData, TServices>,
         context: WorkflowContext<TConfig, TData, CommandServices<TServices>>
@@ -80,6 +154,7 @@ export class WorkflowOrchestrator {
             .orElse((error) => this.handleCommandError(command, context, error));
     }
 
+    /** Runs the afterExecute hook if defined */
     private runAfterExecute<TConfig, TData extends Record<string, unknown>, TServices extends ServiceKeys>(
         command: Command<TConfig, TData, TServices>,
         context: WorkflowContext<TConfig, TData, CommandServices<TServices>>,
@@ -89,6 +164,7 @@ export class WorkflowOrchestrator {
         return command.afterExecute(result, context).map(() => result);
     }
 
+    /** Handles errors by calling onError hook and wrapping the error */
     private handleCommandError<TConfig, TData extends Record<string, unknown>, TServices extends ServiceKeys>(
         command: Command<TConfig, TData, TServices>,
         context: WorkflowContext<TConfig, TData, CommandServices<TServices>>,
@@ -97,7 +173,7 @@ export class WorkflowOrchestrator {
         const wrappedError = createFireflyError({
             code: "FAILED",
             message: error.message,
-            source: "execution/workflow-orchestrator",
+            source: "WorkflowOrchestrator.executeCommand",
             cause: error,
         });
 
@@ -109,6 +185,7 @@ export class WorkflowOrchestrator {
             .orElse(() => errAsync(wrappedError));
     }
 
+    /** Builds tasks from command and orders them by dependencies */
     private buildAndOrderTasks<TConfig, TData extends Record<string, unknown>, TServices extends ServiceKeys>(
         command: Command<TConfig, TData, TServices>,
         context: WorkflowContext<TConfig, TData, CommandServices<TServices>>
@@ -121,7 +198,7 @@ export class WorkflowOrchestrator {
                     createFireflyError({
                         code: "VALIDATION",
                         message: `Command "${command.meta.name}" returned no tasks`,
-                        source: "execution/workflow-orchestrator",
+                        source: "WorkflowOrchestrator.buildAndOrderTasks",
                     })
                 );
             }

@@ -1,3 +1,15 @@
+/**
+ * Workflow Executor Module
+ *
+ * Executes a sequence of tasks with support for:
+ * - Sequential task execution with context passing
+ * - Skip condition evaluation
+ * - Automatic rollback on failure
+ * - Execution timing and result tracking
+ *
+ * @module execution/workflow-executor
+ */
+
 import { err, errAsync, ok, okAsync } from "neverthrow";
 import type { WorkflowContext } from "#/context/workflow-context";
 import type { Task } from "#/task-system/task-types";
@@ -5,25 +17,93 @@ import type { FireflyError } from "#/utils/error";
 import { logger } from "#/utils/log";
 import type { FireflyAsyncResult, FireflyResult } from "#/utils/result";
 
+// ============================================================================
+// Result Types
+// ============================================================================
+
+/**
+ * Comprehensive result of a workflow execution.
+ *
+ * Contains all information needed to understand what happened during
+ * execution, including timing, which tasks ran, and any errors.
+ */
 export interface WorkflowExecutionResult {
+    /** Whether all tasks completed successfully */
     readonly success: boolean;
+    /** IDs of tasks that executed (in order) */
     readonly executedTasks: string[];
+    /** IDs of tasks that were skipped */
     readonly skippedTasks: string[];
+    /** ID of the task that failed (if any) */
     readonly failedTask?: string;
+    /** Error details if execution failed */
     readonly error?: FireflyError;
+    /** Whether rollback was attempted and completed */
     readonly rollbackExecuted: boolean;
+    /** When execution started */
     readonly startTime: Date;
+    /** When execution ended */
     readonly endTime: Date;
+    /** Total execution time in milliseconds */
     readonly executionTimeMs: number;
 }
 
+// ============================================================================
+// Executor Options
+// ============================================================================
+
+/**
+ * Configuration options for the workflow executor.
+ */
 export interface WorkflowExecutorOptions {
+    /**
+     * When true, tasks receive a dry-run flag and should
+     * simulate operations without making actual changes.
+     */
     readonly dryRun?: boolean;
+    /**
+     * When true, automatically calls undo() on executed tasks
+     * (in reverse order) if any task fails.
+     */
     readonly enableRollback?: boolean;
 }
 
+// ============================================================================
+// Internal Types
+// ============================================================================
+
+/** Generic context type for executor internals */
 type ExecutorContext = WorkflowContext<unknown, Record<string, unknown>, unknown>;
 
+// ============================================================================
+// WorkflowExecutor Class
+// ============================================================================
+
+/**
+ * Executes workflow tasks in sequence with error handling and rollback.
+ *
+ * The executor:
+ * 1. Runs tasks sequentially, passing updated context between them
+ * 2. Evaluates skip conditions before each task
+ * 3. Tracks executed tasks for potential rollback
+ * 4. On failure, optionally rolls back completed tasks in reverse order
+ *
+ * @example
+ * ```typescript
+ * const executor = new WorkflowExecutor({
+ *   dryRun: false,
+ *   enableRollback: true,
+ * });
+ *
+ * const result = await executor.execute(orderedTasks, context);
+ *
+ * if (result.isOk() && result.value.success) {
+ *   console.log(`Executed ${result.value.executedTasks.length} tasks`);
+ * } else {
+ *   console.error(`Failed at task: ${result.value.failedTask}`);
+ * }
+ * ```
+ */
 export class WorkflowExecutor {
     private readonly options: WorkflowExecutorOptions;
     private readonly executedTasks: Task[] = [];
@@ -32,6 +112,13 @@ export class WorkflowExecutor {
         this.options = options;
     }
 
+    /**
+     * Executes a sequence of tasks with the given initial context.
+     *
+     * @param tasks - Ordered array of tasks to execute
+     * @param initialContext - Starting workflow context
+     * @returns Execution result with success/failure status and metadata
+     */
     execute(tasks: Task[], initialContext: ExecutorContext): FireflyAsyncResult<WorkflowExecutionResult> {
         const startTime = new Date();
         const executedTaskIds: string[] = [];

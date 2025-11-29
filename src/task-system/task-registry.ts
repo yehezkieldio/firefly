@@ -1,79 +1,89 @@
 import { err, ok } from "neverthrow";
+import { BaseRegistry } from "#/core/registry";
 import type { Task } from "#/task-system/task-types";
 import { createFireflyError } from "#/utils/error";
 import type { FireflyResult } from "#/utils/result";
 
-export class TaskRegistry {
-    private readonly tasks = new Map<string, Task>();
+/**
+ * Registry for managing workflow tasks with dependency validation.
+ *
+ * Extends `BaseRegistry` with task-specific functionality:
+ * - Validates that task dependencies exist at registration time
+ * - Provides topological sorting for execution order
+ * - Detects circular dependencies
+ *
+ * @example
+ * ```typescript
+ * const registry = new TaskRegistry();
+ *
+ * // Register tasks (dependencies must be registered first)
+ * registry.register(taskA);
+ * registry.register(taskB); // If taskB depends on taskA, taskA must exist
+ *
+ * // Get execution order respecting dependencies
+ * const orderResult = registry.buildExecutionOrder();
+ * if (orderResult.isOk()) {
+ *   for (const task of orderResult.value) {
+ *     await task.execute(context);
+ *   }
+ * }
+ * ```
+ */
+export class TaskRegistry extends BaseRegistry<Task> {
+    constructor() {
+        super({
+            name: "Task",
+            source: "TaskRegistry",
+            getKey: (task) => task.meta.id,
+            duplicateErrorCode: "VALIDATION",
+            notFoundErrorCode: "VALIDATION",
+        });
+    }
 
-    register(task: Task): FireflyResult<void> {
-        if (this.tasks.has(task.meta.id)) {
+    /**
+     * Registers a task after validating its dependencies exist.
+     *
+     * @param task - The task to register
+     * @returns `Ok(void)` on success, `Err(FireflyError)` if duplicate or missing dependency
+     * @override
+     */
+    override register(task: Task): FireflyResult<void> {
+        // Check for duplicates first
+        if (this.items.has(task.meta.id)) {
             return err(
                 createFireflyError({
                     code: "VALIDATION",
-                    message: `Task with id "${task.meta.id}" is already registered`,
-                    source: "task-system/task-registry",
+                    message: `Task "${task.meta.id}" is already registered`,
+                    source: "TaskRegistry.register",
                 })
             );
         }
 
         // Validate dependencies exist
         for (const depId of task.meta.dependencies ?? []) {
-            if (!this.tasks.has(depId)) {
+            if (!this.items.has(depId)) {
                 return err(
                     createFireflyError({
                         code: "VALIDATION",
                         message: `Task "${task.meta.id}" depends on "${depId}" which is not registered`,
-                        source: "task-system/task-registry",
+                        source: "TaskRegistry.register",
                     })
                 );
             }
         }
 
-        this.tasks.set(task.meta.id, task);
+        this.items.set(task.meta.id, task);
         return ok();
     }
 
-    registerAll(tasks: Task[]): FireflyResult<void> {
-        for (const task of tasks) {
-            const result = this.register(task);
-            if (result.isErr()) {
-                return result;
-            }
-        }
-        return ok();
-    }
-
-    get(taskId: string): FireflyResult<Task> {
-        const task = this.tasks.get(taskId);
-        if (!task) {
-            return err(
-                createFireflyError({
-                    code: "VALIDATION",
-                    message: `Task with id "${taskId}" not found in registry`,
-                    source: "task-system/task-registry",
-                })
-            );
-        }
-        return ok(task);
-    }
-
-    getAll(): Task[] {
-        return Array.from(this.tasks.values());
-    }
-
-    has(taskId: string): boolean {
-        return this.tasks.has(taskId);
-    }
-
-    size(): number {
-        return this.tasks.size;
-    }
-
-    clear(): void {
-        this.tasks.clear();
-    }
-
+    /**
+     * Builds an execution order that respects task dependencies.
+     *
+     * Uses topological sorting to ensure dependencies execute before their dependents.
+     * Detects and reports circular dependencies.
+     *
+     * @returns `Ok(Task[])` with tasks in execution order, `Err(FireflyError)` if circular dependency detected
+     */
     buildExecutionOrder(): FireflyResult<Task[]> {
         const visited = new Set<string>();
         const recursionStack = new Set<string>();
@@ -86,7 +96,7 @@ export class TaskRegistry {
                     createFireflyError({
                         code: "VALIDATION",
                         message: `Circular dependency detected involving task "${taskId}"`,
-                        source: "task-system/task-registry",
+                        source: "TaskRegistry.buildExecutionOrder",
                     })
                 );
             }
@@ -120,7 +130,7 @@ export class TaskRegistry {
         };
 
         // Visit all tasks
-        for (const taskId of this.tasks.keys()) {
+        for (const taskId of this.items.keys()) {
             const result = visit(taskId);
             if (result.isErr()) {
                 return err(result.error);

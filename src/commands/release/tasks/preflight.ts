@@ -2,7 +2,7 @@ import { errAsync, okAsync } from "neverthrow";
 import type { ReleaseConfig } from "#/commands/release/config";
 import type { ReleaseData } from "#/commands/release/data";
 import type { WorkflowContext } from "#/context/workflow-context";
-import type { ResolvedServices } from "#/shared/service-resolver";
+import type { ResolvedServices } from "#/services/service-registry";
 import { TaskBuilder } from "#/task-system/task-builder";
 import type { Task } from "#/task-system/task-types";
 import { createFireflyError } from "#/utils/error";

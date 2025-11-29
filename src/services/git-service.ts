@@ -1,3 +1,14 @@
+/**
+ * Git Service Implementation
+ *
+ * Provides git operations with:
+ * - Dry-run support for safe testing
+ * - Working directory configuration
+ * - Async Result-based error handling
+ *
+ * @module services/git-service
+ */
+
 import { okAsync } from "neverthrow";
 import type {
     CommitOptions,
@@ -7,16 +18,23 @@ import type {
     PushOptions,
     TagOptions,
     UnpushedCommitsResult,
-} from "#/shared/interfaces";
+} from "#/services/interfaces";
 import { executeGitCommand } from "#/utils/git-command-executor";
 import { logger } from "#/utils/log";
 import type { FireflyAsyncResult } from "#/utils/result";
 
+/** Options for internal git command execution */
 interface GitExecutionOptions {
     readonly dryRun?: boolean;
     readonly verbose?: boolean;
 }
 
+/**
+ * Default implementation of the git service.
+ *
+ * Executes git commands via the system's git binary
+ * using the configured working directory.
+ */
 export class DefaultGitService implements IGitService {
     private readonly cwd: string;
 
@@ -24,6 +42,7 @@ export class DefaultGitService implements IGitService {
         this.cwd = cwd;
     }
 
+    /** Executes a git command with the configured working directory */
     private git(args: string[], options?: GitExecutionOptions): FireflyAsyncResult<string> {
         return executeGitCommand(args, {
             cwd: this.cwd,
@@ -113,10 +132,8 @@ export class DefaultGitService implements IGitService {
     }
 
     commit(message: string, options?: CommitOptions): FireflyAsyncResult<CommitResult> {
-        const dryRun = options?.dryRun ?? false;
-
-        if (dryRun) {
-            logger.verbose("GitService: Dry run enabled, skipping commit");
+        if (options?.dryRun) {
+            logger.verbose("GitService: Dry run, skipping commit");
             return okAsync({ sha: "dry-run-sha" });
         }
 
@@ -135,7 +152,7 @@ export class DefaultGitService implements IGitService {
             args.push("--", ...options.paths);
         }
 
-        return this.git(args, { dryRun }).andThen(() =>
+        return this.git(args).andThen(() =>
             this.git(["rev-parse", "HEAD"]).map((sha) => ({
                 sha: sha.trim().substring(0, 7),
             }))
@@ -143,10 +160,8 @@ export class DefaultGitService implements IGitService {
     }
 
     tag(name: string, options?: TagOptions): FireflyAsyncResult<void> {
-        const dryRun = options?.dryRun ?? false;
-
-        if (dryRun) {
-            logger.verbose("GitService: Dry run enabled, skipping tag creation:", name);
+        if (options?.dryRun) {
+            logger.verbose(`GitService: Dry run, skipping tag creation: ${name}`);
             return okAsync(undefined);
         }
 
@@ -162,14 +177,12 @@ export class DefaultGitService implements IGitService {
             args.push("-s");
         }
 
-        return this.git(args, { dryRun }).andThen(() => okAsync(undefined));
+        return this.git(args).andThen(() => okAsync(undefined));
     }
 
     push(options?: PushOptions): FireflyAsyncResult<void> {
-        const dryRun = options?.dryRun ?? false;
-
-        if (dryRun) {
-            logger.verbose("GitService: Dry run enabled, skipping push");
+        if (options?.dryRun) {
+            logger.verbose("GitService: Dry run, skipping push");
             return okAsync(undefined);
         }
 
@@ -190,7 +203,7 @@ export class DefaultGitService implements IGitService {
             args.push("--follow-tags");
         }
 
-        return this.git(args, { dryRun }).andThen(() => okAsync(undefined));
+        return this.git(args).andThen(() => okAsync(undefined));
     }
 
     add(paths: string | string[]): FireflyAsyncResult<void> {
@@ -199,6 +212,10 @@ export class DefaultGitService implements IGitService {
     }
 }
 
+/**
+ * Creates a git service instance.
+ * @param cwd - Working directory for git commands
+ */
 export function createGitService(cwd: string): IGitService {
     return new DefaultGitService(cwd);
 }
