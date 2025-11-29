@@ -2,6 +2,7 @@ import { errAsync, okAsync } from "neverthrow";
 import type { ReleaseConfig } from "#/commands/release/config";
 import type { ReleaseData } from "#/commands/release/data";
 import type { WorkflowContext } from "#/context/workflow-context";
+import type { ResolvedServices } from "#/shared/interfaces";
 import { TaskBuilder } from "#/task-system/task-builder";
 import type { Task } from "#/task-system/task-types";
 import { createFireflyError } from "#/utils/error";
@@ -10,7 +11,11 @@ import type { FireflyResult } from "#/utils/result";
 
 const CLIFF_CONFIG_FILE = "cliff.toml";
 
-type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData>;
+/** Services required by release tasks */
+type ReleaseServices = ResolvedServices<"fs" | "git">;
+
+/** Context type for release tasks */
+type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData, ReleaseServices>;
 
 function checkCliffConfig(ctx: ReleaseContext) {
     return ctx.services.fs.exists(CLIFF_CONFIG_FILE).andThen((exists) => {

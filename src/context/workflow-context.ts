@@ -1,17 +1,24 @@
 import { err, ok } from "neverthrow";
-import type { WorkflowServices } from "#/shared/interfaces";
+import type { ResolvedServices, ServiceKey } from "#/shared/interfaces";
 import { createFireflyError } from "#/utils/error";
 import type { FireflyResult } from "#/utils/result";
 
-export interface WorkflowContext<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>> {
+/** Default services when none specified (all services) */
+type DefaultServices = ResolvedServices<ServiceKey>;
+
+export interface WorkflowContext<
+    TConfig = unknown,
+    TData extends Record<string, unknown> = Record<string, unknown>,
+    TServices = DefaultServices,
+> {
     readonly startTime: Date;
     readonly config: Readonly<TConfig>;
     readonly data: Readonly<TData>;
-    readonly services: WorkflowServices;
+    readonly services: TServices;
 
     get<K extends keyof TData>(key: K): FireflyResult<TData[K]>;
-    fork<K extends keyof TData>(key: K, value: TData[K]): WorkflowContext<TConfig, TData>;
-    forkMultiple(updates: Partial<TData>): WorkflowContext<TConfig, TData>;
+    fork<K extends keyof TData>(key: K, value: TData[K]): WorkflowContext<TConfig, TData, TServices>;
+    forkMultiple(updates: Partial<TData>): WorkflowContext<TConfig, TData, TServices>;
     has<K extends keyof TData>(key: K): boolean;
     snapshot(): Readonly<TData>;
 }
@@ -19,29 +26,30 @@ export interface WorkflowContext<TConfig = unknown, TData extends Record<string,
 export class ImmutableWorkflowContext<
     TConfig = unknown,
     TData extends Record<string, unknown> = Record<string, unknown>,
-> implements WorkflowContext<TConfig, TData>
+    TServices = DefaultServices,
+> implements WorkflowContext<TConfig, TData, TServices>
 {
     readonly startTime: Date;
     readonly config: Readonly<TConfig>;
     readonly data: Readonly<TData>;
-    readonly services: WorkflowServices;
+    readonly services: TServices;
 
-    private constructor(startTime: Date, config: TConfig, data: TData, services: WorkflowServices) {
+    private constructor(startTime: Date, config: TConfig, data: TData, services: TServices) {
         this.startTime = startTime;
         this.config = Object.freeze({ ...config });
         this.data = Object.freeze({ ...data });
         this.services = services;
     }
 
-    static create<TC, TD extends Record<string, unknown> = Record<string, unknown>>(
+    static create<TC, TD extends Record<string, unknown> = Record<string, unknown>, TS = DefaultServices>(
         config: TC,
-        services: WorkflowServices,
+        services: TS,
         initialData?: Partial<TD>
-    ): WorkflowContext<TC, TD> {
+    ): WorkflowContext<TC, TD, TS> {
         const startTime = new Date();
         const data = (initialData ?? {}) as TD;
 
-        return new ImmutableWorkflowContext<TC, TD>(startTime, config, data, services);
+        return new ImmutableWorkflowContext<TC, TD, TS>(startTime, config, data, services);
     }
 
     get<K extends keyof TData>(key: K): FireflyResult<TData[K]> {
@@ -58,9 +66,9 @@ export class ImmutableWorkflowContext<
         return ok(this.data[key]);
     }
 
-    fork<K extends keyof TData>(key: K, value: TData[K]): WorkflowContext<TConfig, TData> {
+    fork<K extends keyof TData>(key: K, value: TData[K]): WorkflowContext<TConfig, TData, TServices> {
         const updatedData = { ...this.data, [key]: value };
-        return new ImmutableWorkflowContext<TConfig, TData>(
+        return new ImmutableWorkflowContext<TConfig, TData, TServices>(
             this.startTime,
             this.config as TConfig,
             updatedData,
@@ -68,9 +76,9 @@ export class ImmutableWorkflowContext<
         );
     }
 
-    forkMultiple(updates: Partial<TData>): WorkflowContext<TConfig, TData> {
+    forkMultiple(updates: Partial<TData>): WorkflowContext<TConfig, TData, TServices> {
         const updatedData = { ...this.data, ...updates };
-        return new ImmutableWorkflowContext<TConfig, TData>(
+        return new ImmutableWorkflowContext<TConfig, TData, TServices>(
             this.startTime,
             this.config as TConfig,
             updatedData,

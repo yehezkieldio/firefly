@@ -22,6 +22,9 @@ export interface WorkflowExecutorOptions {
     readonly enableRollback?: boolean;
 }
 
+/** Generic context type used by the executor - services are opaque */
+type ExecutorContext = WorkflowContext<unknown, Record<string, unknown>, unknown>;
+
 export class WorkflowExecutor {
     private readonly options: WorkflowExecutorOptions;
     private readonly executedTasks: Task[] = [];
@@ -30,10 +33,7 @@ export class WorkflowExecutor {
         this.options = options;
     }
 
-    execute<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>>(
-        tasks: Task[],
-        initialContext: WorkflowContext<TConfig, TData>
-    ): FireflyAsyncResult<WorkflowExecutionResult> {
+    execute(tasks: Task[], initialContext: ExecutorContext): FireflyAsyncResult<WorkflowExecutionResult> {
         const startTime = new Date();
         const executedTaskIds: string[] = [];
         const skippedTaskIds: string[] = [];
@@ -77,15 +77,12 @@ export class WorkflowExecutor {
         return okAsync(result);
     }
 
-    private handleExecutionFailure<
-        TConfig = unknown,
-        TData extends Record<string, unknown> = Record<string, unknown>,
-    >(args: {
+    private handleExecutionFailure(args: {
         error: FireflyError;
         startTime: Date;
         executedTaskIds: string[];
         skippedTaskIds: string[];
-        initialContext: WorkflowContext<TConfig, TData>;
+        initialContext: ExecutorContext;
     }): FireflyAsyncResult<WorkflowExecutionResult> {
         const { error, startTime, executedTaskIds, skippedTaskIds, initialContext } = args;
         const endTime = new Date();
@@ -126,12 +123,9 @@ export class WorkflowExecutor {
         return okAsync(result);
     }
 
-    private executeTasksSequentially<
-        TConfig = unknown,
-        TData extends Record<string, unknown> = Record<string, unknown>,
-    >(
+    private executeTasksSequentially(
         tasks: Task[],
-        context: WorkflowContext<TConfig, TData>,
+        context: ExecutorContext,
         executedTaskIds: string[],
         skippedTaskIds: string[]
     ): FireflyAsyncResult<void> {
@@ -162,10 +156,10 @@ export class WorkflowExecutor {
         });
     }
 
-    private handleTaskSkip<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>>(
+    private handleTaskSkip(
         currentTask: Task,
         remainingTasks: Task[],
-        context: WorkflowContext<TConfig, TData>,
+        context: ExecutorContext,
         skippedTaskIds: string[]
     ): FireflyResult<{ shouldSkip: boolean; newRemainingTasks: Task[] }> {
         if (!currentTask.shouldSkip) return ok({ shouldSkip: false, newRemainingTasks: remainingTasks });
@@ -193,10 +187,10 @@ export class WorkflowExecutor {
         return ok({ shouldSkip: true, newRemainingTasks: remainingTasks });
     }
 
-    private executeTaskAndContinue<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>>(
+    private executeTaskAndContinue(
         currentTask: Task,
         remainingTasks: Task[],
-        context: WorkflowContext<TConfig, TData>,
+        context: ExecutorContext,
         executionLists: { executedTaskIds: string[]; skippedTaskIds: string[] }
     ): FireflyAsyncResult<void> {
         logger.verbose(`Task '${currentTask.meta.id}': Executing...`);
@@ -220,9 +214,7 @@ export class WorkflowExecutor {
             });
     }
 
-    private rollback<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>>(
-        context: WorkflowContext<TConfig, TData>
-    ): FireflyAsyncResult<boolean> {
+    private rollback(context: ExecutorContext): FireflyAsyncResult<boolean> {
         const tasksToRollback = [...this.executedTasks].reverse();
 
         logger.verbose(`Rolling back ${tasksToRollback.length} tasks in reverse order`);
@@ -241,9 +233,9 @@ export class WorkflowExecutor {
         });
     }
 
-    private rollbackTasks<TConfig = unknown, TData extends Record<string, unknown> = Record<string, unknown>>(
+    private rollbackTasks(
         tasks: Task[],
-        context: WorkflowContext<TConfig, TData>
+        context: ExecutorContext
     ): FireflyAsyncResult<Array<{ taskId: string; error: FireflyError }>> {
         if (tasks.length === 0) {
             return okAsync([]);
