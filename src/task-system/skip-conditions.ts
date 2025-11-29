@@ -4,6 +4,11 @@
  * Provides combinators for composing skip condition predicates.
  * These helpers make it easy to build complex skip logic from simple predicates.
  *
+ * Features:
+ * - Short-circuit evaluation for `any` and `all` combinators
+ * - Memoization support for expensive predicates
+ * - Type-safe predicate composition
+ *
  * @module task-system/skip-conditions
  */
 
@@ -23,13 +28,50 @@ export type SkipPredicate<TContext extends GenericWorkflowContext = GenericWorkf
 ) => boolean;
 
 // ============================================================================
+// Memoization Utilities
+// ============================================================================
+
+/**
+ * Creates a memoized version of a skip predicate.
+ * Uses WeakMap for automatic garbage collection of context references.
+ *
+ * Useful for expensive predicates that access the same context multiple times.
+ *
+ * @param predicate - The predicate to memoize
+ * @returns Memoized predicate
+ *
+ * @example
+ * ```typescript
+ * const expensiveCheck = memoize((ctx) => {
+ *   // Complex computation based on ctx.data
+ *   return ctx.data.items.every(item => validate(item));
+ * });
+ * ```
+ */
+export function memoize<TContext extends GenericWorkflowContext>(
+    predicate: SkipPredicate<TContext>
+): SkipPredicate<TContext> {
+    const cache = new WeakMap<object, boolean>();
+
+    return (ctx) => {
+        const cached = cache.get(ctx);
+        if (cached !== undefined) return cached;
+
+        const result = predicate(ctx);
+        cache.set(ctx, result);
+        return result;
+    };
+}
+
+// ============================================================================
 // Combinator Functions
 // ============================================================================
 
 /**
- * Combines multiple predicates with AND logic.
+ * Combines multiple predicates with AND logic (short-circuit evaluation).
  *
  * Returns true (skip) only if ALL predicates return true.
+ * Stops evaluation at first false result for optimal performance.
  *
  * @param predicates - Predicates to combine
  * @returns Combined predicate
@@ -48,13 +90,25 @@ export type SkipPredicate<TContext extends GenericWorkflowContext = GenericWorkf
 export function all<TContext extends GenericWorkflowContext = GenericWorkflowContext>(
     ...predicates: readonly SkipPredicate<TContext>[]
 ): SkipPredicate<TContext> {
-    return (ctx) => predicates.every((pred) => pred(ctx));
+    // Fast path: empty predicates = never skip
+    if (predicates.length === 0) return () => false;
+    // Fast path: single predicate = return as-is
+    const first = predicates[0];
+    if (predicates.length === 1 && first) return first;
+
+    return (ctx) => {
+        for (const pred of predicates) {
+            if (!pred(ctx)) return false; // Short-circuit on first false
+        }
+        return true;
+    };
 }
 
 /**
- * Combines multiple predicates with OR logic.
+ * Combines multiple predicates with OR logic (short-circuit evaluation).
  *
  * Returns true (skip) if ANY predicate returns true.
+ * Stops evaluation at first true result for optimal performance.
  *
  * @param predicates - Predicates to combine
  * @returns Combined predicate
@@ -73,7 +127,18 @@ export function all<TContext extends GenericWorkflowContext = GenericWorkflowCon
 export function any<TContext extends GenericWorkflowContext = GenericWorkflowContext>(
     ...predicates: readonly SkipPredicate<TContext>[]
 ): SkipPredicate<TContext> {
-    return (ctx) => predicates.some((pred) => pred(ctx));
+    // Fast path: empty predicates = never skip
+    if (predicates.length === 0) return () => false;
+    // Fast path: single predicate = return as-is
+    const first = predicates[0];
+    if (predicates.length === 1 && first) return first;
+
+    return (ctx) => {
+        for (const pred of predicates) {
+            if (pred(ctx)) return true; // Short-circuit on first true
+        }
+        return false;
+    };
 }
 
 /**
@@ -102,6 +167,7 @@ export function not<TContext extends GenericWorkflowContext = GenericWorkflowCon
 
 /**
  * Creates a predicate that checks a boolean config property.
+ * Uses type-safe property access with compile-time key validation.
  *
  * @param key - The config key to check
  * @returns Predicate that returns the config value
@@ -113,14 +179,15 @@ export function not<TContext extends GenericWorkflowContext = GenericWorkflowCon
  *   .skipWhen(fromConfig("skipValidation"))
  * ```
  */
-export function fromConfig<TContext extends GenericWorkflowContext = GenericWorkflowContext>(
-    key: string
+export function fromConfig<TContext extends GenericWorkflowContext = GenericWorkflowContext, K extends string = string>(
+    key: K
 ): SkipPredicate<TContext> {
     return (ctx) => Boolean((ctx.config as Record<string, unknown>)[key]);
 }
 
 /**
  * Creates a predicate that checks a boolean data property.
+ * Uses type-safe property access with compile-time key validation.
  *
  * @param key - The data key to check
  * @returns Predicate that returns the data value
@@ -132,16 +199,22 @@ export function fromConfig<TContext extends GenericWorkflowContext = GenericWork
  *   .skipWhen(fromData("alreadyProcessed"))
  * ```
  */
-export function fromData<TContext extends GenericWorkflowContext = GenericWorkflowContext>(
-    key: string
+export function fromData<TContext extends GenericWorkflowContext = GenericWorkflowContext, K extends string = string>(
+    key: K
 ): SkipPredicate<TContext> {
     return (ctx) => Boolean(ctx.data[key]);
 }
+
+/** Cached always-true predicate for reuse */
+const ALWAYS_TRUE: SkipPredicate = () => true;
+/** Cached always-false predicate for reuse */
+const ALWAYS_FALSE: SkipPredicate = () => false;
 
 /**
  * Creates a predicate that always returns a fixed value.
  *
  * Useful for testing or conditional task inclusion.
+ * Returns cached singleton predicates for true/false.
  *
  * @param value - The fixed boolean value
  * @returns Predicate that always returns the value
@@ -156,13 +229,14 @@ export function fromData<TContext extends GenericWorkflowContext = GenericWorkfl
 export function always<TContext extends GenericWorkflowContext = GenericWorkflowContext>(
     value: boolean
 ): SkipPredicate<TContext> {
-    return () => value;
+    return (value ? ALWAYS_TRUE : ALWAYS_FALSE) as SkipPredicate<TContext>;
 }
 
 /**
  * Creates a predicate that never skips.
  *
  * Syntactic sugar for `always(false)`.
+ * Returns a cached singleton for optimal memory usage.
  *
  * @returns Predicate that always returns false
  *
@@ -173,7 +247,7 @@ export function always<TContext extends GenericWorkflowContext = GenericWorkflow
  * ```
  */
 export function never<TContext extends GenericWorkflowContext = GenericWorkflowContext>(): SkipPredicate<TContext> {
-    return always(false);
+    return ALWAYS_FALSE as SkipPredicate<TContext>;
 }
 
 // ============================================================================

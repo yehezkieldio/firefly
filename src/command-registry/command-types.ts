@@ -16,6 +16,33 @@ import type { Task } from "#/task-system/task-types";
 import type { FireflyAsyncResult } from "#/utils/result";
 
 // ============================================================================
+// Branded Types for Type-Safe Command Registry
+// ============================================================================
+
+/** Branded type symbol for command type erasure */
+declare const CommandBrand: unique symbol;
+
+/**
+ * Branded command type for type-safe registry storage.
+ * Provides compile-time safety without using `any`.
+ */
+export type BrandedCommand = {
+    readonly [CommandBrand]: "Command";
+    readonly meta: CommandMetadata;
+    buildTasks: (context: WorkflowContext) => FireflyAsyncResult<Task[]>;
+    beforeExecute?: (context: WorkflowContext) => FireflyAsyncResult<void>;
+    afterExecute?: (result: WorkflowExecutionResult, context: WorkflowContext) => FireflyAsyncResult<void>;
+    onError?: (error: Error, context: WorkflowContext) => FireflyAsyncResult<void>;
+};
+
+// ============================================================================
+// Simplified Type Aliases
+// ============================================================================
+
+/** Base constraint for workflow data */
+type WorkflowData = Record<string, unknown>;
+
+// ============================================================================
 // Command Metadata
 // ============================================================================
 
@@ -34,7 +61,7 @@ export interface CommandMetadata<TServices extends ServiceKeys = ServiceKeys> {
     /** Array of service keys this command requires */
     readonly requiredServices: TServices;
     /** Optional usage examples for documentation */
-    readonly examples?: string[];
+    readonly examples?: readonly string[];
 }
 
 // ============================================================================
@@ -51,11 +78,11 @@ export interface CommandMetadata<TServices extends ServiceKeys = ServiceKeys> {
  * @template TData - Workflow data type
  * @template TServices - Tuple of required service keys
  */
-export type CommandContext<
+export type CommandContext<TConfig, TData extends WorkflowData, TServices extends ServiceKeys> = WorkflowContext<
     TConfig,
-    TData extends Record<string, unknown>,
-    TServices extends ServiceKeys,
-> = WorkflowContext<TConfig, TData, ResolvedServices<ServiceKeysFromArray<TServices>>>;
+    TData,
+    ResolvedServices<ServiceKeysFromArray<TServices>>
+>;
 
 // ============================================================================
 // Command Interface
@@ -75,7 +102,7 @@ export type CommandContext<
  *
  * @example
  * ```typescript
- * const releaseCommand: Command<ReleaseConfig, ReleaseData, ["fs", "git"]> = {
+ * const releaseCommand = createCommand({
  *   meta: {
  *     name: "release",
  *     description: "Creates a new release with changelog",
@@ -95,12 +122,12 @@ export type CommandContext<
  *     }
  *     return okAsync(undefined);
  *   },
- * };
+ * }) satisfies Command<ReleaseConfig, ReleaseData, readonly ["fs", "git"]>;
  * ```
  */
 export interface Command<
     TConfig = unknown,
-    TData extends Record<string, unknown> = Record<string, unknown>,
+    TData extends WorkflowData = WorkflowData,
     TServices extends ServiceKeys = readonly ServiceKey[],
 > {
     /** Command metadata including name, description, and requirements */
@@ -143,16 +170,41 @@ export interface Command<
 }
 
 // ============================================================================
-// Type-Erased Command (for registry storage)
+// Type-Safe Command Erasure (replaces AnyCommand)
 // ============================================================================
 
 /**
- * Type-erased command for storage in registries.
- * Uses `any` to allow heterogeneous command collections.
+ * Erases a typed Command to a BrandedCommand for registry storage.
+ * Provides type safety without using `any`.
+ *
+ * @param command - The typed command to erase
+ * @returns A branded command safe for heterogeneous storage
  * @internal
  */
-// biome-ignore lint/suspicious/noExplicitAny: Required for type erasure in registry
-export type AnyCommand = Command<any, any, any>;
+export function eraseCommandType<TConfig, TData extends WorkflowData, TServices extends ServiceKeys>(
+    command: Command<TConfig, TData, TServices>
+): BrandedCommand {
+    return command as unknown as BrandedCommand;
+}
+
+/**
+ * Recovers a Command type from a BrandedCommand.
+ * Use with caution - caller is responsible for type correctness.
+ *
+ * @template TConfig - Expected configuration type
+ * @template TData - Expected data type
+ * @template TServices - Expected services tuple
+ * @param branded - The branded command to recover
+ * @returns The command with restored type parameters
+ * @internal
+ */
+export function recoverCommandType<
+    TConfig = unknown,
+    TData extends WorkflowData = WorkflowData,
+    TServices extends ServiceKeys = readonly ServiceKey[],
+>(branded: BrandedCommand): Command<TConfig, TData, TServices> {
+    return branded as unknown as Command<TConfig, TData, TServices>;
+}
 
 // ============================================================================
 // Command Factory
@@ -162,6 +214,7 @@ export type AnyCommand = Command<any, any, any>;
  * Factory function for creating commands with full type inference.
  *
  * Provides better IDE support and type checking when defining commands.
+ * Uses `satisfies` pattern for optimal type inference.
  *
  * @template TConfig - Command configuration type
  * @template TData - Workflow data type
@@ -184,7 +237,7 @@ export type AnyCommand = Command<any, any, any>;
  */
 export function createCommand<
     TConfig = unknown,
-    TData extends Record<string, unknown> = Record<string, unknown>,
+    TData extends WorkflowData = WorkflowData,
     const TServices extends ServiceKeys = readonly ServiceKey[],
 >(command: Command<TConfig, TData, TServices>): Command<TConfig, TData, TServices> {
     return command;

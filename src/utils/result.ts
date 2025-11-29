@@ -2,30 +2,46 @@ import { err, ok, type Result, ResultAsync } from "neverthrow";
 import z from "zod";
 import { createFireflyError, type FireflyError, toFireflyError } from "#/utils/error";
 
+// ============================================================================
+// Core Result Types
+// ============================================================================
+
 export type FireflyResult<T> = Result<T, FireflyError>;
 export type FireflyAsyncResult<T> = ResultAsync<T, FireflyError>;
+
+// ============================================================================
+// Promise Wrapping Utilities
+// ============================================================================
 
 export function wrapPromise<T>(promise: Promise<T>): FireflyAsyncResult<T> {
     return ResultAsync.fromPromise(promise, (e) => createFireflyError(toFireflyError(e)));
 }
 
+// ============================================================================
+// Schema Composition Types
+// ============================================================================
+
 type NonEmptyArray<T> = readonly [T, ...T[]];
 
-type EffectsDescriptor = {
-    mode: "effect";
-    schemas: NonEmptyArray<z.ZodType<unknown>>;
-};
+interface EffectsDescriptor {
+    readonly mode: "effect";
+    readonly schemas: NonEmptyArray<z.ZodType<unknown>>;
+}
 
-type ShapeDescriptor<TBase extends z.ZodObject<z.ZodRawShape>> = {
-    mode: "shape";
-    base: TBase;
-    shapes: readonly z.ZodRawShape[];
-};
+interface ShapeDescriptor<TBase extends z.ZodObject<z.ZodRawShape>> {
+    readonly mode: "shape";
+    readonly base: TBase;
+    readonly shapes: readonly z.ZodRawShape[];
+}
 
 type SchemaInput<TSchema extends z.ZodType<unknown>> =
     | TSchema
     | EffectsDescriptor
     | ShapeDescriptor<z.ZodObject<z.ZodRawShape>>;
+
+// ============================================================================
+// Schema Composition Functions
+// ============================================================================
 
 export function composeEffects<T extends NonEmptyArray<z.ZodType<unknown>>>(...schemas: T) {
     return schemas.slice(1).reduce((acc, s) => z.intersection(acc, s), schemas[0]);
@@ -41,13 +57,19 @@ export function composeShape<TBase extends z.ZodObject<z.ZodRawShape>>(
 }
 
 function toSchema<TSchema extends z.ZodType<unknown>>(input: SchemaInput<TSchema>): z.ZodType<unknown> {
-    if (typeof (input as { _def?: unknown })?._def !== "undefined") {
+    // Type guard: check if it's a Zod schema (has _def property)
+    if ("_def" in input && typeof (input as { _def?: unknown })._def !== "undefined") {
         return input as z.ZodType<unknown>;
     }
+
     const desc = input as EffectsDescriptor | ShapeDescriptor<z.ZodObject<z.ZodRawShape>>;
-    if (desc.mode === "effect") return composeEffects(...desc.schemas);
-    return composeShape(desc.base, ...desc.shapes);
+
+    return desc.mode === "effect" ? composeEffects(...desc.schemas) : composeShape(desc.base, ...desc.shapes);
 }
+
+// ============================================================================
+// Schema Parsing Functions
+// ============================================================================
 
 export function parseSchema<S extends z.ZodType<unknown>>(
     schemaOrDescriptor: S,
@@ -65,8 +87,8 @@ export function parseSchema(
 ): FireflyResult<unknown> {
     const schema = toSchema(schemaOrDescriptor);
     const result = schema.safeParse(data);
-    if (result.success) return ok(result.data);
-    return err(createFireflyError(toFireflyError(result.error)));
+
+    return result.success ? ok(result.data) : err(createFireflyError(toFireflyError(result.error)));
 }
 
 export function parseSchemaAsync<S extends z.ZodType<unknown>>(
@@ -85,4 +107,37 @@ export function parseSchemaAsync(
 ): FireflyAsyncResult<unknown> {
     const schema = toSchema(schemaOrDescriptor);
     return ResultAsync.fromPromise(schema.parseAsync(data), (error) => createFireflyError(toFireflyError(error)));
+}
+
+// ============================================================================
+// Result Utility Functions
+// ============================================================================
+
+/**
+ * Collects multiple FireflyResults into a single result containing an array.
+ * Short-circuits on first error.
+ *
+ * @param results - Array of results to collect
+ * @returns Combined result with all values or first error
+ */
+export function collectResults<T>(results: readonly FireflyResult<T>[]): FireflyResult<T[]> {
+    const values: T[] = [];
+
+    for (const result of results) {
+        if (result.isErr()) return err(result.error);
+        values.push(result.value);
+    }
+
+    return ok(values);
+}
+
+/**
+ * Collects multiple FireflyAsyncResults into a single result containing an array.
+ * Executes in parallel and collects all errors.
+ *
+ * @param results - Array of async results to collect
+ * @returns Combined result with all values or first error
+ */
+export function collectAsyncResults<T>(results: readonly FireflyAsyncResult<T>[]): FireflyAsyncResult<T[]> {
+    return ResultAsync.combine(results as FireflyAsyncResult<T>[]);
 }

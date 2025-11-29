@@ -187,7 +187,7 @@ export class TaskGroupBuilder<TContext extends GenericWorkflowContext = GenericW
         const meta: TaskGroupMeta = {
             id: this.groupId,
             description: this.groupDescription,
-            dependsOnGroups: this.groupDependencies.length > 0 ? this.groupDependencies : undefined,
+            dependsOnGroups: this.groupDependencies.length > 0 ? [...this.groupDependencies] : undefined,
         };
 
         const options: TaskGroupOptions<TContext> = {};
@@ -204,7 +204,7 @@ export class TaskGroupBuilder<TContext extends GenericWorkflowContext = GenericW
         const group: TaskGroup<TContext> = {
             meta,
             options: Object.keys(options).length > 0 ? options : undefined,
-            tasks: this.groupTasks,
+            tasks: [...this.groupTasks],
         };
 
         return ok(group);
@@ -294,10 +294,10 @@ interface TaskExpansionContext {
     readonly groupSkipCondition: GroupSkipCondition | undefined;
     readonly taskIdMapping: Map<string, string>;
     readonly registeredGroups: ReadonlyMap<string, string>;
-    readonly dependsOnGroups: string[] | undefined;
+    readonly dependsOnGroups: readonly string[] | undefined;
 }
 
-function expandTasks(tasks: Task[], ctx: TaskExpansionContext): FireflyResult<ExpandedTask[]> {
+function expandTasks(tasks: readonly Task[], ctx: TaskExpansionContext): FireflyResult<ExpandedTask[]> {
     const expandedTasks: ExpandedTask[] = [];
 
     for (let i = 0; i < tasks.length; i++) {
@@ -345,7 +345,7 @@ function expandSingleTask(task: Task, index: number, ctx: TaskExpansionContext):
 }
 
 function addInterGroupDependencies(
-    dependsOnGroups: string[],
+    dependsOnGroups: readonly string[],
     registeredGroups: ReadonlyMap<string, string>,
     groupId: string
 ): FireflyResult<string[]> {
@@ -400,7 +400,7 @@ function buildGroupSkipCondition(group: TaskGroup): GroupSkipCondition | undefin
  * Dependencies on external tasks are left unchanged.
  */
 function remapDependencies(
-    originalDeps: string[],
+    originalDeps: readonly string[],
     taskIdMapping: ReadonlyMap<string, string>,
     groupId: string
 ): string[] {

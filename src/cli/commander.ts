@@ -16,7 +16,7 @@ import type { ParsedCLIOptions, RuntimeConfig } from "#/cli/internal-types";
 import { OptionsBuilder } from "#/cli/options-builder";
 import { OptionsNormalizer } from "#/cli/options-normalizer";
 import { CommandRegistry } from "#/command-registry/command-registry";
-import type { AnyCommand } from "#/command-registry/command-types";
+import type { BrandedCommand } from "#/command-registry/command-types";
 import { releaseCommand } from "#/commands/release";
 import type { WorkflowExecutionResult } from "#/execution/workflow-executor";
 import { WorkflowOrchestrator } from "#/execution/workflow-orchestrator";
@@ -69,7 +69,7 @@ export function createFireflyCLI(): Command {
 
 function createCommandRegistry(): CommandRegistry {
     const registry = new CommandRegistry();
-    registry.register(releaseCommand);
+    registry.registerCommand(releaseCommand);
     return registry;
 }
 
@@ -167,7 +167,7 @@ function executeWithOrchestrator(
         );
     }
 
-    const command: AnyCommand = commandResult.value;
+    const command: BrandedCommand = commandResult.value;
 
     // Apply schema defaults by parsing the config through the command's schema
     const configSchema = command.meta.configSchema as ZodObject<ZodRawShape>;

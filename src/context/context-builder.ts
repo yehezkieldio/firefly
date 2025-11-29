@@ -13,6 +13,9 @@ import { ImmutableWorkflowContext, type WorkflowContext } from "./workflow-conte
 /** Default services type when using all available services */
 type DefaultServices = ResolvedServices<ServiceKey>;
 
+/** Base constraint for workflow data */
+type WorkflowData = Record<string, unknown>;
+
 /**
  * Fluent builder for constructing workflow contexts.
  *
@@ -42,20 +45,20 @@ type DefaultServices = ResolvedServices<ServiceKey>;
  * ```
  */
 export class ContextBuilder<
-    TConfig = Record<string, unknown>,
-    TData extends Record<string, unknown> = Record<string, unknown>,
+    TConfig = WorkflowData,
+    TData extends WorkflowData = WorkflowData,
     TServices = DefaultServices,
 > {
-    private readonly config: TConfig;
-    private readonly data: Partial<TData>;
-    private readonly servicesOverride?: TServices;
-    private readonly basePath: string;
+    readonly #config: TConfig;
+    readonly #data: Partial<TData>;
+    readonly #servicesOverride?: TServices;
+    readonly #basePath: string;
 
     private constructor(config: TConfig, data: Partial<TData>, basePath: string, services?: TServices) {
-        this.config = config;
-        this.data = data;
-        this.basePath = basePath;
-        this.servicesOverride = services;
+        this.#config = config;
+        this.#data = data;
+        this.#basePath = basePath;
+        this.#servicesOverride = services;
     }
 
     /**
@@ -63,9 +66,9 @@ export class ContextBuilder<
      * @template TC - Configuration type
      * @param basePath - Base path for service instantiation (defaults to cwd)
      */
-    static create<TC = Record<string, unknown>>(
+    static create<TC = WorkflowData>(
         basePath: string = process.cwd()
-    ): ContextBuilder<TC, Record<string, unknown>, DefaultServices> {
+    ): ContextBuilder<TC, WorkflowData, DefaultServices> {
         return new ContextBuilder({} as TC, {}, basePath);
     }
 
@@ -73,7 +76,7 @@ export class ContextBuilder<
      * Creates a builder configured for testing scenarios.
      * Uses current working directory as base path.
      */
-    static forTesting(): ContextBuilder<Record<string, unknown>, Record<string, unknown>, DefaultServices> {
+    static forTesting(): ContextBuilder<WorkflowData, WorkflowData, DefaultServices> {
         return new ContextBuilder({}, {}, process.cwd());
     }
 
@@ -83,7 +86,7 @@ export class ContextBuilder<
      * @param config - The configuration object
      */
     withConfig<TNewConfig>(config: TNewConfig): ContextBuilder<TNewConfig, TData, TServices> {
-        return new ContextBuilder(config, this.data, this.basePath, this.servicesOverride);
+        return new ContextBuilder(config, this.#data, this.#basePath, this.#servicesOverride);
     }
 
     /**
@@ -92,7 +95,7 @@ export class ContextBuilder<
      * @param config - Partial configuration to merge
      */
     withMockConfig(config: Partial<TConfig>): ContextBuilder<TConfig, TData, TServices> {
-        return new ContextBuilder({ ...this.config, ...config }, this.data, this.basePath, this.servicesOverride);
+        return new ContextBuilder({ ...this.#config, ...config }, this.#data, this.#basePath, this.#servicesOverride);
     }
 
     /**
@@ -104,10 +107,10 @@ export class ContextBuilder<
      */
     withData<K extends string, V>(key: K, value: V): ContextBuilder<TConfig, TData & Record<K, V>, TServices> {
         return new ContextBuilder(
-            this.config,
-            { ...this.data, [key]: value } as Partial<TData & Record<K, V>>,
-            this.basePath,
-            this.servicesOverride as TServices
+            this.#config,
+            { ...this.#data, [key]: value } as Partial<TData & Record<K, V>>,
+            this.#basePath,
+            this.#servicesOverride as TServices
         );
     }
 
@@ -127,7 +130,7 @@ export class ContextBuilder<
      * @param data - Object containing key-value pairs to add
      */
     withMultipleData(data: Partial<TData>): ContextBuilder<TConfig, TData, TServices> {
-        return new ContextBuilder(this.config, { ...this.data, ...data }, this.basePath, this.servicesOverride);
+        return new ContextBuilder(this.#config, { ...this.#data, ...data }, this.#basePath, this.#servicesOverride);
     }
 
     /**
@@ -135,7 +138,7 @@ export class ContextBuilder<
      * @param basePath - Absolute path to the project root
      */
     withBasePath(basePath: string): ContextBuilder<TConfig, TData, TServices> {
-        return new ContextBuilder(this.config, this.data, basePath, this.servicesOverride);
+        return new ContextBuilder(this.#config, this.#data, basePath, this.#servicesOverride);
     }
 
     /**
@@ -145,7 +148,7 @@ export class ContextBuilder<
      * @param services - Custom service implementations
      */
     withServices<TNewServices>(services: TNewServices): ContextBuilder<TConfig, TData, TNewServices> {
-        return new ContextBuilder(this.config, this.data, this.basePath, services);
+        return new ContextBuilder(this.#config, this.#data, this.#basePath, services);
     }
 
     /**
@@ -154,8 +157,8 @@ export class ContextBuilder<
      * @returns Configured WorkflowContext instance
      */
     build(): WorkflowContext<TConfig, TData, TServices> {
-        const services = this.servicesOverride ?? (resolveAllServices(this.basePath) as TServices);
+        const services = this.#servicesOverride ?? (resolveAllServices(this.#basePath) as TServices);
 
-        return ImmutableWorkflowContext.create<TConfig, TData, TServices>(this.config, services, this.data);
+        return ImmutableWorkflowContext.create<TConfig, TData, TServices>(this.#config, services, this.#data);
     }
 }

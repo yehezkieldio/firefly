@@ -13,6 +13,13 @@ import type { WorkflowContext } from "#/context/workflow-context";
 import type { FireflyAsyncResult, FireflyResult } from "#/utils/result";
 
 // ============================================================================
+// Simplified Type Aliases
+// ============================================================================
+
+/** Base constraint for workflow data */
+type WorkflowData = Record<string, unknown>;
+
+// ============================================================================
 // Task Metadata
 // ============================================================================
 
@@ -28,7 +35,7 @@ export interface TaskMetadata {
      * IDs of tasks that must complete before this task can execute.
      * Dependencies must be registered before this task.
      */
-    readonly dependencies?: string[];
+    readonly dependencies?: readonly string[];
     /** Optional Zod schema for validating task-specific configuration */
     readonly configSchema?: z.ZodType;
 }
@@ -42,14 +49,14 @@ export interface TaskMetadata {
  */
 export interface SkipCondition {
     /** Whether the task should be skipped */
-    shouldSkip: boolean;
+    readonly shouldSkip: boolean;
     /** Human-readable reason for skipping (shown in logs) */
-    reason?: string;
+    readonly reason?: string;
     /**
      * If provided, skip to these specific tasks instead of continuing sequentially.
      * Useful for conditional branching in workflows.
      */
-    skipToTasks?: string[];
+    readonly skipToTasks?: readonly string[];
 }
 
 // ============================================================================
@@ -59,8 +66,37 @@ export interface SkipCondition {
 /**
  * Generic workflow context type for use in task definitions.
  * Allows tasks to work with any configuration, data, and service types.
+ * Simplified from deep generic nesting.
  */
-export type GenericWorkflowContext = WorkflowContext<unknown, Record<string, unknown>, unknown>;
+export type GenericWorkflowContext = WorkflowContext<unknown, WorkflowData, unknown>;
+
+// ============================================================================
+// Task Function Types (Simplified)
+// ============================================================================
+
+/**
+ * Type for task skip condition functions.
+ * @template TCtx - The workflow context type
+ */
+export type TaskSkipFn<TCtx extends GenericWorkflowContext = GenericWorkflowContext> = (
+    context: TCtx
+) => FireflyResult<SkipCondition>;
+
+/**
+ * Type for task execute functions.
+ * @template TCtx - The workflow context type
+ */
+export type TaskExecuteFn<TCtx extends GenericWorkflowContext = GenericWorkflowContext> = (
+    context: TCtx
+) => FireflyAsyncResult<TCtx>;
+
+/**
+ * Type for task undo functions.
+ * @template TCtx - The workflow context type
+ */
+export type TaskUndoFn<TCtx extends GenericWorkflowContext = GenericWorkflowContext> = (
+    context: TCtx
+) => FireflyAsyncResult<void>;
 
 // ============================================================================
 // Task Interface
@@ -77,7 +113,7 @@ export type GenericWorkflowContext = WorkflowContext<unknown, Record<string, unk
  *
  * @example
  * ```typescript
- * const myTask: Task = {
+ * const myTask = {
  *   meta: {
  *     id: "validate-config",
  *     description: "Validates the release configuration",
@@ -91,7 +127,7 @@ export type GenericWorkflowContext = WorkflowContext<unknown, Record<string, unk
  *     // Rollback if needed
  *     return okAsync(undefined);
  *   },
- * };
+ * } satisfies Task;
  * ```
  */
 export interface Task {
@@ -104,21 +140,38 @@ export interface Task {
      * @param context - Current workflow context
      * @returns Skip decision with optional reason and jump targets
      */
-    shouldSkip?: (context: GenericWorkflowContext) => FireflyResult<SkipCondition>;
+    shouldSkip?: TaskSkipFn;
 
     /**
      * Executes the task's main logic.
      * @param context - Current workflow context
      * @returns Updated context (may include new data) or error
      */
-    execute: (context: GenericWorkflowContext) => FireflyAsyncResult<GenericWorkflowContext>;
+    execute: TaskExecuteFn;
 
     /**
      * Optional rollback logic executed when a later task fails.
      * Called in reverse order of execution during rollback.
      * @param context - Workflow context at time of rollback
      */
-    undo?: (context: GenericWorkflowContext) => FireflyAsyncResult<void>;
+    undo?: TaskUndoFn;
+}
+
+// ============================================================================
+// Typed Task Interface (for type-safe task creation)
+// ============================================================================
+
+/**
+ * A typed task with explicit context type parameter.
+ * Use this when you need type-safe access to specific config/data/services.
+ *
+ * @template TCtx - The specific workflow context type
+ */
+export interface TypedTask<TCtx extends GenericWorkflowContext = GenericWorkflowContext> {
+    readonly meta: TaskMetadata;
+    shouldSkip?: TaskSkipFn<TCtx>;
+    execute: TaskExecuteFn<TCtx>;
+    undo?: TaskUndoFn<TCtx>;
 }
 
 // ============================================================================
@@ -144,4 +197,27 @@ export interface Task {
  */
 export function createTask(task: Task): Task {
     return task;
+}
+
+/**
+ * Creates a typed task with explicit context type.
+ * Provides full type safety for config, data, and services access.
+ *
+ * @template TCtx - The workflow context type
+ * @param task - Typed task definition
+ * @returns The task cast to base Task type for registry compatibility
+ *
+ * @example
+ * ```typescript
+ * const task = createTypedTask<MyContext>({
+ *   meta: { id: "typed-task", description: "Type-safe task" },
+ *   execute: (ctx) => {
+ *     // ctx.config and ctx.data are fully typed
+ *     return okAsync(ctx.fork("result", ctx.config.value * 2));
+ *   },
+ * });
+ * ```
+ */
+export function createTypedTask<TCtx extends GenericWorkflowContext>(task: TypedTask<TCtx>): Task {
+    return task as unknown as Task;
 }

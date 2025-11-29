@@ -46,7 +46,7 @@ export interface TaskGroupMeta {
      * IDs of other groups that must complete before this group can execute.
      * Group dependencies are resolved before task-level dependencies.
      */
-    readonly dependsOnGroups?: string[];
+    readonly dependsOnGroups?: readonly string[];
 }
 
 // ============================================================================
@@ -92,7 +92,7 @@ export interface TaskGroupOptions<TContext extends GenericWorkflowContext = Gene
  *
  * @example
  * ```typescript
- * const gitGroup: TaskGroup = {
+ * const gitGroup = {
  *   meta: {
  *     id: "git",
  *     description: "Git operations for release",
@@ -103,7 +103,7 @@ export interface TaskGroupOptions<TContext extends GenericWorkflowContext = Gene
  *     skipReason: "Git operations disabled",
  *   },
  *   tasks: [stageChangesTask, commitTask, createTagTask],
- * };
+ * } satisfies TaskGroup;
  * ```
  */
 export interface TaskGroup<TContext extends GenericWorkflowContext = GenericWorkflowContext> {
@@ -114,7 +114,7 @@ export interface TaskGroup<TContext extends GenericWorkflowContext = GenericWork
     readonly options?: TaskGroupOptions<TContext>;
 
     /** Tasks belonging to this group (in declaration order) */
-    readonly tasks: Task[];
+    readonly tasks: readonly Task[];
 }
 
 // ============================================================================
@@ -214,7 +214,7 @@ export interface ExpandedGroupResult {
     /** The group ID */
     readonly groupId: string;
     /** The expanded tasks with namespaced IDs */
-    readonly tasks: ExpandedTask[];
+    readonly tasks: readonly ExpandedTask[];
     /** Mapping from original task IDs to namespaced IDs */
     readonly taskIdMapping: ReadonlyMap<string, string>;
 }
