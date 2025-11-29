@@ -215,7 +215,7 @@ export class WorkflowExecutor {
                 );
             })
             .mapErr((error) => {
-                logger.error(`Task '${currentTask.meta.id}': Failed - ${error.message}`);
+                logger.error(error.message);
                 return error;
             });
     }

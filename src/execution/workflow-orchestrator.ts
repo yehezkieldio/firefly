@@ -6,6 +6,9 @@ import {
     WorkflowExecutor,
     type WorkflowExecutorOptions,
 } from "#/execution/workflow-executor";
+import { createFileSystemService } from "#/shared/fs";
+import { createGitService } from "#/shared/git";
+import type { WorkflowServices } from "#/shared/interfaces";
 import { TaskRegistry } from "#/task-system/task-registry";
 import type { Task } from "#/task-system/task-types";
 import { createFireflyError } from "#/utils/error";
@@ -14,6 +17,8 @@ import type { FireflyAsyncResult } from "#/utils/result";
 
 export interface WorkflowOrchestratorOptions extends WorkflowExecutorOptions {
     readonly verbose?: boolean;
+    readonly basePath?: string;
+    readonly services?: WorkflowServices;
 }
 
 export class WorkflowOrchestrator {
@@ -30,7 +35,13 @@ export class WorkflowOrchestrator {
     ): FireflyAsyncResult<WorkflowExecutionResult> {
         logger.verbose(`WorkflowOrchestrator: Executing command "${command.meta.name}"`);
 
-        const context = ImmutableWorkflowContext.create<TConfig, TData>(config, initialData);
+        const basePath = this.options.basePath ?? process.cwd();
+        const services = this.options.services ?? {
+            fs: createFileSystemService(basePath),
+            git: createGitService(basePath),
+        };
+
+        const context = ImmutableWorkflowContext.create<TConfig, TData>(config, services, initialData);
 
         // Execute beforeExecute hook
         const beforeExecutePromise = command.beforeExecute

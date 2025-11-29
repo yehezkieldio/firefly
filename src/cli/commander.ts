@@ -70,7 +70,6 @@ function registerCommand(
         const executionResult = result.value;
 
         if (!executionResult.success) {
-            logger.error(`Command failed: ${executionResult.error?.message ?? "Unknown error"}`);
             process.exit(1);
         }
 

@@ -1,4 +1,5 @@
 import { err, ok } from "neverthrow";
+import type { WorkflowServices } from "#/shared/interfaces";
 import { createFireflyError } from "#/utils/error";
 import type { FireflyResult } from "#/utils/result";
 
@@ -6,6 +7,7 @@ export interface WorkflowContext<TConfig = unknown, TData extends Record<string,
     readonly startTime: Date;
     readonly config: Readonly<TConfig>;
     readonly data: Readonly<TData>;
+    readonly services: WorkflowServices;
 
     get<K extends keyof TData>(key: K): FireflyResult<TData[K]>;
     fork<K extends keyof TData>(key: K, value: TData[K]): WorkflowContext<TConfig, TData>;
@@ -22,24 +24,24 @@ export class ImmutableWorkflowContext<
     readonly startTime: Date;
     readonly config: Readonly<TConfig>;
     readonly data: Readonly<TData>;
+    readonly services: WorkflowServices;
 
-    private constructor(startTime: Date, config: TConfig, data: TData) {
+    private constructor(startTime: Date, config: TConfig, data: TData, services: WorkflowServices) {
         this.startTime = startTime;
         this.config = Object.freeze({ ...config });
         this.data = Object.freeze({ ...data });
+        this.services = services;
     }
 
-    /**
-     * Create a new workflow context.
-     */
     static create<TC, TD extends Record<string, unknown> = Record<string, unknown>>(
         config: TC,
+        services: WorkflowServices,
         initialData?: Partial<TD>
     ): WorkflowContext<TC, TD> {
         const startTime = new Date();
         const data = (initialData ?? {}) as TD;
 
-        return new ImmutableWorkflowContext<TC, TD>(startTime, config, data);
+        return new ImmutableWorkflowContext<TC, TD>(startTime, config, data, services);
     }
 
     get<K extends keyof TData>(key: K): FireflyResult<TData[K]> {
@@ -58,12 +60,22 @@ export class ImmutableWorkflowContext<
 
     fork<K extends keyof TData>(key: K, value: TData[K]): WorkflowContext<TConfig, TData> {
         const updatedData = { ...this.data, [key]: value };
-        return new ImmutableWorkflowContext<TConfig, TData>(this.startTime, this.config as TConfig, updatedData);
+        return new ImmutableWorkflowContext<TConfig, TData>(
+            this.startTime,
+            this.config as TConfig,
+            updatedData,
+            this.services
+        );
     }
 
     forkMultiple(updates: Partial<TData>): WorkflowContext<TConfig, TData> {
         const updatedData = { ...this.data, ...updates };
-        return new ImmutableWorkflowContext<TConfig, TData>(this.startTime, this.config as TConfig, updatedData);
+        return new ImmutableWorkflowContext<TConfig, TData>(
+            this.startTime,
+            this.config as TConfig,
+            updatedData,
+            this.services
+        );
     }
 
     has<K extends keyof TData>(key: K): boolean {
