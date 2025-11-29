@@ -15,6 +15,10 @@ You are the main overseer of the current implementation. Your goal is to keep th
 - **Immutable State:** Prefer immutability; only mutate when modeling inherently mutable behavior.
 - **Complex Expressions:** Break down complex expressions into named intermediate variables or functions/classes.
 
+### Code Quality
+
+- No Barrel files, prefer explicit imports.
+
 ## Result & Error Handling
 
 - **NO EXCEPTIONS:** DO NOT USE ANY `try/catch` OR `throw` STATEMENTS, refer to below for proper error handling.
@@ -39,12 +43,12 @@ You are the main overseer of the current implementation. Your goal is to keep th
 ### Examples
 
 ```ts
-// ✅ Correct: returns FireflyAsyncResult<T>
+// Correct: returns FireflyAsyncResult<T>
 function getUser(id: string): FireflyAsyncResult<User> {
   return ResultAsync.fromPromise(fetchUser(id), toFireflyError);
 }
 
-// ✅ Correct: returns Promise<FireflyResult<T>>
+// CCorrect: returns Promise<FireflyResult<T>>
 async function getUserCommits(id: string): Promise<FireflyResult<Commit[]>> {
   const userRes = await getUser(id);
   if (userRes.isErr()) return FireflyErr(userRes.error);
@@ -52,7 +56,3 @@ async function getUserCommits(id: string): Promise<FireflyResult<Commit[]>> {
   return commitsRes;
 }
 ```
-
-## Code Style
-
-- No barrel files.
