@@ -115,7 +115,7 @@ function logVersionBump(releaseType: string, currentVersion: Version, nextVersio
 export function createStraightBumpTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("straight-bump")
         .description("Performs a direct version bump based on the configured release type")
-        .dependsOn("execute-bump-strategy")
+        .dependsOn("initialize-version")
         .skipWhenWithReason(
             (ctx) => ctx.config.skipBump || ctx.config.releaseType === undefined,
             "Skipped: skipBump is enabled or no release type specified"
