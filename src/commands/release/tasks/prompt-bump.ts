@@ -39,26 +39,18 @@ type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData, ReleaseService
  * ```
  */
 export function createPromptBumpStrategyTask(): FireflyResult<Task> {
-    return TaskBuilder.create<ReleaseContext>("prompt-bump")
+    return TaskBuilder.create<ReleaseContext>("prompt-bump-strategy")
         .description("Prompts the user to select a version bump strategy")
         .dependsOn("initialize-version")
         .skipWhenWithReason(
-            (ctx) => ctx.config.releaseType !== undefined,
-            "Release type already specified, using direct bump"
+            // Execute when neither bumpStrategy nor releaseType is set
+            (ctx) => Boolean(ctx.config.bumpStrategy) || Boolean(ctx.config.releaseType),
+            "Skipped: bumpStrategy or releaseType already specified"
         )
         .execute((ctx) => {
-            const currentVersion = ctx.data.currentVersion ?? "0.0.0";
-            const bumpStrategy = ctx.config.bumpStrategy;
-
-            logger.info("Prompting for bump strategy...");
-            logger.info(`  Current version: ${currentVersion}`);
-
-            if (bumpStrategy) {
-                logger.verbose(`  Configured bump strategy: ${bumpStrategy}`);
-            }
+            logger.info("[prompt-bump-strategy] Prompting for bump strategy...");
 
             // TODO: Implement interactive prompt for bump strategy selection
-            // For now, just log the current state
 
             return okAsync(ctx);
         })

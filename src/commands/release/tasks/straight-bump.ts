@@ -43,19 +43,13 @@ export function createStraightBumpTask(): FireflyResult<Task> {
         .description("Performs a direct version bump based on the configured release type")
         .dependsOn("initialize-version")
         .skipWhenWithReason(
-            (ctx) => ctx.config.releaseType === undefined,
-            "No release type specified, will prompt for bump strategy"
+            (ctx) => ctx.config.skipBump || ctx.config.releaseType === undefined,
+            "Skipped: skipBump is enabled or no release type specified"
         )
         .execute((ctx) => {
-            const currentVersion = ctx.data.currentVersion ?? "0.0.0";
-            const releaseType = ctx.config.releaseType;
+            logger.info("[straight-bump] Executing straight bump task...");
 
-            logger.info(`Preparing ${releaseType} version bump...`);
-            logger.info(`  Current version: ${currentVersion}`);
-            logger.verbose(`  Release type: ${releaseType}`);
-
-            // TODO: Calculate next version based on release type
-            // For now, just log the current state
+            // TODO: Implement straight bump logic
 
             return okAsync(ctx);
         })
