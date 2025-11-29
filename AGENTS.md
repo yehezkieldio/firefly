@@ -52,3 +52,7 @@ async function getUserCommits(id: string): Promise<FireflyResult<Commit[]>> {
   return commitsRes;
 }
 ```
+
+## Code Style
+
+- No barrel files.
