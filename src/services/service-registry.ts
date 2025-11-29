@@ -12,6 +12,7 @@
  * @module services/service-registry
  */
 
+import { ResultAsync } from "neverthrow";
 import type { IFileSystemService, IGitService } from "#/services/interfaces";
 
 // ============================================================================
@@ -156,7 +157,7 @@ export function validateServiceKey(key: string): ValidatedServiceKey | undefined
  *
  * This optimization prevents unnecessary service creation when a service
  * is declared as required but never actually used in a particular code path.
- * Methods return promises that resolve after the service is initialized.
+ * Methods return ResultAsync values that chain the service instantiation.
  *
  * @template T - The service interface type
  * @param factory - Async function that creates the actual service instance
@@ -176,12 +177,12 @@ function createLazyServiceProxy<T extends object>(factory: () => Promise<T>): T 
 
     const handler: ProxyHandler<object> = {
         get(_target, prop, receiver) {
-            // Return a function that awaits the instance first
-            return async (...args: unknown[]) => {
-                const resolved = await ensureInstance();
-                const value = Reflect.get(resolved, prop, receiver);
-                return typeof value === "function" ? value.apply(resolved, args) : value;
-            };
+            // Return a function that returns a ResultAsync chaining the service instantiation
+            return (...args: unknown[]) =>
+                ResultAsync.fromSafePromise(ensureInstance()).andThen((resolved: T) => {
+                    const value = Reflect.get(resolved, prop, receiver);
+                    return typeof value === "function" ? value.apply(resolved, args) : value;
+                });
         },
         has(_target, prop) {
             // For has checks, we need to initialize synchronously if possible
