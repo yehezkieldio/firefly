@@ -20,7 +20,7 @@ import type { AnyCommand } from "#/command-registry/command-types";
 import { releaseCommand } from "#/commands/release";
 import type { WorkflowExecutionResult } from "#/execution/workflow-executor";
 import { WorkflowOrchestrator } from "#/execution/workflow-orchestrator";
-import { createFireflyError } from "#/utils/error";
+import { createFireflyError, toFireflyError } from "#/utils/error";
 import { logger } from "#/utils/log";
 import type { FireflyAsyncResult } from "#/utils/result";
 
@@ -168,9 +168,27 @@ function executeWithOrchestrator(
     }
 
     const command: AnyCommand = commandResult.value;
-    const orchestrator = createOrchestrator(config);
 
-    return orchestrator.executeCommand(command, config);
+    // Apply schema defaults by parsing the config through the command's schema
+    const configSchema = command.meta.configSchema as ZodObject<ZodRawShape>;
+    const parseResult = configSchema.safeParse(config);
+
+    if (!parseResult.success) {
+        const errors = parseResult.error.issues
+            .map((issue) => `  • ${issue.path.join(".")}: ${issue.message}`)
+            .join("\n");
+        logger.error("Config validation failed:");
+        logger.error(errors);
+        return errAsync(
+            createFireflyError(toFireflyError(`Invalid configuration:\n${errors}`, "VALIDATION", "cli/commander"))
+        );
+    }
+
+    // Merge parsed config (with defaults) back with runtime config for global options
+    const parsedConfig = { ...config, ...parseResult.data } as RuntimeConfig;
+    const orchestrator = createOrchestrator(parsedConfig);
+
+    return orchestrator.executeCommand(command, parsedConfig);
 }
 
 /** Creates a workflow orchestrator with the given configuration. */

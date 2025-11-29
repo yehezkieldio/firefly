@@ -78,10 +78,16 @@ export class OptionsNormalizer {
     }
 
     /**
+     * Compound words that should be treated as single units in kebab-case.
+     * These are typically brand names or technical terms that shouldn't be split.
+     */
+    private static readonly COMPOUND_WORDS = ["GitHub", "GitLab", "BitBucket", "OAuth", "JavaScript", "TypeScript"];
+
+    /**
      * Converts a camelCase string to kebab-case.
      *
-     * Handles special cases like "GitHub" → "github" to ensure
-     * consistent CLI flag naming.
+     * Handles compound words (e.g., "GitHub", "GitLab") as single units
+     * to ensure consistent CLI flag naming.
      *
      * @param camelCase - The camelCase string to convert
      * @returns The kebab-case equivalent
@@ -89,12 +95,16 @@ export class OptionsNormalizer {
      * @example
      * ```ts
      * OptionsNormalizer.toKebab("bumpStrategy") // "bump-strategy"
-     * OptionsNormalizer.toKebab("enableGitHubRelease") // "enable-github-release"
+     * OptionsNormalizer.toKebab("skipGitHubRelease") // "skip-github-release"
+     * OptionsNormalizer.toKebab("skipGitLabRelease") // "skip-gitlab-release"
      * ```
      */
     static toKebab(camelCase: string): string {
-        return camelCase
-            .replace(/GitHub/g, "Github")
+        let result = camelCase;
+        for (const word of OptionsNormalizer.COMPOUND_WORDS) {
+            result = result.replace(new RegExp(word, "g"), word.toLowerCase());
+        }
+        return result
             .replace(/([a-z])([A-Z])/g, "$1-$2")
             .toLowerCase()
             .replace(/_/g, "-");

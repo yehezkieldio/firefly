@@ -133,6 +133,7 @@ export class OptionsBuilder {
         const { command, rawField, field, optionFlag, description } = ctx;
 
         if (this.isBooleanField(rawField)) {
+            // Boolean flags don't take arguments - they're simple presence flags
             command.option(optionFlag, description);
             return;
         }
@@ -322,12 +323,25 @@ export class OptionsBuilder {
     }
 
     /**
+     * Compound words that should be treated as single units in kebab-case.
+     * These are typically brand names or technical terms that shouldn't be split.
+     */
+    private readonly compoundWords = ["GitHub", "GitLab", "BitBucket"];
+
+    /**
      * Converts a camelCase string to kebab-case.
+     *
+     * Handles compound words (e.g., "GitHub", "GitLab") as single units.
      *
      * @example
      * camelToKebab("bumpStrategy") // "bump-strategy"
+     * camelToKebab("skipGitHubRelease") // "skip-github-release"
      */
     private camelToKebab(str: string): string {
-        return str.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+        let result = str;
+        for (const word of this.compoundWords) {
+            result = result.replace(new RegExp(word, "g"), word.toLowerCase());
+        }
+        return result.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
     }
 }

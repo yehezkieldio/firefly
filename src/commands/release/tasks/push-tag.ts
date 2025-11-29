@@ -30,10 +30,7 @@ export function createPushTagTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("push-tag")
         .description("Pushes the release tag to remote")
         .dependsOn("push-commit")
-        .skipWhenWithReason(
-            (ctx) => ctx.config.skipGit || ctx.config.skipPush,
-            "Skipped: skipGit or skipPush is enabled"
-        )
+        .skipWhenWithReason((ctx) => ctx.config.skipGit, "Skipped: skipGit is enabled")
         .execute((ctx) => {
             logger.info("[push-tag] Pushing release tag...");
 

@@ -205,6 +205,8 @@ export function createPrepareConfigTask(): FireflyResult<Task> {
         .execute((ctx) => {
             logger.info("Preparing release configuration...");
 
+            logger.info(JSON.stringify(ctx, null, 2));
+
             const hydrated: HydratedConfig = {};
 
             // Hydrate repository

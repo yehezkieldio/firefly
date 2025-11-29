@@ -33,9 +33,9 @@ export function createExecuteBumpStrategyTask(): FireflyResult<Task> {
         .description("Executes the configured bump strategy (auto or manual)")
         .dependsOn("initialize-version")
         .skipWhenWithReason(
-            // Execute when bumpStrategy is set but releaseType is not
-            (ctx) => Boolean(ctx.config.releaseType) || !ctx.config.bumpStrategy,
-            "Skipped: releaseType is set or no bumpStrategy configured"
+            // Execute when: !releaseType && bumpStrategy && !skipBump
+            (ctx) => ctx.config.skipBump || Boolean(ctx.config.releaseType) || !ctx.config.bumpStrategy,
+            "Skipped: skipBump enabled, releaseType set, or no bumpStrategy configured"
         )
         .execute((ctx) => {
             logger.info("[execute-bump-strategy] Executing bump strategy...");
