@@ -4,7 +4,6 @@ import { type ReleaseConfig, ReleaseConfigSchema } from "#/commands/release/conf
 import type { ReleaseData } from "#/commands/release/data";
 import { createReleasePreflightTask } from "#/commands/release/tasks/preflight";
 
-/** Services required by the release command */
 const RELEASE_SERVICES = ["fs", "git"] as const;
 
 export const releaseCommand = createCommand<ReleaseConfig, ReleaseData, typeof RELEASE_SERVICES>({

@@ -18,13 +18,6 @@ export const FireflyConfigSchema = z
 
 export type FireflyConfig = z.infer<typeof FireflyConfigSchema>;
 
-export function toJSONSchema() {
-    return z.toJSONSchema(FireflyConfigSchema, {
-        io: "input",
-        target: "draft-7",
-    });
-}
-
 export function defineConfig<T extends FireflyConfig>(options: T): T {
     return options;
 }

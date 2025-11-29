@@ -1,9 +1,5 @@
 import type { FireflyAsyncResult } from "#/utils/result";
 
-// ============================================================================
-// Service Interfaces
-// ============================================================================
-
 export interface GitStatus {
     readonly hasStaged: boolean;
     readonly hasUnstaged: boolean;
@@ -72,40 +68,13 @@ export interface IGitService {
     add(paths: string | string[]): FireflyAsyncResult<void>;
 }
 
-// ============================================================================
-// Service Registry - Central registry of all available services
-// ============================================================================
-
-/**
- * Master registry mapping service keys to their interfaces.
- * Add new services here as the system grows.
- */
+// TODO: Add new services here as they are implemented and keep in sync with serviceFactories
 export interface ServiceRegistry {
     readonly fs: IFileSystemService;
     readonly git: IGitService;
 }
 
-/** All available service keys */
 export type ServiceKey = keyof ServiceRegistry;
-
-/** All service keys as a readonly array type */
 export type ServiceKeys = readonly ServiceKey[];
-
-/**
- * Resolves a subset of services from the registry.
- * @example ResolvedServices<'fs' | 'git'> = { fs: IFileSystemService, git: IGitService }
- */
 export type ResolvedServices<K extends ServiceKey> = Readonly<Pick<ServiceRegistry, K>>;
-
-/**
- * Extracts service keys from a readonly array type.
- * @example ServiceKeysFromArray<readonly ['fs', 'git']> = 'fs' | 'git'
- */
 export type ServiceKeysFromArray<T extends ServiceKeys> = T[number];
-
-// ============================================================================
-// Legacy Compatibility (deprecated - use ServiceRegistry pattern instead)
-// ============================================================================
-
-/** @deprecated Use `ResolvedServices<'fs' | 'git'>` instead */
-export type WorkflowServices = ResolvedServices<"fs" | "git">;

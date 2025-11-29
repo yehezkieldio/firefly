@@ -15,7 +15,6 @@ export interface SkipCondition {
     skipToTasks?: string[];
 }
 
-/** Generic context type for tasks - services are opaque at this level */
 export type GenericWorkflowContext = WorkflowContext<unknown, Record<string, unknown>, unknown>;
 
 export interface Task {

@@ -3,7 +3,6 @@ import { createGitService } from "#/shared/git";
 import type { ResolvedServices, ServiceKey } from "#/shared/interfaces";
 import { ImmutableWorkflowContext, type WorkflowContext } from "./workflow-context";
 
-/** Default services when none specified */
 type DefaultServices = ResolvedServices<ServiceKey>;
 
 export class ContextBuilder<

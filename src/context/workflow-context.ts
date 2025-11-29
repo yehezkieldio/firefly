@@ -3,7 +3,6 @@ import type { ResolvedServices, ServiceKey } from "#/shared/interfaces";
 import { createFireflyError } from "#/utils/error";
 import type { FireflyResult } from "#/utils/result";
 
-/** Default services when none specified (all services) */
 type DefaultServices = ResolvedServices<ServiceKey>;
 
 export interface WorkflowContext<

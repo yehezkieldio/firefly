@@ -22,7 +22,6 @@ export interface WorkflowExecutorOptions {
     readonly enableRollback?: boolean;
 }
 
-/** Generic context type used by the executor - services are opaque */
 type ExecutorContext = WorkflowContext<unknown, Record<string, unknown>, unknown>;
 
 export class WorkflowExecutor {

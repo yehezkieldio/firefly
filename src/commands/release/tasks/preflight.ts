@@ -11,10 +11,7 @@ import type { FireflyResult } from "#/utils/result";
 
 const CLIFF_CONFIG_FILE = "cliff.toml";
 
-/** Services required by release tasks */
 type ReleaseServices = ResolvedServices<"fs" | "git">;
-
-/** Context type for release tasks */
 type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData, ReleaseServices>;
 
 function checkCliffConfig(ctx: ReleaseContext) {

@@ -1,19 +1,7 @@
 import type { ZodObject, ZodRawShape } from "zod";
 import type { CLIOptions } from "#/cli/types";
 
-/**
- * Normalizes CLI options by mapping kebab-case keys to camelCase keys
- * expected by configuration schemas. Handles the mismatch between Commander's
- * automatic kebab-to-camelCase conversion and Zod schema field names.
- */
 export class OptionNormalizer {
-    /**
-     * Normalizes CLI options using the provided schema to determine key mappings.
-     *
-     * @param options - Raw CLI options from Commander
-     * @param schema - Zod schema defining the expected configuration shape
-     * @returns Normalized options with properly mapped keys
-     */
     normalize<T extends ZodRawShape>(options: CLIOptions, schema: ZodObject<T>): CLIOptions {
         const mappings = this.buildMappingFromSchema(schema);
         const normalized = { ...options };
@@ -45,10 +33,6 @@ export class OptionNormalizer {
         return mappings;
     }
 
-    /**
-     * Converts a camelCase string to kebab-case.
-     * Handles special cases like "GitHub" -> "github".
-     */
     static toKebab(camelCase: string): string {
         return camelCase
             .replace(/GitHub/g, "Github")
