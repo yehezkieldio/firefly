@@ -33,8 +33,8 @@ export function createPromptManualVersionTask(): FireflyResult<Task> {
         .description("Prompts user to manually select version bump type")
         .dependsOn("execute-bump-strategy")
         .skipWhenWithReason(
-            (ctx) => ctx.config.bumpStrategy !== BUMP_STRATEGY_MANUAL,
-            "Skipped: bumpStrategy is not 'manual'"
+            (ctx) => ctx.config.skipBump || ctx.config.bumpStrategy !== BUMP_STRATEGY_MANUAL,
+            "Skipped: skipBump enabled or bumpStrategy is not 'manual'"
         )
         .execute((ctx) => {
             logger.info("[prompt-manual-version] Prompting for manual version selection...");

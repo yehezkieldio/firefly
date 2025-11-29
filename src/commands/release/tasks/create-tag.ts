@@ -24,13 +24,16 @@ type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData, ReleaseService
  *
  * This task creates a git tag using the configured tag name template.
  *
- * Skipped when: skipGit is enabled
+ * Skipped when: skipGit is enabled, or both skipBump and skipChangelog are enabled (nothing to tag)
  */
 export function createCreateTagTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("create-tag")
         .description("Creates a git tag for the release")
         .dependsOn("commit-changes")
-        .skipWhenWithReason((ctx) => ctx.config.skipGit, "Skipped: skipGit is enabled")
+        .skipWhenWithReason(
+            (ctx) => ctx.config.skipGit || (ctx.config.skipBump && ctx.config.skipChangelog),
+            "Skipped: skipGit is enabled, or both skipBump and skipChangelog are enabled"
+        )
         .execute((ctx) => {
             logger.info("[create-tag] Creating release tag...");
 

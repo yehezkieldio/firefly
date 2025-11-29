@@ -44,6 +44,112 @@ export const COMMIT_MSG_TEMPLATE = "chore(release): release {{name}}@{{version}}
 export const TAG_NAME_TEMPLATE = "{{name}}@{{version}}";
 export const RELEASE_TITLE_TEMPLATE = "{{name}}@{{version}}";
 
+interface SkipFlags {
+    skipBump: boolean;
+    skipChangelog: boolean;
+    skipGit: boolean;
+    skipGitHubRelease: boolean;
+    skipPush: boolean;
+}
+
+interface ReleaseFlagsInput {
+    releaseLatest: boolean;
+    releasePreRelease: boolean;
+    releaseDraft: boolean;
+}
+
+interface BumpConfigInput {
+    bumpStrategy: string;
+    releaseType?: string;
+}
+
+type ConfigInput = SkipFlags & ReleaseFlagsInput & BumpConfigInput;
+
+interface CheckContext {
+    value: ConfigInput;
+    issues: Array<{ code: string; message: string; input: ConfigInput; path?: string[] }>;
+}
+
+function validateReleaseFlagExclusivity(ctx: CheckContext): void {
+    const flagNames = ["releaseLatest", "releasePreRelease", "releaseDraft"] as const;
+    const setFlags = flagNames.filter((k) => ctx.value[k]);
+
+    if (setFlags.length > 1) {
+        ctx.issues.push({
+            code: "custom",
+            message: `Only one of ${flagNames.join(", ")} can be set to true.`,
+            input: ctx.value,
+            path: ["releaseLatest"],
+        });
+    }
+}
+
+function validateSkipGitRedundancy(ctx: CheckContext): void {
+    if (ctx.value.skipGit && ctx.value.skipPush) {
+        ctx.issues.push({
+            code: "custom",
+            message: "skipPush should not be set when skipGit is true.",
+            input: ctx.value,
+        });
+    }
+}
+
+function validateBumpStrategyCompatibility(ctx: CheckContext): void {
+    const { bumpStrategy, releaseType } = ctx.value;
+    if (bumpStrategy === "auto" && releaseType !== undefined && releaseType !== "prerelease") {
+        ctx.issues.push({
+            code: "custom",
+            message: "When bumpStrategy is 'auto', releaseType can only be 'prerelease' if specified.",
+            input: ctx.value,
+        });
+    }
+}
+
+function validateSkipFlagCombinations(ctx: CheckContext): void {
+    const { skipBump, skipChangelog, skipGit, skipGitHubRelease } = ctx.value;
+
+    // Nothing to do: skipping everything produces no output
+    if (skipBump && skipChangelog && skipGit && skipGitHubRelease) {
+        ctx.issues.push({
+            code: "custom",
+            message:
+                "Invalid configuration: skipBump, skipChangelog, skipGit, and skipGitHubRelease are all enabled. Nothing to do.",
+            input: ctx.value,
+        });
+        return;
+    }
+
+    // No changes to commit/tag: skipBump + skipChangelog without skipGit is pointless
+    if (skipBump && skipChangelog && !skipGit) {
+        ctx.issues.push({
+            code: "custom",
+            message:
+                "Invalid configuration: skipBump and skipChangelog are enabled without skipGit. There are no changes to commit or tag.",
+            input: ctx.value,
+        });
+    }
+
+    // GitHub release requires a tag: skipGit without skipGitHubRelease won't work
+    if (skipGit && !skipGitHubRelease) {
+        ctx.issues.push({
+            code: "custom",
+            message:
+                "Invalid configuration: skipGit is enabled without skipGitHubRelease. GitHub releases require a git tag.",
+            input: ctx.value,
+        });
+    }
+
+    // Changelog-only mode without git doesn't make sense for a "release" command
+    if (!skipChangelog && skipGit && skipGitHubRelease && !skipBump) {
+        ctx.issues.push({
+            code: "custom",
+            message:
+                "Invalid configuration: generating changelog and bumping version without any git operations. Consider using a changelog-only tool instead.",
+            input: ctx.value,
+        });
+    }
+}
+
 export const ReleaseConfigSchema = z
     .object({
         name: z.string().optional().describe("Unscoped project name. Auto-detected from package.json."),
@@ -75,40 +181,10 @@ export const ReleaseConfigSchema = z
         releaseDraft: z.coerce.boolean().default(false).describe("Release as draft version."),
     })
     .check((ctx) => {
-        const flagNames = ["releaseLatest", "releasePreRelease", "releaseDraft"] as const;
-        const setFlags = flagNames.filter((k) => Boolean((ctx.value as Record<string, unknown>)[k]));
-
-        // Only one of releaseLatest, releasePreRelease, or releaseDraft may be true.
-        if (setFlags.length > 1) {
-            ctx.issues.push({
-                code: "custom",
-                message: `Only one of ${flagNames.join(", ")} can be set to true.`,
-                input: ctx.value,
-                path: ["releaseLatest"],
-            });
-        }
-
-        // When skipGit is true, skipPush is redundant and should not be set.
-        if (ctx.value.skipGit && ctx.value.skipPush) {
-            ctx.issues.push({
-                code: "custom",
-                message: "skipPush should not be set when skipGit is true.",
-                input: ctx.value,
-            });
-        }
-
-        // When bumpStrategy is "auto", explicit releaseType values (other than allowed ones) are invalid.
-        if (
-            ctx.value.bumpStrategy === "auto" &&
-            ctx.value.releaseType !== undefined &&
-            ctx.value.releaseType !== "prerelease"
-        ) {
-            ctx.issues.push({
-                code: "custom",
-                message: "When bumpStrategy is 'auto', releaseType can only be 'prerelease' if specified.",
-                input: ctx.value,
-            });
-        }
+        validateReleaseFlagExclusivity(ctx as unknown as CheckContext);
+        validateSkipGitRedundancy(ctx as unknown as CheckContext);
+        validateBumpStrategyCompatibility(ctx as unknown as CheckContext);
+        validateSkipFlagCombinations(ctx as unknown as CheckContext);
     });
 
 export type ReleaseConfig = z.infer<typeof ReleaseConfigSchema>;

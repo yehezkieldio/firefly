@@ -24,13 +24,16 @@ type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData, ReleaseService
  *
  * This task creates a release commit with the configured message template.
  *
- * Skipped when: skipGit is enabled
+ * Skipped when: skipGit is enabled, or both skipBump and skipChangelog are enabled (nothing to commit)
  */
 export function createCommitChangesTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("commit-changes")
         .description("Creates a release commit")
         .dependsOn("stage-changes")
-        .skipWhenWithReason((ctx) => ctx.config.skipGit, "Skipped: skipGit is enabled")
+        .skipWhenWithReason(
+            (ctx) => ctx.config.skipGit || (ctx.config.skipBump && ctx.config.skipChangelog),
+            "Skipped: skipGit is enabled, or both skipBump and skipChangelog are enabled"
+        )
         .execute((ctx) => {
             logger.info("[commit-changes] Creating release commit...");
 

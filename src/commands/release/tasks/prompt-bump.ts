@@ -44,8 +44,8 @@ export function createPromptBumpStrategyTask(): FireflyResult<Task> {
         .dependsOn("initialize-version")
         .skipWhenWithReason(
             // Execute when neither bumpStrategy nor releaseType is set
-            (ctx) => Boolean(ctx.config.bumpStrategy) || Boolean(ctx.config.releaseType),
-            "Skipped: bumpStrategy or releaseType already specified"
+            (ctx) => ctx.config.skipBump || Boolean(ctx.config.bumpStrategy) || Boolean(ctx.config.releaseType),
+            "Skipped: skipBump enabled, or bumpStrategy/releaseType already specified"
         )
         .execute((ctx) => {
             logger.info("[prompt-bump-strategy] Prompting for bump strategy...");

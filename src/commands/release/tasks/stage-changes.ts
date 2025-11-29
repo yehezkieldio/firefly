@@ -24,13 +24,16 @@ type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData, ReleaseService
  *
  * This task stages all modified release files for commit.
  *
- * Skipped when: skipGit is enabled
+ * Skipped when: skipGit is enabled, or both skipBump and skipChangelog are enabled (nothing to stage)
  */
 export function createStageChangesTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("stage-changes")
         .description("Stages modified files for commit")
         .dependsOn("generate-changelog")
-        .skipWhenWithReason((ctx) => ctx.config.skipGit, "Skipped: skipGit is enabled")
+        .skipWhenWithReason(
+            (ctx) => ctx.config.skipGit || (ctx.config.skipBump && ctx.config.skipChangelog),
+            "Skipped: skipGit is enabled, or both skipBump and skipChangelog are enabled"
+        )
         .execute((ctx) => {
             logger.info("[stage-changes] Staging changes...");
 

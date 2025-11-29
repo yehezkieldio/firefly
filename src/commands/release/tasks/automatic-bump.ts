@@ -33,8 +33,8 @@ export function createAutomaticBumpTask(): FireflyResult<Task> {
         .description("Automatically determines version bump from commit messages")
         .dependsOn("execute-bump-strategy")
         .skipWhenWithReason(
-            (ctx) => ctx.config.bumpStrategy !== BUMP_STRATEGY_AUTO,
-            "Skipped: bumpStrategy is not 'auto'"
+            (ctx) => ctx.config.skipBump || ctx.config.bumpStrategy !== BUMP_STRATEGY_AUTO,
+            "Skipped: skipBump enabled or bumpStrategy is not 'auto'"
         )
         .execute((ctx) => {
             logger.info("[automatic-bump] Analyzing commits for automatic bump...");

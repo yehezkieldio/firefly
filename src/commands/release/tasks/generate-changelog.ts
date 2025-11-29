@@ -27,12 +27,16 @@ type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData, ReleaseService
  * commits since the last release.
  *
  * Skipped when: skipChangelog is enabled
+ * Dependencies: bump-version (or initialize-version if skipBump)
  */
 export function createGenerateChangelogTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("generate-changelog")
         .description("Generates or updates the changelog file")
         .dependsOn("bump-version")
-        .skipWhenWithReason((ctx) => ctx.config.skipChangelog, "Skipped: skipChangelog is enabled")
+        .skipWhenWithReason(
+            (ctx) => ctx.config.skipChangelog || (ctx.config.skipBump && ctx.config.skipGit),
+            "Skipped: skipChangelog is enabled, or both skipBump and skipGit are enabled"
+        )
         .execute((ctx) => {
             logger.info("[generate-changelog] Generating changelog...");
 

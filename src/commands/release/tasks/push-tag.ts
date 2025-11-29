@@ -24,13 +24,16 @@ type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData, ReleaseService
  *
  * This task pushes the release tag to the remote repository.
  *
- * Skipped when: skipGit or skipPush is enabled
+ * Skipped when: skipGit, skipPush, or both skipBump and skipChangelog are enabled
  */
 export function createPushTagTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("push-tag")
         .description("Pushes the release tag to remote")
         .dependsOn("push-commit")
-        .skipWhenWithReason((ctx) => ctx.config.skipGit, "Skipped: skipGit is enabled")
+        .skipWhenWithReason(
+            (ctx) => ctx.config.skipGit || ctx.config.skipPush || (ctx.config.skipBump && ctx.config.skipChangelog),
+            "Skipped: skipGit, skipPush, or both skipBump and skipChangelog are enabled"
+        )
         .execute((ctx) => {
             logger.info("[push-tag] Pushing release tag...");
 

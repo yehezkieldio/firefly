@@ -24,13 +24,17 @@ type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData, ReleaseService
  *
  * This task creates a GitHub release using the GitHub API.
  *
- * Skipped when: skipGitHubRelease is enabled
+ * Skipped when: skipGitHubRelease, skipGit, or both skipBump and skipChangelog are enabled
  */
 export function createPublishGitHubReleaseTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("publish-github-release")
         .description("Creates a GitHub release")
         .dependsOn("push-tag")
-        .skipWhenWithReason((ctx) => ctx.config.skipGitHubRelease, "Skipped: skipGitHubRelease is enabled")
+        .skipWhenWithReason(
+            (ctx) =>
+                ctx.config.skipGitHubRelease || ctx.config.skipGit || (ctx.config.skipBump && ctx.config.skipChangelog),
+            "Skipped: skipGitHubRelease, skipGit, or both skipBump and skipChangelog are enabled"
+        )
         .execute((ctx) => {
             logger.info("[publish-github-release] Publishing GitHub release...");
 
