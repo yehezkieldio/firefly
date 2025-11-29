@@ -210,6 +210,17 @@ export class DefaultGitService implements IGitService {
         const pathArray = Array.isArray(paths) ? paths : [paths];
         return this.git(["add", ...pathArray]).andThen(() => okAsync(undefined));
     }
+
+    getRemoteUrl(remote?: string): FireflyAsyncResult<string> {
+        const remoteName = remote ?? "origin";
+        return this.git(["remote", "get-url", remoteName]).map((output) => output.trim());
+    }
+
+    branchExists(branch: string): FireflyAsyncResult<boolean> {
+        return this.git(["rev-parse", "--verify", branch])
+            .map(() => true)
+            .orElse(() => okAsync(false));
+    }
 }
 
 /**

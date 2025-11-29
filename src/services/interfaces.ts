@@ -272,4 +272,16 @@ export interface IGitService {
      * @param paths - File path(s) to stage
      */
     add(paths: string | string[]): FireflyAsyncResult<void>;
+
+    /**
+     * Gets the URL of a remote.
+     * @param remote - Remote name (defaults to "origin")
+     */
+    getRemoteUrl(remote?: string): FireflyAsyncResult<string>;
+
+    /**
+     * Checks if a branch exists in the repository.
+     * @param branch - Branch name to check
+     */
+    branchExists(branch: string): FireflyAsyncResult<boolean>;
 }
