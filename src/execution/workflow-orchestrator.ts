@@ -6,8 +6,13 @@ import {
     WorkflowExecutor,
     type WorkflowExecutorOptions,
 } from "#/execution/workflow-executor";
-import type { ResolvedServices, ServiceKey, ServiceKeys, ServiceKeysFromArray } from "#/shared/interfaces";
-import { resolveServices } from "#/shared/service-resolver";
+import {
+    type ResolvedServices,
+    resolveServices,
+    type ServiceKey,
+    type ServiceKeys,
+    type ServiceKeysFromArray,
+} from "#/shared/service-resolver";
 import { TaskRegistry } from "#/task-system/task-registry";
 import type { Task } from "#/task-system/task-types";
 import { createFireflyError, type FireflyError } from "#/utils/error";

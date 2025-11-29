@@ -1,7 +1,7 @@
 import type { z } from "zod";
 import type { WorkflowContext } from "#/context/workflow-context";
 import type { WorkflowExecutionResult } from "#/execution/workflow-executor";
-import type { ResolvedServices, ServiceKey, ServiceKeys, ServiceKeysFromArray } from "#/shared/interfaces";
+import type { ResolvedServices, ServiceKey, ServiceKeys, ServiceKeysFromArray } from "#/shared/service-resolver";
 import type { Task } from "#/task-system/task-types";
 import type { FireflyAsyncResult } from "#/utils/result";
 

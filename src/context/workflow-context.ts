@@ -1,5 +1,5 @@
 import { err, ok } from "neverthrow";
-import type { ResolvedServices, ServiceKey } from "#/shared/interfaces";
+import type { ResolvedServices, ServiceKey } from "#/shared/service-resolver";
 import { createFireflyError } from "#/utils/error";
 import type { FireflyResult } from "#/utils/result";
 

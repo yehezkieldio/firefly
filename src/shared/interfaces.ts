@@ -67,14 +67,3 @@ export interface IGitService {
     push(options?: PushOptions): FireflyAsyncResult<void>;
     add(paths: string | string[]): FireflyAsyncResult<void>;
 }
-
-// TODO: Add new services here as they are implemented and keep in sync with serviceFactories
-export interface ServiceRegistry {
-    readonly fs: IFileSystemService;
-    readonly git: IGitService;
-}
-
-export type ServiceKey = keyof ServiceRegistry;
-export type ServiceKeys = readonly ServiceKey[];
-export type ResolvedServices<K extends ServiceKey> = Readonly<Pick<ServiceRegistry, K>>;
-export type ServiceKeysFromArray<T extends ServiceKeys> = T[number];

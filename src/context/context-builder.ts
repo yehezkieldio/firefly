@@ -1,6 +1,5 @@
-import { createFileSystemService } from "#/shared/fs";
-import { createGitService } from "#/shared/git";
-import type { ResolvedServices, ServiceKey } from "#/shared/interfaces";
+import type { ResolvedServices, ServiceKey } from "#/shared/service-resolver";
+import { resolveAllServices } from "#/shared/service-resolver";
 import { ImmutableWorkflowContext, type WorkflowContext } from "./workflow-context";
 
 type DefaultServices = ResolvedServices<ServiceKey>;
@@ -66,12 +65,7 @@ export class ContextBuilder<
     }
 
     build(): WorkflowContext<TConfig, TData, TServices> {
-        const services =
-            this.servicesOverride ??
-            ({
-                fs: createFileSystemService(this.basePath),
-                git: createGitService(this.basePath),
-            } as TServices);
+        const services = this.servicesOverride ?? (resolveAllServices(this.basePath) as TServices);
 
         return ImmutableWorkflowContext.create<TConfig, TData, TServices>(this.config, services, this.data);
     }
