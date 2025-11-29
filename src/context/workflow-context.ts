@@ -141,6 +141,14 @@ export class ImmutableWorkflowContext<
     /** Cached frozen snapshot */
     #frozenData: Readonly<TData> | null = null;
 
+    /**
+     * Custom string tag for better debugging output.
+     * Displays as [object WorkflowContext] instead of [object Object].
+     */
+    get [Symbol.toStringTag](): string {
+        return "WorkflowContext";
+    }
+
     private constructor(startTime: Date, config: Readonly<TConfig>, data: TData, services: TServices) {
         this.startTime = startTime;
         this.config = config;

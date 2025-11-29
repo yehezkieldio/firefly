@@ -344,6 +344,92 @@ export function hasAnyTags(cwd?: string): FireflyAsyncResult<boolean> {
     return getLastTag(cwd).map((tag) => tag !== null);
 }
 
+// ============================================================================
+// AsyncGenerator for Streaming Commit History
+// ============================================================================
+
+/**
+ * Async generator that yields commits one at a time for memory-efficient processing.
+ * Useful for repositories with large commit histories where loading all commits
+ * into memory at once would be problematic.
+ *
+ * @param since - Tag or commit hash to start from (null for all commits)
+ * @param cwd - Working directory for git commands
+ * @yields Individual Commit objects as they are parsed
+ *
+ * @example
+ * ```ts
+ * // Process commits one at a time without loading all into memory
+ * for await (const commit of streamCommits("v1.0.0")) {
+ *   if (commit.notes.length > 0) {
+ *     console.log(`Breaking change in ${commit.hash}`);
+ *   }
+ * }
+ *
+ * // Find first feature commit efficiently (stops early)
+ * for await (const commit of streamCommits(null)) {
+ *   if (commit.type === "feat") {
+ *     console.log(`First feature: ${commit.subject}`);
+ *     break;
+ *   }
+ * }
+ * ```
+ */
+export async function* streamCommits(since: string | null, cwd?: string): AsyncGenerator<Commit, void, undefined> {
+    logger.verbose(`CommitHistory: Streaming commits since ${since ?? "the beginning"}`);
+
+    const hashesResult = await getCommitHashesSince(since, cwd);
+    if (hashesResult.isErr()) {
+        logger.verbose(`CommitHistory: Failed to get commit hashes: ${hashesResult.error.message}`);
+        return;
+    }
+
+    const hashes = hashesResult.value;
+    logger.verbose(`CommitHistory: Streaming ${hashes.length} commits`);
+
+    for (const hash of hashes) {
+        const detailsResult = await getCommitDetails(hash, cwd);
+        if (detailsResult.isErr()) {
+            logger.verbose(`CommitHistory: Failed to get details for ${hash}: ${detailsResult.error.message}`);
+            continue;
+        }
+
+        const parsed = parseCommitFromRaw(detailsResult.value, hash);
+        if (parsed.isErr()) {
+            logger.verbose(`CommitHistory: Failed to parse commit ${hash}: ${parsed.error.message}`);
+            continue;
+        }
+
+        yield parsed.value;
+    }
+}
+
+/**
+ * Async generator that yields commits since the last tag.
+ * Combines getLastTag and streamCommits for convenience.
+ *
+ * @param cwd - Working directory for git commands
+ * @yields Individual Commit objects
+ *
+ * @example
+ * ```ts
+ * // Count breaking changes since last tag
+ * let breakingCount = 0;
+ * for await (const commit of streamCommitsSinceLastTag()) {
+ *   if (commit.notes.length > 0) breakingCount++;
+ * }
+ * ```
+ */
+export async function* streamCommitsSinceLastTag(cwd?: string): AsyncGenerator<Commit, void, undefined> {
+    const lastTagResult = await getLastTag(cwd);
+    if (lastTagResult.isErr()) {
+        logger.verbose(`CommitHistory: Failed to get last tag: ${lastTagResult.error.message}`);
+        return;
+    }
+
+    yield* streamCommits(lastTagResult.value, cwd);
+}
+
 /**
  * Parses an array of commit hashes into full Commit objects.
  */

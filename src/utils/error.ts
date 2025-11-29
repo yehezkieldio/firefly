@@ -33,12 +33,14 @@ export type FireflyError = Readonly<z.infer<typeof FireflyErrorSchema>>;
 
 /**
  * Creates a frozen FireflyError with stack trace.
+ * Uses native Error.cause for proper error chaining.
  *
  * @param error - Error properties to include
  * @returns Frozen error object with stack trace
  */
 export function createFireflyError(error: FireflyError): FireflyError & { stack?: string } {
-    const err = new Error(error.message);
+    // Use native Error.cause for proper error chaining and debugging tools support
+    const err = new Error(error.message, { cause: error.cause });
     return Object.freeze({
         ...error,
         stack: err.stack,

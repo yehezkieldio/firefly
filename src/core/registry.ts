@@ -78,6 +78,14 @@ export abstract class BaseRegistry<T, K extends string = string> {
     protected readonly config: Required<RegistryConfig<T, K>>;
 
     /**
+     * Custom string tag for better debugging output.
+     * Displays as [object {name}Registry] instead of [object Object].
+     */
+    get [Symbol.toStringTag](): string {
+        return `${this.config.name}Registry`;
+    }
+
+    /**
      * Creates a new registry instance.
      * @param config - Configuration options for the registry
      */

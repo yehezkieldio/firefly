@@ -54,6 +54,14 @@ export class ContextBuilder<
     readonly #servicesOverride?: TServices;
     readonly #basePath: string;
 
+    /**
+     * Custom string tag for better debugging output.
+     * Displays as [object ContextBuilder] instead of [object Object].
+     */
+    get [Symbol.toStringTag](): string {
+        return "ContextBuilder";
+    }
+
     private constructor(config: TConfig, data: Partial<TData>, basePath: string, services?: TServices) {
         this.#config = config;
         this.#data = data;

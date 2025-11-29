@@ -66,6 +66,16 @@ export interface WorkflowExecutorOptions {
      * (in reverse order) if any task fails.
      */
     readonly enableRollback?: boolean;
+    /**
+     * AbortSignal for cancellation support.
+     * When aborted, the workflow will stop after the current task completes.
+     */
+    readonly signal?: AbortSignal;
+    /**
+     * Timeout in milliseconds for the entire workflow execution.
+     * Creates an internal AbortSignal if signal is not provided.
+     */
+    readonly timeoutMs?: number;
 }
 
 // ============================================================================
@@ -107,9 +117,21 @@ type ExecutorContext = WorkflowContext<unknown, Record<string, unknown>, unknown
 export class WorkflowExecutor {
     private readonly options: WorkflowExecutorOptions;
     private readonly executedTasks: Task[] = [];
+    /** Resolved AbortSignal for cancellation */
+    readonly #signal?: AbortSignal;
+
+    /**
+     * Custom string tag for better debugging output.
+     * Displays as [object WorkflowExecutor] instead of [object Object].
+     */
+    get [Symbol.toStringTag](): string {
+        return "WorkflowExecutor";
+    }
 
     constructor(options: WorkflowExecutorOptions = {}) {
         this.options = options;
+        // Resolve signal: use provided signal, create timeout signal, or undefined
+        this.#signal = options.signal ?? (options.timeoutMs ? AbortSignal.timeout(options.timeoutMs) : undefined);
     }
 
     /**
@@ -219,6 +241,15 @@ export class WorkflowExecutor {
             return okAsync();
         }
 
+        // Check for abort signal before each task
+        if (this.#signal?.aborted) {
+            return errAsync({
+                code: "TIMEOUT",
+                message: "Workflow execution was aborted",
+                details: this.#signal.reason,
+            } as FireflyError);
+        }
+
         const [currentTask, ...remainingTasks] = tasks;
 
         if (!currentTask) {
@@ -301,7 +332,8 @@ export class WorkflowExecutor {
     }
 
     private rollback(context: ExecutorContext): FireflyAsyncResult<boolean> {
-        const tasksToRollback = [...this.executedTasks].reverse();
+        // Use toReversed() for non-mutating reverse - cleaner and more expressive
+        const tasksToRollback = this.executedTasks.toReversed();
 
         logger.verbose(`Rolling back ${tasksToRollback.length} tasks in reverse order`);
 

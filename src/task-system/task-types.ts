@@ -13,6 +13,94 @@ import type { WorkflowContext } from "#/context/workflow-context";
 import type { FireflyAsyncResult, FireflyResult } from "#/utils/result";
 
 // ============================================================================
+// Custom Symbols for Task Metadata
+// ============================================================================
+
+/**
+ * Well-known symbols for task metadata that prevent naming collisions
+ * with user-defined metadata keys. Using Symbol.for() creates global symbols
+ * that are consistent across module boundaries.
+ *
+ * @example
+ * ```typescript
+ * const task = {
+ *   meta: {
+ *     id: "my-task",
+ *     description: "Does something",
+ *     [TaskSymbols.kind]: "mutation",
+ *     [TaskSymbols.phase]: "main",
+ *     [TaskSymbols.priority]: 10,
+ *   },
+ *   execute: (ctx) => okAsync(ctx),
+ * };
+ * ```
+ */
+export const TaskSymbols = {
+    /**
+     * Categorizes the task by its effect on the system.
+     * - `validation`: Checks preconditions without side effects
+     * - `mutation`: Modifies state (files, git, etc.)
+     * - `notification`: Sends notifications or logs without state changes
+     * - `query`: Retrieves information without side effects
+     */
+    kind: Symbol.for("firefly.task.kind"),
+
+    /**
+     * Indicates which phase of the workflow the task belongs to.
+     * - `setup`: Initialization and preparation
+     * - `main`: Core workflow operations
+     * - `cleanup`: Finalization and cleanup
+     */
+    phase: Symbol.for("firefly.task.phase"),
+
+    /**
+     * Numeric priority for execution ordering within the same dependency level.
+     * Higher values execute first. Default is 0.
+     */
+    priority: Symbol.for("firefly.task.priority"),
+
+    /**
+     * Indicates if the task can be safely retried on failure.
+     */
+    retryable: Symbol.for("firefly.task.retryable"),
+
+    /**
+     * Maximum number of retry attempts for retryable tasks.
+     */
+    maxRetries: Symbol.for("firefly.task.maxRetries"),
+
+    /**
+     * Timeout in milliseconds for task execution.
+     */
+    timeout: Symbol.for("firefly.task.timeout"),
+
+    /**
+     * Tags for filtering and categorization.
+     */
+    tags: Symbol.for("firefly.task.tags"),
+} as const;
+
+/**
+ * Type definitions for task symbol values.
+ */
+export type TaskKind = "validation" | "mutation" | "notification" | "query";
+export type TaskPhase = "setup" | "main" | "cleanup";
+
+/**
+ * Typed metadata interface that includes symbol-based properties.
+ * This extends the base TaskMetadata with framework-level metadata.
+ */
+export interface TaskSymbolMetadata {
+    readonly [TaskSymbols.kind]?: TaskKind;
+    readonly [TaskSymbols.phase]?: TaskPhase;
+    readonly [TaskSymbols.priority]?: number;
+    readonly [TaskSymbols.retryable]?: boolean;
+    readonly [TaskSymbols.maxRetries]?: number;
+    readonly [TaskSymbols.timeout]?: number;
+    readonly [TaskSymbols.tags]?: readonly string[];
+}
+
+// ============================================================================
 // Simplified Type Aliases
 // ============================================================================
 
@@ -25,8 +113,9 @@ type WorkflowData = Record<string, unknown>;
 
 /**
  * Metadata describing a task's identity and relationships.
+ * Can be extended with TaskSymbolMetadata for framework-level properties.
  */
-export interface TaskMetadata {
+export interface TaskMetadata extends TaskSymbolMetadata {
     /** Unique identifier for the task within a workflow */
     readonly id: string;
     /** Human-readable description of what the task does */

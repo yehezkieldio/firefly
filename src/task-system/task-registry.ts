@@ -19,6 +19,7 @@ import type { FireflyResult } from "#/utils/result";
  * - Provides topological sorting for execution order
  * - Detects circular dependencies
  * - Supports task group registration with automatic namespacing
+ * - Implements Symbol.iterator for direct iteration in execution order
  *
  * @example
  * ```typescript
@@ -31,13 +32,16 @@ import type { FireflyResult } from "#/utils/result";
  * // Or register a group of related tasks
  * registry.registerGroup(gitGroup);
  *
- * // Get execution order respecting dependencies
+ * // Iterate directly in execution order using for-of
  * const orderResult = registry.buildExecutionOrder();
  * if (orderResult.isOk()) {
  *   for (const task of orderResult.value) {
  *     await task.execute(context);
  *   }
  * }
+ *
+ * // Or use spread operator
+ * const tasks = [...registry];
  * ```
  */
 export class TaskRegistry extends BaseRegistry<Task> {
@@ -52,6 +56,68 @@ export class TaskRegistry extends BaseRegistry<Task> {
             notFoundErrorCode: "VALIDATION",
         });
         this.groupRegistry = createGroupRegistry();
+    }
+
+    /**
+     * Custom string tag for better debugging output.
+     * Displays as [object TaskRegistry] instead of [object Object].
+     */
+    override get [Symbol.toStringTag](): string {
+        return "TaskRegistry";
+    }
+
+    /**
+     * Implements Symbol.iterator for direct iteration over tasks in execution order.
+     * Uses a generator for lazy topological traversal.
+     *
+     * @yields Tasks in dependency-respecting execution order
+     * @throws If circular dependency is detected
+     *
+     * @example
+     * ```typescript
+     * for (const task of registry) {
+     *   console.log(task.meta.id);
+     * }
+     *
+     * // Or spread into array
+     * const tasks = [...registry];
+     * ```
+     */
+    *[Symbol.iterator](): Generator<Task, void, undefined> {
+        const visited = new Set<string>();
+        const recursionStack = new Set<string>();
+
+        const visit = function* (this: TaskRegistry, taskId: string): Generator<Task, void, undefined> {
+            // Check for circular dependencies
+            if (recursionStack.has(taskId)) {
+                // biome-ignore lint: Generators can't use result types for error handling within the iterator itself
+                throw new Error(`Circular dependency detected involving task "${taskId}"`);
+            }
+
+            // Already visited, skip
+            if (visited.has(taskId)) {
+                return;
+            }
+
+            const task = this.items.get(taskId);
+            if (!task) return;
+
+            recursionStack.add(taskId);
+
+            // Visit dependencies first
+            for (const depId of task.meta.dependencies ?? []) {
+                yield* visit.call(this, depId);
+            }
+
+            recursionStack.delete(taskId);
+            visited.add(taskId);
+            yield task;
+        };
+
+        // Visit all tasks
+        for (const taskId of this.items.keys()) {
+            yield* visit.call(this, taskId);
+        }
     }
 
     /**
