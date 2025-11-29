@@ -9,7 +9,6 @@
 
 import { Command } from "commander";
 import { colors } from "consola/utils";
-import { errAsync } from "neverthrow";
 import type { ZodObject, ZodRawShape } from "zod";
 import { ConfigLoader } from "#/cli/config-loader";
 import type { ParsedCLIOptions, RuntimeConfig } from "#/cli/internal-types";
@@ -20,9 +19,9 @@ import type { BrandedCommand } from "#/command-registry/command-types";
 import { releaseCommand } from "#/commands/release";
 import type { WorkflowExecutionResult } from "#/execution/workflow-executor";
 import { WorkflowOrchestrator } from "#/execution/workflow-orchestrator";
-import { createFireflyError, toFireflyError } from "#/utils/error";
+import { validationError } from "#/utils/error";
 import { logger } from "#/utils/log";
-import type { FireflyAsyncResult } from "#/utils/result";
+import { type FireflyAsyncResult, FireflyErrAsync, notFoundErrAsync } from "#/utils/result";
 
 /** Context for command registration containing program, builder, and registry instances. */
 interface CommandRegistrationContext {
@@ -158,13 +157,10 @@ function executeWithOrchestrator(
     const commandResult = registry.get(commandName);
 
     if (commandResult.isErr()) {
-        return errAsync(
-            createFireflyError({
-                code: "NOT_FOUND",
-                message: `Command "${commandName}" not found`,
-                source: "cli/commander",
-            })
-        );
+        return notFoundErrAsync({
+            message: `Command "${commandName}" not found`,
+            source: "cli/commander",
+        });
     }
 
     const command: BrandedCommand = commandResult.value;
@@ -179,8 +175,11 @@ function executeWithOrchestrator(
             .join("\n");
         logger.error("Config validation failed:");
         logger.error(errors);
-        return errAsync(
-            createFireflyError(toFireflyError(`Invalid configuration:\n${errors}`, "VALIDATION", "cli/commander"))
+        return FireflyErrAsync(
+            validationError({
+                message: `Invalid configuration:\n${errors}`,
+                source: "cli/commander",
+            })
         );
     }
 

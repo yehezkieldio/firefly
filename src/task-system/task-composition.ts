@@ -10,8 +10,8 @@
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { TaskBuilder } from "#/task-system/task-builder";
 import type { GenericWorkflowContext, Task } from "#/task-system/task-types";
-import { createFireflyError, type FireflyError } from "#/utils/error";
-import type { FireflyAsyncResult, FireflyResult } from "#/utils/result";
+import { type FireflyError, timeoutError, unexpectedError } from "#/utils/error";
+import { type FireflyAsyncResult, type FireflyResult, failedErrAsync } from "#/utils/result";
 
 /**
  * Composes multiple tasks into a single sequential task.
@@ -157,29 +157,26 @@ export function composeParallel(
                 return settled;
             };
 
-            return ResultAsync.fromPromise(collectResults(), (e) =>
-                createFireflyError({ code: "UNEXPECTED", message: String(e) })
-            ).andThen((results) => {
-                const errors: FireflyError[] = [];
-                for (const result of results) {
-                    if (result.isErr()) {
-                        errors.push(result.error);
+            return ResultAsync.fromPromise(collectResults(), (e) => unexpectedError({ message: String(e) })).andThen(
+                (results) => {
+                    const errors: FireflyError[] = [];
+                    for (const result of results) {
+                        if (result.isErr()) {
+                            errors.push(result.error);
+                        }
                     }
-                }
 
-                if (errors.length > 0) {
-                    return errAsync(
-                        createFireflyError({
-                            code: "FAILED",
+                    if (errors.length > 0) {
+                        return failedErrAsync({
                             message: `${errors.length} parallel task(s) failed`,
                             details: errors,
                             source: `task-composition/composeParallel/${id}`,
-                        })
-                    );
-                }
+                        });
+                    }
 
-                return okAsync(ctx);
-            });
+                    return okAsync(ctx);
+                }
+            );
         })
         .build();
 }
@@ -247,7 +244,7 @@ export function withRetry(task: Task, options: RetryOptions): Task {
             const currentDelay = backoffMultiplier ? delayMs * backoffMultiplier ** attempt : delayMs;
 
             return ResultAsync.fromPromise(delay(currentDelay), () =>
-                createFireflyError({ code: "UNEXPECTED", message: "Delay failed" })
+                unexpectedError({ message: "Delay failed" })
             ).andThen(() => executeWithRetry(ctx, attempt + 1));
         });
 
@@ -309,8 +306,7 @@ export function withTimeout(task: Task, options: TimeoutOptions): Task {
             const timeoutPromise = new Promise<never>((_, reject) => {
                 setTimeout(() => {
                     reject(
-                        createFireflyError({
-                            code: "TIMEOUT",
+                        timeoutError({
                             message: message ?? `Task "${task.meta.id}" timed out after ${timeoutMs}ms`,
                             source: `task-composition/withTimeout/${task.meta.id}`,
                         })
@@ -322,10 +318,7 @@ export function withTimeout(task: Task, options: TimeoutOptions): Task {
                 if (typeof e === "object" && e !== null && "code" in e) {
                     return e as FireflyError;
                 }
-                return createFireflyError({
-                    code: "UNEXPECTED",
-                    message: String(e),
-                });
+                return unexpectedError({ message: String(e) });
             }).andThen((result) => {
                 if (result.isErr()) {
                     return errAsync(result.error);

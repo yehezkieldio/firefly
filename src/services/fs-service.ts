@@ -9,11 +9,10 @@
  * @module services/fs-service
  */
 
-import { errAsync, okAsync } from "neverthrow";
+import { okAsync } from "neverthrow";
 import type { IFileSystemService, WriteJsonOptions, WriteOptions } from "#/services/interfaces";
-import { createFireflyError } from "#/utils/error";
 import { logger } from "#/utils/log";
-import { type FireflyAsyncResult, wrapPromise } from "#/utils/result";
+import { type FireflyAsyncResult, notFoundErrAsync, wrapPromise } from "#/utils/result";
 
 /**
  * Default implementation of the file system service.
@@ -48,13 +47,10 @@ export class DefaultFileSystemService implements IFileSystemService {
 
         return wrapPromise(file.exists()).andThen((fileExists) => {
             if (!fileExists) {
-                return errAsync(
-                    createFireflyError({
-                        code: "NOT_FOUND",
-                        message: `File not found: ${resolved}`,
-                        source: "FileSystemService.read",
-                    })
-                );
+                return notFoundErrAsync({
+                    message: `File not found: ${resolved}`,
+                    source: "FileSystemService.read",
+                });
             }
             return wrapPromise(file.text());
         });
@@ -66,13 +62,10 @@ export class DefaultFileSystemService implements IFileSystemService {
 
         return wrapPromise(file.exists()).andThen((fileExists) => {
             if (!fileExists) {
-                return errAsync(
-                    createFireflyError({
-                        code: "NOT_FOUND",
-                        message: `File not found: ${resolved}`,
-                        source: "FileSystemService.readJson",
-                    })
-                );
+                return notFoundErrAsync({
+                    message: `File not found: ${resolved}`,
+                    source: "FileSystemService.readJson",
+                });
             }
             return wrapPromise(file.json() as Promise<T>);
         });

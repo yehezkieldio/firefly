@@ -1,7 +1,7 @@
-import { err, ok } from "neverthrow";
+import { ok } from "neverthrow";
 import type { FireflyErrorCode } from "#/utils/error";
-import { createFireflyError } from "#/utils/error";
-import type { FireflyResult } from "#/utils/result";
+import { conflictError, notFoundError } from "#/utils/error";
+import { FireflyErr, type FireflyResult } from "#/utils/result";
 
 /**
  * Configuration options for the base Registry class.
@@ -107,12 +107,16 @@ export abstract class BaseRegistry<T, K extends string = string> {
         const key = this.config.getKey(item);
 
         if (this.items.has(key)) {
-            return err(
-                createFireflyError({
-                    code: this.config.duplicateErrorCode,
-                    message: `${this.config.name} "${key}" is already registered`,
-                    source: this.config.source,
-                })
+            return FireflyErr(
+                this.config.duplicateErrorCode === "CONFLICT"
+                    ? conflictError({
+                          message: `${this.config.name} "${key}" is already registered`,
+                          source: this.config.source,
+                      })
+                    : notFoundError({
+                          message: `${this.config.name} "${key}" is already registered`,
+                          source: this.config.source,
+                      })
             );
         }
 
@@ -147,9 +151,8 @@ export abstract class BaseRegistry<T, K extends string = string> {
         const item = this.items.get(key);
 
         if (!item) {
-            return err(
-                createFireflyError({
-                    code: this.config.notFoundErrorCode,
+            return FireflyErr(
+                notFoundError({
                     message: `${this.config.name} "${key}" not found in registry`,
                     source: this.config.source,
                 })

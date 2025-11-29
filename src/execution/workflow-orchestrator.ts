@@ -27,9 +27,9 @@ import {
 } from "#/services/service-registry";
 import { TaskRegistry } from "#/task-system/task-registry";
 import type { Task } from "#/task-system/task-types";
-import { createFireflyError, type FireflyError } from "#/utils/error";
+import { type FireflyError, failedError, wrapErrorMessage } from "#/utils/error";
 import { logger } from "#/utils/log";
-import type { FireflyAsyncResult } from "#/utils/result";
+import { type FireflyAsyncResult, validationErrAsync } from "#/utils/result";
 
 // ============================================================================
 // Orchestrator Options
@@ -170,12 +170,13 @@ export class WorkflowOrchestrator {
         context: WorkflowContext<TConfig, TData, CommandServices<TServices>>,
         error: FireflyError
     ): FireflyAsyncResult<WorkflowExecutionResult> {
-        const wrappedError = createFireflyError({
-            code: "FAILED",
-            message: error.message,
-            source: "WorkflowOrchestrator.executeCommand",
-            cause: error,
-        });
+        const wrappedError = wrapErrorMessage(
+            failedError({
+                message: error.message,
+                source: "WorkflowOrchestrator.executeCommand",
+            }),
+            "Command execution failed"
+        );
 
         if (!command.onError) return errAsync(error);
 
@@ -194,13 +195,10 @@ export class WorkflowOrchestrator {
 
         return command.buildTasks(context).andThen((tasks) => {
             if (tasks.length === 0) {
-                return errAsync(
-                    createFireflyError({
-                        code: "VALIDATION",
-                        message: `Command "${command.meta.name}" returned no tasks`,
-                        source: "WorkflowOrchestrator.buildAndOrderTasks",
-                    })
-                );
+                return validationErrAsync({
+                    message: `Command "${command.meta.name}" returned no tasks`,
+                    source: "WorkflowOrchestrator.buildAndOrderTasks",
+                });
             }
 
             logger.verbose(`WorkflowOrchestrator: Built ${tasks.length} tasks`);

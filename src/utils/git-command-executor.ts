@@ -1,7 +1,8 @@
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
 import { z } from "zod";
-import { createFireflyError, type FireflyError } from "#/utils/error";
+import { type FireflyError, failedError } from "#/utils/error";
 import { logger } from "#/utils/log";
+import { failedErrAsync } from "#/utils/result";
 
 const SIDE_EFFECT_COMMANDS = new Set<string>([
     "add",
@@ -56,13 +57,10 @@ export function executeGitCommand(args: string[], options: GitCommandOptions = {
 
     const parseResult = gitArgsSchema.safeParse(args);
     if (!parseResult.success) {
-        return errAsync(
-            createFireflyError({
-                code: "FAILED",
-                message: "Invalid git arguments",
-                details: parseResult.error,
-            })
-        );
+        return failedErrAsync({
+            message: "Invalid git arguments",
+            details: parseResult.error,
+        });
     }
 
     const validatedArgs = parseResult.data;
@@ -117,8 +115,7 @@ function executeGitCommandBuffered(
             return output;
         }),
         (error) =>
-            createFireflyError({
-                code: "FAILED",
+            failedError({
                 message: `Git command failed: ${commandStr}`,
                 details: error,
             })
@@ -131,8 +128,7 @@ function executeGitCommandStreaming(
     commandStr: string
 ): ResultAsync<string, FireflyError> {
     return ResultAsync.fromPromise(streamToString(args, spawnOptions), (error) =>
-        createFireflyError({
-            code: "FAILED",
+        failedError({
             message: `Git command failed: ${commandStr}`,
             details: error,
         })

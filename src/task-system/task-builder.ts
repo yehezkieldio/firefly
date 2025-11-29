@@ -8,11 +8,11 @@
  * @module task-system/task-builder
  */
 
-import { err, ok } from "neverthrow";
+import { ok } from "neverthrow";
 import type { z } from "zod";
 import type { GenericWorkflowContext, SkipCondition, Task, TaskMetadata } from "#/task-system/task-types";
-import { createFireflyError } from "#/utils/error";
 import type { FireflyAsyncResult, FireflyResult } from "#/utils/result";
+import { invalidErr } from "#/utils/result";
 
 /**
  * Fluent builder for constructing validated tasks.
@@ -180,23 +180,17 @@ export class TaskBuilder<TContext extends GenericWorkflowContext = GenericWorkfl
      */
     build(): FireflyResult<Task> {
         if (!this.executeFn) {
-            return err(
-                createFireflyError({
-                    code: "INVALID",
-                    message: `Task "${this.taskId}" must have an execute function`,
-                    source: "TaskBuilder.build",
-                })
-            );
+            return invalidErr({
+                message: `Task "${this.taskId}" must have an execute function`,
+                source: "TaskBuilder.build",
+            });
         }
 
         if (!this.taskDescription) {
-            return err(
-                createFireflyError({
-                    code: "INVALID",
-                    message: `Task "${this.taskId}" must have a description`,
-                    source: "TaskBuilder.build",
-                })
-            );
+            return invalidErr({
+                message: `Task "${this.taskId}" must have a description`,
+                source: "TaskBuilder.build",
+            });
         }
 
         const meta: TaskMetadata = {

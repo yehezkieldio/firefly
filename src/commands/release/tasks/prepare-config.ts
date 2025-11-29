@@ -7,16 +7,15 @@
  * @module commands/release/tasks/prepare-config
  */
 
-import { errAsync, okAsync } from "neverthrow";
+import { okAsync } from "neverthrow";
 import type { ReleaseConfig } from "#/commands/release/config";
 import type { ReleaseData } from "#/commands/release/data";
 import type { WorkflowContext } from "#/context/workflow-context";
 import type { ResolvedServices } from "#/services/service-registry";
 import { TaskBuilder } from "#/task-system/task-builder";
 import type { Task } from "#/task-system/task-types";
-import { createFireflyError } from "#/utils/error";
 import { logger } from "#/utils/log";
-import type { FireflyAsyncResult, FireflyResult } from "#/utils/result";
+import { type FireflyAsyncResult, type FireflyResult, validationErrAsync } from "#/utils/result";
 
 type ReleaseServices = ResolvedServices<"fs" | "git">;
 type ReleaseContext = WorkflowContext<ReleaseConfig, ReleaseData, ReleaseServices>;
@@ -132,13 +131,10 @@ function hydrateBranch(ctx: ReleaseContext): FireflyAsyncResult<string | undefin
 function validateBranch(ctx: ReleaseContext, branch: string): FireflyAsyncResult<void> {
     return ctx.services.git.branchExists(branch).andThen((exists) => {
         if (!exists) {
-            return errAsync(
-                createFireflyError({
-                    code: "VALIDATION",
-                    message: `Configured branch "${branch}" does not exist in the repository.`,
-                    source: "commands/release/prepare-config",
-                })
-            );
+            return validationErrAsync({
+                message: `Configured branch "${branch}" does not exist in the repository.`,
+                source: "commands/release/prepare-config",
+            });
         }
         logger.verbose(`  ✓ Validated branch exists: ${branch}`);
         return okAsync(undefined);

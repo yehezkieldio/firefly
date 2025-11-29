@@ -8,7 +8,7 @@
  * @module task-system/task-group-builder
  */
 
-import { err, ok } from "neverthrow";
+import { ok } from "neverthrow";
 import type {
     ExpandedGroupResult,
     ExpandedTask,
@@ -20,8 +20,8 @@ import type {
 } from "#/task-system/task-group";
 import { createNamespacedTaskId } from "#/task-system/task-group";
 import type { GenericWorkflowContext, Task } from "#/task-system/task-types";
-import { createFireflyError } from "#/utils/error";
-import type { FireflyResult } from "#/utils/result";
+import { invalidError, validationError } from "#/utils/error";
+import { FireflyErr, type FireflyResult } from "#/utils/result";
 
 // ============================================================================
 // Task Group Builder
@@ -165,9 +165,8 @@ export class TaskGroupBuilder<TContext extends GenericWorkflowContext = GenericW
      */
     build(): FireflyResult<TaskGroup<TContext>> {
         if (!this.groupDescription) {
-            return err(
-                createFireflyError({
-                    code: "INVALID",
+            return FireflyErr(
+                invalidError({
                     message: `Task group "${this.groupId}" must have a description`,
                     source: "TaskGroupBuilder.build",
                 })
@@ -175,9 +174,8 @@ export class TaskGroupBuilder<TContext extends GenericWorkflowContext = GenericW
         }
 
         if (this.groupTasks.length === 0) {
-            return err(
-                createFireflyError({
-                    code: "INVALID",
+            return FireflyErr(
+                invalidError({
                     message: `Task group "${this.groupId}" must have at least one task`,
                     source: "TaskGroupBuilder.build",
                 })
@@ -279,7 +277,7 @@ export function expandTaskGroup(
 
     const expandedTasksResult = expandTasks(group.tasks, expansionContext);
     if (expandedTasksResult.isErr()) {
-        return err(expandedTasksResult.error);
+        return FireflyErr(expandedTasksResult.error);
     }
 
     return ok({
@@ -306,7 +304,7 @@ function expandTasks(tasks: readonly Task[], ctx: TaskExpansionContext): Firefly
 
         const result = expandSingleTask(task, i, ctx);
         if (result.isErr()) {
-            return err(result.error);
+            return FireflyErr(result.error);
         }
         expandedTasks.push(result.value);
     }
@@ -327,7 +325,7 @@ function expandSingleTask(task: Task, index: number, ctx: TaskExpansionContext):
     if (index === 0 && dependsOnGroups) {
         const interGroupResult = addInterGroupDependencies(dependsOnGroups, registeredGroups, groupId);
         if (interGroupResult.isErr()) {
-            return err(interGroupResult.error);
+            return FireflyErr(interGroupResult.error);
         }
         remappedDependencies.push(...interGroupResult.value);
     }
@@ -353,9 +351,8 @@ function addInterGroupDependencies(
     for (const depGroupId of dependsOnGroups) {
         const lastTaskOfDepGroup = registeredGroups.get(depGroupId);
         if (!lastTaskOfDepGroup) {
-            return err(
-                createFireflyError({
-                    code: "VALIDATION",
+            return FireflyErr(
+                validationError({
                     message: `Group "${groupId}" depends on group "${depGroupId}" which is not registered`,
                     source: "expandTaskGroup",
                 })
