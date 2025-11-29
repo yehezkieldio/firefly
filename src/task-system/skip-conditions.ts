@@ -273,3 +273,109 @@ export const skip = {
     toSkipCondition,
     toSkipConditionWithJump,
 } as const;
+
+// ============================================================================
+// Group Skip Condition Helpers
+// ============================================================================
+
+/**
+ * Type alias for group-level skip conditions.
+ * Group skip conditions can use the same predicates as task skip conditions.
+ */
+export type GroupSkipPredicate<TContext extends GenericWorkflowContext = GenericWorkflowContext> =
+    SkipPredicate<TContext>;
+
+/**
+ * Creates a group skip condition from a simple predicate.
+ *
+ * Use this to define shared skip logic for all tasks in a group.
+ *
+ * @param predicate - Predicate that returns true if the group should be skipped
+ * @param reason - Human-readable reason shown in logs
+ * @returns A function that produces a SkipCondition result
+ *
+ * @example
+ * ```typescript
+ * import { groupSkipWhen, fromConfig } from "#/task-system/skip-conditions";
+ *
+ * const group = buildTaskGroup("git")
+ *   .shouldSkip(groupSkipWhen(fromConfig("skipGit"), "Git operations disabled"))
+ *   .tasks([...])
+ *   .build();
+ * ```
+ */
+export function groupSkipWhen<TContext extends GenericWorkflowContext = GenericWorkflowContext>(
+    predicate: SkipPredicate<TContext>,
+    reason: string
+): (ctx: TContext) => FireflyResult<SkipCondition> {
+    return toSkipCondition(predicate, reason);
+}
+
+/**
+ * Creates a group skip condition that combines multiple predicates with OR logic.
+ *
+ * The group is skipped if ANY of the predicates return true.
+ *
+ * @param predicates - Array of predicates to evaluate
+ * @param reason - Human-readable reason shown in logs
+ * @returns A function that produces a SkipCondition result
+ *
+ * @example
+ * ```typescript
+ * const group = buildTaskGroup("git-push")
+ *   .shouldSkip(groupSkipWhenAny(
+ *     [fromConfig("skipGit"), fromConfig("skipPush")],
+ *     "Git push disabled"
+ *   ))
+ *   .tasks([...])
+ *   .build();
+ * ```
+ */
+export function groupSkipWhenAny<TContext extends GenericWorkflowContext = GenericWorkflowContext>(
+    predicates: readonly SkipPredicate<TContext>[],
+    reason: string
+): (ctx: TContext) => FireflyResult<SkipCondition> {
+    return toSkipCondition(any(...predicates), reason);
+}
+
+/**
+ * Creates a group skip condition that combines multiple predicates with AND logic.
+ *
+ * The group is skipped only if ALL predicates return true.
+ *
+ * @param predicates - Array of predicates to evaluate
+ * @param reason - Human-readable reason shown in logs
+ * @returns A function that produces a SkipCondition result
+ *
+ * @example
+ * ```typescript
+ * const group = buildTaskGroup("changelog")
+ *   .shouldSkip(groupSkipWhenAll(
+ *     [fromConfig("skipBump"), fromConfig("skipChangelog")],
+ *     "Both bump and changelog disabled"
+ *   ))
+ *   .tasks([...])
+ *   .build();
+ * ```
+ */
+export function groupSkipWhenAll<TContext extends GenericWorkflowContext = GenericWorkflowContext>(
+    predicates: readonly SkipPredicate<TContext>[],
+    reason: string
+): (ctx: TContext) => FireflyResult<SkipCondition> {
+    return toSkipCondition(all(...predicates), reason);
+}
+
+/**
+ * Extended namespace with group skip condition helpers.
+ */
+export const groupSkip = {
+    when: groupSkipWhen,
+    whenAny: groupSkipWhenAny,
+    whenAll: groupSkipWhenAll,
+    // Re-export base combinators for convenience
+    fromConfig,
+    fromData,
+    all,
+    any,
+    not,
+} as const;

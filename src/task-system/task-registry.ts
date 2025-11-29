@@ -1,5 +1,12 @@
 import { err, ok } from "neverthrow";
 import { BaseRegistry } from "#/core/registry";
+import type { TaskGroup } from "#/task-system/task-group";
+import {
+    createGroupRegistry,
+    expandTaskGroup,
+    type GroupRegistry,
+    updateGroupRegistry,
+} from "#/task-system/task-group-builder";
 import type { Task } from "#/task-system/task-types";
 import { createFireflyError } from "#/utils/error";
 import type { FireflyResult } from "#/utils/result";
@@ -11,6 +18,7 @@ import type { FireflyResult } from "#/utils/result";
  * - Validates that task dependencies exist at registration time
  * - Provides topological sorting for execution order
  * - Detects circular dependencies
+ * - Supports task group registration with automatic namespacing
  *
  * @example
  * ```typescript
@@ -19,6 +27,9 @@ import type { FireflyResult } from "#/utils/result";
  * // Register tasks (dependencies must be registered first)
  * registry.register(taskA);
  * registry.register(taskB); // If taskB depends on taskA, taskA must exist
+ *
+ * // Or register a group of related tasks
+ * registry.registerGroup(gitGroup);
  *
  * // Get execution order respecting dependencies
  * const orderResult = registry.buildExecutionOrder();
@@ -30,6 +41,8 @@ import type { FireflyResult } from "#/utils/result";
  * ```
  */
 export class TaskRegistry extends BaseRegistry<Task> {
+    private readonly groupRegistry: GroupRegistry;
+
     constructor() {
         super({
             name: "Task",
@@ -38,6 +51,7 @@ export class TaskRegistry extends BaseRegistry<Task> {
             duplicateErrorCode: "VALIDATION",
             notFoundErrorCode: "VALIDATION",
         });
+        this.groupRegistry = createGroupRegistry();
     }
 
     /**
@@ -74,6 +88,110 @@ export class TaskRegistry extends BaseRegistry<Task> {
 
         this.items.set(task.meta.id, task);
         return ok();
+    }
+
+    /**
+     * Registers a task group, expanding it into individual tasks with namespaced IDs.
+     *
+     * This method:
+     * 1. Expands the group into individual tasks with `groupId:taskId` format
+     * 2. Merges group skip conditions with task-level skip conditions
+     * 3. Resolves inter-group dependencies
+     * 4. Registers all expanded tasks
+     *
+     * @param group - The task group to register
+     * @returns `Ok(void)` on success, `Err(FireflyError)` if validation fails
+     *
+     * @example
+     * ```typescript
+     * const gitGroup = buildTaskGroup("git")
+     *   .description("Git operations")
+     *   .skipWhen((ctx) => ctx.config.skipGit)
+     *   .tasks([stageTask, commitTask, tagTask])
+     *   .build();
+     *
+     * if (gitGroup.isOk()) {
+     *   registry.registerGroup(gitGroup.value);
+     * }
+     * ```
+     */
+    registerGroup(group: TaskGroup): FireflyResult<void> {
+        // Check for duplicate group ID
+        if (this.groupRegistry.lastTaskByGroup.has(group.meta.id)) {
+            return err(
+                createFireflyError({
+                    code: "VALIDATION",
+                    message: `Task group "${group.meta.id}" is already registered`,
+                    source: "TaskRegistry.registerGroup",
+                })
+            );
+        }
+
+        // Expand the group into individual tasks
+        const expandResult = expandTaskGroup(group, this.groupRegistry.lastTaskByGroup);
+        if (expandResult.isErr()) {
+            return err(expandResult.error);
+        }
+
+        // Register each expanded task
+        for (const task of expandResult.value.tasks) {
+            const registerResult = this.register(task);
+            if (registerResult.isErr()) {
+                return registerResult;
+            }
+        }
+
+        // Update the group registry
+        updateGroupRegistry(this.groupRegistry, expandResult.value);
+
+        return ok();
+    }
+
+    /**
+     * Registers multiple task groups in order.
+     *
+     * Groups are registered sequentially, allowing later groups to depend on earlier ones.
+     *
+     * @param groups - Array of task groups to register
+     * @returns `Ok(void)` on success, `Err(FireflyError)` if any registration fails
+     */
+    registerGroups(groups: TaskGroup[]): FireflyResult<void> {
+        for (const group of groups) {
+            const result = this.registerGroup(group);
+            if (result.isErr()) {
+                return result;
+            }
+        }
+        return ok();
+    }
+
+    /**
+     * Gets all task IDs belonging to a specific group.
+     *
+     * @param groupId - The group ID to query
+     * @returns Array of namespaced task IDs, or empty array if group not found
+     */
+    getGroupTaskIds(groupId: string): string[] {
+        return this.groupRegistry.tasksByGroup.get(groupId) ?? [];
+    }
+
+    /**
+     * Gets all registered group IDs.
+     *
+     * @returns Array of group IDs in registration order
+     */
+    getGroupIds(): string[] {
+        return [...this.groupRegistry.lastTaskByGroup.keys()];
+    }
+
+    /**
+     * Checks if a group has been registered.
+     *
+     * @param groupId - The group ID to check
+     * @returns True if the group is registered
+     */
+    hasGroup(groupId: string): boolean {
+        return this.groupRegistry.lastTaskByGroup.has(groupId);
     }
 
     /**
