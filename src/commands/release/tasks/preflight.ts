@@ -18,7 +18,7 @@ function checkCliffConfig(ctx: ReleaseContext) {
             return errAsync(
                 createFireflyError({
                     code: "NOT_FOUND",
-                    message: `Configuration file "${CLIFF_CONFIG_FILE}" not found. Run "git-cliff --init" to create one.`,
+                    message: `Configuration file "${CLIFF_CONFIG_FILE}" not found. See: https://git-cliff.org/docs/usage/initializing`,
                     source: "commands/release/preflight",
                 })
             );
@@ -83,17 +83,17 @@ function checkUnpushedCommits(ctx: ReleaseContext) {
     });
 }
 
-export function createPreflightTask(skipCondition: () => boolean): FireflyResult<Task> {
-    return TaskBuilder.create("release-preflight")
+export function createReleasePreflightTask(skipCondition: () => boolean): FireflyResult<Task> {
+    return TaskBuilder.create<ReleaseContext>("release-preflight")
         .description("Validate git repository status and prerequisites")
         .skipWhen(skipCondition)
         .execute((ctx) => {
             logger.info("Running preflight checks...");
 
-            return checkCliffConfig(ctx as ReleaseContext)
-                .andThen(() => checkGitRepository(ctx as ReleaseContext))
-                .andThen(() => checkCleanWorkingDirectory(ctx as ReleaseContext))
-                .andThen(() => checkUnpushedCommits(ctx as ReleaseContext))
+            return checkCliffConfig(ctx)
+                .andThen(() => checkGitRepository(ctx))
+                .andThen(() => checkCleanWorkingDirectory(ctx))
+                .andThen(() => checkUnpushedCommits(ctx))
                 .andThen(() => {
                     logger.info("Preflight checks passed!");
                     return okAsync(ctx);

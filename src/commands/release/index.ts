@@ -2,9 +2,7 @@ import { errAsync, okAsync, Result } from "neverthrow";
 import { createCommand } from "#/command-registry/command-types";
 import { type ReleaseConfig, ReleaseConfigSchema } from "#/commands/release/config";
 import type { ReleaseData } from "#/commands/release/data";
-import { createPreflightTask } from "#/commands/release/tasks/preflight";
-import { TaskBuilder } from "#/task-system/task-builder";
-import { logger } from "#/utils/log";
+import { createReleasePreflightTask } from "#/commands/release/tasks/preflight";
 
 export const releaseCommand = createCommand<ReleaseConfig, ReleaseData>({
     meta: {
@@ -14,16 +12,7 @@ export const releaseCommand = createCommand<ReleaseConfig, ReleaseData>({
     },
 
     buildTasks(context) {
-        const taskResults = [
-            createPreflightTask(() => context.config.skipPreflightCheck === true),
-            TaskBuilder.create("init-version")
-                .description("Load current version from package.json")
-                .execute((ctx) => {
-                    logger.info("Hello, world!");
-                    return okAsync(ctx);
-                })
-                .build(),
-        ];
+        const taskResults = [createReleasePreflightTask(() => context.config.skipPreflightCheck === true)];
 
         const combined = Result.combine(taskResults);
         if (combined.isErr()) {
