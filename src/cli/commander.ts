@@ -1,10 +1,20 @@
+/**
+ * CLI orchestration and command registration.
+ *
+ * This module creates the Commander.js program, registers commands and options,
+ * and handles the execution flow from CLI input to workflow execution.
+ *
+ * @internal
+ */
+
 import { Command } from "commander";
 import { colors } from "consola/utils";
 import { errAsync } from "neverthrow";
 import type { ZodObject, ZodRawShape } from "zod";
 import { ConfigLoader } from "#/cli/config-loader";
-import { OptionsRegistrar } from "#/cli/options-registrar";
-import type { CLIOptions, CommandConfig } from "#/cli/types";
+import type { ParsedCLIOptions, RuntimeConfig } from "#/cli/internal-types";
+import { OptionsBuilder } from "#/cli/options-builder";
+import { OptionsNormalizer } from "#/cli/options-normalizer";
 import { CommandRegistry } from "#/command-registry/command-registry";
 import type { AnyCommand } from "#/command-registry/command-types";
 import { releaseCommand } from "#/commands/release";
@@ -14,12 +24,24 @@ import { createFireflyError } from "#/utils/error";
 import { logger } from "#/utils/log";
 import type { FireflyAsyncResult } from "#/utils/result";
 
+/** Context for command registration containing program, builder, and registry instances. */
 interface CommandRegistrationContext {
     program: Command;
-    registrar: OptionsRegistrar;
+    builder: OptionsBuilder;
+    normalizer: OptionsNormalizer;
     registry: CommandRegistry;
 }
 
+/**
+ * Creates and configures the Firefly CLI program.
+ *
+ * Sets up the Commander.js program with:
+ * - Global options (--dry-run, --verbose, --no-enable-rollback)
+ * - All registered commands with their specific options
+ * - Help and version information
+ *
+ * @returns Configured Commander program ready for parsing
+ */
 export function createFireflyCLI(): Command {
     const program = new Command();
 
@@ -30,11 +52,12 @@ export function createFireflyCLI(): Command {
         .helpOption("-h, --help", "Display help information")
         .helpCommand("help", "Display help for command");
 
-    const registrar = new OptionsRegistrar();
-    registrar.registerGlobalOptions(program);
+    const builder = new OptionsBuilder();
+    builder.registerGlobalOptions(program);
 
+    const normalizer = new OptionsNormalizer();
     const registry = createCommandRegistry();
-    const ctx: CommandRegistrationContext = { program, registrar, registry };
+    const ctx: CommandRegistrationContext = { program, builder, normalizer, registry };
 
     for (const command of registry.getAll()) {
         const configSchema = command.meta.configSchema as ZodObject<ZodRawShape>;
@@ -50,6 +73,13 @@ function createCommandRegistry(): CommandRegistry {
     return registry;
 }
 
+/**
+ * Registers a single command with the CLI program.
+ *
+ * @param ctx - The registration context containing program, builder, and registry
+ * @param commandName - The name of the command to register
+ * @param configSchema - The Zod schema defining the command's configuration
+ */
 function registerCommand(
     ctx: CommandRegistrationContext,
     commandName: string,
@@ -57,10 +87,11 @@ function registerCommand(
 ): void {
     const cmd = ctx.program.command(commandName).description(getCommandDescription(commandName));
 
-    ctx.registrar.registerCommandOptions(cmd, configSchema);
+    ctx.builder.registerCommandOptions(cmd, configSchema);
 
-    cmd.action(async (cliOptions: CLIOptions) => {
-        const result = await executeCommand(commandName, cliOptions, ctx.registry);
+    cmd.action(async (cliOptions: ParsedCLIOptions) => {
+        const normalizedOptions = ctx.normalizer.normalize(cliOptions, configSchema);
+        const result = await executeCommand(commandName, normalizedOptions, ctx.registry);
 
         if (result.isErr()) {
             logger.error("Execution failed:", result.error.message);
@@ -77,9 +108,23 @@ function registerCommand(
     });
 }
 
+/**
+ * Executes a command with the given options.
+ *
+ * Handles the full execution flow:
+ * 1. Log version information
+ * 2. Merge global and command options
+ * 3. Load and merge config file values
+ * 4. Execute through the workflow orchestrator
+ *
+ * @param commandName - The command to execute
+ * @param cliOptions - Parsed and normalized CLI options
+ * @param registry - The command registry to look up the command
+ * @returns Async result of the workflow execution
+ */
 function executeCommand(
     commandName: string,
-    cliOptions: CLIOptions,
+    cliOptions: ParsedCLIOptions,
     registry: CommandRegistry
 ): FireflyAsyncResult<WorkflowExecutionResult> {
     logVersionInfo(commandName);
@@ -97,9 +142,17 @@ function executeCommand(
     });
 }
 
+/**
+ * Executes a command through the workflow orchestrator.
+ *
+ * @param commandName - The command to execute
+ * @param config - The merged runtime configuration
+ * @param registry - The command registry
+ * @returns Async result of the workflow execution
+ */
 function executeWithOrchestrator(
     commandName: string,
-    config: CommandConfig,
+    config: RuntimeConfig,
     registry: CommandRegistry
 ): FireflyAsyncResult<WorkflowExecutionResult> {
     const commandResult = registry.get(commandName);
@@ -120,7 +173,8 @@ function executeWithOrchestrator(
     return orchestrator.executeCommand(command, config);
 }
 
-function createOrchestrator(config: CommandConfig): WorkflowOrchestrator {
+/** Creates a workflow orchestrator with the given configuration. */
+function createOrchestrator(config: RuntimeConfig): WorkflowOrchestrator {
     return new WorkflowOrchestrator({
         dryRun: config.dryRun ?? false,
         enableRollback: config.enableRollback ?? true,
@@ -128,8 +182,17 @@ function createOrchestrator(config: CommandConfig): WorkflowOrchestrator {
     });
 }
 
-function mergeOptions(options: CLIOptions): CLIOptions {
-    const parent = options.parent as { opts?: () => CLIOptions } | undefined;
+/**
+ * Merges global options from the parent command with command-specific options.
+ *
+ * Commander.js stores global options in the parent context, so we need to
+ * extract and merge them with the command's own options.
+ *
+ * @param options - The command's parsed options
+ * @returns Merged options including global flags
+ */
+function mergeOptions(options: ParsedCLIOptions): ParsedCLIOptions {
+    const parent = options.parent as { opts?: () => ParsedCLIOptions } | undefined;
     const globalOpts = parent?.opts?.() ?? {};
     return { ...globalOpts, ...options };
 }

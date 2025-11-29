@@ -1,29 +1,73 @@
+/**
+ * Commander.js option builder for Zod schemas.
+ *
+ * This module provides utilities to automatically generate Commander.js CLI options
+ * from Zod schemas, ensuring type safety and consistent option handling.
+ *
+ * @internal
+ */
+
 import type { Command } from "commander";
 import { err, ok, type Result } from "neverthrow";
 import z, { type ZodObject, type ZodRawShape } from "zod";
 import { parseSchema } from "#/utils/result";
 
+/** Result type for option value parsing/validation. */
 type ValidationResult<T> = Result<T, string>;
 
-type OptionContext = {
+/**
+ * Context object containing all information needed to register a single CLI option.
+ */
+interface OptionContext {
+    /** The Commander command to register the option on. */
     command: Command;
+    /** The schema key (camelCase). */
     key: string;
+    /** The raw Zod field (may include wrappers like optional/default). */
     rawField: z.ZodType;
+    /** The unwrapped inner Zod field. */
     field: z.ZodType;
+    /** The Commander option flag string (e.g., "-bt, --bump-strategy"). */
     optionFlag: string;
+    /** The kebab-case option name. */
     optionName: string;
+    /** The option description from the Zod schema. */
     description: string;
+    /** The default value extracted from the schema. */
     parsedDefault: unknown;
-};
+}
 
-export class OptionsRegistrar {
+/**
+ * Builds and registers Commander.js CLI options from Zod schemas.
+ *
+ * Automatically converts Zod schema definitions into Commander options with:
+ * - Appropriate type parsing (string, number, enum, boolean)
+ * - Default value extraction
+ * - Description from schema metadata
+ * - Shorthand aliases for common options
+ *
+ * @example
+ * ```ts
+ * const builder = new OptionsBuilder();
+ * builder.registerGlobalOptions(program);
+ * builder.registerCommandOptions(releaseCmd, ReleaseConfigSchema);
+ * ```
+ */
+export class OptionsBuilder {
+    /** Mapping of schema keys to their shorthand CLI flags. */
     private readonly shorthandMap = new Map<string, string>([
         ["bumpStrategy", "bt"],
         ["releaseType", "rt"],
     ]);
 
+    /** Fields that are handled by global options and should be skipped for command options. */
     private readonly skipFields = new Set(["dryRun", "verbose", "enableRollback"]);
 
+    /**
+     * Registers global options that apply to all commands.
+     *
+     * @param program - The root Commander program instance
+     */
     registerGlobalOptions(program: Command): void {
         program
             .option("--dry-run", "Run without making actual changes")
@@ -31,6 +75,15 @@ export class OptionsRegistrar {
             .option("--no-enable-rollback", "Disable automatic rollback on failure");
     }
 
+    /**
+     * Registers command-specific options from a Zod schema.
+     *
+     * Iterates through the schema shape and creates Commander options
+     * for each field, skipping global options.
+     *
+     * @param command - The Commander command to register options on
+     * @param schema - The Zod schema defining the command's options
+     */
     registerCommandOptions<T extends ZodRawShape>(command: Command, schema: ZodObject<T>): void {
         for (const [key, rawField] of Object.entries(schema.shape)) {
             if (!rawField || this.skipFields.has(key)) continue;
@@ -40,6 +93,11 @@ export class OptionsRegistrar {
         }
     }
 
+    /**
+     * Builds the context object for registering a single option.
+     *
+     * @returns The option context, or null if the option already exists
+     */
     private buildOptionContext(command: Command, key: string, rawField: z.ZodType): OptionContext | null {
         const field = this.unwrapSchema(rawField);
         const optionName = this.camelToKebab(key);
@@ -59,14 +117,20 @@ export class OptionsRegistrar {
         return { command, key, rawField, field, optionFlag, optionName, description, parsedDefault };
     }
 
+    /**
+     * Extracts the default value from a Zod field by parsing an empty object.
+     */
     private extractDefaultValue(key: string, rawField: z.ZodType): unknown {
         const single = z.object({ [key]: rawField }).partial();
         const parseResult = single.safeParse({});
         return parseResult.success ? (parseResult.data as Record<string, unknown>)[key] : undefined;
     }
 
+    /**
+     * Registers a single option based on its type.
+     */
     private registerOption(ctx: OptionContext): void {
-        const { command, rawField, field, optionFlag, optionName, description, parsedDefault } = ctx;
+        const { command, rawField, field, optionFlag, description } = ctx;
 
         if (this.isBooleanField(rawField)) {
             command.option(optionFlag, description);
@@ -91,6 +155,7 @@ export class OptionsRegistrar {
         this.registerGenericOption(ctx);
     }
 
+    /** Registers a number option with numeric parsing. */
     private registerNumberOption(ctx: OptionContext): void {
         const { command, rawField, optionFlag, optionName, description, parsedDefault } = ctx;
         const parser = this.createNumberParser(rawField, optionName);
@@ -103,6 +168,7 @@ export class OptionsRegistrar {
         );
     }
 
+    /** Registers an enum option with choice validation. */
     private registerEnumOption(ctx: OptionContext): void {
         const { command, rawField, field, optionFlag, optionName, description, parsedDefault } = ctx;
         const choices = this.getEnumChoices(field);
@@ -117,6 +183,7 @@ export class OptionsRegistrar {
         );
     }
 
+    /** Registers a string option with validation. */
     private registerStringOption(ctx: OptionContext): void {
         const { command, rawField, optionFlag, optionName, description, parsedDefault } = ctx;
         const parser = this.createStringParser(rawField);
@@ -129,6 +196,7 @@ export class OptionsRegistrar {
         );
     }
 
+    /** Registers a generic option for other Zod types. */
     private registerGenericOption(ctx: OptionContext): void {
         const { command, rawField, optionFlag, optionName, description, parsedDefault } = ctx;
         const parser = this.createGenericParser(rawField);
@@ -136,6 +204,12 @@ export class OptionsRegistrar {
         command.option(`${optionFlag} <${optionName}>`, description, wrappedParser, parsedDefault);
     }
 
+    /**
+     * Wraps a Result-returning parser into a Commander-compatible parser.
+     *
+     * Commander expects parsers to return values directly or throw on error.
+     * This wrapper converts our Result-based parsers to that pattern.
+     */
     private wrapParser<T>(parser: (input: string) => ValidationResult<T>): (input: string) => T {
         return (input: string) => {
             const result = parser(input);
@@ -147,6 +221,7 @@ export class OptionsRegistrar {
         };
     }
 
+    /** Creates a parser for number options. */
     private createNumberParser<T>(rawField: z.ZodType, optionName: string): (input: string) => ValidationResult<T> {
         return (input: string) => {
             const num = Number(input);
@@ -160,6 +235,7 @@ export class OptionsRegistrar {
         };
     }
 
+    /** Creates a parser for enum options. */
     private createEnumParser<T>(
         rawField: z.ZodType,
         optionName: string,
@@ -173,6 +249,7 @@ export class OptionsRegistrar {
         };
     }
 
+    /** Creates a parser for string options. */
     private createStringParser<T>(rawField: z.ZodType): (input: string) => ValidationResult<T> {
         return (input: string) => {
             const result = parseSchema(rawField, input);
@@ -181,6 +258,7 @@ export class OptionsRegistrar {
         };
     }
 
+    /** Creates a generic parser using Zod validation. */
     private createGenericParser<T>(rawField: z.ZodType): (input: string) => ValidationResult<T> {
         return (input: string) => {
             const result = parseSchema(rawField, input);
@@ -189,6 +267,11 @@ export class OptionsRegistrar {
         };
     }
 
+    /**
+     * Gets the internal definition object from a Zod type.
+     *
+     * Handles both modern Zod v4 (_zod.def) and legacy (_def) structures.
+     */
     private getInternalDef(field: z.ZodType): {
         innerType?: z.ZodType;
         schema?: z.ZodType;
@@ -203,6 +286,9 @@ export class OptionsRegistrar {
         return (legacy ?? {}) as { innerType?: z.ZodType; schema?: z.ZodType; values?: readonly string[] };
     }
 
+    /**
+     * Unwraps Zod wrapper types (optional, default, etc.) to get the inner type.
+     */
     private unwrapSchema(field: z.ZodType): z.ZodType {
         if (field instanceof z.ZodDefault) {
             const inner = this.getInternalDef(field).innerType;
@@ -222,17 +308,25 @@ export class OptionsRegistrar {
         return field;
     }
 
+    /** Checks if a field is a boolean type (possibly wrapped). */
     private isBooleanField(rawField: z.ZodType): boolean {
         const def = this.getInternalDef(rawField);
         const inner = (def.innerType ?? def.schema) as z.ZodType | undefined;
         return inner instanceof z.ZodBoolean;
     }
 
+    /** Extracts enum choices from a ZodEnum field. */
     private getEnumChoices(field: z.ZodType): readonly string[] {
         const def = this.getInternalDef(field);
         return def.values ?? [];
     }
 
+    /**
+     * Converts a camelCase string to kebab-case.
+     *
+     * @example
+     * camelToKebab("bumpStrategy") // "bump-strategy"
+     */
     private camelToKebab(str: string): string {
         return str.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
     }
