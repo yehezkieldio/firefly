@@ -6,6 +6,29 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.5 (November 30, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`24ee453`](https://github.com/yehezkieldio/firefly/commit/24ee453d41e53fbb385689333550728e6cacd31d) commits: Add commit parsing and type definitions for git history analysis
+- [`73c11e3`](https://github.com/yehezkieldio/firefly/commit/73c11e3a1c1cfe72ae54c64d5c451920abdbd89e) release: Add config and version setup tasks to release workflow
+- [`1b5fde5`](https://github.com/yehezkieldio/firefly/commit/1b5fde5c5863306c47dc90da1011aa5659ead1b1) commit-history: Add commit history service and extend git service with tag and commit retrieval methods
+- [`d81969f`](https://github.com/yehezkieldio/firefly/commit/d81969fb6be7db4e1b55a590b57db0ca5af3a9b7) semver: Add Version class for parsing and handling semantic versions
+- [`aa5c34f`](https://github.com/yehezkieldio/firefly/commit/aa5c34ffb411a2280f834d2047a68c8ed539ffe4) release: Add bump strategy task group for version management
+- [`52d69e9`](https://github.com/yehezkieldio/firefly/commit/52d69e94c9a423ea35478e5dbc454c112a575192) release: Add bump execution and version bump tasks to release flow
+- [`251d26c`](https://github.com/yehezkieldio/firefly/commit/251d26c055140c65ce8abe5ef77a961ae5455d4c) release: Extend release workflow with git service integration and preflight validation
+- [`0989372`](https://github.com/yehezkieldio/firefly/commit/0989372f90f8b0c6812382e50ed856adc82362b4) git: Extend git service with commit, tag, push and status APIs
+- [`69b71af`](https://github.com/yehezkieldio/firefly/commit/69b71afa998e9d41bd896ffc866c6dfc63af5604) git: Add tag management methods and isClean flag to git interfaces
+- [`9e0ca2f`](https://github.com/yehezkieldio/firefly/commit/9e0ca2fbffcc81673fbb276e539af2b4c3d3dac3) git: Add methods to retrieve staged and unstaged file statuses
+- [`f9c6042`](https://github.com/yehezkieldio/firefly/commit/f9c6042e833394f92a0572959d5380c2ea9c15c7) git: Add branch listing and parsing to git service
+- [`7f2010c`](https://github.com/yehezkieldio/firefly/commit/7f2010c37164fc8c77fb36e09038232a31fd39ad) release: Add dependency on prepare-release-config in initialization task
+- [`4a77d0e`](https://github.com/yehezkieldio/firefly/commit/4a77d0e221261b8de33fd6bce3910e4c65e72086) release-preflight: Add checks for git status, unpushed commits and cliff config
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`f2e8f46`](https://github.com/yehezkieldio/firefly/commit/f2e8f461bccefa40753592ea4b82b0a77ffc9b1a) release-preflight: Use isInsideRepository instead of isRepository for proper repo check
+
+### <!-- 7 -->🚜 Refactor
+- [`631421b`](https://github.com/yehezkieldio/firefly/commit/631421bc27b1db1d86442b5879633ad9ba2ca5df) git.interface: Extend dry-run options across git operation interfaces to reduce duplication and improve consistency
+- [`581cd9d`](https://github.com/yehezkieldio/firefly/commit/581cd9d72b392f5617d9e499415489772914cb3b) git: Redesign git service and interfaces for cleaner API and remove obsolete commit-history service
 ## firefly@4.0.0-alpha.4 (November 30, 2025)
 
 ### <!-- 5 -->📚 Documentation
