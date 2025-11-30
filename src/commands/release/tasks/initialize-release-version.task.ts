@@ -8,6 +8,7 @@ import { logger } from "#/infrastructure/logging";
 export function createInitializeReleaseVersion(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("initialize-release-version")
         .description("Hydrate and prepare the release configuration")
+        .dependsOn("prepare-release-config")
         .execute((ctx) => {
             logger.info("initialize-release-version");
 
