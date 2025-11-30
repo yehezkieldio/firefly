@@ -1,9 +1,10 @@
 import type { FireflyAsyncResult } from "#/core/result/result.types";
+import type { DryRunOptions } from "#/infrastructure/dry-run";
 
 /**
  * Represents the current status of a git working directory.
  */
-export interface GitStatus {
+export interface GitStatus extends DryRunOptions {
     /**
      * Whether there are changes staged for commit
      */
@@ -18,11 +19,6 @@ export interface GitStatus {
      * Whether there are untracked files in the working directory
      */
     readonly hasUntracked: boolean;
-
-    /**
-     * True if the working directory has no changes (staged, unstaged, or untracked)
-     */
-    readonly isClean: boolean;
 }
 
 /**
@@ -43,7 +39,7 @@ export interface UnpushedCommitsResult {
 /**
  * Options for git commit operations.
  */
-export interface CommitOptions {
+export interface CommitOptions extends DryRunOptions {
     /**
      * Whether to GPG sign the commit
      */
@@ -63,11 +59,6 @@ export interface CommitOptions {
      * Skip pre-commit and commit-msg hooks
      */
     readonly noVerify?: boolean;
-
-    /**
-     * Simulate the operation without making changes
-     */
-    readonly dryRun?: boolean;
 }
 
 /**
@@ -83,7 +74,7 @@ export interface CommitResult {
 /**
  * Options for git tag operations.
  */
-export interface TagOptions {
+export interface TagOptions extends DryRunOptions {
     /**
      * Annotation message for the tag (creates annotated tag)
      *
@@ -94,17 +85,12 @@ export interface TagOptions {
      *  Whether to GPG sign the tag
      */
     readonly sign?: boolean;
-
-    /**
-     * Simulate the operation without making changes
-     */
-    readonly dryRun?: boolean;
 }
 
 /**
  * Options for git push operations.
  */
-export interface PushOptions {
+export interface PushOptions extends DryRunOptions {
     /**
      * Remote name to push to.
      * @default "origin"
@@ -125,11 +111,6 @@ export interface PushOptions {
      *  Push commits and their associated tags
      */
     readonly followTags?: boolean;
-
-    /**
-     * Simulate the operation without making changes
-     */
-    readonly dryRun?: boolean;
 }
 
 /**
