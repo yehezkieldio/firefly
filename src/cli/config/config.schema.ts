@@ -4,9 +4,7 @@ import { ReleaseConfigSchema } from "#/commands/release/release.config";
 
 /**
  * Complete Firefly configuration schema.
- *
  * Combines global options with command-specific configuration sections.
- * Used for validation and JSON schema generation.
  */
 export const FireflyConfigSchema = z
     .object({
