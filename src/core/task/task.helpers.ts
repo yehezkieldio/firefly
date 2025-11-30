@@ -3,6 +3,7 @@ import { FireflyErrAsync, FireflyOkAsync } from "#/core/result/result.constructo
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 import { TaskBuilder } from "#/core/task/task.builder";
 import type { GenericWorkflowContext, Task } from "#/core/task/task.types";
+import type { TaskGroup } from "#/core/task/task-group.types";
 
 /**
  * Options for creating a side-effect task.
@@ -386,4 +387,78 @@ export function runChecks<TContext extends GenericWorkflowContext>(
     const initial: FireflyAsyncResult<void> = FireflyOkAsync(undefined);
 
     return checks.reduce((chain, check) => chain.andThen(() => check(ctx)), initial).map(() => ctx);
+}
+
+/**
+ * Collects task group results from factory functions into a single array.
+ *
+ * Simplifies the pattern of building multiple task groups by handling
+ * Result combination and async wrapping automatically.
+ *
+ * @param factories - Array of task group factory functions
+ * @returns Combined result of all task groups, or first error encountered
+ *
+ * @example
+ * ```typescript
+ * // In a command's buildTaskGroups:
+ * buildTaskGroups(context) {
+ *   return collectTaskGroups(
+ *     () => createPreflightGroup(context),
+ *     () => createBumpGroup(context),
+ *     () => createGitGroup(context),
+ *   );
+ * }
+ * ```
+ */
+export function collectTaskGroups(
+    ...factories: ReadonlyArray<() => FireflyResult<TaskGroup>>
+): FireflyAsyncResult<TaskGroup[]> {
+    const results = factories.map((factory) => factory());
+    const combined = Result.combine(results);
+
+    if (combined.isErr()) {
+        return FireflyErrAsync(combined.error);
+    }
+
+    return FireflyOkAsync(combined.value);
+}
+
+/**
+ * Collects task groups conditionally, filtering out disabled groups.
+ *
+ * Each entry can be either a factory function or a tuple of [condition, factory].
+ * If condition is false, the task group is not included.
+ *
+ * @param entries - Array of factories or [condition, factory] tuples
+ * @returns Combined result of enabled task groups
+ *
+ * @example
+ * ```typescript
+ * buildTaskGroups(context) {
+ *   return collectTaskGroupsConditionally(
+ *     () => createPreflightGroup(context),
+ *     [context.config.enableBump, () => createBumpGroup(context)],
+ *     [context.config.enableGit, () => createGitGroup(context)],
+ *     [context.config.createRelease, () => createGitHubGroup(context)],
+ *   );
+ * }
+ * ```
+ */
+export function collectTaskGroupsConditionally(
+    ...entries: ReadonlyArray<(() => FireflyResult<TaskGroup>) | readonly [boolean, () => FireflyResult<TaskGroup>]>
+): FireflyAsyncResult<TaskGroup[]> {
+    const factories: Array<() => FireflyResult<TaskGroup>> = [];
+
+    for (const entry of entries) {
+        if (typeof entry === "function") {
+            factories.push(entry);
+        } else {
+            const [condition, factory] = entry;
+            if (condition) {
+                factories.push(factory);
+            }
+        }
+    }
+
+    return collectTaskGroups(...factories);
 }
