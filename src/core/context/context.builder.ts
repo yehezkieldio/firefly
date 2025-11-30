@@ -1,12 +1,6 @@
-import { ImmutableWorkflowContext, type WorkflowContext } from "#/core/context/workflow.context";
+import { ImmutableWorkflowContext, type WorkflowContext, type WorkflowData } from "#/core/context/workflow.context";
 import { resolveAllServices } from "#/core/service/service.proxy";
-import type { ResolvedServices, ServiceKey } from "#/core/service/service.registry";
-
-// Default services type when using all available services
-type DefaultServices = ResolvedServices<ServiceKey>;
-
-// Base constraint for workflow data - must be a record with string keys
-type WorkflowData = Record<string, unknown>;
+import type { DefaultServices } from "#/core/service/service.registry";
 
 /**
  * Fluent builder for constructing workflow contexts.

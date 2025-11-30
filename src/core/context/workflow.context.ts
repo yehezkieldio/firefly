@@ -1,12 +1,9 @@
 import { FireflyOk, validationErr } from "#/core/result/result.constructors";
 import type { FireflyResult } from "#/core/result/result.types";
-import type { ResolvedServices, ServiceKey } from "#/core/service/service.registry";
-
-// Default services type when using all available services
-type DefaultServices = ResolvedServices<ServiceKey>;
+import type { DefaultServices } from "#/core/service/service.registry";
 
 // Base constraint for workflow data - must be a record with string keys
-type WorkflowData = Record<string, unknown>;
+export type WorkflowData = Record<string, unknown>;
 
 /**
  * Immutable context that flows through workflow task execution.
