@@ -11,10 +11,12 @@
 
 import type { BrandedServiceKey, ServiceDefinition, ServiceFactoryContext } from "#/core/service/service.types";
 import type { IFileSystemService } from "#/services/contracts/filesystem.interface";
+import type { IPackageJsonService } from "#/services/contracts/package-json.interface";
 
 // Forward declaration for ServiceRegistry type used in factory context
 type ServiceRegistryType = {
     readonly fs: IFileSystemService;
+    readonly packageJson: IPackageJsonService;
 };
 
 /**
@@ -34,6 +36,14 @@ export const SERVICE_DEFINITIONS = {
         factory: async ({ basePath }: ServiceFactoryContext<ServiceRegistryType>) => {
             const { createFileSystemService } = await import("#/services/implementations/filesystem.service");
             return createFileSystemService(basePath);
+        },
+    }),
+    packageJson: defineService<IPackageJsonService>({
+        dependencies: ["fs"],
+        factory: async ({ getService }) => {
+            const fs = await getService("fs");
+            const { createPackageJsonService } = await import("#/services/implementations/package-json.service");
+            return createPackageJsonService(fs);
         },
     }),
 } as const satisfies Record<string, ServiceDefinition<unknown, ServiceRegistryType>>;
