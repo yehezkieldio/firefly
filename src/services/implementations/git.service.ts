@@ -42,6 +42,43 @@ export class DefaultGitService implements IGitService {
             .map(() => true)
             .orElse(() => FireflyOkAsync(false));
     }
+
+    getLastTag(): FireflyAsyncResult<string | null> {
+        return this.git(["describe", "--tags", "--abbrev=0"])
+            .map((output) => {
+                const tag = output.trim();
+                return tag || null;
+            })
+            .orElse((error) => {
+                // If no tags found, return null instead of error
+                if (error.message.includes("No names found") || error.message.includes("fatal")) {
+                    return FireflyOkAsync(null);
+                }
+                return FireflyOkAsync(null);
+            });
+    }
+
+    getCommitHashesSince(since: string | null): FireflyAsyncResult<string[]> {
+        const args = since ? ["rev-list", `${since}..HEAD`] : ["rev-list", "HEAD"];
+
+        return this.git(args).map((output) =>
+            output
+                .trim()
+                .split("\n")
+                .map((line) => line.trim())
+                .filter((line) => line.length > 0)
+        );
+    }
+
+    getCommitDetails(hash: string): FireflyAsyncResult<string> {
+        const format = ["hash:%H", "date:%ci", "author:%an <%ae>", "subject:%s", "body:%b", "notes:%N"].join("%n");
+
+        return this.git(["show", "--no-patch", `--format=${format}`, hash]);
+    }
+
+    hasAnyTags(): FireflyAsyncResult<boolean> {
+        return this.getLastTag().map((tag) => tag !== null);
+    }
 }
 
 /**

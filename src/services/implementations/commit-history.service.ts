@@ -1,8 +1,9 @@
 import { FireflyOk, FireflyOkAsync, invalidErr } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 import type { Commit, CommitNote, CommitReference } from "#/domain/commits/commit-types";
-import { executeGitCommand } from "#/infrastructure/executors/git-command.executor";
 import { logger } from "#/infrastructure/logging";
+import type { ICommitHistoryService } from "#/services/contracts/commit-history.interface";
+import type { IGitService } from "#/services/contracts/git.interface";
 
 const COMMIT_MESSAGE_PATTERNS = {
     /** Matches breaking change syntax: feat(scope)!: message */
@@ -192,139 +193,113 @@ function parseCommitFromRaw(rawDetails: string, hash: string): FireflyResult<Com
     return FireflyOk(commit);
 }
 
-export function getLastTag(cwd?: string): FireflyAsyncResult<string | null> {
-    logger.verbose("CommitHistory: Fetching last tag");
+/**
+ * Default implementation of the commit history service.
+ * Uses IGitService to fetch and parse commit data.
+ */
+export class DefaultCommitHistoryService implements ICommitHistoryService {
+    private readonly git: IGitService;
 
-    return executeGitCommand(["describe", "--tags", "--abbrev=0"], { cwd, verbose: false })
-        .map((output) => {
-            const tag = output.trim();
-            logger.verbose(`CommitHistory: Last tag found - ${tag}`);
-            return tag || null;
-        })
-        .orElse((error) => {
-            // If no tags found, return null instead of error
-            if (error.message.includes("No names found") || error.message.includes("fatal")) {
-                logger.verbose("CommitHistory: No tags found in repository");
-                return FireflyOkAsync(null);
-            }
-            return FireflyOkAsync(null);
+    constructor(git: IGitService) {
+        this.git = git;
+    }
+
+    getCommitsSinceLastTag(): FireflyAsyncResult<Commit[]> {
+        logger.verbose("CommitHistoryService: Retrieving commits since last tag");
+
+        return this.git.getLastTag().andThen((lastTag) => {
+            logger.verbose(`CommitHistoryService: Last tag is: ${lastTag ?? "none"}`);
+            return this.getCommitsSince(lastTag);
         });
-}
+    }
 
-export function getCommitHashesSince(since: string | null, cwd?: string): FireflyAsyncResult<string[]> {
-    logger.verbose(`CommitHistory: Fetching commits since ${since ?? "the beginning"}`);
+    getAllCommits(): FireflyAsyncResult<Commit[]> {
+        logger.verbose("CommitHistoryService: Retrieving all commits");
+        return this.getCommitsSince(null);
+    }
 
-    const args = since ? ["rev-list", `${since}..HEAD`] : ["rev-list", "HEAD"];
+    getCommitsSince(since: string | null): FireflyAsyncResult<Commit[]> {
+        logger.verbose(`CommitHistoryService: Fetching commits since ${since ?? "the beginning"}`);
 
-    return executeGitCommand(args, { cwd, verbose: false }).map((output) => {
-        const commits = output
-            .trim()
-            .split("\n")
-            .map((line) => line.trim())
-            .filter((line) => line.length > 0);
-
-        logger.verbose(`CommitHistory: Found ${commits.length} commits since ${since ?? "the beginning"}`);
-        return commits;
-    });
-}
-
-export function getCommitDetails(hash: string, cwd?: string): FireflyAsyncResult<string> {
-    const format = ["hash:%H", "date:%ci", "author:%an <%ae>", "subject:%s", "body:%b", "notes:%N"].join("%n");
-
-    return executeGitCommand(["show", "--no-patch", `--format=${format}`, hash], { cwd, verbose: false });
-}
-
-export function getCommitsSinceLastTag(cwd?: string): FireflyAsyncResult<Commit[]> {
-    logger.verbose("CommitHistory: Retrieving commits since last tag");
-
-    return getLastTag(cwd).andThen((lastTag) => {
-        logger.verbose(`CommitHistory: Last tag is: ${lastTag ?? "none"}`);
-
-        return getCommitHashesSince(lastTag, cwd).andThen((hashes) => {
+        return this.git.getCommitHashesSince(since).andThen((hashes) => {
             if (hashes.length === 0) {
-                logger.verbose("CommitHistory: No new commits found since last tag");
+                logger.verbose("CommitHistoryService: No commits found");
                 return FireflyOkAsync([]);
             }
 
-            return parseCommitHashes(hashes, cwd);
+            logger.verbose(`CommitHistoryService: Found ${hashes.length} commits`);
+            return this.parseCommitHashes(hashes);
         });
-    });
-}
-
-export function getAllCommits(cwd?: string): FireflyAsyncResult<Commit[]> {
-    logger.verbose("CommitHistory: Retrieving all commits");
-
-    return getCommitHashesSince(null, cwd).andThen((hashes) => {
-        if (hashes.length === 0) {
-            logger.verbose("CommitHistory: No commits found in repository");
-            return FireflyOkAsync([]);
-        }
-
-        return parseCommitHashes(hashes, cwd);
-    });
-}
-
-export function hasAnyTags(cwd?: string): FireflyAsyncResult<boolean> {
-    return getLastTag(cwd).map((tag) => tag !== null);
-}
-
-export async function* streamCommits(since: string | null, cwd?: string): AsyncGenerator<Commit, void, undefined> {
-    logger.verbose(`CommitHistory: Streaming commits since ${since ?? "the beginning"}`);
-
-    const hashesResult = await getCommitHashesSince(since, cwd);
-    if (hashesResult.isErr()) {
-        logger.verbose(`CommitHistory: Failed to get commit hashes: ${hashesResult.error.message}`);
-        return;
     }
 
-    const hashes = hashesResult.value;
-    logger.verbose(`CommitHistory: Streaming ${hashes.length} commits`);
+    async *streamCommits(since: string | null): AsyncGenerator<Commit, void, undefined> {
+        logger.verbose(`CommitHistoryService: Streaming commits since ${since ?? "the beginning"}`);
 
-    for (const hash of hashes) {
-        const detailsResult = await getCommitDetails(hash, cwd);
-        if (detailsResult.isErr()) {
-            logger.verbose(`CommitHistory: Failed to get details for ${hash}: ${detailsResult.error.message}`);
-            continue;
+        const hashesResult = await this.git.getCommitHashesSince(since);
+        if (hashesResult.isErr()) {
+            logger.verbose(`CommitHistoryService: Failed to get commit hashes: ${hashesResult.error.message}`);
+            return;
         }
 
-        const parsed = parseCommitFromRaw(detailsResult.value, hash);
-        if (parsed.isErr()) {
-            logger.verbose(`CommitHistory: Failed to parse commit ${hash}: ${parsed.error.message}`);
-            continue;
+        const hashes = hashesResult.value;
+        logger.verbose(`CommitHistoryService: Streaming ${hashes.length} commits`);
+
+        for (const hash of hashes) {
+            const detailsResult = await this.git.getCommitDetails(hash);
+            if (detailsResult.isErr()) {
+                logger.verbose(
+                    `CommitHistoryService: Failed to get details for ${hash}: ${detailsResult.error.message}`
+                );
+                continue;
+            }
+
+            const parsed = parseCommitFromRaw(detailsResult.value, hash);
+            if (parsed.isErr()) {
+                logger.verbose(`CommitHistoryService: Failed to parse commit ${hash}: ${parsed.error.message}`);
+                continue;
+            }
+
+            yield parsed.value;
+        }
+    }
+
+    async *streamCommitsSinceLastTag(): AsyncGenerator<Commit, void, undefined> {
+        const lastTagResult = await this.git.getLastTag();
+        if (lastTagResult.isErr()) {
+            logger.verbose(`CommitHistoryService: Failed to get last tag: ${lastTagResult.error.message}`);
+            return;
         }
 
-        yield parsed.value;
-    }
-}
-
-export async function* streamCommitsSinceLastTag(cwd?: string): AsyncGenerator<Commit, void, undefined> {
-    const lastTagResult = await getLastTag(cwd);
-    if (lastTagResult.isErr()) {
-        logger.verbose(`CommitHistory: Failed to get last tag: ${lastTagResult.error.message}`);
-        return;
+        yield* this.streamCommits(lastTagResult.value);
     }
 
-    yield* streamCommits(lastTagResult.value, cwd);
+    /**
+     * Parses an array of commit hashes into full Commit objects.
+     */
+    private parseCommitHashes(hashes: string[]): FireflyAsyncResult<Commit[]> {
+        return hashes.reduce<FireflyAsyncResult<Commit[]>>(
+            (acc, hash) =>
+                acc.andThen((commits) =>
+                    this.git.getCommitDetails(hash).andThen((rawDetails) => {
+                        const parsed = parseCommitFromRaw(rawDetails, hash);
+                        if (parsed.isErr()) {
+                            logger.verbose(
+                                `CommitHistoryService: Failed to parse commit ${hash}: ${parsed.error.message}`
+                            );
+                            return FireflyOkAsync(commits);
+                        }
+                        return FireflyOkAsync([...commits, parsed.value]);
+                    })
+                ),
+            FireflyOkAsync([])
+        );
+    }
 }
 
 /**
- * Parses an array of commit hashes into full Commit objects.
+ * Creates a commit history service instance.
+ * @param git - Git service for repository operations
  */
-function parseCommitHashes(hashes: string[], cwd?: string): FireflyAsyncResult<Commit[]> {
-    // Process commits sequentially to avoid overwhelming git
-    return hashes.reduce<FireflyAsyncResult<Commit[]>>(
-        (acc, hash) =>
-            acc.andThen((commits) =>
-                getCommitDetails(hash, cwd).andThen((rawDetails) => {
-                    const parsed = parseCommitFromRaw(rawDetails, hash);
-                    if (parsed.isErr()) {
-                        // Log but continue with other commits
-                        logger.verbose(`CommitHistory: Failed to parse commit ${hash}: ${parsed.error.message}`);
-                        return FireflyOkAsync(commits);
-                    }
-                    return FireflyOkAsync([...commits, parsed.value]);
-                })
-            ),
-        FireflyOkAsync([])
-    );
+export function createCommitHistoryService(git: IGitService): ICommitHistoryService {
+    return new DefaultCommitHistoryService(git);
 }
