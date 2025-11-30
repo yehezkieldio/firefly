@@ -42,6 +42,28 @@ export interface UnpushedCommitsResult {
 }
 
 /**
+ * Represents a file with its git status code.
+ */
+export interface GitFileStatus {
+    /**
+     * The file path relative to the repository root
+     */
+    readonly path: string;
+
+    /**
+     * The git status code for the index (staged area)
+     * M = modified, A = added, D = deleted, R = renamed, C = copied, ? = untracked
+     */
+    readonly indexStatus: string;
+
+    /**
+     * The git status code for the working tree
+     * M = modified, A = added, D = deleted, R = renamed, C = copied, ? = untracked
+     */
+    readonly workTreeStatus: string;
+}
+
+/**
  * Options for git commit operations.
  */
 export interface CommitOptions extends DryRunOptions {
@@ -246,4 +268,41 @@ export interface IGitService {
      * @returns The tag message, or null if the tag is lightweight or doesn't exist.
      */
     getTagMessage(name: string): FireflyAsyncResult<string | null>;
+
+    /**
+     * Gets all staged files with their status information.
+     * @returns Array of files that are staged for commit.
+     */
+    getStagedFiles(): FireflyAsyncResult<GitFileStatus[]>;
+
+    /**
+     * Gets the names of all staged files.
+     * @returns Array of file paths that are staged for commit.
+     */
+    getStagedFileNames(): FireflyAsyncResult<string[]>;
+
+    /**
+     * Gets all unstaged modified files with their status information.
+     * These are tracked files that have been modified but not staged.
+     * @returns Array of files with unstaged modifications.
+     */
+    getUnstagedFiles(): FireflyAsyncResult<GitFileStatus[]>;
+
+    /**
+     * Gets the names of all unstaged modified files.
+     * @returns Array of file paths with unstaged modifications.
+     */
+    getUnstagedFileNames(): FireflyAsyncResult<string[]>;
+
+    /**
+     * Gets all modified files (both staged and unstaged) with their status information.
+     * @returns Array of all modified files.
+     */
+    getModifiedFiles(): FireflyAsyncResult<GitFileStatus[]>;
+
+    /**
+     * Gets the names of all modified files (both staged and unstaged).
+     * @returns Array of all modified file paths.
+     */
+    getModifiedFileNames(): FireflyAsyncResult<string[]>;
 }

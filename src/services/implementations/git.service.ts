@@ -5,6 +5,7 @@ import { logger } from "#/infrastructure/logging";
 import type {
     CommitOptions,
     CommitResult,
+    GitFileStatus,
     GitStatus,
     IGitService,
     PushOptions,
@@ -284,6 +285,54 @@ export class DefaultGitService implements IGitService {
                 return message || null;
             })
             .orElse(() => FireflyOkAsync(null));
+    }
+
+    /**
+     * Parses git status porcelain output into structured file status objects.
+     */
+    private parseStatusOutput(output: string): GitFileStatus[] {
+        return output
+            .split("\n")
+            .filter((line) => line.length >= 3)
+            .map((line) => {
+                const indexStatus = line[0] ?? " ";
+                const workTreeStatus = line[1] ?? " ";
+                const path = line.slice(3).trim();
+                return { path, indexStatus, workTreeStatus };
+            });
+    }
+
+    getStagedFiles(): FireflyAsyncResult<GitFileStatus[]> {
+        return this.git(["status", "--porcelain"]).map((output) => {
+            const files = this.parseStatusOutput(output);
+            return files.filter((file) => file.indexStatus !== " " && file.indexStatus !== "?");
+        });
+    }
+
+    getStagedFileNames(): FireflyAsyncResult<string[]> {
+        return this.getStagedFiles().map((files) => files.map((file) => file.path));
+    }
+
+    getUnstagedFiles(): FireflyAsyncResult<GitFileStatus[]> {
+        return this.git(["status", "--porcelain"]).map((output) => {
+            const files = this.parseStatusOutput(output);
+            return files.filter((file) => file.workTreeStatus !== " " && file.workTreeStatus !== "?");
+        });
+    }
+
+    getUnstagedFileNames(): FireflyAsyncResult<string[]> {
+        return this.getUnstagedFiles().map((files) => files.map((file) => file.path));
+    }
+
+    getModifiedFiles(): FireflyAsyncResult<GitFileStatus[]> {
+        return this.git(["status", "--porcelain"]).map((output) => {
+            const files = this.parseStatusOutput(output);
+            return files.filter((file) => file.indexStatus !== "?" || file.workTreeStatus !== "?");
+        });
+    }
+
+    getModifiedFileNames(): FireflyAsyncResult<string[]> {
+        return this.getModifiedFiles().map((files) => files.map((file) => file.path));
     }
 }
 
