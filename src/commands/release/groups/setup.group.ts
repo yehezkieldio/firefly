@@ -1,4 +1,6 @@
 import { Result } from "neverthrow";
+import { createBumpExecutionGroup } from "#/commands/release/groups/bump-execution.group";
+import { createBumpStrategyGroup } from "#/commands/release/groups/bump-strategy.group";
 import type { ReleaseContext } from "#/commands/release/release.context";
 import { createInitializeReleaseVersion } from "#/commands/release/tasks/initialize-release-version.task";
 import { createPrepareReleaseConfigTask } from "#/commands/release/tasks/prepare-release-config.task";
@@ -38,7 +40,11 @@ function createReleaseSetupGroup(skipPreflight: boolean): FireflyResult<TaskGrou
  * @returns Array of task groups or an error
  */
 export function createReleaseGroups(skipPreflight: boolean): FireflyResult<TaskGroup<ReleaseContext>[]> {
-    const groupResults = [createReleaseSetupGroup(skipPreflight)];
+    const groupResults = [
+        createReleaseSetupGroup(skipPreflight),
+        createBumpStrategyGroup(),
+        createBumpExecutionGroup(),
+    ];
 
     return Result.combine(groupResults);
 }

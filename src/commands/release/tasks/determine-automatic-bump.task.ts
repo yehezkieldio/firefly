@@ -7,7 +7,7 @@ import { BUMP_STRATEGY_AUTO } from "#/domain/semver/semver.strategies";
 import { logger } from "#/infrastructure/logging";
 
 export function createDetermineAutomaticBump(): FireflyResult<Task> {
-    return TaskBuilder.create<ReleaseContext>("automatic-bump-determination")
+    return TaskBuilder.create<ReleaseContext>("determine-automatic-bump")
         .description("Automatically determines the version bump from commit messages")
         .dependsOn("delegate-bump-strategy")
         .skipWhenWithReason(
@@ -15,7 +15,7 @@ export function createDetermineAutomaticBump(): FireflyResult<Task> {
             "Skipped: skipBump enabled or bumpStrategy is not 'auto'"
         )
         .execute((ctx) => {
-            logger.info("automatic-bump-determination");
+            logger.info("determine-automatic-bump");
 
             return FireflyOkAsync(ctx);
         })
