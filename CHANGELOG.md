@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.3 (November 30, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`9ac502e`](https://github.com/yehezkieldio/firefly/commit/9ac502ed260f405019962d66194970e0ee02d03a) core: Add git service with repository detection capability
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`e81bca6`](https://github.com/yehezkieldio/firefly/commit/e81bca6edd0554330721bc1f3c21e5a96b532212) cli: Improve camel-to-kebab conversion for compound words
+
+### <!-- 5 -->📚 Documentation
+- [`5644b2e`](https://github.com/yehezkieldio/firefly/commit/5644b2ee9f31f9ef5b4df3e4d09a44a0cbd2865a) copilot: Add Firefly Service Module documentation
+- [`c0909c9`](https://github.com/yehezkieldio/firefly/commit/c0909c940977ecf56d85c54b534b30de4e245c6b) copilot: Add Firefly module documentation set
+
+### <!-- 7 -->🚜 Refactor
+- [`f14fa00`](https://github.com/yehezkieldio/firefly/commit/f14fa00b9a099bd271afc3ee5dd184f0b3a7be35) cli: Simplify option merging and improve verbose logging
+- [`5202be2`](https://github.com/yehezkieldio/firefly/commit/5202be27f5e01813e3d6c4d6671d511c92a2b16a) workflow-executor: Prefix all verbose logs with class name for clearer tracing
+- [`40b8696`](https://github.com/yehezkieldio/firefly/commit/40b8696183e9a90f203d984a11e531ac6ead2f6a) logging: Enhance logger with custom reporter and verbose output handling
+- [`a3e2ca8`](https://github.com/yehezkieldio/firefly/commit/a3e2ca888896b7bc7bca4175f5734a86e6467056) task-graph: Extract graph logging into reusable function and simplify release command debug handling
 ## firefly@4.0.0-alpha.2 (November 30, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
