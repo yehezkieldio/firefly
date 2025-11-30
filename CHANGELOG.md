@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.4 (November 30, 2025)
+
+### <!-- 5 -->📚 Documentation
+- [`a5ee438`](https://github.com/yehezkieldio/firefly/commit/a5ee438bc60a7fb4dd4520b10bad3bd59974d7b5) copilot-docs: Add Firefly result module documentation file
 ## firefly@4.0.0-alpha.3 (November 30, 2025)
 
 ### <!-- 3 -->🚀 New Features
