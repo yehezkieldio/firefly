@@ -5,6 +5,16 @@ import { TaskBuilder } from "#/core/task/task.builder";
 import type { Task } from "#/core/task/task.types";
 import { logger } from "#/infrastructure/logging";
 
+/**
+ * Creates the Prepare Release Config Task.
+ *
+ * This task determines and hydrates configuration settings, by inferring values from the environment.
+ *
+ * This task:
+ * 1. Detects repository owner/repo from git remote URL
+ * 2. Extracts name and scope from package.json
+ * 3. Extracts preReleaseId from package.json version
+ */
 export function createPrepareReleaseConfigTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("prepare-release-config")
         .description("Hydrate and prepare the release configuration")

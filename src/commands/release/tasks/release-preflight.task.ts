@@ -79,6 +79,9 @@ function checkCliffConfig(ctx: ReleaseContext): FireflyAsyncResult<void> {
  * This task checks the environment and prerequisites for a release.
  * It can be conditionally skipped based on the provided skip condition, though not recommended.
  *
+ * Skipping this may led to malformed releases or errors during the release process,
+ * and generally done for development purposes only or if you know what you are doing.
+ *
  * This task:
  * 1. Check if its on a git repository
  * 2. Check if on a clean working tree, no uncommitted changes
