@@ -30,6 +30,18 @@
       "options": {
         "cwd": "${workspaceFolder}"
       }
+    },
+    {
+      "label": "TypeScript: Type-Check (Workspace)",
+      "type": "shell",
+      "command": "bun run typecheck",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true
+      },
+      "problemMatcher": []
     }
   ]
 }
