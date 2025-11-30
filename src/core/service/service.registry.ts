@@ -11,12 +11,14 @@
 
 import type { BrandedServiceKey, ServiceDefinition, ServiceFactoryContext } from "#/core/service/service.types";
 import type { IFileSystemService } from "#/services/contracts/filesystem.interface";
+import type { IGitService } from "#/services/contracts/git.interface";
 import type { IPackageJsonService } from "#/services/contracts/package-json.interface";
 
 // Forward declaration for ServiceRegistry type used in factory context
 type ServiceRegistryType = {
     readonly fs: IFileSystemService;
     readonly packageJson: IPackageJsonService;
+    readonly git: IGitService;
 };
 
 /**
@@ -44,6 +46,12 @@ export const SERVICE_DEFINITIONS = {
             const fs = await getService("fs");
             const { createPackageJsonService } = await import("#/services/implementations/package-json.service");
             return createPackageJsonService(fs);
+        },
+    }),
+    git: defineService<IGitService>({
+        factory: async ({ basePath }) => {
+            const { createGitService } = await import("#/services/implementations/git.service");
+            return createGitService(basePath);
         },
     }),
 } as const satisfies Record<string, ServiceDefinition<unknown, ServiceRegistryType>>;
