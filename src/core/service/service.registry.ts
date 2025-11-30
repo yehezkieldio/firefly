@@ -97,6 +97,17 @@ export type ValidateServiceKey<K extends string> = K extends ServiceKey ? Brande
 export type DefaultServices = ResolvedServices<ServiceKey>;
 
 /**
+ * Helper to define a tuple of service keys with proper type inference.
+ * Use this to get editor autocomplete for valid service keys.
+ *
+ * Example:
+ * const RELEASE_SERVICES = defineServiceKeys("fs");
+ */
+export function defineServiceKeys<const Keys extends readonly ServiceKey[]>(...keys: Keys): Keys {
+    return keys;
+}
+
+/**
  * Validates and brands a service key at runtime.
  *
  * @param key - The string to validate as a service key
