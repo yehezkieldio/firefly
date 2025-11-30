@@ -3,21 +3,26 @@
  * Services are lazily instantiated on first access via Proxy.
  *
  * Adding a new service:
- * 1. Create the service interface.
- * 2. Create the service implementation in its own file.
+ * 1. Create the service interface in `./src/services/contracts/`
+ * 2. Create the service implementation in its own file in `./src/services/implementations/`
  * 3. Add the factory to `SERVICE_DEFINITIONS` below
  *
  */
 
-import type { BrandedServiceKey, ServiceDefinition } from "#/core/service/service.types";
+import type { BrandedServiceKey, ServiceDefinition, ServiceFactoryContext } from "#/core/service/service.types";
 import type { IFileSystemService } from "#/services/contracts/filesystem.interface";
+
+// Forward declaration for ServiceRegistry type used in factory context
+type ServiceRegistryType = {
+    readonly fs: IFileSystemService;
+};
 
 /**
  * Helper function to define a service with proper type inference.
  * @internal
  */
-function defineService<T>(definition: ServiceDefinition<T>) {
-    return definition satisfies ServiceDefinition<T>;
+function defineService<T>(definition: ServiceDefinition<T, ServiceRegistryType>) {
+    return definition satisfies ServiceDefinition<T, ServiceRegistryType>;
 }
 
 /**
@@ -26,12 +31,12 @@ function defineService<T>(definition: ServiceDefinition<T>) {
  */
 export const SERVICE_DEFINITIONS = {
     fs: defineService<IFileSystemService>({
-        factory: async (basePath) => {
+        factory: async ({ basePath }: ServiceFactoryContext<ServiceRegistryType>) => {
             const { createFileSystemService } = await import("#/services/implementations/filesystem.service");
             return createFileSystemService(basePath);
         },
     }),
-} as const satisfies Record<string, ServiceDefinition<unknown>>;
+} as const satisfies Record<string, ServiceDefinition<unknown, ServiceRegistryType>>;
 
 /**
  *  Union of all available service keys

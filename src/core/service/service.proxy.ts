@@ -1,5 +1,5 @@
 import { ResultAsync } from "neverthrow";
-import type { ServiceDefinition } from "#/core/service/service.types";
+import type { ServiceFactoryContext } from "#/core/service/service.types";
 import {
     ALL_SERVICE_KEYS,
     type ResolvedServices,
@@ -11,11 +11,68 @@ import {
 } from "#/core/service/service-registry";
 
 /**
+ * Tracks services currently being resolved to detect circular dependencies.
+ */
+type ResolutionContext = {
+    readonly basePath: string;
+    readonly resolving: Set<ServiceKey>;
+    readonly resolved: Map<ServiceKey, object>;
+};
+
+/**
+ * Creates a new resolution context for tracking service instantiation.
+ * @internal
+ */
+function createResolutionContext(basePath: string): ResolutionContext {
+    return {
+        basePath,
+        resolving: new Set(),
+        resolved: new Map(),
+    };
+}
+
+/**
+ * Resolves a service within a resolution context, with circular dependency detection.
+ * @internal
+ */
+async function resolveServiceWithContext<K extends ServiceKey>(
+    key: K,
+    context: ResolutionContext
+): Promise<ServiceRegistry[K]> {
+    // Check if already resolved in this context
+    const cached = context.resolved.get(key);
+    if (cached) {
+        return cached as ServiceRegistry[K];
+    }
+
+    // Check for circular dependency
+    if (context.resolving.has(key)) {
+        const chain = [...context.resolving, key].join(" -> ");
+        return Promise.reject(new Error(`Circular service dependency detected:  ${chain}`));
+    }
+
+    // Mark as resolving
+    context.resolving.add(key);
+
+    const definition = SERVICE_DEFINITIONS[key];
+
+    // Create the factory context with a bound getService
+    const factoryContext: ServiceFactoryContext<ServiceRegistry> = {
+        basePath: context.basePath,
+        getService: <DK extends ServiceKey>(depKey: DK) => resolveServiceWithContext(depKey, context),
+    };
+
+    const instance = (await definition.factory(factoryContext)) as ServiceRegistry[K];
+
+    // Mark as resolved and remove from resolving
+    context.resolving.delete(key);
+    context.resolved.set(key, instance as object);
+
+    return instance;
+}
+
+/**
  * Creates a lazy proxy that defers async service instantiation until first access.
- *
- * This optimization prevents unnecessary service creation when a service
- * is declared as required but never actually used in a particular code path.
- * Methods return ResultAsync values that chain the service instantiation.
  *
  * @template T - The service interface type
  * @param factory - Async function that creates the actual service instance
@@ -74,23 +131,11 @@ function createSyncProxy<T extends object>(instance: T): T {
 }
 
 /**
- * Options for service resolution.
- */
-export interface ResolveServicesOptions {
-    /**
-     * When true (default), services are wrapped in lazy proxies
-     * and only instantiated on first property access.
-     */
-    readonly lazy?: boolean;
-}
-
-/**
  * Resolves a specific set of services for use in a workflow context.
  *
  * @template TKeys - Tuple type of service keys to resolve
  * @param requiredServices - Array of service keys to resolve
  * @param basePath - Base path passed to service factories (usually the project root)
- * @param options - Resolution options (lazy loading, etc.)
  * @returns Object containing the resolved services
  *
  * @example
@@ -101,23 +146,13 @@ export interface ResolveServicesOptions {
  */
 export function resolveServices<const TKeys extends ServiceKeys>(
     requiredServices: TKeys,
-    basePath: string,
-    options: ResolveServicesOptions = {}
+    basePath: string
 ): ResolvedServices<ServiceKeysFromArray<TKeys>> {
-    const { lazy = true } = options;
-    const resolved = {} as Record<ServiceKey, unknown>;
+    const resolved: Record<string, unknown> = {};
+    const context = createResolutionContext(basePath);
 
     for (const key of requiredServices) {
-        const definition = SERVICE_DEFINITIONS[key] as ServiceDefinition<object>;
-
-        if (lazy) {
-            resolved[key] = createLazyServiceProxy(() => definition.factory(basePath));
-        } else {
-            // For non-lazy mode, we still return a lazy proxy but it will be
-            // initialized on first access. True eager loading would require
-            // this function to be async.
-            resolved[key] = createLazyServiceProxy(() => definition.factory(basePath));
-        }
+        resolved[key] = createLazyServiceProxy(() => resolveServiceWithContext(key, context));
     }
 
     return resolved as ResolvedServices<ServiceKeysFromArray<TKeys>>;
@@ -136,15 +171,14 @@ export async function resolveServicesAsync<const TKeys extends ServiceKeys>(
     requiredServices: TKeys,
     basePath: string
 ): Promise<ResolvedServices<ServiceKeysFromArray<TKeys>>> {
-    const resolved = {} as Record<ServiceKey, unknown>;
+    const resolved: Record<string, unknown> = {};
+    const context = createResolutionContext(basePath);
 
-    await Promise.all(
-        requiredServices.map(async (key) => {
-            const definition = SERVICE_DEFINITIONS[key as ServiceKey];
-            const service = await definition.factory(basePath);
-            resolved[key] = createSyncProxy(service as object);
-        })
-    );
+    // Resolve services sequentially to properly track dependencies
+    for (const key of requiredServices) {
+        const service = await resolveServiceWithContext(key, context);
+        resolved[key] = createSyncProxy(service as object);
+    }
 
     return resolved as ResolvedServices<ServiceKeysFromArray<TKeys>>;
 }
@@ -153,14 +187,10 @@ export async function resolveServicesAsync<const TKeys extends ServiceKeys>(
  * Resolves all available services.
  *
  * @param basePath - Base path passed to service factories
- * @param options - Resolution options
  * @returns Object containing all resolved services
  */
-export function resolveAllServices(
-    basePath: string,
-    options: ResolveServicesOptions = {}
-): ResolvedServices<ServiceKey> {
-    return resolveServices(ALL_SERVICE_KEYS, basePath, options);
+export function resolveAllServices(basePath: string): ResolvedServices<ServiceKey> {
+    return resolveServices(ALL_SERVICE_KEYS, basePath);
 }
 
 /**
@@ -169,16 +199,11 @@ export function resolveAllServices(
  * @template K - The service key type
  * @param key - The service key to resolve
  * @param basePath - Base path passed to the service factory
- * @param options - Resolution options
  * @returns The resolved service instance
  */
-export function resolveService<K extends ServiceKey>(
-    key: K,
-    basePath: string,
-    _options: ResolveServicesOptions = {}
-): ServiceRegistry[K] {
-    const definition = SERVICE_DEFINITIONS[key] as ServiceDefinition<ServiceRegistry[K]>;
-    return createLazyServiceProxy(() => definition.factory(basePath)) as ServiceRegistry[K];
+export function resolveService<K extends ServiceKey>(key: K, basePath: string): ServiceRegistry[K] {
+    const context = createResolutionContext(basePath);
+    return createLazyServiceProxy(() => resolveServiceWithContext(key, context)) as ServiceRegistry[K];
 }
 
 /**
@@ -190,7 +215,7 @@ export function resolveService<K extends ServiceKey>(
  * @returns Promise resolving to the service instance
  */
 export async function resolveServiceAsync<K extends ServiceKey>(key: K, basePath: string): Promise<ServiceRegistry[K]> {
-    const definition = SERVICE_DEFINITIONS[key] as ServiceDefinition<ServiceRegistry[K]>;
-    const service = await definition.factory(basePath);
+    const context = createResolutionContext(basePath);
+    const service = await resolveServiceWithContext(key, context);
     return createSyncProxy(service as object) as ServiceRegistry[K];
 }
