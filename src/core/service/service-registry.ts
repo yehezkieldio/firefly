@@ -10,6 +10,7 @@
  */
 
 import type { BrandedServiceKey, ServiceDefinition } from "#/core/service/service.types";
+import type { IFileSystemService } from "#/services/contracts/filesystem.interface";
 
 /**
  * Helper function to define a service with proper type inference.
@@ -23,7 +24,14 @@ function defineService<T>(definition: ServiceDefinition<T>) {
  * Registry of all available services and their factories.
  * Each service is lazily loaded via dynamic `import()`.
  */
-export const SERVICE_DEFINITIONS = {} as const satisfies Record<string, ServiceDefinition<unknown>>;
+export const SERVICE_DEFINITIONS = {
+    fs: defineService<IFileSystemService>({
+        factory: async (basePath) => {
+            const { createFileSystemService } = await import("#/services/implementations/filesystem.service");
+            return createFileSystemService(basePath);
+        },
+    }),
+} as const satisfies Record<string, ServiceDefinition<unknown>>;
 
 /**
  *  Union of all available service keys
