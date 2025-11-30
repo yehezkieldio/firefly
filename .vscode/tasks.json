@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Biome: Check, Format, and Fix Unsafe (Current File)",
+      "type": "shell",
+      "command": "bunx biome check --write --unsafe ${file}",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${fileDirname}"
+      }
+    }
+  ]
+}
