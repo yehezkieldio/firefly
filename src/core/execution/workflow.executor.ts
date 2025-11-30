@@ -176,7 +176,7 @@ export class WorkflowExecutor {
 
         logger.verbose("WorkflowExecutor: Execution completed successfully");
         logger.verbose(
-            `  Executed: ${executedTaskIds.length}, Skipped: ${skippedTaskIds.length}, Time: ${result.executionTimeMs}ms`
+            `WorkflowExecutor: Executed: ${executedTaskIds.length}, Skipped: ${skippedTaskIds.length}, Time: ${result.executionTimeMs}ms`
         );
 
         return FireflyOkAsync(result);
@@ -282,12 +282,12 @@ export class WorkflowExecutor {
         if (!skipResult.value.shouldSkip) return FireflyOk({ shouldSkip: false, newRemainingTasks: remainingTasks });
 
         const reason = skipResult.value.reason || "condition not met";
-        logger.verbose(`Task '${currentTask.meta.id}': Skipped - ${reason}`);
+        logger.verbose(`WorkflowExecutor: Task '${currentTask.meta.id}': Skipped - ${reason}`);
         skippedTaskIds.push(currentTask.meta.id);
 
         if (skipResult.value.skipToTasks && skipResult.value.skipToTasks.length > 0) {
             logger.verbose(
-                `Task '${currentTask.meta.id}': Skipping through to ${skipResult.value.skipToTasks.join(", ")}`
+                `WorkflowExecutor: Task '${currentTask.meta.id}': Skipping through to ${skipResult.value.skipToTasks.join(", ")}`
             );
             const skipToIndex = remainingTasks.findIndex((t) => skipResult.value.skipToTasks?.includes(t.meta.id));
             if (skipToIndex >= 0) {
@@ -305,12 +305,12 @@ export class WorkflowExecutor {
         context: ExecutorContext,
         executionLists: { executedTaskIds: string[]; skippedTaskIds: string[] }
     ): FireflyAsyncResult<void> {
-        logger.verbose(`Task '${currentTask.meta.id}': Executing...`);
+        logger.verbose(`WorkflowExecutor: Task '${currentTask.meta.id}': Executing...`);
 
         return currentTask
             .execute(context)
             .andThen((updatedContext) => {
-                logger.verbose(`Task '${currentTask.meta.id}': Completed`);
+                logger.verbose(`WorkflowExecutor: Task '${currentTask.meta.id}': Completed`);
                 executionLists.executedTaskIds.push(currentTask.meta.id);
                 this.executedTasks.push(currentTask);
                 return this.executeTasksSequentially(
@@ -330,7 +330,7 @@ export class WorkflowExecutor {
         // Use toReversed() for non-mutating reverse - cleaner and more expressive
         const tasksToRollback = this.executedTasks.toReversed();
 
-        logger.verbose(`Rolling back ${tasksToRollback.length} tasks in reverse order`);
+        logger.verbose(`WorkflowExecutor: Rolling back ${tasksToRollback.length} tasks in reverse order`);
 
         return this.rollbackTasks(tasksToRollback, context).andThen((errors) => {
             if (errors.length > 0) {
@@ -341,7 +341,7 @@ export class WorkflowExecutor {
                 return FireflyOkAsync(false);
             }
 
-            logger.verbose("Rollback completed successfully");
+            logger.verbose("WorkflowExecutor: Rollback completed successfully");
             return FireflyOkAsync(true);
         });
     }
@@ -363,16 +363,16 @@ export class WorkflowExecutor {
 
         // Skip tasks without undo
         if (!currentTask.undo) {
-            logger.verbose(`Task '${currentTask.meta.id}': No undo available, skipping rollback`);
+            logger.verbose(`WorkflowExecutor: Task '${currentTask.meta.id}': No undo available, skipping rollback`);
             return this.rollbackTasks(remainingTasks, context);
         }
 
-        logger.verbose(`Task '${currentTask.meta.id}': Rolling back...`);
+        logger.verbose(`WorkflowExecutor: Task '${currentTask.meta.id}': Rolling back...`);
 
         return currentTask
             .undo(context)
             .andThen(() => {
-                logger.verbose(`Task '${currentTask.meta.id}': Rollback completed`);
+                logger.verbose(`WorkflowExecutor: Task '${currentTask.meta.id}': Rollback completed`);
                 return this.rollbackTasks(remainingTasks, context);
             })
             .orElse((error) => {
