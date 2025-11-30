@@ -17,7 +17,7 @@ import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.typ
  * Wraps a Promise into a FireflyAsyncResult, converting any errors into FireflyError.
  *
  * @param promise - The Promise to wrap.
- * @returns A FireflyAsyncResult representing the outcome of the Promise.
+ * @returns FireflyAsyncResult representing the outcome of the Promise.
  */
 export function wrapPromise<T>(promise: Promise<T>): FireflyAsyncResult<T> {
     return ResultAsync.fromPromise(promise, (e) => createFireflyError(toFireflyError(e)));

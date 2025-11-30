@@ -45,7 +45,7 @@ type SchemaInput<TSchema extends z.ZodType<unknown>> =
  * with it. This effectively merges validation rules across schemas.
  *
  * @param schemas - A non-empty list of Zod schemas to intersect.
- * @returns A Zod schema that is the intersection of the provided schemas.
+ * @returns Zod schema that is the intersection of the provided schemas.
  */
 export function composeEffects<T extends NonEmptyArray<z.ZodType<unknown>>>(...schemas: T) {
     return schemas.slice(1).reduce((acc, s) => z.intersection(acc, s), schemas[0]);
@@ -57,7 +57,7 @@ export function composeEffects<T extends NonEmptyArray<z.ZodType<unknown>>>(...s
  *
  * @param base - The root Zod object schema to extend.
  * @param shapes - Raw Zod shapes (plain objects of Zod schema definitions) to merge into the base.
- * @returns A new Zod object schema that extends `base` with merged `shapes`.
+ * @returns New Zod object schema that extends `base` with merged `shapes`.
  */
 export function composeShape<TBase extends z.ZodObject<z.ZodRawShape>>(
     base: TBase,
@@ -76,7 +76,7 @@ export function composeShape<TBase extends z.ZodObject<z.ZodRawShape>>(
  *
  * @internal
  * @param input - Either a Zod schema or a descriptor describing how to compose one.
- * @returns A concrete `z.ZodType` instance resulting from the input.
+ * @returns Concrete `z.ZodType` instance resulting from the input.
  */
 function toSchema<TSchema extends z.ZodType<unknown>>(input: SchemaInput<TSchema>): z.ZodType<unknown> {
     // Type guard: check if it's a Zod schema (has _def property)

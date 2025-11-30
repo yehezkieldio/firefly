@@ -9,7 +9,7 @@ import {
  * Creates a frozen FireflyError instance with an attached stack trace.
  *
  * @param error - The FireflyError object to enhance.
- * @returns A frozen FireflyError with an optional stack trace.
+ * @returns Frozen FireflyError with an optional stack trace.
  */
 export function createFireflyError(error: FireflyError): FireflyError & { stack?: string } {
     const err = new Error(error.message, { cause: error.cause });
@@ -25,7 +25,7 @@ export function createFireflyError(error: FireflyError): FireflyError & { stack?
  * @param err - The unknown error to convert.
  * @param code - The FireflyErrorCode to assign.
  * @param source - The source of the error.
- * @returns A FireflyError instance.
+ * @returns FireflyError instance.
  */
 export function toFireflyError(
     err: unknown,
