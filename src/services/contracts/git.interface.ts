@@ -1,6 +1,138 @@
 import type { FireflyAsyncResult } from "#/core/result/result.types";
 
 /**
+ * Represents the current status of a git working directory.
+ */
+export interface GitStatus {
+    /**
+     * Whether there are changes staged for commit
+     */
+    readonly hasStaged: boolean;
+
+    /**
+     * Whether there are unstaged modifications to tracked files
+     */
+    readonly hasUnstaged: boolean;
+
+    /**
+     * Whether there are untracked files in the working directory
+     */
+    readonly hasUntracked: boolean;
+
+    /**
+     * True if the working directory has no changes (staged, unstaged, or untracked)
+     */
+    readonly isClean: boolean;
+}
+
+/**
+ * Result of checking for unpushed commits.
+ */
+export interface UnpushedCommitsResult {
+    /**
+     * Whether there are commits not yet pushed to the remote
+     */
+    readonly hasUnpushed: boolean;
+
+    /**
+     * Number of unpushed commits
+     */
+    readonly count: number;
+}
+
+/**
+ * Options for git commit operations.
+ */
+export interface CommitOptions {
+    /**
+     * Whether to GPG sign the commit
+     */
+    readonly sign?: boolean;
+
+    /**
+     * Allow creating a commit with no changes
+     */
+    readonly allowEmpty?: boolean;
+
+    /**
+     * Specific file paths to include in the commit
+     */
+    readonly paths?: string[];
+
+    /**
+     * Skip pre-commit and commit-msg hooks
+     */
+    readonly noVerify?: boolean;
+
+    /**
+     * Simulate the operation without making changes
+     */
+    readonly dryRun?: boolean;
+}
+
+/**
+ * Result of a successful commit operation.
+ */
+export interface CommitResult {
+    /**
+     * Short SHA hash of the created commit
+     */
+    readonly sha: string;
+}
+
+/**
+ * Options for git tag operations.
+ */
+export interface TagOptions {
+    /**
+     * Annotation message for the tag (creates annotated tag)
+     *
+     */
+    readonly message?: string;
+
+    /**
+     *  Whether to GPG sign the tag
+     */
+    readonly sign?: boolean;
+
+    /**
+     * Simulate the operation without making changes
+     */
+    readonly dryRun?: boolean;
+}
+
+/**
+ * Options for git push operations.
+ */
+export interface PushOptions {
+    /**
+     * Remote name to push to.
+     * @default "origin"
+     */
+    readonly remote?: string;
+
+    /**
+     * Specific branch to push
+     */
+    readonly branch?: string;
+
+    /**
+     *  Push all tags
+     */
+    readonly tags?: boolean;
+
+    /**
+     *  Push commits and their associated tags
+     */
+    readonly followTags?: boolean;
+
+    /**
+     * Simulate the operation without making changes
+     */
+    readonly dryRun?: boolean;
+}
+
+/**
  * Service for git operations.
  */
 export interface IGitService {
@@ -10,10 +142,40 @@ export interface IGitService {
     isRepository(): FireflyAsyncResult<boolean>;
 
     /**
+     * Gets the name of the current branch.
+     */
+    currentBranch(): FireflyAsyncResult<string>;
+
+    /**
+     * Gets the detailed status of the working directory.
+     */
+    status(): FireflyAsyncResult<GitStatus>;
+
+    /**
+     * Checks if the working directory is clean (no changes).
+     */
+    isClean(): FireflyAsyncResult<boolean>;
+
+    /**
+     * Checks for commits that haven't been pushed to the remote.
+     */
+    unpushedCommits(): FireflyAsyncResult<UnpushedCommitsResult>;
+
+    /**
+     * Gets the absolute path to the repository root.
+     */
+    repositoryRoot(): FireflyAsyncResult<string>;
+
+    /**
      * Gets the most recent tag in the repository.
      * @returns The tag name, or null if no tags exist.
      */
     getLastTag(): FireflyAsyncResult<string | null>;
+
+    /**
+     * Lists all tags in the repository.
+     */
+    listTags(): FireflyAsyncResult<string[]>;
 
     /**
      * Gets all commit hashes since a given reference.
@@ -33,4 +195,42 @@ export interface IGitService {
      * Checks if the repository has any tags.
      */
     hasAnyTags(): FireflyAsyncResult<boolean>;
+
+    /**
+     * Gets the URL of a remote.
+     * @param remote - Remote name (defaults to "origin")
+     */
+    getRemoteUrl(remote?: string): FireflyAsyncResult<string>;
+
+    /**
+     * Checks if a branch exists in the repository.
+     * @param branch - Branch name to check
+     */
+    branchExists(branch: string): FireflyAsyncResult<boolean>;
+
+    /**
+     * Creates a new commit with the given message.
+     * @param message - Commit message
+     * @param options - Commit options including signing and dry-run
+     */
+    commit(message: string, options?: CommitOptions): FireflyAsyncResult<CommitResult>;
+
+    /**
+     * Creates a new tag.
+     * @param name - Tag name (e.g., "v1.0.0")
+     * @param options - Tag options including message and dry-run
+     */
+    tag(name: string, options?: TagOptions): FireflyAsyncResult<void>;
+
+    /**
+     * Pushes commits and/or tags to the remote.
+     * @param options - Push options including remote, branch, and dry-run
+     */
+    push(options?: PushOptions): FireflyAsyncResult<void>;
+
+    /**
+     * Stages files for the next commit.
+     * @param paths - File path(s) to stage
+     */
+    add(paths: string | string[]): FireflyAsyncResult<void>;
 }
