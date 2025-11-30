@@ -235,9 +235,9 @@ export class WorkflowOrchestrator {
             if (orderedTasksResult.isErr()) return FireflyErrAsync(orderedTasksResult.error);
 
             const orderedTasks = orderedTasksResult.value;
-            logger.verbose(
-                `WorkflowOrchestrator: Task execution order: ${orderedTasks.map((t) => t.meta.id).join(" -> ")}`
-            );
+            // logger.verbose(
+            //     `WorkflowOrchestrator: Task execution order: ${orderedTasks.map((t) => t.meta.id).join(" -> ")}`
+            // );
 
             return FireflyOkAsync(orderedTasks);
         });
