@@ -133,6 +133,27 @@ const MUTATING_SUBCOMMANDS = [
  */
 const STREAMING_SUBCOMMANDS = ["list", "view", "status", "diff", "log", "search"] as const;
 
+/**
+ * Flags whose values contain sensitive information that should be redacted in logs.
+ */
+const SENSITIVE_FLAGS = new Set<string>([
+    "--token",
+    "-t",
+    "--password",
+    "-p",
+    "--secret",
+    "--body",
+    "-b",
+    "--notes",
+    "-n",
+    "--message",
+    "-m",
+    "--key",
+    "--value",
+    "--header",
+    "-H",
+] as const);
+
 // Validates that GitHub CLI arguments are non-empty strings
 const ghArgsSchema = z.array(z.string().min(1));
 
@@ -181,24 +202,69 @@ function shouldUseStreaming(args: string[]): boolean {
 }
 
 /**
+ * Redacts sensitive values from command arguments for secure logging.
+ * Replaces values following sensitive flags with [REDACTED].
+ *
+ * @param args - GitHub CLI command arguments
+ * @returns Arguments with sensitive values replaced
+ */
+function redactSensitiveArgs(args: string[]): string[] {
+    const redactedArgs: string[] = [];
+    let redactNext = false;
+
+    for (const arg of args) {
+        if (redactNext) {
+            redactedArgs.push("[REDACTED]");
+            redactNext = false;
+            continue;
+        }
+
+        // Check for --flag=value format
+        const equalIndex = arg.indexOf("=");
+        if (equalIndex !== -1) {
+            const flag = arg.slice(0, equalIndex);
+            if (SENSITIVE_FLAGS.has(flag)) {
+                redactedArgs.push(`${flag}=[REDACTED]`);
+                continue;
+            }
+        }
+
+        // Check if this flag's next argument should be redacted
+        if (SENSITIVE_FLAGS.has(arg)) {
+            redactedArgs.push(arg);
+            redactNext = true;
+            continue;
+        }
+
+        redactedArgs.push(arg);
+    }
+
+    return redactedArgs;
+}
+
+/**
  * Creates a sanitized log representation of command arguments.
  * Truncates release notes content to avoid log pollution.
  *
  * @param args - GitHub CLI command arguments
+ * @param redacted - When true, sensitive values are masked (unless FIREFLY_DEBUG_DONT_REDACT is set)
  * @returns Sanitized argument string for logging
  */
-function createLogArgs(args: string[]): string {
+function createLogArgs(args: string[], redacted = false): string {
     const dontTruncateNotes = Boolean(process.env.FIREFLY_DEBUG_DONT_TRUNCATE_RELEASE_NOTES);
+    const skipRedaction = Boolean(process.env.FIREFLY_DEBUG_DONT_REDACT_GITHUB_CLI_ARGS);
 
-    if (args[0] === "release" && args[1] === "create" && !dontTruncateNotes) {
-        const notesIdx = args.indexOf("--notes");
+    const processedArgs = redacted && !skipRedaction ? redactSensitiveArgs(args) : args;
+
+    if (processedArgs[0] === "release" && processedArgs[1] === "create" && !dontTruncateNotes) {
+        const notesIdx = processedArgs.indexOf("--notes");
         if (notesIdx !== -1) {
-            const trailingFlags = args.slice(notesIdx + 2).filter((a) => a.startsWith("--"));
-            return [...args.slice(0, notesIdx + 1), "NOTES_TRUNCATED", ...trailingFlags].join(" ");
+            const trailingFlags = processedArgs.slice(notesIdx + 2).filter((a) => a.startsWith("--"));
+            return [...processedArgs.slice(0, notesIdx + 1), "NOTES_TRUNCATED", ...trailingFlags].join(" ");
         }
     }
 
-    return args.join(" ");
+    return processedArgs.join(" ");
 }
 
 /**
@@ -343,7 +409,7 @@ export function executeGhCommand(args: string[], options: GhCommandOptions = {})
     }
 
     const validatedArgs = parseResult.data;
-    const logArgs = createLogArgs(validatedArgs);
+    const logArgs = createLogArgs(validatedArgs, resolvedOptions.redacted);
     const commandStr = `gh ${logArgs}`;
 
     const useStreaming = shouldUseStreaming(validatedArgs) && !resolvedOptions.forceBuffered;
