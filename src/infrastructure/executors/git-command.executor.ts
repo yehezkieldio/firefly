@@ -4,6 +4,7 @@ import { z } from "zod";
 import { failedError } from "#/core/result/error.factories";
 import { FireflyOkAsync, failedErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult } from "#/core/result/result.types";
+import { withDryRun } from "#/infrastructure/dry-run";
 import { logger } from "#/infrastructure/logging";
 
 /**
@@ -312,10 +313,7 @@ export function executeGitCommand(args: string[], options: GitCommandOptions = {
 
     if (resolvedOptions.dryRun && hasSideEffects(validatedArgs)) {
         const dryRunMessage = `Dry run: Skipping ${commandStr}`;
-        if (resolvedOptions.verbose) {
-            logger.verbose(dryRunMessage);
-        }
-        return FireflyOkAsync(dryRunMessage);
+        return withDryRun(resolvedOptions, dryRunMessage, () => FireflyOkAsync(dryRunMessage), dryRunMessage);
     }
 
     const spawnOptions: SpawnOptions = {

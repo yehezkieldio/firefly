@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createFireflyError } from "#/core/result/error.factories";
 import { FireflyErrAsync, FireflyOkAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult } from "#/core/result/result.types";
+import { withDryRun } from "#/infrastructure/dry-run";
 import { logger } from "#/infrastructure/logging";
 
 /**
@@ -421,10 +422,7 @@ export function executeGhCommand(args: string[], options: GhCommandOptions = {})
 
     if (resolvedOptions.dryRun && hasSideEffects(validatedArgs)) {
         const dryRunMessage = `Dry run: Skipping ${commandStr}`;
-        if (resolvedOptions.verbose) {
-            logger.verbose(dryRunMessage);
-        }
-        return FireflyOkAsync(dryRunMessage);
+        return withDryRun(resolvedOptions, dryRunMessage, () => FireflyOkAsync(dryRunMessage), dryRunMessage);
     }
 
     const spawnOptions: SpawnOptions = {
