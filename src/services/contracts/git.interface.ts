@@ -19,6 +19,11 @@ export interface GitStatus extends DryRunOptions {
      * Whether there are untracked files in the working directory
      */
     readonly hasUntracked: boolean;
+
+    /**
+     * Whether the working directory is clean (no changes)
+     */
+    readonly isClean: boolean;
 }
 
 /**
@@ -214,4 +219,31 @@ export interface IGitService {
      * @param paths - File path(s) to stage
      */
     add(paths: string | string[]): FireflyAsyncResult<void>;
+
+    /**
+     * Deletes a local tag.
+     * @param name - Tag name to delete
+     * @param options - Dry-run options
+     */
+    deleteLocalTag(name: string, options?: DryRunOptions): FireflyAsyncResult<void>;
+
+    /**
+     * Deletes a remote tag by pushing a delete reference.
+     * @param name - Tag name to delete
+     * @param options - Push options including remote and dry-run
+     */
+    deleteRemoteTag(name: string, options?: PushOptions): FireflyAsyncResult<void>;
+
+    /**
+     * Checks if a tag exists in the repository.
+     * @param name - Tag name to check
+     */
+    tagExists(name: string): FireflyAsyncResult<boolean>;
+
+    /**
+     * Gets the message of an annotated tag.
+     * @param name - Tag name
+     * @returns The tag message, or null if the tag is lightweight or doesn't exist.
+     */
+    getTagMessage(name: string): FireflyAsyncResult<string | null>;
 }

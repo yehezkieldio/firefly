@@ -253,6 +253,38 @@ export class DefaultGitService implements IGitService {
         const pathArray = Array.isArray(paths) ? paths : [paths];
         return this.git(["add", ...pathArray]).andThen(() => FireflyOkAsync(undefined));
     }
+
+    deleteLocalTag(name: string, options?: Omit<TagOptions, "message" | "sign">): FireflyAsyncResult<void> {
+        if (options?.dryRun) {
+            logger.verbose(`GitService: Dry run, skipping local tag deletion: ${name}`);
+            return FireflyOkAsync(undefined);
+        }
+
+        return this.git(["tag", "-d", name]).andThen(() => FireflyOkAsync(undefined));
+    }
+
+    deleteRemoteTag(name: string, options?: PushOptions): FireflyAsyncResult<void> {
+        if (options?.dryRun) {
+            logger.verbose(`GitService: Dry run, skipping remote tag deletion: ${name}`);
+            return FireflyOkAsync(undefined);
+        }
+
+        const remote = options?.remote ?? "origin";
+        return this.git(["push", remote, `:refs/tags/${name}`]).andThen(() => FireflyOkAsync(undefined));
+    }
+
+    tagExists(name: string): FireflyAsyncResult<boolean> {
+        return this.git(["tag", "--list", name]).map((output) => output.trim() === name);
+    }
+
+    getTagMessage(name: string): FireflyAsyncResult<string | null> {
+        return this.git(["tag", "-l", "--format=%(contents)", name])
+            .map((output) => {
+                const message = output.trim();
+                return message || null;
+            })
+            .orElse(() => FireflyOkAsync(null));
+    }
 }
 
 /**
