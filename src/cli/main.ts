@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 if (!process.versions.bun) {
     console.error(
         "Firefly is designed to run with Bun. Please install Bun if you haven't already and run the command again."
