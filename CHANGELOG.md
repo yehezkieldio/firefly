@@ -6,6 +6,54 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.2 (November 30, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`ca47864`](https://github.com/yehezkieldio/firefly/commit/ca4786403bf3235b51e04560adab97ff9b0460f1) Cleanup
+- [`ac99b96`](https://github.com/yehezkieldio/firefly/commit/ac99b965d016dde48321a907c73933fbdf1640fe) vscode: Add biome format and fix task configuration
+- [`40e6469`](https://github.com/yehezkieldio/firefly/commit/40e646962b7a17854989fd79cf04fce3187e8faa) vscode: Add Biome workspace task for check format and fix
+- [`7588512`](https://github.com/yehezkieldio/firefly/commit/7588512b9d350cbe70c70a619ab1a06c203ad938) config: Enable incremental compilation in tsconfig
+- [`d07b581`](https://github.com/yehezkieldio/firefly/commit/d07b581131d644a63ba0440ae2bd16357bc12bf6) vscode: Add TypeScript type-check workspace task
+- [`c58996f`](https://github.com/yehezkieldio/firefly/commit/c58996f867ca3d0d5c76c575dc13c21d57bf7d19) Adjust file names
+- [`44a508e`](https://github.com/yehezkieldio/firefly/commit/44a508e77e23e92ff772704b58d29a5ca20519a6) cli: Add bun shebang for direct script execution
+
+### <!-- 3 -->🚀 New Features
+- [`816e094`](https://github.com/yehezkieldio/firefly/commit/816e094f6eeee37c6b401a8de5ab8169a21bf6e4) core: Add error handling utilities and schemas
+- [`c7aaf26`](https://github.com/yehezkieldio/firefly/commit/c7aaf263616fa78c7e2edcb90a9a007d5d17ee0f) logging: Add consola-based logger for structured output
+- [`5e9791c`](https://github.com/yehezkieldio/firefly/commit/5e9791cb6cfdb4a06cf43cee674faa9b1c3084f6) executors: Add Git and GitHub CLI command executors with error handling and dry-run support
+- [`b34a3f5`](https://github.com/yehezkieldio/firefly/commit/b34a3f5dcdd24a0c8b6cbc8754653e4d33e0d0b2) gh-command-executor: Add sensitive arg redaction for secure logging
+- [`746fa7d`](https://github.com/yehezkieldio/firefly/commit/746fa7d18defef79c8ec22a0db8cff0223e9fbbf) infrastructure: Add dry-run utility and integrate into command executors for consistent simulation handling
+- [`6a85c25`](https://github.com/yehezkieldio/firefly/commit/6a85c255aad0c90d4e25f37ad99aaeae13ecb9a5) core/service: Add service registry and type definitions for dependency injection system
+- [`e4e09ce`](https://github.com/yehezkieldio/firefly/commit/e4e09ce23db8b8c8fc099315ace82797f546697b) filesystem: Add filesystem service interface and implementation
+- [`25d8360`](https://github.com/yehezkieldio/firefly/commit/25d8360f3c0b639b832b3644bb95aed7ebd39cfa) core/service: Add lazy and eager service resolution with filesystem support
+- [`ca2f5fb`](https://github.com/yehezkieldio/firefly/commit/ca2f5fb32c17005aad555bb0b6e3c7d7b16d75fc) core/service: Add dependency-aware service resolution with circular detection
+- [`7c942b4`](https://github.com/yehezkieldio/firefly/commit/7c942b48d237d3a644f5d05b4b3d7dc6e64b8c7b) core/service: Add package-json service for reading and updating version
+- [`0427429`](https://github.com/yehezkieldio/firefly/commit/04274297d9aada854d8107df60c5a2820e73cb24) core/context: Add immutable workflow context implementation
+- [`a8e256a`](https://github.com/yehezkieldio/firefly/commit/a8e256a5c3f1bad5f9b37ff0fc50a5b4b0de06d6) context: Add fluent builder for workflow context creation
+- [`7e6876c`](https://github.com/yehezkieldio/firefly/commit/7e6876c5d48fed64ab37fa1650301b8fa59aa34e) core/task: Add task system
+- [`2897cea`](https://github.com/yehezkieldio/firefly/commit/2897cea6b14ddc68c42bdbd453ed2f6a809203c0) task: Add helpers to collect and combine task groups
+- [`f3fd052`](https://github.com/yehezkieldio/firefly/commit/f3fd052d4b5c1d64a98233663b191a4931eeafa8) workflow: Add workflow executor for sequential task execution with rollback and error handling
+- [`a6f91d6`](https://github.com/yehezkieldio/firefly/commit/a6f91d62dc63acad0646b39677023b5680d9210a) core: Add helper to wrap error messages with context prefix
+- [`d1758e1`](https://github.com/yehezkieldio/firefly/commit/d1758e1ff2987d332987f7d3da43b7a5915998bc) core/command: Add typed command factory and types for workflow commands
+- [`3be08e8`](https://github.com/yehezkieldio/firefly/commit/3be08e8ae2dd5bd56fe4ca167e70546f2585b45f) execution: Add workflow orchestrator to manage command lifecycle execution
+- [`c647a9e`](https://github.com/yehezkieldio/firefly/commit/c647a9ed8d15a928dbbd56049eba3ca8d7fea965) release: Add initial release command workflow with setup tasks and config validation
+- [`60588b9`](https://github.com/yehezkieldio/firefly/commit/60588b99f9ddb626bcccc50bcb662d553256a5a8) semver: Add version bump and strategy schemas for release handling
+- [`7ffa0e1`](https://github.com/yehezkieldio/firefly/commit/7ffa0e19bc3296ca59578bf97c7871c83f500055) service: Add defineServiceKeys helper for typed service key tuples
+- [`0ae59ac`](https://github.com/yehezkieldio/firefly/commit/0ae59ac2ca1d908da399ece6a07bc5e5f04d63f3) registry: Add command registry for managing workflow commands
+- [`65176ab`](https://github.com/yehezkieldio/firefly/commit/65176ab69e20a3eafa6ab3cfe219066772a5dad0) cli: Implement firefly cli core with config loader and options system
+- [`3e204b9`](https://github.com/yehezkieldio/firefly/commit/3e204b9f507cee5818f378ef2694ea17621b8f1f) config: Add type-safe Firefly config helper and update build entry path
+- [`9791fa7`](https://github.com/yehezkieldio/firefly/commit/9791fa7d04f1ba4d101099e7560ddc893867bc87) scripts: Add script to generate json schema from config schema
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`6f3a7bc`](https://github.com/yehezkieldio/firefly/commit/6f3a7bcf458b559507d3ea1a0d84ce168279eeb7) gh-command.executor: Trim env vars before boolean conversion to avoid malformed values
+
+### <!-- 5 -->📚 Documentation
+- [`e21ff5b`](https://github.com/yehezkieldio/firefly/commit/e21ff5bcb711a7a4981eb4e0f611972867d16844) copilot-docs: Add Firefly task module documentation
+- [`5db3975`](https://github.com/yehezkieldio/firefly/commit/5db39755f8c478acd79902a958a08ad76fb8d853) config: Clean up comments in configuration schema for clarity
+
+### <!-- 7 -->🚜 Refactor
+- [`b78df8e`](https://github.com/yehezkieldio/firefly/commit/b78df8efb22bef003f8bc480154f588db7447e0b) context: Centralize WorkflowData and DefaultServices types for reuse across modules
+- [`a6f3048`](https://github.com/yehezkieldio/firefly/commit/a6f304868e828841224ec8d64cc167d6db01cc39) core: Centralize task sequencing and simplify skip handling
 ## firefly@4.0.0-alpha.1 (November 29, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
