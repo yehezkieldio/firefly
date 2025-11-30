@@ -85,7 +85,9 @@ export const ALL_SERVICE_KEYS = Object.keys(SERVICE_DEFINITIONS) as ServiceKey[]
  * Complete registry mapping service keys to their resolved types.
  */
 export type ServiceRegistry = {
-    readonly [K in ServiceKey]: (typeof SERVICE_DEFINITIONS)[K] extends ServiceDefinition<infer T> ? T : never;
+    readonly [K in ServiceKey]: (typeof SERVICE_DEFINITIONS)[K] extends ServiceDefinition<infer T, infer _TRegistry>
+        ? T
+        : never;
 };
 
 /**
