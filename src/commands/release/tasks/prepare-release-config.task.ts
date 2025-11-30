@@ -5,12 +5,11 @@ import { TaskBuilder } from "#/core/task/task.builder";
 import type { Task } from "#/core/task/task.types";
 import { logger } from "#/infrastructure/logging";
 
-export function createReleasePreflightTask(skipCondition: () => boolean): FireflyResult<Task> {
-    return TaskBuilder.create<ReleaseContext>("release-preflight")
-        .description("Validate environment and prerequisites for a release")
-        .skipWhen(skipCondition)
+export function createPrepareReleaseConfigTask(): FireflyResult<Task> {
+    return TaskBuilder.create<ReleaseContext>("prepare-release-config")
+        .description("Hydrate and prepare the release configuration")
         .execute((ctx) => {
-            logger.info("release-preflight");
+            logger.info("prepare-release-config");
 
             return FireflyOkAsync(ctx);
         })

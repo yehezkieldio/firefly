@@ -1,5 +1,7 @@
 import { Result } from "neverthrow";
 import type { ReleaseContext } from "#/commands/release/release.context";
+import { createInitializeReleaseVersion } from "#/commands/release/tasks/initialize-release-version.task";
+import { createPrepareReleaseConfigTask } from "#/commands/release/tasks/prepare-release-config.task";
 import { createReleasePreflightTask } from "#/commands/release/tasks/release-preflight.task";
 import type { FireflyResult } from "#/core/result/result.types";
 import { buildTaskGroup } from "#/core/task/task-group.builder";
@@ -14,7 +16,8 @@ import type { TaskGroup } from "#/core/task/task-group.types";
 function createReleaseSetupGroup(skipPreflight: boolean): FireflyResult<TaskGroup<ReleaseContext>> {
     const taskResults = [
         createReleasePreflightTask(() => skipPreflight),
-        // TODO: Implement config preparation and version initialization tasks
+        createPrepareReleaseConfigTask(),
+        createInitializeReleaseVersion(),
     ];
 
     const combined = Result.combine(taskResults);
