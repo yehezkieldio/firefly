@@ -15,6 +15,21 @@
       "options": {
         "cwd": "${fileDirname}"
       }
+    },
+    {
+      "label": "Biome: Check, Format, and Fix Unsafe (Workspace)",
+      "type": "shell",
+      "command": "bunx biome check --write --unsafe .",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true
+      },
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     }
   ]
 }
