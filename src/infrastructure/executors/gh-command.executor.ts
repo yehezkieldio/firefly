@@ -252,8 +252,8 @@ function redactSensitiveArgs(args: string[]): string[] {
  * @returns Sanitized argument string for logging
  */
 function createLogArgs(args: string[], redacted = false): string {
-    const dontTruncateNotes = Boolean(process.env.FIREFLY_DEBUG_DONT_TRUNCATE_RELEASE_NOTES);
-    const skipRedaction = Boolean(process.env.FIREFLY_DEBUG_DONT_REDACT_GITHUB_CLI_ARGS);
+    const dontTruncateNotes = Boolean(process.env.FIREFLY_DEBUG_DONT_TRUNCATE_RELEASE_NOTES?.trim());
+    const skipRedaction = Boolean(process.env.FIREFLY_DEBUG_DONT_REDACT_GITHUB_CLI_ARGS?.trim());
 
     const processedArgs = redacted && !skipRedaction ? redactSensitiveArgs(args) : args;
 
