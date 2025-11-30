@@ -249,6 +249,26 @@ export function toSkipCondition<TContext extends GenericWorkflowContext = Generi
 }
 
 /**
+ * Converts a predicate to a SkipCondition with a default reason.
+ *
+ * This is a convenience function for internal use when a specific reason
+ * is not required. For user-facing code, prefer `toSkipCondition` with
+ * an explicit reason.
+ *
+ * @param predicate - Predicate to convert
+ * @param defaultReason - Optional reason (defaults to "Skip condition met")
+ * @returns Function returning FireflyResult<SkipCondition>
+ *
+ * @internal
+ */
+export function predicateToSkipFn<TContext extends GenericWorkflowContext = GenericWorkflowContext>(
+    predicate: SkipPredicate<TContext>,
+    defaultReason = "Skip condition met"
+): (ctx: TContext) => FireflyResult<SkipCondition> {
+    return toSkipCondition(predicate, defaultReason);
+}
+
+/**
  * Converts a predicate into a SkipCondition with jump targets.
  *
  * When the predicate returns true, the task is skipped and execution

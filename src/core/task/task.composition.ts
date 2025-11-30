@@ -4,6 +4,7 @@ import type { FireflyError } from "#/core/result/error.types";
 import { FireflyErrAsync, FireflyOkAsync, failedErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 import { TaskBuilder } from "#/core/task/task.builder";
+import { executeSequentially } from "#/core/task/task.helpers";
 import type { GenericWorkflowContext, Task } from "#/core/task/task.types";
 
 /**
@@ -33,13 +34,7 @@ import type { GenericWorkflowContext, Task } from "#/core/task/task.types";
 export function composeSequential(id: string, tasks: Task[]): FireflyResult<Task> {
     return TaskBuilder.create(id)
         .description(`Sequential composition: ${tasks.map((t) => t.meta.id).join(" → ")}`)
-        .execute(
-            (ctx): FireflyAsyncResult<GenericWorkflowContext> =>
-                tasks.reduce<FireflyAsyncResult<GenericWorkflowContext>>(
-                    (accResult, task) => accResult.andThen((currentCtx) => task.execute(currentCtx)),
-                    FireflyOkAsync(ctx)
-                )
-        )
+        .execute((ctx): FireflyAsyncResult<GenericWorkflowContext> => executeSequentially(tasks, ctx))
         .build();
 }
 
@@ -410,13 +405,7 @@ export function composeGroup(
 ): FireflyResult<Task> {
     let builder = TaskBuilder.create(id)
         .description(description)
-        .execute(
-            (ctx): FireflyAsyncResult<GenericWorkflowContext> =>
-                tasks.reduce<FireflyAsyncResult<GenericWorkflowContext>>(
-                    (accResult, task) => accResult.andThen((currentCtx) => task.execute(currentCtx)),
-                    FireflyOkAsync(ctx)
-                )
-        );
+        .execute((ctx): FireflyAsyncResult<GenericWorkflowContext> => executeSequentially(tasks, ctx));
 
     if (options.skipWhen) {
         builder = builder.skipWhenWithReason(options.skipWhen, options.skipReason ?? "Group skip condition met");

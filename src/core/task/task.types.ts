@@ -1,5 +1,6 @@
 import type z from "zod";
 import type { WorkflowContext, WorkflowData } from "#/core/context/workflow.context";
+import { FireflyOk } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 
 /**
@@ -221,45 +222,53 @@ export interface TypedTask<TCtx extends GenericWorkflowContext = GenericWorkflow
 }
 
 /**
- * Identity function for creating tasks with type inference.
+ * Factory function for creating tasks with type inference.
  *
  * Provides a clean syntax for defining tasks while preserving type safety.
- * Prefer using `TaskBuilder` for more complex task definitions.
+ * Returns a Result for consistency with other factory functions.
+ * Prefer using `TaskBuilder` for more complex task definitions with validation.
  *
  * @param task - Task definition
- * @returns The same task (identity function)
+ * @returns `FireflyOk(Task)` containing the task
  *
  * @example
  * ```typescript
- * const task = createTask({
+ * const taskResult = createTask({
  *   meta: { id: "my-task", description: "Does something" },
  *   execute: (ctx) => okAsync(ctx),
  * });
+ *
+ * if (taskResult.isOk()) {
+ *   registry.register(taskResult.value);
+ * }
  * ```
  */
-export function createTask(task: Task): Task {
-    return task;
+export function createTask(task: Task): FireflyResult<Task> {
+    return FireflyOk(task);
 }
 
 /**
  * Creates a typed task with explicit context type.
- * Provides full type safety for config, data, and services access.
  *
  * @template TCtx - The workflow context type
  * @param task - Typed task definition
- * @returns The task cast to base Task type for registry compatibility
+ * @returns `FireflyOk(Task)` containing the task cast to base Task type for registry compatibility
  *
  * @example
  * ```typescript
- * const task = createTypedTask<MyContext>({
+ * const taskResult = createTypedTask<MyContext>({
  *   meta: { id: "typed-task", description: "Type-safe task" },
  *   execute: (ctx) => {
  *     // ctx.config and ctx.data are fully typed
  *     return okAsync(ctx.fork("result", ctx.config.value * 2));
  *   },
  * });
+ *
+ * if (taskResult.isOk()) {
+ *   registry.register(taskResult.value);
+ * }
  * ```
  */
-export function createTypedTask<TCtx extends GenericWorkflowContext>(task: TypedTask<TCtx>): Task {
-    return task as unknown as Task;
+export function createTypedTask<TCtx extends GenericWorkflowContext>(task: TypedTask<TCtx>): FireflyResult<Task> {
+    return FireflyOk(task as unknown as Task);
 }

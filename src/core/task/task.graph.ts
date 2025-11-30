@@ -74,6 +74,15 @@ export function validateTaskGraph(tasks: Task[]): GraphValidationResult {
     };
 }
 
+/**
+ * Builds a map of task IDs to Task objects for efficient lookup.
+ *
+ * Also detects and reports duplicate task IDs.
+ *
+ * @param tasks - Array of tasks to index
+ * @param errors - Array to collect duplicate ID errors
+ * @returns Map from task ID to Task object
+ */
 function buildTaskMap(tasks: Task[], errors: string[]): Map<string, Task> {
     const taskMap = new Map<string, Task>();
     for (const task of tasks) {
@@ -86,6 +95,16 @@ function buildTaskMap(tasks: Task[], errors: string[]): Map<string, Task> {
     return taskMap;
 }
 
+/**
+ * Validates that all task dependencies reference existing tasks.
+ *
+ * Also warns about tasks missing descriptions.
+ *
+ * @param tasks - Array of tasks to validate
+ * @param taskMap - Map of task IDs to Task objects
+ * @param errors - Array to collect missing dependency errors
+ * @param warnings - Array to collect non-critical warnings
+ */
 function checkMissingDependencies(
     tasks: Task[],
     taskMap: Map<string, Task>,
@@ -105,6 +124,16 @@ function checkMissingDependencies(
     }
 }
 
+/**
+ * Detects circular dependencies in the task graph using DFS.
+ *
+ * When a cycle is detected, adds an error message showing the cycle path
+ * (e.g., "A → B → C → A").
+ *
+ * @param tasks - Array of tasks to check
+ * @param taskMap - Map of task IDs to Task objects
+ * @param errors - Array to collect cycle detection errors
+ */
 function checkCyclicDependencies(tasks: Task[], taskMap: Map<string, Task>, errors: string[]): void {
     const visited = new Set<string>();
     const recursionStack = new Set<string>();
@@ -145,6 +174,17 @@ function checkCyclicDependencies(tasks: Task[], taskMap: Map<string, Task>, erro
     }
 }
 
+/**
+ * Computes the execution order and depth map for a validated task graph.
+ *
+ * Uses topological sort to determine execution order and calculates
+ * the depth of each task in the dependency tree.
+ *
+ * @param tasks - Array of tasks to order
+ * @param taskMap - Map of task IDs to Task objects
+ * @param errors - Array of existing validation errors (skips computation if non-empty)
+ * @returns Object containing execution order (task IDs) and depth map
+ */
 function computeExecutionOrder(
     tasks: Task[],
     taskMap: Map<string, Task>,

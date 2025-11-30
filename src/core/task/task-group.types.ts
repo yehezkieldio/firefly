@@ -1,4 +1,5 @@
 import type { FireflyResult } from "#/core/result/result.types";
+import type { SkipPredicate } from "#/core/task/skip-conditions";
 import type { GenericWorkflowContext, SkipCondition, Task } from "#/core/task/task.types";
 
 /**
@@ -12,9 +13,8 @@ export type GroupSkipCondition<TContext extends GenericWorkflowContext = Generic
 /**
  * A simple predicate for determining if a group should be skipped.
  */
-export type GroupSkipPredicate<TContext extends GenericWorkflowContext = GenericWorkflowContext> = (
-    ctx: TContext
-) => boolean;
+export type GroupSkipPredicate<TContext extends GenericWorkflowContext = GenericWorkflowContext> =
+    SkipPredicate<TContext>;
 
 /**
  * Metadata describing a task group's identity and relationships.

@@ -1,5 +1,4 @@
-import { invalidError } from "#/core/result/error.factories";
-import { FireflyErr, FireflyOk } from "#/core/result/result.constructors";
+import { FireflyOk, invalidErr } from "#/core/result/result.constructors";
 import type { FireflyResult } from "#/core/result/result.types";
 import type { GenericWorkflowContext, Task } from "#/core/task/task.types";
 import type {
@@ -146,21 +145,17 @@ export class TaskGroupBuilder<TContext extends GenericWorkflowContext = GenericW
      */
     build(): FireflyResult<TaskGroup<TContext>> {
         if (!this.groupDescription) {
-            return FireflyErr(
-                invalidError({
-                    message: `Task group "${this.groupId}" must have a description`,
-                    source: "TaskGroupBuilder.build",
-                })
-            );
+            return invalidErr({
+                message: `Task group "${this.groupId}" must have a description`,
+                source: "TaskGroupBuilder.build",
+            });
         }
 
         if (this.groupTasks.length === 0) {
-            return FireflyErr(
-                invalidError({
-                    message: `Task group "${this.groupId}" must have at least one task`,
-                    source: "TaskGroupBuilder.build",
-                })
-            );
+            return invalidErr({
+                message: `Task group "${this.groupId}" must have at least one task`,
+                source: "TaskGroupBuilder.build",
+            });
         }
 
         const meta: TaskGroupMeta = {

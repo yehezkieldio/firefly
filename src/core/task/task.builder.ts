@@ -1,6 +1,7 @@
 import type z from "zod";
 import { FireflyOk, invalidErr } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
+import { predicateToSkipFn, toSkipCondition, toSkipConditionWithJump } from "#/core/task/skip-conditions";
 import type { GenericWorkflowContext, SkipCondition, Task, TaskMetadata } from "#/core/task/task.types";
 
 /**
@@ -95,11 +96,7 @@ export class TaskBuilder<TContext extends GenericWorkflowContext = GenericWorkfl
      * @param predicate - Function returning true if task should be skipped
      */
     skipWhen(predicate: (context: TContext) => boolean): TaskBuilder<TContext> {
-        this.skipFn = (ctx) =>
-            FireflyOk({
-                shouldSkip: predicate(ctx),
-                reason: "Skip condition met",
-            });
+        this.skipFn = predicateToSkipFn(predicate);
         return this;
     }
 
@@ -109,11 +106,7 @@ export class TaskBuilder<TContext extends GenericWorkflowContext = GenericWorkfl
      * @param reason - Human-readable reason shown in logs
      */
     skipWhenWithReason(predicate: (context: TContext) => boolean, reason: string): TaskBuilder<TContext> {
-        this.skipFn = (ctx) =>
-            FireflyOk({
-                shouldSkip: predicate(ctx),
-                reason,
-            });
+        this.skipFn = toSkipCondition(predicate, reason);
         return this;
     }
 
@@ -123,12 +116,7 @@ export class TaskBuilder<TContext extends GenericWorkflowContext = GenericWorkfl
      * @param skipToTasks - Task IDs to jump to when skipping
      */
     skipWhenAndJumpTo(predicate: (context: TContext) => boolean, skipToTasks: string[]): TaskBuilder<TContext> {
-        this.skipFn = (ctx) =>
-            FireflyOk({
-                shouldSkip: predicate(ctx),
-                reason: "Skip condition met",
-                skipToTasks,
-            });
+        this.skipFn = toSkipConditionWithJump(predicate, skipToTasks);
         return this;
     }
 

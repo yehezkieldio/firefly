@@ -6,6 +6,36 @@ import type { GenericWorkflowContext, Task } from "#/core/task/task.types";
 import type { TaskGroup } from "#/core/task/task-group.types";
 
 /**
+ * Executes an array of tasks sequentially, passing context through each.
+ *
+ * This is the canonical implementation for sequential task execution.
+ * Each task receives the context from the previous task's output.
+ * If any task fails, execution stops and the error propagates.
+ *
+ * @template TContext - The workflow context type
+ * @param tasks - Array of tasks to execute in sequence
+ * @param initialCtx - The starting context
+ * @returns The final context after all tasks complete, or the first error
+ *
+ * @example
+ * ```typescript
+ * const result = await executeSequentially(tasks, context);
+ * if (result.isOk()) {
+ *   console.log("All tasks completed", result.value);
+ * }
+ * ```
+ */
+export function executeSequentially<TContext extends GenericWorkflowContext>(
+    tasks: readonly Task[],
+    initialCtx: TContext
+): FireflyAsyncResult<TContext> {
+    return tasks.reduce<FireflyAsyncResult<GenericWorkflowContext>>(
+        (accResult, task) => accResult.andThen((currentCtx) => task.execute(currentCtx)),
+        FireflyOkAsync(initialCtx)
+    ) as FireflyAsyncResult<TContext>;
+}
+
+/**
  * Options for creating a side-effect task.
  */
 export interface SideEffectTaskOptions<TContext extends GenericWorkflowContext = GenericWorkflowContext> {

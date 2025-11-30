@@ -1,7 +1,8 @@
 import { err } from "neverthrow";
 import { BaseRegistry } from "#/core/registry/base.registry";
-import { FireflyErr, FireflyOk, validationErr } from "#/core/result/result.constructors";
+import { FireflyOk, validationErr } from "#/core/result/result.constructors";
 import type { FireflyResult } from "#/core/result/result.types";
+import { topologicalSort } from "#/core/task/task.graph";
 import type { Task } from "#/core/task/task.types";
 import {
     createGroupRegistry,
@@ -239,61 +240,25 @@ export class TaskRegistry extends BaseRegistry<Task> {
 
     /**
      * Builds an execution order that respects task dependencies.
-     *
-     * Uses topological sorting to ensure dependencies execute before their dependents.
-     * Detects and reports circular dependencies.
-     *
      * @returns `FireflyOk(Task[])` with tasks in execution order, `Err(FireflyError)` if circular dependency detected
      */
     buildExecutionOrder(): FireflyResult<Task[]> {
-        const visited = new Set<string>();
-        const recursionStack = new Set<string>();
-        const ordered: Task[] = [];
+        const tasks = [...this.items.values()];
+        const sortResult = topologicalSort(tasks);
 
-        const visit = (taskId: string): FireflyResult<void> => {
-            // Check for circular dependencies
-            if (recursionStack.has(taskId)) {
-                return validationErr({
-                    message: `Circular dependency detected involving task "${taskId}"`,
-                });
-            }
+        if (sortResult.isErr()) {
+            return err(sortResult.error);
+        }
 
-            // Already visited, skip
-            if (visited.has(taskId)) {
-                return FireflyOk(undefined);
-            }
-
-            const taskResult = this.get(taskId);
-            if (taskResult.isErr()) {
-                return err(taskResult.error);
-            }
-
-            const task = taskResult.value;
-            recursionStack.add(taskId);
-
-            // Visit dependencies first
-            for (const depId of task.meta.dependencies ?? []) {
-                const result = visit(depId);
-                if (result.isErr()) {
-                    return result;
-                }
-            }
-
-            recursionStack.delete(taskId);
-            visited.add(taskId);
-            ordered.push(task);
-
-            return FireflyOk(undefined);
-        };
-
-        // Visit all tasks
-        for (const taskId of this.items.keys()) {
-            const result = visit(taskId);
-            if (result.isErr()) {
-                return FireflyErr(result.error);
+        // Map sorted IDs back to Task objects
+        const orderedTasks: Task[] = [];
+        for (const taskId of sortResult.value) {
+            const task = this.items.get(taskId);
+            if (task) {
+                orderedTasks.push(task);
             }
         }
 
-        return FireflyOk(ordered);
+        return FireflyOk(orderedTasks);
     }
 }

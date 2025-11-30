@@ -59,14 +59,40 @@ export function expandTaskGroup(
     });
 }
 
+/**
+ * Internal context used during task group expansion.
+ * Contains all state needed to expand tasks within a single group.
+ */
 interface TaskExpansionContext {
+    /**
+     * The group's unique identifier
+     */
     readonly groupId: string;
+    /**
+     * The group's skip condition (if any) to merge with task conditions
+     */
     readonly groupSkipCondition: GroupSkipCondition | undefined;
+    /**
+     * Mapping from original task IDs to their namespaced versions
+     */
     readonly taskIdMapping: Map<string, string>;
+    /**
+     * Map of already registered groups to their last task IDs
+     */
     readonly registeredGroups: ReadonlyMap<string, string>;
+    /**
+     * Group IDs that this group depends on
+     */
     readonly dependsOnGroups: readonly string[] | undefined;
 }
 
+/**
+ * Expands an array of tasks within a group context.
+ *
+ * @param tasks - The tasks to expand
+ * @param ctx - The expansion context containing group metadata
+ * @returns Array of expanded tasks with namespaced IDs
+ */
 function expandTasks(tasks: readonly Task[], ctx: TaskExpansionContext): FireflyResult<ExpandedTask[]> {
     const expandedTasks: ExpandedTask[] = [];
 
@@ -84,6 +110,14 @@ function expandTasks(tasks: readonly Task[], ctx: TaskExpansionContext): Firefly
     return FireflyOk(expandedTasks);
 }
 
+/**
+ * Expands a single task with namespace prefixing and dependency resolution.
+ *
+ * @param task - The task to expand
+ * @param index - Position of the task within the group (0-based)
+ * @param ctx - The expansion context
+ * @returns The expanded task with namespaced ID and resolved dependencies
+ */
 function expandSingleTask(task: Task, index: number, ctx: TaskExpansionContext): FireflyResult<ExpandedTask> {
     const { groupId, groupSkipCondition, taskIdMapping, registeredGroups, dependsOnGroups } = ctx;
     const originalTaskId = task.meta.id;
@@ -114,6 +148,17 @@ function expandSingleTask(task: Task, index: number, ctx: TaskExpansionContext):
     );
 }
 
+/**
+ * Resolves inter-group dependencies to their last task IDs.
+ *
+ * When a group depends on other groups, the first task in the group
+ * needs to depend on the last task of each dependency group.
+ *
+ * @param dependsOnGroups - Array of group IDs this group depends on
+ * @param registeredGroups - Map of registered groups to their last task IDs
+ * @param groupId - Current group ID (for error messages)
+ * @returns Array of namespaced task IDs to depend on, or error if dependency not found
+ */
 function addInterGroupDependencies(
     dependsOnGroups: readonly string[],
     registeredGroups: ReadonlyMap<string, string>,
@@ -137,6 +182,12 @@ function addInterGroupDependencies(
 
 /**
  * Builds a unified skip condition from group options.
+ *
+ * If a full `skipCondition` is provided, it's used directly.
+ * If only `skipWhen` predicate is provided, it's converted to a full skip condition.
+ *
+ * @param group - The task group to extract skip condition from
+ * @returns The group's skip condition function, or undefined if none configured
  */
 function buildGroupSkipCondition(group: TaskGroup): GroupSkipCondition | undefined {
     const { options } = group;
@@ -165,8 +216,16 @@ function buildGroupSkipCondition(group: TaskGroup): GroupSkipCondition | undefin
 
 /**
  * Remaps task dependencies to use namespaced IDs.
- * Dependencies within the same group are namespaced.
- * Dependencies on external tasks are left unchanged.
+ *
+ * Handles three cases:
+ * 1. Dependency already processed in this group → use mapped namespaced ID
+ * 2. Dependency already namespaced (cross-group) → use as-is
+ * 3. Dependency not yet processed → assume same group, create namespaced ID
+ *
+ * @param originalDeps - Original dependency IDs from the task
+ * @param taskIdMapping - Map of processed task IDs to their namespaced versions
+ * @param groupId - Current group ID for namespacing
+ * @returns Array of remapped dependency IDs
  */
 function remapDependencies(
     originalDeps: readonly string[],
@@ -190,17 +249,49 @@ function remapDependencies(
     });
 }
 
+/**
+ * Options for creating an expanded task.
+ */
 interface CreateExpandedTaskOptions {
+    /**
+     * The original task being expanded.
+     */
     readonly originalTask: Task;
+
+    /**
+     * The new namespaced task ID.
+     */
     readonly namespacedId: string;
+
+    /**
+     * The original task ID before namespacing.
+     */
     readonly originalTaskId: string;
+
+    /**
+     * The group this task belongs to.
+     */
     readonly groupId: string;
+
+    /**
+     * Remapped dependencies (namespaced).
+     */
     readonly dependencies: string[];
+
+    /**
+     * Optional group-level skip condition to merge.
+     */
     readonly groupSkipCondition?: GroupSkipCondition;
 }
 
 /**
  * Creates an expanded task with merged skip condition.
+ *
+ * The expanded task preserves the original task's execute and undo functions
+ * while updating metadata and merging skip conditions.
+ *
+ * @param opts - Options containing original task and expansion metadata
+ * @returns The expanded task with namespaced ID and merged properties
  */
 function createExpandedTask(opts: CreateExpandedTaskOptions): ExpandedTask {
     const { originalTask, namespacedId, originalTaskId, groupId, dependencies, groupSkipCondition } = opts;
@@ -223,8 +314,14 @@ function createExpandedTask(opts: CreateExpandedTaskOptions): ExpandedTask {
 
 /**
  * Merges a group skip condition with a task's own skip condition.
- * The group condition is evaluated first - if it returns shouldSkip: true,
+ *
+ * The group condition is evaluated first. If it returns `shouldSkip: true`,
  * the task is skipped without evaluating its own condition.
+ * This allows groups to skip all their tasks with a single condition.
+ *
+ * @param taskSkipCondition - The task's original skip condition (if any)
+ * @param groupSkipCondition - The group's skip condition (if any)
+ * @returns Merged skip condition function, or undefined if neither exists
  */
 function mergeSkipConditions(
     taskSkipCondition: Task["shouldSkip"],
@@ -274,6 +371,19 @@ export interface GroupRegistry {
 
 /**
  * Creates an empty group registry for tracking registered groups.
+ *
+ * The registry tracks:
+ * - Which groups have been registered
+ * - The last task ID of each group (for inter-group dependencies)
+ * - All task IDs belonging to each group
+ *
+ * @returns Empty group registry
+ *
+ * @example
+ * ```typescript
+ * const registry = createGroupRegistry();
+ * // Register groups and update registry...
+ * ```
  */
 export function createGroupRegistry(): GroupRegistry {
     return {
@@ -284,6 +394,20 @@ export function createGroupRegistry(): GroupRegistry {
 
 /**
  * Updates the group registry with a newly expanded group.
+ *
+ * Records all task IDs for the group and stores the last task ID
+ * to enable inter-group dependency resolution.
+ *
+ * @param registry - The group registry to update
+ * @param expandedResult - The result of expanding a task group
+ *
+ * @example
+ * ```typescript
+ * const expandResult = expandTaskGroup(group, registry.lastTaskByGroup);
+ * if (expandResult.isOk()) {
+ *   updateGroupRegistry(registry, expandResult.value);
+ * }
+ * ```
  */
 export function updateGroupRegistry(registry: GroupRegistry, expandedResult: ExpandedGroupResult): void {
     const { groupId, tasks } = expandedResult;
