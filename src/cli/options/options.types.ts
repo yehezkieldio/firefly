@@ -30,10 +30,6 @@ export type GlobalOptions = z.infer<typeof GlobalOptionsSchema>;
  *
  * This interface represents the shape of options immediately after Commander parses them,
  * before any normalization or merging with config file values.
- *
- * @remarks
- * The `parent` property contains the parent command's context, which is used
- * to access global options when processing subcommand options.
  */
 export interface ParsedCLIOptions extends Record<string, unknown> {
     /**
@@ -54,11 +50,6 @@ export interface ParsedCLIOptions extends Record<string, unknown> {
      * Automatically rollback on failure.
      */
     enableRollback?: boolean;
-
-    /**
-     * Parent command context (used internally by Commander.js).
-     */
-    parent?: unknown;
 }
 
 /**

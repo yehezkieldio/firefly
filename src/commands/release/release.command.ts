@@ -32,7 +32,7 @@ export const releaseCommand = createCommand<ReleaseConfig, ReleaseData, typeof R
             const stats = getGraphStatistics(tasks);
 
             logger.verbose("");
-            logger.verbose("R");
+            logger.verbose("Release Task Graph Statistics:");
             logger.verbose(`Total tasks: ${stats.totalTasks}`);
             logger.verbose(`Root tasks (can run first): ${stats.rootTasks}`);
             logger.verbose(`Leaf tasks (final): ${stats.leafTasks}`);

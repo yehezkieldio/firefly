@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { LogLevels } from "consola";
 import { colors } from "consola/utils";
 import type { ZodObject, ZodRawShape } from "zod";
 import { ConfigLoader } from "#/cli/config/config.loader";
@@ -81,8 +82,9 @@ function registerCommand(
 
     ctx.builder.registerCommandOptions(cmd, configSchema);
 
-    cmd.action(async (cliOptions: ParsedCLIOptions) => {
-        const normalizedOptions = ctx.normalizer.normalize(cliOptions, configSchema);
+    cmd.action(async (_cliOptions: ParsedCLIOptions, command: Command) => {
+        const allOptions = command.optsWithGlobals() as ParsedCLIOptions;
+        const normalizedOptions = ctx.normalizer.normalize(allOptions, configSchema);
         const result = await executeCommand(commandName, normalizedOptions, ctx.registry);
 
         if (result.isErr()) {
@@ -105,12 +107,11 @@ function registerCommand(
  *
  * Handles the full execution flow:
  * 1. Log version information
- * 2. Merge global and command options
- * 3. Load and merge config file values
- * 4. Execute through the workflow orchestrator
+ * 2. Load and merge config file values
+ * 3. Execute through the workflow orchestrator
  *
  * @param commandName - The command to execute
- * @param cliOptions - Parsed and normalized CLI options
+ * @param cliOptions - Parsed and normalized CLI options (already merged with globals via optsWithGlobals)
  * @param registry - The command registry to look up the command
  * @returns Async result of the workflow execution
  */
@@ -120,16 +121,18 @@ function executeCommand(
     registry: CommandRegistry
 ): FireflyAsyncResult<WorkflowExecutionResult> {
     logVersionInfo(commandName);
-
-    const mergedOptions = mergeOptions(cliOptions);
+    console.log("CONFIG =>", cliOptions);
+    if (cliOptions.verbose) {
+        logger.level = LogLevels.verbose;
+    }
 
     const configLoader = new ConfigLoader({
-        configFile: mergedOptions.config,
+        configFile: cliOptions.config,
         commandName,
     });
 
     return configLoader.load().andThen((fileConfig) => {
-        const finalConfig = { ...fileConfig, ...mergedOptions };
+        const finalConfig = { ...fileConfig, ...cliOptions };
         return executeWithOrchestrator(commandName, finalConfig, registry);
     });
 }
@@ -186,21 +189,6 @@ function createOrchestrator(config: RuntimeConfig): WorkflowOrchestrator {
         enableRollback: config.enableRollback ?? true,
         verbose: config.verbose ?? false,
     });
-}
-
-/**
- * Merges global options from the parent command with command-specific options.
- *
- * Commander.js stores global options in the parent context, so we need to
- * extract and merge them with the command's own options.
- *
- * @param options - The command's parsed options
- * @returns Merged options including global flags
- */
-function mergeOptions(options: ParsedCLIOptions): ParsedCLIOptions {
-    const parent = options.parent as { opts?: () => ParsedCLIOptions } | undefined;
-    const globalOpts = parent?.opts?.() ?? {};
-    return { ...globalOpts, ...options };
 }
 
 function logVersionInfo(commandName: string): void {
