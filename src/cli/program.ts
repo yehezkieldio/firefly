@@ -121,7 +121,7 @@ function executeCommand(
     registry: CommandRegistry
 ): FireflyAsyncResult<WorkflowExecutionResult> {
     logVersionInfo(commandName);
-    console.log("CONFIG =>", cliOptions);
+
     if (cliOptions.verbose) {
         logger.level = LogLevels.verbose;
     }
