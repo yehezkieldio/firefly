@@ -42,6 +42,26 @@ export function toFireflyError(
 }
 
 /**
+ * Wraps an error message with additional context prefix.
+ *
+ * @param error - Original error
+ * @param prefix - Message prefix to add
+ * @returns New error with prefixed message
+ *
+ * @example
+ * ```ts
+ * const wrapped = wrapErrorMessage(error, "Failed to execute release");
+ * // Result: "Failed to execute release: original message"
+ * ```
+ */
+export function wrapErrorMessage(error: FireflyError, prefix: string): FireflyError {
+    return createFireflyError({
+        ...error,
+        message: `${prefix}: ${error.message}`,
+    });
+}
+
+/**
  * Creates a validation error.
  *
  * @example
