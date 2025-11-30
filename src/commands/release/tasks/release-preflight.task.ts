@@ -11,7 +11,7 @@ import { logger } from "#/infrastructure/logging";
  */
 function checkGitRepository(ctx: ReleaseContext): FireflyAsyncResult<void> {
     return ctx.services.git
-        .isRepository()
+        .isInsideRepository()
         .andThen((isRepo) =>
             ensureNotAsync(!isRepo, {
                 message: "We are not inside a git repository!",
