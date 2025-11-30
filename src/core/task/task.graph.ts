@@ -1,6 +1,7 @@
 import { FireflyOk, invalidErr } from "#/core/result/result.constructors";
 import type { FireflyResult } from "#/core/result/result.types";
 import type { Task } from "#/core/task/task.types";
+import { logger } from "#/infrastructure/logging";
 
 /**
  * Result of task graph validation.
@@ -385,4 +386,29 @@ export function getGraphStatistics(tasks: Task[]): GraphStatistics {
         mostDependentTasks,
         mostDependendUponTasks,
     };
+}
+
+/**
+ * Logs graph statistics to the logger.
+ *
+ * @param stats - Graph statistics to log
+ */
+export function logGraphStatistics(stats: GraphStatistics): void {
+    logger.verbose("");
+    logger.verbose("Task Graph Statistics:");
+    logger.verbose(`Total tasks: ${stats.totalTasks}`);
+    logger.verbose(`Root tasks (can run first): ${stats.rootTasks}`);
+    logger.verbose(`Leaf tasks (final): ${stats.leafTasks}`);
+    logger.verbose(`Max depth: ${stats.maxDepth}`);
+    logger.verbose(`Avg dependencies: ${stats.avgDependencies.toFixed(2)}`);
+
+    if (stats.mostDependentTasks.length > 0) {
+        logger.verbose(`Most dependent tasks: ${stats.mostDependentTasks.join(", ")}`);
+    }
+
+    if (stats.mostDependendUponTasks.length > 0) {
+        logger.verbose(`Critical path tasks: ${stats.mostDependendUponTasks.join(", ")}`);
+    }
+
+    logger.verbose("");
 }

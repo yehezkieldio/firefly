@@ -248,7 +248,7 @@ function redactSensitiveArgs(args: string[]): string[] {
  * Truncates release notes content to avoid log pollution.
  *
  * @param args - GitHub CLI command arguments
- * @param redacted - When true, sensitive values are masked (unless FIREFLY_DEBUG_DONT_REDACT is set)
+ * @param redacted - When true, sensitive values are masked
  * @returns Sanitized argument string for logging
  */
 function createLogArgs(args: string[], redacted = false): string {
