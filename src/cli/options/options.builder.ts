@@ -336,7 +336,10 @@ export class OptionsBuilder {
     private camelToKebab(str: string): string {
         let result = str;
         for (const word of this.compoundWords) {
-            result = result.replace(new RegExp(word, "g"), word.toLowerCase());
+            // Insert hyphen before compound word when preceded by lowercase letter
+            result = result.replace(new RegExp(`([a-z])${word}`, "g"), `$1-${word.toLowerCase()}`);
+            // Handle compound word at start of string
+            result = result.replace(new RegExp(`^${word}`, "g"), word.toLowerCase());
         }
         return result.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
     }

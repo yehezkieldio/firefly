@@ -92,7 +92,10 @@ export class OptionsNormalizer {
     static toKebab(camelCase: string): string {
         let result = camelCase;
         for (const word of OptionsNormalizer.COMPOUND_WORDS) {
-            result = result.replace(new RegExp(word, "g"), word.toLowerCase());
+            // Insert hyphen before compound word when preceded by lowercase letter
+            result = result.replace(new RegExp(`([a-z])${word}`, "g"), `$1-${word.toLowerCase()}`);
+            // Handle compound word at start of string
+            result = result.replace(new RegExp(`^${word}`, "g"), word.toLowerCase());
         }
         return result
             .replace(/([a-z])([A-Z])/g, "$1-$2")
