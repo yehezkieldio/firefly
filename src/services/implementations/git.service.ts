@@ -3,6 +3,7 @@ import type { FireflyAsyncResult } from "#/core/result/result.types";
 import { executeGitCommand } from "#/infrastructure/executors/git-command.executor";
 import { logger } from "#/infrastructure/logging";
 import type {
+    BranchInformation,
     CommitOptions,
     CommitResult,
     CreateTagOptions,
@@ -14,6 +15,9 @@ import type {
     PushOptions,
     UnpushedCommitsResult,
 } from "#/services/contracts/git.interface";
+
+const CURRENT_BRANCH_MARKER_REGEX = /^\*\s*/;
+const REMOTES_PREFIX_REGEX = /^remotes\//;
 
 export class DefaultGitService implements IGitService {
     private readonly cwd: string;
@@ -143,6 +147,37 @@ export class DefaultGitService implements IGitService {
         return this.git(["rev-parse", "--verify", branch])
             .map(() => true)
             .orElse(() => FireflyOkAsync(false));
+    }
+
+    private parseBranchLine(line: string): BranchInformation {
+        const isCurrent = line.startsWith("*");
+        const isRemote = line.includes("remotes/");
+
+        // Remove the "*" marker and any leading whitespace
+        let branchName = line.replace(CURRENT_BRANCH_MARKER_REGEX, "").trim();
+
+        // Remove "remotes/" prefix for remote branches
+        if (isRemote) {
+            branchName = branchName.replace(REMOTES_PREFIX_REGEX, "");
+        }
+
+        return {
+            name: branchName,
+            isCurrent,
+            isRemote,
+        };
+    }
+
+    listBranches(includeRemote?: boolean): FireflyAsyncResult<BranchInformation[]> {
+        const args = ["branch"];
+        if (includeRemote) {
+            args.push("-a");
+        }
+
+        return this.git(args).map((output) => {
+            const lines = output.split("\n").filter((line) => line.trim().length > 0);
+            return lines.map((line) => this.parseBranchLine(line));
+        });
     }
 
     createCommit(message: string, options?: CommitOptions): FireflyAsyncResult<CommitResult> {

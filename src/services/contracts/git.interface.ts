@@ -109,6 +109,32 @@ export interface CommitResult {
 }
 
 /**
+ * Information about a git branch.
+ */
+export interface BranchInformation {
+    /***
+     * Name of the branch
+     */
+    name: string;
+
+    /**
+     * Whether this is the current checked-out branch
+     */
+    isCurrent: boolean;
+
+    /**
+     * Whether this is a remote-tracking branch
+     *
+     */
+    isRemote: boolean;
+
+    /**
+     * Upstream branch name, if set
+     */
+    upstream?: string;
+}
+
+/**
  * Options for creating git tags.
  */
 export interface CreateTagOptions extends DryRunOptions {
@@ -246,6 +272,12 @@ export interface IGitService {
      * @param branch - Branch name to check
      */
     hasBranch(branch: string): FireflyAsyncResult<boolean>;
+
+    /**
+     * Gets a list of branches in the repository.
+     * @param includeRemote - Whether to include remote branches
+     */
+    listBranches(includeRemote?: boolean): FireflyAsyncResult<BranchInformation[]>;
 
     /**
      * Creates a new commit with the given message.
