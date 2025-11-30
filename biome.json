@@ -20,7 +20,8 @@
     "rules": {
       "recommended": true,
       "nursery": {
-        "noEmptySource": "off"
+        "noEmptySource": "off",
+        "noUselessUndefined": "off"
       },
       "correctness": {
         "noUnusedVariables": "off"

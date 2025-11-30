@@ -5,26 +5,16 @@ import { logger } from "#/infrastructure/logging";
 import type {
     CommitOptions,
     CommitResult,
+    CreateTagOptions,
+    DeleteTagOptions,
+    FileStatusFilter,
     GitFileStatus,
     GitStatus,
     IGitService,
     PushOptions,
-    TagOptions,
     UnpushedCommitsResult,
 } from "#/services/contracts/git.interface";
 
-/** Options for internal git command execution */
-interface GitExecutionOptions {
-    readonly dryRun?: boolean;
-    readonly verbose?: boolean;
-}
-
-/**
- * Default implementation of the git service.
- *
- * Executes git commands via the system's git binary
- * using the configured working directory.
- */
 export class DefaultGitService implements IGitService {
     private readonly cwd: string;
 
@@ -39,7 +29,7 @@ export class DefaultGitService implements IGitService {
      * @param options - Execution options
      * @returns Command output or error
      */
-    private git(args: string[], options?: GitExecutionOptions): FireflyAsyncResult<string> {
+    private git(args: string[], options?: { dryRun?: boolean; verbose?: boolean }): FireflyAsyncResult<string> {
         return executeGitCommand(args, {
             cwd: this.cwd,
             dryRun: options?.dryRun,
@@ -47,17 +37,22 @@ export class DefaultGitService implements IGitService {
         });
     }
 
-    isRepository(): FireflyAsyncResult<boolean> {
+    isInsideRepository(): FireflyAsyncResult<boolean> {
         return this.git(["rev-parse", "--is-inside-work-tree"])
             .map(() => true)
             .orElse(() => FireflyOkAsync(false));
     }
 
-    currentBranch(): FireflyAsyncResult<string> {
-        return this.git(["rev-parse", "--abbrev-ref", "HEAD"]).map((output) => output.trim());
+    getRepositoryRoot(): FireflyAsyncResult<string> {
+        return this.git(["rev-parse", "--show-toplevel"]).map((output) => output.trim());
     }
 
-    status(): FireflyAsyncResult<GitStatus> {
+    getRemoteUrl(remote?: string): FireflyAsyncResult<string> {
+        const remoteName = remote ?? "origin";
+        return this.git(["remote", "get-url", remoteName]).map((output) => output.trim());
+    }
+
+    getStatus(): FireflyAsyncResult<GitStatus> {
         return this.git(["status", "--porcelain"]).map((output) => {
             const lines = output.split("\n").filter((line) => line.length > 0);
 
@@ -89,93 +84,68 @@ export class DefaultGitService implements IGitService {
         });
     }
 
-    isClean(): FireflyAsyncResult<boolean> {
-        return this.status().map((status) => status.isClean);
+    isWorkingTreeClean(): FireflyAsyncResult<boolean> {
+        return this.getStatus().map((status) => status.isClean);
     }
 
-    unpushedCommits(): FireflyAsyncResult<UnpushedCommitsResult> {
-        return this.currentBranch().andThen((branch) => {
-            const upstream = `origin/${branch}`;
-
-            return this.git(["rev-list", "--count", `${upstream}..HEAD`])
-                .map((output) => {
-                    const count = Number.parseInt(output.trim(), 10) || 0;
-                    return { hasUnpushed: count > 0, count };
-                })
-                .orElse(() => {
-                    // No upstream branch set - check if there are any commits at all
-                    return this.git(["rev-list", "--count", "HEAD"])
-                        .map((output) => {
-                            const count = Number.parseInt(output.trim(), 10) || 0;
-                            return { hasUnpushed: count > 0, count };
-                        })
-                        .orElse(() => FireflyOkAsync({ hasUnpushed: false, count: 0 }));
-                });
-        });
-    }
-
-    repositoryRoot(): FireflyAsyncResult<string> {
-        return this.git(["rev-parse", "--show-toplevel"]).map((output) => output.trim());
-    }
-
-    getLastTag(): FireflyAsyncResult<string | null> {
-        return this.git(["describe", "--tags", "--abbrev=0"])
-            .map((output) => {
-                const tag = output.trim();
-                return tag || null;
-            })
-            .orElse((error) => {
-                // If no tags found, return null instead of error
-                if (error.message.includes("No names found") || error.message.includes("fatal")) {
-                    return FireflyOkAsync(null);
-                }
-                return FireflyOkAsync(null);
+    /**
+     * Parses git status porcelain output into structured file status objects.
+     *
+     * @param output - The raw output from `git status --porcelain`
+     * @returns Array of GitFileStatus objects
+     */
+    private parseStatusOutput(output: string): GitFileStatus[] {
+        return output
+            .split("\n")
+            .filter((line) => line.length >= 3)
+            .map((line) => {
+                const indexStatus = line[0] ?? " ";
+                const workTreeStatus = line[1] ?? " ";
+                const path = line.slice(3).trim();
+                return { path, indexStatus, workTreeStatus };
             });
     }
 
-    listTags(): FireflyAsyncResult<string[]> {
-        return this.git(["tag", "--list"]).map((output) =>
-            output
-                .split("\n")
-                .map((tag) => tag.trim())
-                .filter((tag) => tag.length > 0)
-        );
+    getFiles(filter?: FileStatusFilter): FireflyAsyncResult<GitFileStatus[]> {
+        const includeStaged = filter?.staged ?? true;
+        const includeUnstaged = filter?.unstaged ?? true;
+
+        return this.git(["status", "--porcelain"]).map((output) => {
+            const files = this.parseStatusOutput(output);
+
+            return files.filter((file) => {
+                const isStaged = file.indexStatus !== " " && file.indexStatus !== "?";
+                const isUnstaged = file.workTreeStatus !== " " && file.workTreeStatus !== "?";
+
+                if (includeStaged && includeUnstaged) {
+                    return isStaged || isUnstaged;
+                }
+                if (includeStaged) {
+                    return isStaged;
+                }
+                if (includeUnstaged) {
+                    return isUnstaged;
+                }
+                return false;
+            });
+        });
     }
 
-    getCommitHashesSince(since: string | null): FireflyAsyncResult<string[]> {
-        const args = since ? ["rev-list", `${since}..HEAD`] : ["rev-list", "HEAD"];
-
-        return this.git(args).map((output) =>
-            output
-                .trim()
-                .split("\n")
-                .map((line) => line.trim())
-                .filter((line) => line.length > 0)
-        );
+    getFileNames(filter?: FileStatusFilter): FireflyAsyncResult<string[]> {
+        return this.getFiles(filter).map((files) => files.map((file) => file.path));
     }
 
-    getCommitDetails(hash: string): FireflyAsyncResult<string> {
-        const format = ["hash:%H", "date:%ci", "author:%an <%ae>", "subject:%s", "body:%b", "notes:%N"].join("%n");
-
-        return this.git(["show", "--no-patch", `--format=${format}`, hash]);
+    getCurrentBranch(): FireflyAsyncResult<string> {
+        return this.git(["rev-parse", "--abbrev-ref", "HEAD"]).map((output) => output.trim());
     }
 
-    hasAnyTags(): FireflyAsyncResult<boolean> {
-        return this.getLastTag().map((tag) => tag !== null);
-    }
-
-    getRemoteUrl(remote?: string): FireflyAsyncResult<string> {
-        const remoteName = remote ?? "origin";
-        return this.git(["remote", "get-url", remoteName]).map((output) => output.trim());
-    }
-
-    branchExists(branch: string): FireflyAsyncResult<boolean> {
+    hasBranch(branch: string): FireflyAsyncResult<boolean> {
         return this.git(["rev-parse", "--verify", branch])
             .map(() => true)
             .orElse(() => FireflyOkAsync(false));
     }
 
-    commit(message: string, options?: CommitOptions): FireflyAsyncResult<CommitResult> {
+    createCommit(message: string, options?: CommitOptions): FireflyAsyncResult<CommitResult> {
         if (options?.dryRun) {
             logger.verbose("GitService: Dry run, skipping commit");
             return FireflyOkAsync({ sha: "dry-run-sha" });
@@ -203,7 +173,46 @@ export class DefaultGitService implements IGitService {
         );
     }
 
-    tag(name: string, options?: TagOptions): FireflyAsyncResult<void> {
+    getCommitHashesSince(since: string | null): FireflyAsyncResult<string[]> {
+        const args = since ? ["rev-list", `${since}..HEAD`] : ["rev-list", "HEAD"];
+
+        return this.git(args).map((output) =>
+            output
+                .trim()
+                .split("\n")
+                .map((line) => line.trim())
+                .filter((line) => line.length > 0)
+        );
+    }
+
+    getCommitDetails(hash: string): FireflyAsyncResult<string> {
+        const format = ["hash:%H", "date:%ci", "author:%an <%ae>", "subject:%s", "body:%b", "notes:%N"].join("%n");
+
+        return this.git(["show", "--no-patch", `--format=${format}`, hash]);
+    }
+
+    getUnpushedCommits(): FireflyAsyncResult<UnpushedCommitsResult> {
+        return this.getCurrentBranch().andThen((branch) => {
+            const upstream = `origin/${branch}`;
+
+            return this.git(["rev-list", "--count", `${upstream}..HEAD`])
+                .map((output) => {
+                    const count = Number.parseInt(output.trim(), 10) || 0;
+                    return { hasUnpushed: count > 0, count };
+                })
+                .orElse(() => {
+                    // No upstream branch set - check if there are any commits at all
+                    return this.git(["rev-list", "--count", "HEAD"])
+                        .map((output) => {
+                            const count = Number.parseInt(output.trim(), 10) || 0;
+                            return { hasUnpushed: count > 0, count };
+                        })
+                        .orElse(() => FireflyOkAsync({ hasUnpushed: false, count: 0 }));
+                });
+        });
+    }
+
+    createTag(name: string, options?: CreateTagOptions): FireflyAsyncResult<void> {
         if (options?.dryRun) {
             logger.verbose(`GitService: Dry run, skipping tag creation: ${name}`);
             return FireflyOkAsync(undefined);
@@ -221,7 +230,81 @@ export class DefaultGitService implements IGitService {
             args.push("-s");
         }
 
-        return this.git(args).andThen(() => FireflyOkAsync(undefined));
+        return this.git(args).map(() => undefined);
+    }
+
+    deleteTag(name: string, options?: DeleteTagOptions): FireflyAsyncResult<void> {
+        const scope = options?.scope ?? "local";
+        const remote = options?.remote ?? "origin";
+
+        if (options?.dryRun) {
+            logger.verbose(`GitService: Dry run, skipping tag deletion (${scope}): ${name}`);
+            return FireflyOkAsync(undefined);
+        }
+
+        if (scope === "local") {
+            return this.git(["tag", "-d", name]).map(() => undefined);
+        }
+
+        if (scope === "remote") {
+            return this.git(["push", remote, `:refs/tags/${name}`]).map(() => undefined);
+        }
+
+        // scope === "both"
+        return this.git(["tag", "-d", name])
+            .andThen(() => this.git(["push", remote, `:refs/tags/${name}`]))
+            .map(() => undefined);
+    }
+
+    hasTag(name: string): FireflyAsyncResult<boolean> {
+        return this.git(["tag", "--list", name]).map((output) => output.trim() === name);
+    }
+
+    hasAnyTags(): FireflyAsyncResult<boolean> {
+        return this.getLatestTag().map((tag) => tag !== null);
+    }
+
+    listTags(): FireflyAsyncResult<string[]> {
+        return this.git(["tag", "--list"]).map((output) =>
+            output
+                .split("\n")
+                .map((tag) => tag.trim())
+                .filter((tag) => tag.length > 0)
+        );
+    }
+
+    getLatestTag(): FireflyAsyncResult<string | null> {
+        return this.git(["describe", "--tags", "--abbrev=0"])
+            .map((output) => {
+                const tag = output.trim();
+                return tag || null;
+            })
+            .orElse((error) => {
+                // If no tags found, return null instead of error
+                if (error.message.includes("No names found") || error.message.includes("fatal")) {
+                    return FireflyOkAsync(null);
+                }
+                return FireflyOkAsync(null);
+            });
+    }
+
+    getTagMessage(name: string): FireflyAsyncResult<string | null> {
+        return this.git(["tag", "-l", "--format=%(contents)", name])
+            .map((output) => {
+                const message = output.trim();
+                return message || null;
+            })
+            .orElse(() => FireflyOkAsync(null));
+    }
+
+    stage(paths: string | string[]): FireflyAsyncResult<void> {
+        const pathArray = Array.isArray(paths) ? paths : [paths];
+        return this.git(["add", ...pathArray]).map(() => undefined);
+    }
+
+    unstage(paths: string | string[]): FireflyAsyncResult<void> {
+        const pathArray = Array.isArray(paths) ? paths : [paths];
+        return this.git(["reset", "HEAD", "--", ...pathArray]).map(() => undefined);
     }
 
     push(options?: PushOptions): FireflyAsyncResult<void> {
@@ -247,92 +330,7 @@ export class DefaultGitService implements IGitService {
             args.push("--follow-tags");
         }
 
-        return this.git(args).andThen(() => FireflyOkAsync(undefined));
-    }
-
-    add(paths: string | string[]): FireflyAsyncResult<void> {
-        const pathArray = Array.isArray(paths) ? paths : [paths];
-        return this.git(["add", ...pathArray]).andThen(() => FireflyOkAsync(undefined));
-    }
-
-    deleteLocalTag(name: string, options?: Omit<TagOptions, "message" | "sign">): FireflyAsyncResult<void> {
-        if (options?.dryRun) {
-            logger.verbose(`GitService: Dry run, skipping local tag deletion: ${name}`);
-            return FireflyOkAsync(undefined);
-        }
-
-        return this.git(["tag", "-d", name]).andThen(() => FireflyOkAsync(undefined));
-    }
-
-    deleteRemoteTag(name: string, options?: PushOptions): FireflyAsyncResult<void> {
-        if (options?.dryRun) {
-            logger.verbose(`GitService: Dry run, skipping remote tag deletion: ${name}`);
-            return FireflyOkAsync(undefined);
-        }
-
-        const remote = options?.remote ?? "origin";
-        return this.git(["push", remote, `:refs/tags/${name}`]).andThen(() => FireflyOkAsync(undefined));
-    }
-
-    tagExists(name: string): FireflyAsyncResult<boolean> {
-        return this.git(["tag", "--list", name]).map((output) => output.trim() === name);
-    }
-
-    getTagMessage(name: string): FireflyAsyncResult<string | null> {
-        return this.git(["tag", "-l", "--format=%(contents)", name])
-            .map((output) => {
-                const message = output.trim();
-                return message || null;
-            })
-            .orElse(() => FireflyOkAsync(null));
-    }
-
-    /**
-     * Parses git status porcelain output into structured file status objects.
-     */
-    private parseStatusOutput(output: string): GitFileStatus[] {
-        return output
-            .split("\n")
-            .filter((line) => line.length >= 3)
-            .map((line) => {
-                const indexStatus = line[0] ?? " ";
-                const workTreeStatus = line[1] ?? " ";
-                const path = line.slice(3).trim();
-                return { path, indexStatus, workTreeStatus };
-            });
-    }
-
-    getStagedFiles(): FireflyAsyncResult<GitFileStatus[]> {
-        return this.git(["status", "--porcelain"]).map((output) => {
-            const files = this.parseStatusOutput(output);
-            return files.filter((file) => file.indexStatus !== " " && file.indexStatus !== "?");
-        });
-    }
-
-    getStagedFileNames(): FireflyAsyncResult<string[]> {
-        return this.getStagedFiles().map((files) => files.map((file) => file.path));
-    }
-
-    getUnstagedFiles(): FireflyAsyncResult<GitFileStatus[]> {
-        return this.git(["status", "--porcelain"]).map((output) => {
-            const files = this.parseStatusOutput(output);
-            return files.filter((file) => file.workTreeStatus !== " " && file.workTreeStatus !== "?");
-        });
-    }
-
-    getUnstagedFileNames(): FireflyAsyncResult<string[]> {
-        return this.getUnstagedFiles().map((files) => files.map((file) => file.path));
-    }
-
-    getModifiedFiles(): FireflyAsyncResult<GitFileStatus[]> {
-        return this.git(["status", "--porcelain"]).map((output) => {
-            const files = this.parseStatusOutput(output);
-            return files.filter((file) => file.indexStatus !== "?" || file.workTreeStatus !== "?");
-        });
-    }
-
-    getModifiedFileNames(): FireflyAsyncResult<string[]> {
-        return this.getModifiedFiles().map((files) => files.map((file) => file.path));
+        return this.git(args).map(() => undefined);
     }
 }
 

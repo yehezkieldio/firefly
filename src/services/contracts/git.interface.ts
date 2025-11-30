@@ -4,7 +4,7 @@ import type { DryRunOptions } from "#/infrastructure/dry-run";
 /**
  * Represents the current status of a git working directory.
  */
-export interface GitStatus extends DryRunOptions {
+export interface GitStatus {
     /**
      * Whether there are changes staged for commit
      */
@@ -89,6 +89,16 @@ export interface CommitOptions extends DryRunOptions {
 }
 
 /**
+ * Scope for tag operations.
+ */
+export type TagScope = "local" | "remote" | "both";
+
+/**
+ * Operations that can be performed on tags.
+ */
+export type TagOperation = "create" | "delete" | "check" | "list" | "getMessage";
+
+/**
  * Result of a successful commit operation.
  */
 export interface CommitResult {
@@ -99,19 +109,38 @@ export interface CommitResult {
 }
 
 /**
- * Options for git tag operations.
+ * Options for creating git tags.
  */
-export interface TagOptions extends DryRunOptions {
+export interface CreateTagOptions extends DryRunOptions {
     /**
      * Annotation message for the tag (creates annotated tag)
-     *
      */
     readonly message?: string;
 
     /**
-     *  Whether to GPG sign the tag
+     * Whether to GPG sign the tag
      */
     readonly sign?: boolean;
+}
+
+/**
+ * Options for deleting git tags.
+ */
+export interface DeleteTagOptions extends DryRunOptions {
+    /**
+     * Scope of the delete operation.
+     * - "local": Delete only from local repository
+     * - "remote": Delete only from remote repository
+     * - "both": Delete from both local and remote
+     * @default "local"
+     */
+    readonly scope?: TagScope;
+
+    /**
+     * Remote name for remote operations.
+     * @default "origin"
+     */
+    readonly remote?: string;
 }
 
 /**
@@ -141,49 +170,89 @@ export interface PushOptions extends DryRunOptions {
 }
 
 /**
+ * Filter options for retrieving file status.
+ */
+export interface FileStatusFilter {
+    /**
+     * Include staged files.
+     * @default true
+     */
+    readonly staged?: boolean;
+
+    /**
+     * Include unstaged files.
+     * @default true
+     */
+    readonly unstaged?: boolean;
+
+    /**
+     * Return only file names instead of full status objects.
+     * @default false
+     */
+    readonly namesOnly?: boolean;
+}
+
+/**
  * Service for git operations.
  */
 export interface IGitService {
     /**
      * Checks if the current directory is inside a git repository.
      */
-    isRepository(): FireflyAsyncResult<boolean>;
-
-    /**
-     * Gets the name of the current branch.
-     */
-    currentBranch(): FireflyAsyncResult<string>;
-
-    /**
-     * Gets the detailed status of the working directory.
-     */
-    status(): FireflyAsyncResult<GitStatus>;
-
-    /**
-     * Checks if the working directory is clean (no changes).
-     */
-    isClean(): FireflyAsyncResult<boolean>;
-
-    /**
-     * Checks for commits that haven't been pushed to the remote.
-     */
-    unpushedCommits(): FireflyAsyncResult<UnpushedCommitsResult>;
+    isInsideRepository(): FireflyAsyncResult<boolean>;
 
     /**
      * Gets the absolute path to the repository root.
      */
-    repositoryRoot(): FireflyAsyncResult<string>;
+    getRepositoryRoot(): FireflyAsyncResult<string>;
 
     /**
-     * Gets the most recent tag in the repository.
-     * @returns The tag name, or null if no tags exist.
+     * Gets the URL of a remote.
+     * @param remote - Remote name (defaults to "origin")
      */
-    getLastTag(): FireflyAsyncResult<string | null>;
+    getRemoteUrl(remote?: string): FireflyAsyncResult<string>;
 
     /**
-     * Lists all tags in the repository.
+     * Gets the detailed status of the working directory.
      */
-    listTags(): FireflyAsyncResult<string[]>;
+    getStatus(): FireflyAsyncResult<GitStatus>;
+
+    /**
+     * Checks if the working directory is clean (no changes).
+     */
+    isWorkingTreeClean(): FireflyAsyncResult<boolean>;
+
+    /**
+     * Gets files based on filter criteria.
+     * @param filter - Options to filter which files to return
+     * @returns Array of files matching the filter criteria.
+     */
+    getFiles(filter?: FileStatusFilter): FireflyAsyncResult<GitFileStatus[]>;
+
+    /**
+     * Gets file names based on filter criteria.
+     * @param filter - Options to filter which files to return
+     * @returns Array of file paths matching the filter criteria.
+     */
+    getFileNames(filter?: FileStatusFilter): FireflyAsyncResult<string[]>;
+
+    /**
+     * Gets the name of the current branch.
+     */
+    getCurrentBranch(): FireflyAsyncResult<string>;
+
+    /**
+     * Checks if a branch exists in the repository.
+     * @param branch - Branch name to check
+     */
+    hasBranch(branch: string): FireflyAsyncResult<boolean>;
+
+    /**
+     * Creates a new commit with the given message.
+     * @param message - Commit message
+     * @param options - Commit options including signing and dry-run
+     */
+    createCommit(message: string, options?: CommitOptions): FireflyAsyncResult<CommitResult>;
 
     /**
      * Gets all commit hashes since a given reference.
@@ -200,67 +269,45 @@ export interface IGitService {
     getCommitDetails(hash: string): FireflyAsyncResult<string>;
 
     /**
-     * Checks if the repository has any tags.
+     * Checks for commits that haven't been pushed to the remote.
      */
-    hasAnyTags(): FireflyAsyncResult<boolean>;
-
-    /**
-     * Gets the URL of a remote.
-     * @param remote - Remote name (defaults to "origin")
-     */
-    getRemoteUrl(remote?: string): FireflyAsyncResult<string>;
-
-    /**
-     * Checks if a branch exists in the repository.
-     * @param branch - Branch name to check
-     */
-    branchExists(branch: string): FireflyAsyncResult<boolean>;
-
-    /**
-     * Creates a new commit with the given message.
-     * @param message - Commit message
-     * @param options - Commit options including signing and dry-run
-     */
-    commit(message: string, options?: CommitOptions): FireflyAsyncResult<CommitResult>;
+    getUnpushedCommits(): FireflyAsyncResult<UnpushedCommitsResult>;
 
     /**
      * Creates a new tag.
      * @param name - Tag name (e.g., "v1.0.0")
-     * @param options - Tag options including message and dry-run
+     * @param options - Tag options including message and signing
      */
-    tag(name: string, options?: TagOptions): FireflyAsyncResult<void>;
+    createTag(name: string, options?: CreateTagOptions): FireflyAsyncResult<void>;
 
     /**
-     * Pushes commits and/or tags to the remote.
-     * @param options - Push options including remote, branch, and dry-run
-     */
-    push(options?: PushOptions): FireflyAsyncResult<void>;
-
-    /**
-     * Stages files for the next commit.
-     * @param paths - File path(s) to stage
-     */
-    add(paths: string | string[]): FireflyAsyncResult<void>;
-
-    /**
-     * Deletes a local tag.
+     * Deletes a tag from local and/or remote repository.
      * @param name - Tag name to delete
-     * @param options - Dry-run options
+     * @param options - Delete options including scope and remote
      */
-    deleteLocalTag(name: string, options?: DryRunOptions): FireflyAsyncResult<void>;
-
-    /**
-     * Deletes a remote tag by pushing a delete reference.
-     * @param name - Tag name to delete
-     * @param options - Push options including remote and dry-run
-     */
-    deleteRemoteTag(name: string, options?: PushOptions): FireflyAsyncResult<void>;
+    deleteTag(name: string, options?: DeleteTagOptions): FireflyAsyncResult<void>;
 
     /**
      * Checks if a tag exists in the repository.
      * @param name - Tag name to check
      */
-    tagExists(name: string): FireflyAsyncResult<boolean>;
+    hasTag(name: string): FireflyAsyncResult<boolean>;
+
+    /**
+     * Checks if the repository has any tags.
+     */
+    hasAnyTags(): FireflyAsyncResult<boolean>;
+
+    /**
+     * Lists all tags in the repository.
+     */
+    listTags(): FireflyAsyncResult<string[]>;
+
+    /**
+     * Gets the most recent tag in the repository.
+     * @returns The tag name, or null if no tags exist.
+     */
+    getLatestTag(): FireflyAsyncResult<string | null>;
 
     /**
      * Gets the message of an annotated tag.
@@ -270,39 +317,20 @@ export interface IGitService {
     getTagMessage(name: string): FireflyAsyncResult<string | null>;
 
     /**
-     * Gets all staged files with their status information.
-     * @returns Array of files that are staged for commit.
+     * Stages files for the next commit.
+     * @param paths - File path(s) to stage
      */
-    getStagedFiles(): FireflyAsyncResult<GitFileStatus[]>;
+    stage(paths: string | string[]): FireflyAsyncResult<void>;
 
     /**
-     * Gets the names of all staged files.
-     * @returns Array of file paths that are staged for commit.
+     * Unstages files from the staging area.
+     * @param paths - File path(s) to unstage
      */
-    getStagedFileNames(): FireflyAsyncResult<string[]>;
+    unstage(paths: string | string[]): FireflyAsyncResult<void>;
 
     /**
-     * Gets all unstaged modified files with their status information.
-     * These are tracked files that have been modified but not staged.
-     * @returns Array of files with unstaged modifications.
+     * Pushes commits and/or tags to the remote.
+     * @param options - Push options including remote, branch, and dry-run
      */
-    getUnstagedFiles(): FireflyAsyncResult<GitFileStatus[]>;
-
-    /**
-     * Gets the names of all unstaged modified files.
-     * @returns Array of file paths with unstaged modifications.
-     */
-    getUnstagedFileNames(): FireflyAsyncResult<string[]>;
-
-    /**
-     * Gets all modified files (both staged and unstaged) with their status information.
-     * @returns Array of all modified files.
-     */
-    getModifiedFiles(): FireflyAsyncResult<GitFileStatus[]>;
-
-    /**
-     * Gets the names of all modified files (both staged and unstaged).
-     * @returns Array of all modified file paths.
-     */
-    getModifiedFileNames(): FireflyAsyncResult<string[]>;
+    push(options?: PushOptions): FireflyAsyncResult<void>;
 }

@@ -10,7 +10,6 @@
  */
 
 import type { BrandedServiceKey, ServiceDefinition, ServiceFactoryContext } from "#/core/service/service.types";
-import type { ICommitHistoryService } from "#/services/contracts/commit-history.interface";
 import type { IFileSystemService } from "#/services/contracts/filesystem.interface";
 import type { IGitService } from "#/services/contracts/git.interface";
 import type { IPackageJsonService } from "#/services/contracts/package-json.interface";
@@ -20,7 +19,6 @@ type ServiceRegistryType = {
     readonly fs: IFileSystemService;
     readonly packageJson: IPackageJsonService;
     readonly git: IGitService;
-    readonly commitHistory: ICommitHistoryService;
 };
 
 /**
@@ -54,14 +52,6 @@ export const SERVICE_DEFINITIONS = {
         factory: async ({ basePath }) => {
             const { createGitService } = await import("#/services/implementations/git.service");
             return createGitService(basePath);
-        },
-    }),
-    commitHistory: defineService<ICommitHistoryService>({
-        dependencies: ["git"],
-        factory: async ({ getService }) => {
-            const git = await getService("git");
-            const { createCommitHistoryService } = await import("#/services/implementations/commit-history.service");
-            return createCommitHistoryService(git);
         },
     }),
 } as const satisfies Record<string, ServiceDefinition<unknown, ServiceRegistryType>>;
