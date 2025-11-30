@@ -1,5 +1,4 @@
 import { ResultAsync } from "neverthrow";
-import type { ServiceFactoryContext } from "#/core/service/service.types";
 import {
     ALL_SERVICE_KEYS,
     type ResolvedServices,
@@ -8,7 +7,8 @@ import {
     type ServiceKeys,
     type ServiceKeysFromArray,
     type ServiceRegistry,
-} from "#/core/service/service-registry";
+} from "#/core/service/service.registry";
+import type { ServiceFactoryContext } from "#/core/service/service.types";
 
 /**
  * Tracks services currently being resolved to detect circular dependencies.
