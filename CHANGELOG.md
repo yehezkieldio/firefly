@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.9 (December 1, 2025)
+
+### <!-- 16 -->🤖 CI/CD
+- [`5828491`](https://github.com/yehezkieldio/firefly/commit/5828491f5f7d162a40bb5cdf5d4300280da0fa32) Add manual trigger for publish latest workflow and adjust branch condition
 ## firefly@3.0.8 (December 1, 2025)
 ### 📝 Release Notes
 This hotfix restores the missing TypeScript declaration files for Firefly.
