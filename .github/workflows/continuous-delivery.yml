@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - v3
+  workflow_dispatch:
+    inputs:
+      publish_latest:
+        description: "Set to true to run the Publish Latest job manually"
+        required: false
+        type: boolean
+        default: false
 permissions:
   id-token: write
   contents: read
@@ -57,10 +64,12 @@ jobs:
     name: Publish Latest
     needs: detect-changes
     if: |
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/master' &&
-      needs.detect-changes.outputs.is_release == 'true' &&
-      needs.detect-changes.outputs.is_stable == 'true'
+      (github.event_name == 'push' &&
+       github.ref == 'refs/heads/v3' &&
+       needs.detect-changes.outputs.is_release == 'true' &&
+       needs.detect-changes.outputs.is_stable == 'true') ||
+      (github.event_name == 'workflow_dispatch' &&
+       github.event.inputs.publish_latest == 'true')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
