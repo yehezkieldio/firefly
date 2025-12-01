@@ -13,6 +13,7 @@ import { WorkflowOrchestrator } from "#/core/execution/workflow.orchestrator";
 import { CommandRegistry } from "#/core/registry/command.registry";
 import { notFoundErrAsync, validationErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult } from "#/core/result/result.types";
+import { formatZodErrors } from "#/core/result/schema.utilities";
 import { Workspace } from "#/core/workspace/workspace";
 import { logger } from "#/infrastructure/logging";
 
@@ -61,6 +62,11 @@ export function createFireflyCLI(): Command {
     return program;
 }
 
+/**
+ * Creates a command registry for the CLI.
+ *
+ * @returns Configured command registry with all commands registered
+ */
 function createCommandRegistry(): CommandRegistry {
     const registry = new CommandRegistry();
     registry.registerCommand(releaseCommand);
@@ -172,16 +178,15 @@ function executeWithOrchestrator(
     const parseResult = configSchema.safeParse(config);
 
     if (!parseResult.success) {
-        const errors = parseResult.error.issues
-            .map((issue) => `${issue.message} for ${issue.path.join(".")}`)
-            .join("\n");
+        const errors = formatZodErrors(parseResult.error);
 
-        if (process.env.FIREFLY_DEBUG_SHOW_RAW_ERROR) {
+        const showRawError = Boolean(process.env.FIREFLY_DEBUG_SHOW_RAW_ERROR);
+        if (showRawError) {
             logger.error(parseResult.error);
         }
 
         return validationErrAsync({
-            message: `${errors}`,
+            message: errors,
         });
     }
 
@@ -192,7 +197,13 @@ function executeWithOrchestrator(
     return orchestrator.executeCommand(command, parsedConfig);
 }
 
-/** Creates a workflow orchestrator with the given configuration. */
+/**
+ * Creates a workflow orchestrator with the given configuration.
+ *
+ * @param config - The runtime configuration
+ * @param workspace - The workspace for file operations
+ * @returns Configured workflow orchestrator
+ */
 function createOrchestrator(config: RuntimeConfig, workspace: Workspace): WorkflowOrchestrator {
     return new WorkflowOrchestrator({
         workspace,
@@ -202,6 +213,11 @@ function createOrchestrator(config: RuntimeConfig, workspace: Workspace): Workfl
     });
 }
 
+/**
+ * Logs version information for the Firefly CLI.
+ *
+ * @param commandName - The name of the executed command
+ */
 function logVersionInfo(commandName: string): void {
     const fireflyVersion = colors.dim(`v${String(process.env.FIREFLY_VERSION)}`);
     const fireflyLabel = `${colors.magenta("firefly")} ${fireflyVersion}`;
@@ -214,6 +230,12 @@ function logVersionInfo(commandName: string): void {
     }
 }
 
+/**
+ * Get a description for a specific command.
+ *
+ * @param commandName - The name of the command
+ * @returns A description of the command
+ */
 function getCommandDescription(commandName: string): string {
     const descriptions: Record<string, string> = {
         release: "Automated semantic versioning, changelog generation, and GitHub release creation",

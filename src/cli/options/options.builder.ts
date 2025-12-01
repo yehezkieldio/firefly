@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import { err, ok, type Result } from "neverthrow";
 import type { ZodObject, ZodRawShape } from "zod";
 import z from "zod";
+import { camelToKebab } from "#/cli/options/options.utilities";
 import { parseSchema } from "#/core/result/schema.utilities";
 
 // Result type for option value parsing/validation. */
@@ -11,21 +12,44 @@ type ValidationResult<T> = Result<T, string>;
  * Context object containing all information needed to register a single CLI option.
  */
 interface OptionContext {
-    /** The Commander command to register the option on. */
+    /**
+     * The Commander command to register the option on.
+     */
     command: Command;
-    /** The schema key (camelCase). */
+
+    /**
+     * The schema key (camelCase).
+     */
     key: string;
-    /** The raw Zod field (may include wrappers like optional/default). */
+
+    /**
+     * The raw Zod field (may include wrappers like optional/default).
+     */
     rawField: z.ZodType;
-    /** The unwrapped inner Zod field. */
+
+    /**
+     * The unwrapped inner Zod field.
+     */
     field: z.ZodType;
-    /** The Commander option flag string (e.g., "-bt, --bump-strategy"). */
+
+    /**
+     * The Commander option flag string (e.g., "-bt, --bump-strategy").
+     */
     optionFlag: string;
-    /** The kebab-case option name. */
+
+    /**
+     * The kebab-case option name.
+     */
     optionName: string;
-    /** The option description from the Zod schema. */
+
+    /**
+     * The option description from the Zod schema.
+     */
     description: string;
-    /** The default value extracted from the schema. */
+
+    /**
+     * The default value extracted from the schema.
+     */
     parsedDefault: unknown;
 }
 
@@ -93,11 +117,14 @@ export class OptionsBuilder {
     /**
      * Builds the context object for registering a single option.
      *
+     * @param command - The Commander command
+     * @param key - The schema key
+     * @param rawField - The raw Zod field
      * @returns The option context, or null if the option already exists
      */
     private buildOptionContext(command: Command, key: string, rawField: z.ZodType): OptionContext | null {
         const field = this.unwrapSchema(rawField);
-        const optionName = this.camelToKebab(key);
+        const optionName = camelToKebab(key);
         const shorthand = this.shorthandMap.get(key);
         const shorthandPrefix = shorthand && shorthand.length === 1 ? "-" : "--";
         const optionFlag = shorthand ? `${shorthandPrefix}${shorthand}, --${optionName}` : `--${optionName}`;
@@ -116,6 +143,10 @@ export class OptionsBuilder {
 
     /**
      * Extracts the default value from a Zod field by parsing an empty object.
+     *
+     * @param key - The schema key
+     * @param rawField - The raw Zod field
+     * @returns The default value, or undefined if none
      */
     private extractDefaultValue(key: string, rawField: z.ZodType): unknown {
         const single = z.object({ [key]: rawField }).partial();
@@ -125,6 +156,8 @@ export class OptionsBuilder {
 
     /**
      * Registers a single option based on its type.
+     *
+     * @param ctx - The option context
      */
     private registerOption(ctx: OptionContext): void {
         const { command, rawField, field, optionFlag, description } = ctx;
@@ -153,7 +186,11 @@ export class OptionsBuilder {
         this.registerGenericOption(ctx);
     }
 
-    /** Registers a number option with numeric parsing. */
+    /**
+     * Registers a number option with numeric parsing.
+     *
+     * @param ctx - The option context
+     */
     private registerNumberOption(ctx: OptionContext): void {
         const { command, rawField, optionFlag, optionName, description, parsedDefault } = ctx;
         const parser = this.createNumberParser(rawField, optionName);
@@ -166,7 +203,11 @@ export class OptionsBuilder {
         );
     }
 
-    /** Registers an enum option with choice validation. */
+    /**
+     * Registers an enum option with choice validation.
+     *
+     * @param ctx - The option context
+     */
     private registerEnumOption(ctx: OptionContext): void {
         const { command, rawField, field, optionFlag, optionName, description, parsedDefault } = ctx;
         const choices = this.getEnumChoices(field);
@@ -181,7 +222,11 @@ export class OptionsBuilder {
         );
     }
 
-    /** Registers a string option with validation. */
+    /**
+     *  Registers a string option with validation.
+     *
+     * @param ctx - The option context
+     */
     private registerStringOption(ctx: OptionContext): void {
         const { command, rawField, optionFlag, optionName, description, parsedDefault } = ctx;
         const parser = this.createStringParser(rawField);
@@ -194,7 +239,11 @@ export class OptionsBuilder {
         );
     }
 
-    /** Registers a generic option for other Zod types. */
+    /**
+     * Registers a generic option for other Zod types.
+     *
+     * @param ctx - The option context
+     */
     private registerGenericOption(ctx: OptionContext): void {
         const { command, rawField, optionFlag, optionName, description, parsedDefault } = ctx;
         const parser = this.createGenericParser(rawField);
@@ -207,6 +256,9 @@ export class OptionsBuilder {
      *
      * Commander expects parsers to return values directly or throw on error.
      * This wrapper converts our Result-based parsers to that pattern.
+     *
+     * @param parser - The Result-based parser function
+     * @returns A Commander-compatible parser function
      */
     private wrapParser<T>(parser: (input: string) => ValidationResult<T>): (input: string) => T {
         return (input: string) => {
@@ -219,7 +271,14 @@ export class OptionsBuilder {
         };
     }
 
-    /** Creates a parser for number options. */
+    /**
+     * Creates a parser for number options.
+     *
+     * @template T - The expected return type
+     * @param rawField - The raw Zod field
+     * @param optionName - The option name for error messages
+     * @returns A parser function that converts strings to numbers with validation
+     */
     private createNumberParser<T>(rawField: z.ZodType, optionName: string): (input: string) => ValidationResult<T> {
         return (input: string) => {
             const num = Number(input);
@@ -233,7 +292,15 @@ export class OptionsBuilder {
         };
     }
 
-    /** Creates a parser for enum options. */
+    /**
+     * Creates a parser for enum options.
+     *
+     * @template T - The expected return type
+     * @param rawField - The raw Zod field
+     * @param optionName - The option name for error messages
+     * @param choices - The valid enum choices
+     * @returns A parser function that validates input against the enum choices
+     */
     private createEnumParser<T>(
         rawField: z.ZodType,
         optionName: string,
@@ -247,7 +314,13 @@ export class OptionsBuilder {
         };
     }
 
-    /** Creates a parser for string options. */
+    /**
+     * Creates a parser for string options.
+     *
+     * @template T - The expected return type
+     * @param rawField - The raw Zod field
+     * @returns A parser function that validates input against the schema
+     */
     private createStringParser<T>(rawField: z.ZodType): (input: string) => ValidationResult<T> {
         return (input: string) => {
             const result = parseSchema(rawField, input);
@@ -256,7 +329,13 @@ export class OptionsBuilder {
         };
     }
 
-    /** Creates a generic parser using Zod validation. */
+    /**
+     * Creates a generic parser using Zod validation.
+     *
+     * @template T - The expected return type
+     * @param rawField - The raw Zod field
+     * @returns A parser function that validates input against the schema
+     */
     private createGenericParser<T>(rawField: z.ZodType): (input: string) => ValidationResult<T> {
         return (input: string) => {
             const result = parseSchema(rawField, input);
@@ -267,8 +346,10 @@ export class OptionsBuilder {
 
     /**
      * Gets the internal definition object from a Zod type.
-     *
      * Handles both modern Zod v4 (_zod.def) and legacy (_def) structures.
+     *
+     * @param field - The raw Zod field
+     * @returns The internal definition object
      */
     private getInternalDef(field: z.ZodType): {
         innerType?: z.ZodType;
@@ -286,6 +367,9 @@ export class OptionsBuilder {
 
     /**
      * Unwraps Zod wrapper types (optional, default, etc.) to get the inner type.
+     *
+     * @param field - The raw Zod field
+     * @returns The unwrapped Zod type
      */
     private unwrapSchema(field: z.ZodType): z.ZodType {
         if (field instanceof z.ZodDefault) {
@@ -306,42 +390,26 @@ export class OptionsBuilder {
         return field;
     }
 
-    /** Checks if a field is a boolean type (possibly wrapped). */
+    /**
+     * Checks if a field is a boolean type (possibly wrapped).
+     *
+     * @param rawField - The raw Zod field
+     * @returns True if the field is boolean, false otherwise
+     */
     private isBooleanField(rawField: z.ZodType): boolean {
         const def = this.getInternalDef(rawField);
         const inner = (def.innerType ?? def.schema) as z.ZodType | undefined;
         return inner instanceof z.ZodBoolean;
     }
 
-    /** Extracts enum choices from a ZodEnum field. */
+    /**
+     * Extracts enum choices from a ZodEnum field.
+     *
+     * @param field - The ZodEnum field
+     * @returns The array of valid enum choices
+     */
     private getEnumChoices(field: z.ZodType): readonly string[] {
         const def = this.getInternalDef(field);
         return def.values ?? [];
-    }
-
-    /**
-     * Compound words that should be treated as single units in kebab-case.
-     * These are typically brand names or technical terms that shouldn't be split.
-     */
-    private readonly compoundWords = ["GitHub", "GitLab", "BitBucket"];
-
-    /**
-     * Converts a camelCase string to kebab-case.
-     *
-     * Handles compound words (e.g., "GitHub", "GitLab") as single units.
-     *
-     * @example
-     * camelToKebab("bumpStrategy") // "bump-strategy"
-     * camelToKebab("skipGitHubRelease") // "skip-github-release"
-     */
-    private camelToKebab(str: string): string {
-        let result = str;
-        for (const word of this.compoundWords) {
-            // Insert hyphen before compound word when preceded by lowercase letter
-            result = result.replace(new RegExp(`([a-z])${word}`, "g"), `$1-${word.toLowerCase()}`);
-            // Handle compound word at start of string
-            result = result.replace(new RegExp(`^${word}`, "g"), word.toLowerCase());
-        }
-        return result.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
     }
 }

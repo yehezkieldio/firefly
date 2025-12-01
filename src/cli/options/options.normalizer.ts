@@ -1,5 +1,6 @@
 import type { ZodObject, ZodRawShape } from "zod";
 import type { ParsedCLIOptions } from "#/cli/options/options.types";
+import { camelToKebab } from "#/cli/options/options.utilities";
 
 /**
  * Normalizes CLI option names between Commander.js and Zod schema conventions.
@@ -56,7 +57,7 @@ export class OptionsNormalizer {
         const shape = schema.shape;
 
         for (const camelKey of Object.keys(shape)) {
-            const kebabKey = OptionsNormalizer.toKebab(camelKey);
+            const kebabKey = camelToKebab(camelKey);
             if (kebabKey !== camelKey) {
                 // Commander converts --kebab-case to kebabCase (removing dashes)
                 const commanderKey = kebabKey.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
@@ -65,41 +66,5 @@ export class OptionsNormalizer {
         }
 
         return mappings;
-    }
-
-    /**
-     * Compound words that should be treated as single units in kebab-case.
-     * These are typically brand names or technical terms that shouldn't be split.
-     */
-    private static readonly COMPOUND_WORDS = ["GitHub", "GitLab", "BitBucket"];
-
-    /**
-     * Converts a camelCase string to kebab-case.
-     *
-     * Handles compound words (e.g., "GitHub", "GitLab") as single units
-     * to ensure consistent CLI flag naming.
-     *
-     * @param camelCase - The camelCase string to convert
-     * @returns The kebab-case equivalent
-     *
-     * @example
-     * ```ts
-     * OptionsNormalizer.toKebab("bumpStrategy") // "bump-strategy"
-     * OptionsNormalizer.toKebab("skipGitHubRelease") // "skip-github-release"
-     * OptionsNormalizer.toKebab("skipGitLabRelease") // "skip-gitlab-release"
-     * ```
-     */
-    static toKebab(camelCase: string): string {
-        let result = camelCase;
-        for (const word of OptionsNormalizer.COMPOUND_WORDS) {
-            // Insert hyphen before compound word when preceded by lowercase letter
-            result = result.replace(new RegExp(`([a-z])${word}`, "g"), `$1-${word.toLowerCase()}`);
-            // Handle compound word at start of string
-            result = result.replace(new RegExp(`^${word}`, "g"), word.toLowerCase());
-        }
-        return result
-            .replace(/([a-z])([A-Z])/g, "$1-$2")
-            .toLowerCase()
-            .replace(/_/g, "-");
     }
 }

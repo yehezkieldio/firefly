@@ -5,6 +5,16 @@ import { FireflyErr, FireflyOk } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 
 /**
+ * Formats Zod validation errors into a human-readable string.
+ *
+ * @param error - The Zod error object
+ * @returns A formatted string with each issue on a new line
+ */
+export function formatZodErrors(error: z.ZodError): string {
+    return error.issues.map((issue) => `${issue.message} for ${issue.path.join(".")}`).join("\n");
+}
+
+/**
  * A tuple type that ensures the array has at least one element.
  */
 type NonEmptyArray<T> = readonly [T, ...T[]];

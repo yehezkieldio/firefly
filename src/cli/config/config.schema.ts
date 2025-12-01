@@ -15,8 +15,6 @@ export const FireflyConfigSchema = z
 
 /**
  * TypeScript type for Firefly configuration.
- *
- * Use this type when you need to reference the configuration shape
- * without runtime validation.
+ * Use this type when you need to reference the configuration shape without runtime validation.
  */
 export type FireflyConfig = z.infer<typeof FireflyConfigSchema>;

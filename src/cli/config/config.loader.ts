@@ -1,8 +1,7 @@
 import { type ConfigLayerMeta, loadConfig, type ResolvedConfig } from "c12";
 import { colors } from "consola/utils";
-import type z from "zod";
 import type { RuntimeConfig } from "#/cli/options/options.types";
-import { FireflyOkAsync, validationErrAsync } from "#/core/result/result.constructors";
+import { FireflyOkAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult } from "#/core/result/result.types";
 import { wrapPromise } from "#/core/result/result.utilities";
 import { logger } from "#/infrastructure/logging";
@@ -11,23 +10,27 @@ import { logger } from "#/infrastructure/logging";
  * Options for configuring the ConfigLoader.
  */
 export interface ConfigLoaderOptions {
-    /** Working directory to search for config files. Defaults to process.cwd(). */
+    /**
+     * Working directory to search for config files. Defaults to process.cwd().
+     */
     cwd?: string;
-    /** Explicit path to a config file, overriding auto-detection. */
+
+    /**
+     * Explicit path to a config file, overriding auto-detection.
+     */
     configFile?: string;
-    /** The command being executed, used to extract command-specific config. */
+
+    /**
+     * The command being executed, used to extract command-specific config.
+     */
     commandName?: string;
-    /** Optional Zod schema to validate the loaded config against. */
-    schema?: z.ZodSchema;
 }
 
 /**
  * Loads and resolves Firefly configuration from files.
  *
  * Supports multiple config file formats:
- * - firefly.config.ts
- * - firefly.config.js
- * - firefly.config.json
+ * - .js, .ts, .mjs, .cjs, .mts, .cts .json, .jsonrc, .json5, .yaml, .yml, .toml
  *
  * Configuration is merged in the following order (later overrides earlier):
  * 1. Default values from schemas
@@ -56,7 +59,7 @@ export class ConfigLoader {
      * @returns Async result containing the merged configuration or an error
      */
     load(): FireflyAsyncResult<RuntimeConfig> {
-        const { cwd = process.cwd(), configFile, schema } = this.options;
+        const { cwd = process.cwd(), configFile } = this.options;
 
         return wrapPromise(
             loadConfig<RuntimeConfig>({
@@ -67,8 +70,13 @@ export class ConfigLoader {
             })
         ).andThen((result: ResolvedConfig<RuntimeConfig, ConfigLayerMeta>) => {
             this.logConfigFile(result.configFile);
-            const finalConfig = this.extractCommandConfig(result.config ?? {});
-            return this.validateConfig(finalConfig, schema);
+
+            const showFileConfig = Boolean(process.env.FIREFLY_DEBUG_SHOW_FILE_CONFIG);
+            if (showFileConfig) {
+                logger.verbose(JSON.stringify(result.config, null, 2));
+            }
+
+            return FireflyOkAsync(this.extractCommandConfig(result.config ?? {}));
         });
     }
 
@@ -83,6 +91,9 @@ export class ConfigLoader {
      *
      * If a commandName is specified, this merges the command's nested config
      * (e.g., `release: { ... }`) with the root config.
+     *
+     * @param config - The full runtime configuration
+     * @returns The extracted and merged configuration
      */
     private extractCommandConfig(config: RuntimeConfig): RuntimeConfig {
         const commandName = this.options.commandName;
@@ -105,32 +116,5 @@ export class ConfigLoader {
             ...baseConfig,
             ...(commandSpecificConfig as Record<string, unknown>),
         };
-    }
-
-    /**
-     * Validates the configuration against the provided schema.
-     */
-    private validateConfig(config: RuntimeConfig, schema?: z.ZodSchema): FireflyAsyncResult<RuntimeConfig> {
-        if (!schema) {
-            return FireflyOkAsync(config);
-        }
-
-        const validation = schema.safeParse(config);
-
-        if (validation.success) {
-            return FireflyOkAsync(validation.data as RuntimeConfig);
-        }
-
-        const errors = this.formatValidationErrors(validation.error.issues);
-        logger.error("Config validation failed:");
-        logger.error(errors);
-
-        return validationErrAsync({
-            message: `Invalid configuration:\n${errors}`,
-        });
-    }
-
-    private formatValidationErrors(issues: z.core.$ZodIssue[]): string {
-        return issues.map((issue) => `  • ${issue.path.join(".")}: ${issue.message}`).join("\n");
     }
 }

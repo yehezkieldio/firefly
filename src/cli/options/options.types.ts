@@ -75,18 +75,28 @@ export interface ParsedCLIOptions extends Record<string, unknown> {
  * (e.g., `release` for release command config).
  */
 export interface RuntimeConfig extends Record<string, unknown> {
-    /** The working directory for all operations. */
+    /**
+     * The working directory for all operations.
+     */
     cwd?: string;
 
-    /** Run without making actual changes. */
+    /**
+     * Run without making actual changes.
+     */
     dryRun?: boolean;
 
-    /** Enable verbose logging output. */
+    /**
+     * Enable verbose logging output.
+     */
     verbose?: boolean;
 
-    /** Automatically rollback on failure. */
+    /**
+     * Automatically rollback on failure.
+     */
     enableRollback?: boolean;
 
-    /** Release command configuration (when running release). */
+    /**
+     * Release command configuration (when running release).
+     */
     release?: Record<string, unknown>;
 }
