@@ -3,7 +3,7 @@ name: Continuous Delivery
 on:
   push:
     branches:
-      - master
+      - v3
 permissions:
   id-token: write
   contents: read
