@@ -18,7 +18,6 @@ export interface GhCommandOptions {
 
     /**
      * Working directory for the GitHub CLI command.
-     * Defaults to `process.cwd()` if not specified.
      */
     cwd?: string;
 
