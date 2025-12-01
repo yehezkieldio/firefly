@@ -6,6 +6,28 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.6 (December 1, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`e95f91f`](https://github.com/yehezkieldio/firefly/commit/e95f91fbb505f57a3fda04b960290e9b85e98c86) copilot-docs: Remove documentation modules
+
+### <!-- 3 -->🚀 New Features
+- [`c60d395`](https://github.com/yehezkieldio/firefly/commit/c60d3954eb0b4a503aeafc176945da564c3fb489) cli: Add workspace support for cwd-aware execution
+- [`5b6abb9`](https://github.com/yehezkieldio/firefly/commit/5b6abb935ba66c1f511c0d5f6e67e2e52b18dc04) release: Add packageJson hydration and preflight cliff.toml check
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`8f20480`](https://github.com/yehezkieldio/firefly/commit/8f204801f8fc62bab8908e06983d7d6a7a23d460) config: Set default cwd in config loader and remove redundant comment
+- [`cd882fa`](https://github.com/yehezkieldio/firefly/commit/cd882facae16eb88be2d700c88a0d36124407e37) release: Make preReleaseId optional and extract from package version for better flexibility
+- [`82f8919`](https://github.com/yehezkieldio/firefly/commit/82f89198588b73396bb5e4f70362ce670b3a7965) cli: Improve error logging and add raw debug output option
+
+### <!-- 5 -->📚 Documentation
+- [`cd4e7bf`](https://github.com/yehezkieldio/firefly/commit/cd4e7bf128f9834c156560c7f814a6bc6a53c72a) release: Add detailed comments for release task behavior and preparation steps
+
+### <!-- 7 -->🚜 Refactor
+- [`2751d58`](https://github.com/yehezkieldio/firefly/commit/2751d58834e3ef703e53cb34a100b96f49f3f5d4) services: Switch package-json service to async result pattern for cleaner chaining and better error handling
+
+### <!-- 9 -->🎨 Code Styling
+- [`c3992a5`](https://github.com/yehezkieldio/firefly/commit/c3992a57fc79d225fd50044d810fd04ade40cd93) release-preflight: Improve logger messages for clarity and consistency
 ## firefly@4.0.0-alpha.5 (November 30, 2025)
 
 ### <!-- 3 -->🚀 New Features
