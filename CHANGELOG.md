@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.10 (December 1, 2025)
+
+### <!-- 16 -->🤖 CI/CD
+- [`151a952`](https://github.com/yehezkieldio/firefly/commit/151a9529cd289e79b07b1a81755483cacbdf2e0c) Update npm publish tag from v3 to major-3 for clarity in versioning
 ## firefly@3.0.9 (December 1, 2025)
 
 ### <!-- 16 -->🤖 CI/CD
