@@ -18,7 +18,7 @@ function checkGitRepository(ctx: ReleaseContext): FireflyAsyncResult<void> {
                 message: "We are not inside a git repository!",
             })
         )
-        .andTee(() => logger.verbose("ReleasePreflightTask: We are inside a git repository."));
+        .andTee(() => logger.verbose("ReleasePreflightTask: Confirmed inside a git repository."));
 }
 
 /**
@@ -41,7 +41,7 @@ function checkCleanWorkingDirectory(ctx: ReleaseContext): FireflyAsyncResult<voi
             }
             return FireflyOk(undefined);
         })
-        .andTee(() => logger.verbose("ReleasePreflightTask: Working directory is clean."));
+        .andTee(() => logger.verbose("ReleasePreflightTask: Confirmed working directory is clean."));
 }
 
 /**
@@ -56,7 +56,7 @@ function checkUnpushedCommits(ctx: ReleaseContext): FireflyAsyncResult<void> {
                 source: "commands/release/preflight",
             })
         )
-        .andTee(() => logger.verbose("ReleasePreflightTask: No unpushed commits found."));
+        .andTee(() => logger.verbose("ReleasePreflightTask: Confirmed no unpushed commits found."));
 }
 
 /**
@@ -73,7 +73,9 @@ function checkCliffConfig(ctx: ReleaseContext): FireflyAsyncResult<void> {
                 source: "commands/release/preflight",
             })
         )
-        .andTee(() => logger.verbose(`ReleasePreflightTask: Found "${CLIFF_CONFIG_FILE}" in project root.`));
+        .andTee(() =>
+            logger.verbose(`ReleasePreflightTask: Confirmed presence of "${CLIFF_CONFIG_FILE}" in project root.`)
+        );
 }
 
 /**
