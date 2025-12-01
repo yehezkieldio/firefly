@@ -89,7 +89,7 @@ function registerCommand(
         const result = await executeCommand(commandName, normalizedOptions, ctx.registry);
 
         if (result.isErr()) {
-            logger.error("Execution failed:", result.error.message);
+            logger.error(result.error.message);
             process.exit(1);
         }
 
@@ -173,12 +173,15 @@ function executeWithOrchestrator(
 
     if (!parseResult.success) {
         const errors = parseResult.error.issues
-            .map((issue) => `  • ${issue.path.join(".")}: ${issue.message}`)
+            .map((issue) => `${issue.message} for ${issue.path.join(".")}`)
             .join("\n");
-        logger.error("Config validation failed:");
-        logger.error(errors);
+
+        if (process.env.FIREFLY_DEBUG_SHOW_RAW_ERROR) {
+            logger.error(parseResult.error);
+        }
+
         return validationErrAsync({
-            message: `Invalid configuration:\n${errors}`,
+            message: `${errors}`,
         });
     }
 
