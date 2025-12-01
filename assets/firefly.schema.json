@@ -2,6 +2,10 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
+    "cwd": {
+      "description": "The working directory for all operations.",
+      "type": "string"
+    },
     "dryRun": {
       "description": "Run without making actual changes.",
       "type": "boolean"
@@ -66,7 +70,6 @@
         },
         "preReleaseId": {
           "description": "Pre-release ID (e.g., \"alpha\", \"beta\").",
-          "default": "alpha",
           "type": "string"
         },
         "preReleaseBase": {
