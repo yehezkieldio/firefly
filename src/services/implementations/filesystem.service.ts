@@ -4,9 +4,18 @@ import { wrapPromise } from "#/core/result/result.utilities";
 import { withDryRun } from "#/infrastructure/dry-run";
 import type { IFileSystemService, WriteOptions } from "#/services/contracts/filesystem.interface";
 
+/**
+ * Default implementation of the file system service.
+ */
 export class DefaultFileSystemService implements IFileSystemService {
+    /**
+     * The workspace root directory used for resolving relative paths.
+     */
     private readonly basePath: string;
 
+    /**
+     * Creates a new file system service.
+     */
     constructor(basePath: string) {
         this.basePath = basePath;
     }
@@ -53,7 +62,6 @@ export class DefaultFileSystemService implements IFileSystemService {
 
 /**
  * Creates a file system service instance.
- * @param basePath - Base path for relative file resolution
  */
 export function createFileSystemService(basePath: string): IFileSystemService {
     return new DefaultFileSystemService(basePath);

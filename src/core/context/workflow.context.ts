@@ -1,9 +1,22 @@
 import { FireflyOk, validationErr } from "#/core/result/result.constructors";
 import type { FireflyResult } from "#/core/result/result.types";
 import type { DefaultServices } from "#/core/service/service.registry";
+import { Workspace } from "#/core/workspace/workspace";
 
 // Base constraint for workflow data - must be a record with string keys
 export type WorkflowData = Record<string, unknown>;
+
+/**
+ * Options for creating an immutable workflow context.
+ * @internal
+ */
+interface ContextCreateOptions<TConfig, TData, TServices> {
+    readonly startTime: Date;
+    readonly workspace: Workspace;
+    readonly config: Readonly<TConfig>;
+    readonly data: TData;
+    readonly services: TServices;
+}
 
 /**
  * Immutable context that flows through workflow task execution.
@@ -66,6 +79,21 @@ export interface WorkflowContext<
      * Timestamp when the workflow started
      */
     readonly startTime: Date;
+
+    /**
+     * The workspace providing the base path for all file operations.
+     * This is the root directory from which the CLI was invoked.
+     *
+     * @example
+     * ```typescript
+     * // Access base path
+     * const projectRoot = ctx.workspace.basePath;
+     *
+     * // Resolve paths relative to workspace
+     * const configPath = ctx.workspace.resolve("firefly.config.ts");
+     * ```
+     */
+    readonly workspace: Workspace;
 
     /**
      * Frozen configuration for the workflow
@@ -189,6 +217,7 @@ export class ImmutableWorkflowContext<
 > implements WorkflowContext<TConfig, TData, TServices>
 {
     readonly startTime: Date;
+    readonly workspace: Workspace;
     readonly config: Readonly<TConfig>;
     readonly services: TServices;
 
@@ -206,11 +235,12 @@ export class ImmutableWorkflowContext<
         return "WorkflowContext";
     }
 
-    private constructor(startTime: Date, config: Readonly<TConfig>, data: TData, services: TServices) {
-        this.startTime = startTime;
-        this.config = config;
-        this.#data = data;
-        this.services = services;
+    private constructor(options: ContextCreateOptions<TConfig, TData, TServices>) {
+        this.startTime = options.startTime;
+        this.workspace = options.workspace;
+        this.config = options.config;
+        this.#data = options.data;
+        this.services = options.services;
     }
 
     /**
@@ -251,13 +281,21 @@ export class ImmutableWorkflowContext<
     static create<TC, TD extends WorkflowData = WorkflowData, TS = DefaultServices>(
         config: TC,
         services: TS,
-        initialData?: Partial<TD>
+        initialData?: Partial<TD>,
+        workspace?: Workspace
     ): WorkflowContext<TC, TD, TS> {
         const startTime = new Date();
+        const resolvedWorkspace = workspace ?? Workspace.current();
         const frozenConfig = Object.freeze({ ...config }) as Readonly<TC>;
         const data = (initialData ?? {}) as TD;
 
-        return new ImmutableWorkflowContext<TC, TD, TS>(startTime, frozenConfig, data, services);
+        return new ImmutableWorkflowContext<TC, TD, TS>({
+            startTime,
+            workspace: resolvedWorkspace,
+            config: frozenConfig,
+            data,
+            services,
+        });
     }
 
     /**
@@ -316,12 +354,13 @@ export class ImmutableWorkflowContext<
 
         // Reuse config and services, only copy data
         const updatedData = { ...this.#data, [key]: value } as TData;
-        return new ImmutableWorkflowContext<TConfig, TData, TServices>(
-            this.startTime,
-            this.config,
-            updatedData,
-            this.services
-        );
+        return new ImmutableWorkflowContext<TConfig, TData, TServices>({
+            startTime: this.startTime,
+            workspace: this.workspace,
+            config: this.config,
+            data: updatedData,
+            services: this.services,
+        });
     }
 
     forkMultiple(updates: Partial<TData>): WorkflowContext<TConfig, TData, TServices> {
@@ -340,12 +379,13 @@ export class ImmutableWorkflowContext<
 
         // Spread existing data, apply updates
         const updatedData = { ...this.#data, ...updates } as TData;
-        return new ImmutableWorkflowContext<TConfig, TData, TServices>(
-            this.startTime,
-            this.config,
-            updatedData,
-            this.services
-        );
+        return new ImmutableWorkflowContext<TConfig, TData, TServices>({
+            startTime: this.startTime,
+            workspace: this.workspace,
+            config: this.config,
+            data: updatedData,
+            services: this.services,
+        });
     }
 
     has<K extends keyof TData>(key: K): boolean {

@@ -21,7 +21,13 @@
       "recommended": true,
       "nursery": {
         "noEmptySource": "off",
-        "noUselessUndefined": "off"
+        "noUselessUndefined": "off",
+        "useMaxParams": {
+          "level": "warn",
+          "options": {
+            "max": 5
+          }
+        }
       },
       "correctness": {
         "noUnusedVariables": "off"

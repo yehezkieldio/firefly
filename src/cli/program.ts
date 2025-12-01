@@ -13,6 +13,7 @@ import { WorkflowOrchestrator } from "#/core/execution/workflow.orchestrator";
 import { CommandRegistry } from "#/core/registry/command.registry";
 import { notFoundErrAsync, validationErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult } from "#/core/result/result.types";
+import { Workspace } from "#/core/workspace/workspace";
 import { logger } from "#/infrastructure/logging";
 
 /**
@@ -126,14 +127,18 @@ function executeCommand(
         logger.level = LogLevels.verbose;
     }
 
+    // Resolve workspace from cwd option (defaults to process.cwd())
+    const workspace = Workspace.fromOptions({ basePath: cliOptions.cwd });
+
     const configLoader = new ConfigLoader({
+        cwd: workspace.basePath,
         configFile: cliOptions.config,
         commandName,
     });
 
     return configLoader.load().andThen((fileConfig) => {
         const finalConfig = { ...fileConfig, ...cliOptions };
-        return executeWithOrchestrator(commandName, finalConfig, registry);
+        return executeWithOrchestrator(commandName, finalConfig, workspace, registry);
     });
 }
 
@@ -142,12 +147,14 @@ function executeCommand(
  *
  * @param commandName - The command to execute
  * @param config - The merged runtime configuration
+ * @param workspace - The workspace for file operations
  * @param registry - The command registry
  * @returns Async result of the workflow execution
  */
 function executeWithOrchestrator(
     commandName: string,
     config: RuntimeConfig,
+    workspace: Workspace,
     registry: CommandRegistry
 ): FireflyAsyncResult<WorkflowExecutionResult> {
     const commandResult = registry.get(commandName);
@@ -177,14 +184,15 @@ function executeWithOrchestrator(
 
     // Merge parsed config (with defaults) back with runtime config for global options
     const parsedConfig = { ...config, ...parseResult.data } as RuntimeConfig;
-    const orchestrator = createOrchestrator(parsedConfig);
+    const orchestrator = createOrchestrator(parsedConfig, workspace);
 
     return orchestrator.executeCommand(command, parsedConfig);
 }
 
 /** Creates a workflow orchestrator with the given configuration. */
-function createOrchestrator(config: RuntimeConfig): WorkflowOrchestrator {
+function createOrchestrator(config: RuntimeConfig, workspace: Workspace): WorkflowOrchestrator {
     return new WorkflowOrchestrator({
+        workspace,
         dryRun: config.dryRun ?? false,
         enableRollback: config.enableRollback ?? true,
         verbose: config.verbose ?? false,

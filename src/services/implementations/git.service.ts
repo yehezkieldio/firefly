@@ -19,9 +19,19 @@ import type {
 const CURRENT_BRANCH_MARKER_REGEX = /^\*\s*/;
 const REMOTES_PREFIX_REGEX = /^remotes\//;
 
+/**
+ * Default implementation of the git service.
+ */
 export class DefaultGitService implements IGitService {
+    /**
+     * The working directory where git commands are executed.
+     */
     private readonly cwd: string;
 
+    /**
+     * Creates a new git service.
+     * @param cwd - The working directory for git operations
+     */
     constructor(cwd: string) {
         this.cwd = cwd;
     }
@@ -371,7 +381,6 @@ export class DefaultGitService implements IGitService {
 
 /**
  * Creates a git service instance.
- * @param cwd - Working directory for git commands
  */
 export function createGitService(cwd: string): IGitService {
     return new DefaultGitService(cwd);

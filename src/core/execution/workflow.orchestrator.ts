@@ -13,6 +13,7 @@ import type { FireflyAsyncResult } from "#/core/result/result.types";
 import { resolveServices } from "#/core/service/service.proxy";
 import type { ResolvedServices, ServiceKey, ServiceKeys, ServiceKeysFromArray } from "#/core/service/service.registry";
 import type { Task } from "#/core/task/task.types";
+import { Workspace } from "#/core/workspace/workspace";
 import { logger } from "#/infrastructure/logging";
 
 /**
@@ -25,9 +26,10 @@ export interface WorkflowOrchestratorOptions extends WorkflowExecutorOptions {
      */
     readonly verbose?: boolean;
     /**
-     * Base path for service instantiation (defaults to cwd)
+     * The workspace for the workflow execution.
+     * Provides the base path for all file operations and service instantiation.
      */
-    readonly basePath?: string;
+    readonly workspace?: Workspace;
 }
 
 // Resolved services type based on command requirements
@@ -35,8 +37,8 @@ type CommandServices<TServices extends ServiceKeys> = ResolvedServices<ServiceKe
 
 /**
  * Orchestrates the execution of workflow commands.
- *
  * The orchestrator is the main entry point for executing commands.
+ *
  * It coordinates:
  * - Service resolution based on command requirements
  * - Context creation with configuration and initial data
@@ -113,16 +115,18 @@ export class WorkflowOrchestrator {
         config: TConfig,
         initialData?: Partial<TData>
     ): WorkflowContext<TConfig, TData, CommandServices<TServices>> {
-        const basePath = this.options.basePath ?? process.cwd();
+        const workspace = this.options.workspace ?? Workspace.current();
         const requiredServices = command.meta.requiredServices;
-        const services = resolveServices(requiredServices, basePath) as CommandServices<TServices>;
+        const services = resolveServices(requiredServices, workspace.basePath) as CommandServices<TServices>;
 
         logger.verbose(`WorkflowOrchestrator: Resolved services: [${requiredServices.join(", ")}]`);
+        logger.verbose(`WorkflowOrchestrator: Using workspace: ${workspace.basePath}`);
 
         return ImmutableWorkflowContext.create<TConfig, TData, CommandServices<TServices>>(
             config,
             services,
-            initialData
+            initialData,
+            workspace
         );
     }
 

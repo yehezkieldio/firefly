@@ -1,6 +1,7 @@
 import { ImmutableWorkflowContext, type WorkflowContext, type WorkflowData } from "#/core/context/workflow.context";
 import { resolveAllServices } from "#/core/service/service.proxy";
 import type { DefaultServices } from "#/core/service/service.registry";
+import { Workspace } from "#/core/workspace/workspace";
 
 /**
  * Fluent builder for constructing workflow contexts.
@@ -32,16 +33,16 @@ export class ContextBuilder<
     readonly #config: TConfig;
     readonly #data: Partial<TData>;
     readonly #servicesOverride?: TServices;
-    readonly #basePath: string;
+    readonly #workspace: Workspace;
 
     get [Symbol.toStringTag](): string {
         return "ContextBuilder";
     }
 
-    private constructor(config: TConfig, data: Partial<TData>, basePath: string, services?: TServices) {
+    private constructor(config: TConfig, data: Partial<TData>, workspace: Workspace, services?: TServices) {
         this.#config = config;
         this.#data = data;
-        this.#basePath = basePath;
+        this.#workspace = workspace;
         this.#servicesOverride = services;
     }
 
@@ -53,7 +54,7 @@ export class ContextBuilder<
     static create<TC = WorkflowData>(
         basePath: string = process.cwd()
     ): ContextBuilder<TC, WorkflowData, DefaultServices> {
-        return new ContextBuilder({} as TC, {}, basePath);
+        return new ContextBuilder({} as TC, {}, Workspace.from(basePath));
     }
 
     /**
@@ -61,7 +62,7 @@ export class ContextBuilder<
      * Uses current working directory as base path.
      */
     static forTesting(): ContextBuilder<WorkflowData, WorkflowData, DefaultServices> {
-        return new ContextBuilder({}, {}, process.cwd());
+        return new ContextBuilder({}, {}, Workspace.current());
     }
 
     /**
@@ -70,7 +71,7 @@ export class ContextBuilder<
      * @param config - The configuration object
      */
     withConfig<TNewConfig>(config: TNewConfig): ContextBuilder<TNewConfig, TData, TServices> {
-        return new ContextBuilder(config, this.#data, this.#basePath, this.#servicesOverride);
+        return new ContextBuilder(config, this.#data, this.#workspace, this.#servicesOverride);
     }
 
     /**
@@ -79,7 +80,7 @@ export class ContextBuilder<
      * @param config - Partial configuration to merge
      */
     withMockConfig(config: Partial<TConfig>): ContextBuilder<TConfig, TData, TServices> {
-        return new ContextBuilder({ ...this.#config, ...config }, this.#data, this.#basePath, this.#servicesOverride);
+        return new ContextBuilder({ ...this.#config, ...config }, this.#data, this.#workspace, this.#servicesOverride);
     }
 
     /**
@@ -93,7 +94,7 @@ export class ContextBuilder<
         return new ContextBuilder(
             this.#config,
             { ...this.#data, [key]: value } as Partial<TData & Record<K, V>>,
-            this.#basePath,
+            this.#workspace,
             this.#servicesOverride as TServices
         );
     }
@@ -114,7 +115,7 @@ export class ContextBuilder<
      * @param data - Object containing key-value pairs to add
      */
     withMultipleData(data: Partial<TData>): ContextBuilder<TConfig, TData, TServices> {
-        return new ContextBuilder(this.#config, { ...this.#data, ...data }, this.#basePath, this.#servicesOverride);
+        return new ContextBuilder(this.#config, { ...this.#data, ...data }, this.#workspace, this.#servicesOverride);
     }
 
     /**
@@ -122,7 +123,15 @@ export class ContextBuilder<
      * @param basePath - Absolute path to the project root
      */
     withBasePath(basePath: string): ContextBuilder<TConfig, TData, TServices> {
-        return new ContextBuilder(this.#config, this.#data, basePath, this.#servicesOverride);
+        return new ContextBuilder(this.#config, this.#data, Workspace.from(basePath), this.#servicesOverride);
+    }
+
+    /**
+     * Sets the workspace for service instantiation.
+     * @param workspace - Workspace instance
+     */
+    withWorkspace(workspace: Workspace): ContextBuilder<TConfig, TData, TServices> {
+        return new ContextBuilder(this.#config, this.#data, workspace, this.#servicesOverride);
     }
 
     /**
@@ -132,7 +141,7 @@ export class ContextBuilder<
      * @param services - Custom service implementations
      */
     withServices<TNewServices>(services: TNewServices): ContextBuilder<TConfig, TData, TNewServices> {
-        return new ContextBuilder(this.#config, this.#data, this.#basePath, services);
+        return new ContextBuilder(this.#config, this.#data, this.#workspace, services);
     }
 
     /**
@@ -141,8 +150,13 @@ export class ContextBuilder<
      * @returns Configured WorkflowContext instance
      */
     build(): WorkflowContext<TConfig, TData, TServices> {
-        const services = this.#servicesOverride ?? (resolveAllServices(this.#basePath) as TServices);
+        const services = this.#servicesOverride ?? (resolveAllServices(this.#workspace.basePath) as TServices);
 
-        return ImmutableWorkflowContext.create<TConfig, TData, TServices>(this.#config, services, this.#data);
+        return ImmutableWorkflowContext.create<TConfig, TData, TServices>(
+            this.#config,
+            services,
+            this.#data,
+            this.#workspace
+        );
     }
 }

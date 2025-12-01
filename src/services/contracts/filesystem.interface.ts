@@ -17,14 +17,14 @@ export interface IFileSystemService {
     /**
      * Checks if a file or directory exists.
      *
-     * @param path - Path relative to the service's base path, or absolute
+     * @param path - Path relative to the workspace root, or absolute
      */
     exists(path: string): FireflyAsyncResult<boolean>;
 
     /**
      * Reads the contents of a text file.
      *
-     * @param path - Path relative to the service's base path, or absolute
+     * @param path - Path relative to the workspace root, or absolute
      * @returns File contents as a string, or error if not found
      */
     read(path: string): FireflyAsyncResult<string>;
@@ -32,7 +32,7 @@ export interface IFileSystemService {
     /**
      * Writes content to a text file.
      *
-     * @param path - Path relative to the service's base path, or absolute
+     * @param path - Path relative to the workspace root, or absolute
      * @param content - String content to write
      * @param options - Write options including dry-run support
      */

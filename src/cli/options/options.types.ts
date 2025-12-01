@@ -8,6 +8,12 @@ import z from "zod";
  */
 export const GlobalOptionsSchema = z.object({
     /**
+     * The working directory for the CLI to operate in.
+     * Defaults to the current working directory.
+     */
+    cwd: z.string().optional().describe("The working directory for all operations."),
+
+    /**
      * Run without making actual changes (preview mode).
      */
     dryRun: z.boolean().optional().describe("Run without making actual changes."),
@@ -37,6 +43,11 @@ export interface ParsedCLIOptions extends Record<string, unknown> {
     config?: string;
 
     /**
+     * The working directory for all operations.
+     */
+    cwd?: string;
+
+    /**
      * Run without making actual changes.
      */
     dryRun?: boolean;
@@ -64,6 +75,9 @@ export interface ParsedCLIOptions extends Record<string, unknown> {
  * (e.g., `release` for release command config).
  */
 export interface RuntimeConfig extends Record<string, unknown> {
+    /** The working directory for all operations. */
+    cwd?: string;
+
     /** Run without making actual changes. */
     dryRun?: boolean;
 

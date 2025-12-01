@@ -57,7 +57,7 @@ export class OptionsBuilder {
     /**
      * Fields that are handled by global options and should be skipped for command options.
      */
-    private readonly skipFields = new Set(["dryRun", "verbose", "enableRollback"]);
+    private readonly skipFields = new Set(["cwd", "dryRun", "verbose", "enableRollback"]);
 
     /**
      * Registers global options that apply to all commands.
@@ -66,6 +66,7 @@ export class OptionsBuilder {
      */
     registerGlobalOptions(program: Command): void {
         program
+            .option("-C, --cwd <path>", "The working directory for all operations")
             .option("--dry-run", "Run without making actual changes")
             .option("--verbose", "Enable verbose logging")
             .option("--no-enable-rollback", "Disable automatic rollback on failure");

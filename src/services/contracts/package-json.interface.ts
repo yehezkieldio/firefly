@@ -23,12 +23,27 @@ export interface UpdateVersionOptions {
 
 /**
  * Service for package.json operations.
+ *
+ * @example
+ * ```typescript
+ * // In a task, access via context
+ * const { packageJson } = ctx.services;
+ *
+ * // Read from workspace root
+ * const pkg = await packageJson.read("package.json");
+ *
+ * // Read from a subdirectory
+ * const subPkg = await packageJson.read("packages/core/package.json");
+ *
+ * // Update version
+ * await packageJson.updateVersion("package.json", "2.0.0");
+ * ```
  */
 export interface IPackageJsonService {
     /**
      * Reads the contents of a package.json file and parses it.
      *
-     * @param path - Path relative to the service's base path, or absolute
+     * @param path - Path relative to the workspace root, or absolute
      * @returns Parsed package.json contents, or error if not found
      */
     read(path: string): FireflyAsyncResult<PackageJson>;
@@ -36,7 +51,7 @@ export interface IPackageJsonService {
     /**
      * Updates the version in a package.json file.
      *
-     * @param path - Path relative to the service's base path, or absolute
+     * @param path - Path relative to the workspace root, or absolute
      * @param newVersion - New version string to set
      */
     updateVersion(path: string, newVersion: string): FireflyAsyncResult<void>;

@@ -56,7 +56,7 @@ export class ConfigLoader {
      * @returns Async result containing the merged configuration or an error
      */
     load(): FireflyAsyncResult<RuntimeConfig> {
-        const { cwd = process.cwd(), configFile, schema } = this.options;
+        const { cwd, configFile, schema } = this.options;
 
         return wrapPromise(
             loadConfig<RuntimeConfig>({
