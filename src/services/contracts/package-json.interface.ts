@@ -1,5 +1,5 @@
 import z from "zod";
-import type { FireflyResult } from "#/core/result/result.types";
+import type { FireflyAsyncResult } from "#/core/result/result.types";
 
 export const PackageJsonSchema = z
     // Minimal structure of package.json as we don't need the full schema
@@ -31,7 +31,7 @@ export interface IPackageJsonService {
      * @param path - Path relative to the service's base path, or absolute
      * @returns Parsed package.json contents, or error if not found
      */
-    read(path: string): Promise<FireflyResult<PackageJson>>;
+    read(path: string): FireflyAsyncResult<PackageJson>;
 
     /**
      * Updates the version in a package.json file.
@@ -39,5 +39,5 @@ export interface IPackageJsonService {
      * @param path - Path relative to the service's base path, or absolute
      * @param newVersion - New version string to set
      */
-    updateVersion(path: string, newVersion: string): Promise<FireflyResult<void>>;
+    updateVersion(path: string, newVersion: string): FireflyAsyncResult<void>;
 }

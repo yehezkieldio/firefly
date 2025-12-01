@@ -1,7 +1,7 @@
 import { Result } from "neverthrow";
 import { toFireflyError } from "#/core/result/error.factories";
-import { FireflyErr, validationErr } from "#/core/result/result.constructors";
-import type { FireflyResult } from "#/core/result/result.types";
+import { FireflyOkAsync, validationErr, validationErrAsync } from "#/core/result/result.constructors";
+import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 import { parseSchema } from "#/core/result/schema.utilities";
 import type { IFileSystemService } from "#/services/contracts/filesystem.interface";
 import {
@@ -18,48 +18,33 @@ export class DefaultPackageJsonService implements IPackageJsonService {
         this.fs = fileSystemService;
     }
 
-    async read(path: string): Promise<FireflyResult<PackageJson>> {
-        const contentResult = await this.fs.read(path);
+    read(path: string): FireflyAsyncResult<PackageJson> {
+        return this.fs.read(path).andThen((content) => {
+            const jsonParseResult = this.parseJsonString(content, path);
 
-        if (contentResult.isErr()) {
-            return FireflyErr(contentResult.error);
-        }
+            if (jsonParseResult.isErr()) {
+                return validationErrAsync(jsonParseResult.error);
+            }
 
-        const jsonParseResult = this.parseJsonString(contentResult.value, path);
-
-        if (jsonParseResult.isErr()) {
-            return FireflyErr(jsonParseResult.error);
-        }
-
-        return parseSchema(PackageJsonSchema, jsonParseResult.value);
+            return parseSchema(PackageJsonSchema, jsonParseResult.value);
+        });
     }
 
-    async updateVersion(path: string, newVersion: string): Promise<FireflyResult<void>> {
-        const contentResult = await this.fs.read(path);
-
-        if (contentResult.isErr()) {
-            return FireflyErr(contentResult.error);
-        }
-
-        const updatedContent = this.replaceVersionInContent(contentResult.value, newVersion);
-        const writeResult = await this.fs.write(path, updatedContent);
-
-        if (writeResult.isErr()) {
-            return FireflyErr(writeResult.error);
-        }
-
-        const verifyReadResult = await this.read(path);
-        if (verifyReadResult.isErr()) {
-            return FireflyErr(verifyReadResult.error);
-        }
-
-        if (verifyReadResult.value.version !== newVersion) {
-            return validationErr({
-                message: `Failed to verify updated version in package.json at path: ${path}`,
-            });
-        }
-
-        return writeResult;
+    updateVersion(path: string, newVersion: string): FireflyAsyncResult<void> {
+        return this.fs
+            .read(path)
+            .map((content) => this.replaceVersionInContent(content, newVersion))
+            .andThen((updatedContent) => this.fs.write(path, updatedContent))
+            .andThen(() =>
+                this.read(path).andThen((pkg) => {
+                    if (pkg.version !== newVersion) {
+                        return validationErrAsync<void>({
+                            message: `Failed to verify updated version in package.json at path: ${path}`,
+                        });
+                    }
+                    return FireflyOkAsync(undefined);
+                })
+            );
     }
 
     /**
