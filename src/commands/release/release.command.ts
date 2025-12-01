@@ -7,7 +7,7 @@ import { defineServiceKeys } from "#/core/service/service.registry";
 import { getGraphStatistics, logGraphStatistics } from "#/core/task/task.graph";
 import type { Task } from "#/core/task/task.types";
 
-export const RELEASE_SERVICES = defineServiceKeys("fs", "git");
+export const RELEASE_SERVICES = defineServiceKeys("fs", "packageJson", "git");
 
 export const releaseCommand = createCommand<ReleaseConfig, ReleaseData, typeof RELEASE_SERVICES>({
     meta: {

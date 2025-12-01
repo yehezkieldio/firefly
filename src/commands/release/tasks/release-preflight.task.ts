@@ -59,6 +59,9 @@ function checkUnpushedCommits(ctx: ReleaseContext): FireflyAsyncResult<void> {
         .andTee(() => logger.verbose("ReleasePreflightTask: No unpushed commits found."));
 }
 
+/**
+ * Checks if the `cliff.toml` configuration file exists in the project root.
+ */
 function checkCliffConfig(ctx: ReleaseContext): FireflyAsyncResult<void> {
     const CLIFF_CONFIG_FILE = "cliff.toml";
 
