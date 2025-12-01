@@ -1,0 +1,202 @@
+name: Continuous Delivery
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      publish_latest:
+        description: "Set to true to run the Publish Latest job manually"
+        required: false
+        type: boolean
+        default: false
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+env:
+  DEFAULT_BRANCH: master
+  VERSION_PATTERN: "[0-9]+\\.[0-9]+\\.[0-9]+"
+  PRERELEASE_PATTERN: "[0-9]+\\.[0-9]+\\.[0-9]+-[A-Za-z]+\\.[0-9]+"
+
+jobs:
+  detect-changes:
+    name: Detect Changes and Release Type
+    runs-on: ubuntu-latest
+    outputs:
+      src_changed: ${{ steps.filter.outputs.src_changed }}
+      is_release: ${{ steps.detect_release.outputs.is_release }}
+      is_prerelease: ${{ steps.detect_release.outputs.is_prerelease }}
+      is_stable: ${{ steps.detect_release.outputs.is_stable }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes in src/
+        id: filter
+        run: |
+          BEFORE="${{ github.event.before }}"
+          # Handle first push or force push where before is all zeros
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+            # Compare against the parent commit or check if src/ exists in current commit
+            if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -qE '^src/' || git ls-tree -r HEAD --name-only | grep -qE '^src/'; then
+              echo "src_changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "src_changed=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            if git diff --name-only "$BEFORE" ${{ github.sha }} | grep -qE '^src/'; then
+              echo "src_changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "src_changed=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Determine release type
+        id: detect_release
+        run: |
+          MSG="${{ github.event.head_commit.message }}"
+
+          if echo "$MSG" | grep -q 'chore(release): release firefly@'; then
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_release=false" >> $GITHUB_OUTPUT
+          fi
+
+          if echo "$MSG" | grep -Pq "firefly@${{ env.PRERELEASE_PATTERN }}"; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+          if echo "$MSG" | grep -Pq "firefly@${{ env.VERSION_PATTERN }}$"; then
+            echo "is_stable=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_stable=false" >> $GITHUB_OUTPUT
+          fi
+
+  publish-latest:
+    name: Publish Latest
+    needs: detect-changes
+    if: |
+      (github.event_name == 'push' &&
+       github.ref == format('refs/heads/{0}', vars.DEFAULT_BRANCH || 'master') &&
+       needs.detect-changes.outputs.is_release == 'true' &&
+       needs.detect-changes.outputs.is_stable == 'true') ||
+      (github.event_name == 'workflow_dispatch' &&
+       github.event.inputs.publish_latest == 'true')
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Setup Bun Runtime
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: canary
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+
+      - name: Install Project Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build Firefly Package
+        run: bun run build
+
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Publish Package to NPM (Latest tag)
+        run: npm publish --tag=latest
+  publish-next:
+    name: Publish Development
+    needs: detect-changes
+    if: |
+      github.event_name == 'push' &&
+      github.ref == format('refs/heads/{0}', vars.DEFAULT_BRANCH || 'master') &&
+      needs.detect-changes.outputs.is_release == 'false' &&
+      needs.detect-changes.outputs.src_changed == 'true'
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Fetch All Tags
+        run: git fetch --tags
+
+      - name: Setup Bun Runtime
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: canary
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+
+      - name: Install Project Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Firefly v3
+        run: bun install -g fireflyy@major-3
+
+      - name: Bump Version
+        run: firefly release --bs auto --rt prerelease --pre-release-id "dev.$(git rev-parse --verify --short HEAD)" --skip-changelog --skip-git --skip-github-release
+
+      - name: Build Firefly Package
+        run: bun run build
+
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Publish Package to NPM (next tag)
+        run: npm publish --tag=next
+  publish-pre-release:
+    name: Publish Pre-release
+    needs: detect-changes
+    if: |
+      github.event_name == 'push' &&
+      github.ref == format('refs/heads/{0}', vars.DEFAULT_BRANCH || 'master') &&
+      needs.detect-changes.outputs.is_release == 'true' &&
+      needs.detect-changes.outputs.is_prerelease == 'true'
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Extract Pre-release Tag
+        id: prerelease
+        run: |
+          TAG=$(echo "${{ github.event.head_commit.message }}" | grep -oP 'firefly@[0-9]+\.[0-9]+\.[0-9]+-\K[^.]+' )
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Setup Bun Runtime
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: canary
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+
+      - name: Install Project Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build Firefly Package
+        run: bun run build
+
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Publish Package to NPM (prerelease tag)
+        run: npm publish --tag=${{ steps.prerelease.outputs.tag }}
