@@ -1,5 +1,6 @@
 import type { Command } from "#/core/command/command.types";
 import { ImmutableWorkflowContext, type WorkflowContext } from "#/core/context/workflow.context";
+import { Workspace } from "#/core/environment/workspace";
 import {
     type WorkflowExecutionResult,
     WorkflowExecutor,
@@ -13,7 +14,6 @@ import type { FireflyAsyncResult } from "#/core/result/result.types";
 import { resolveServices } from "#/core/service/service.proxy";
 import type { ResolvedServices, ServiceKey, ServiceKeys, ServiceKeysFromArray } from "#/core/service/service.registry";
 import type { Task } from "#/core/task/task.types";
-import { Workspace } from "#/core/workspace/workspace";
 import { logger } from "#/infrastructure/logging";
 
 /**

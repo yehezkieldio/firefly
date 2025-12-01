@@ -1,6 +1,7 @@
 import { ResultAsync } from "neverthrow";
 import { z } from "zod";
 
+import { DebugFlags } from "#/core/environment/debug-flags";
 import { createFireflyError } from "#/core/result/error.factories";
 import { FireflyErrAsync, FireflyOkAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult } from "#/core/result/result.types";
@@ -251,12 +252,9 @@ function redactSensitiveArgs(args: string[]): string[] {
  * @returns Sanitized argument string for logging
  */
 function createLogArgs(args: string[], redacted = false): string {
-    const dontTruncateNotes = Boolean(process.env.FIREFLY_DEBUG_DONT_TRUNCATE_RELEASE_NOTES?.trim());
-    const skipRedaction = Boolean(process.env.FIREFLY_DEBUG_DONT_REDACT_GITHUB_CLI_ARGS?.trim());
+    const processedArgs = redacted && !DebugFlags.dontRedactGithubCliArgs ? redactSensitiveArgs(args) : args;
 
-    const processedArgs = redacted && !skipRedaction ? redactSensitiveArgs(args) : args;
-
-    if (processedArgs[0] === "release" && processedArgs[1] === "create" && !dontTruncateNotes) {
+    if (processedArgs[0] === "release" && processedArgs[1] === "create" && !DebugFlags.dontTruncateReleaseNotes) {
         const notesIdx = processedArgs.indexOf("--notes");
         if (notesIdx !== -1) {
             const trailingFlags = processedArgs.slice(notesIdx + 2).filter((a) => a.startsWith("--"));

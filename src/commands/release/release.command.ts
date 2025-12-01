@@ -2,6 +2,7 @@ import { createReleaseGroups } from "#/commands/release/groups/setup.group";
 import { type ReleaseConfig, ReleaseConfigSchema } from "#/commands/release/release.config";
 import type { ReleaseData } from "#/commands/release/release.data";
 import { createCommand } from "#/core/command/command.factory";
+import { DebugFlags } from "#/core/environment/debug-flags";
 import { FireflyErrAsync, FireflyOkAsync } from "#/core/result/result.constructors";
 import { defineServiceKeys } from "#/core/service/service.registry";
 import { getGraphStatistics, logGraphStatistics } from "#/core/task/task.graph";
@@ -24,8 +25,7 @@ export const releaseCommand = createCommand<ReleaseConfig, ReleaseData, typeof R
 
         const tasks: Task[] = groupsResult.value.flatMap((group) => group.tasks);
 
-        const showGraph = Boolean(process.env.FIREFLY_DEBUG_SHOW_TASK_GRAPH_STATS?.trim());
-        if (showGraph) logGraphStatistics(getGraphStatistics(tasks));
+        if (DebugFlags.showTaskGraphStats) logGraphStatistics(getGraphStatistics(tasks));
 
         return FireflyOkAsync(tasks);
     },

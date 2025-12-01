@@ -8,13 +8,15 @@ import { OptionsNormalizer } from "#/cli/options/options.normalizer";
 import type { ParsedCLIOptions, RuntimeConfig } from "#/cli/options/options.types";
 import { releaseCommand } from "#/commands/release/release.command";
 import type { BrandedCommand } from "#/core/command/command.types";
+import { DebugFlags } from "#/core/environment/debug-flags";
+import { RuntimeEnv } from "#/core/environment/runtime-env";
+import { Workspace } from "#/core/environment/workspace";
 import type { WorkflowExecutionResult } from "#/core/execution/workflow.executor";
 import { WorkflowOrchestrator } from "#/core/execution/workflow.orchestrator";
 import { CommandRegistry } from "#/core/registry/command.registry";
 import { notFoundErrAsync, validationErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult } from "#/core/result/result.types";
 import { formatZodErrors } from "#/core/result/schema.utilities";
-import { Workspace } from "#/core/workspace/workspace";
 import { logger } from "#/infrastructure/logging";
 
 /**
@@ -42,8 +44,8 @@ export function createFireflyCLI(): Command {
 
     program
         .name("firefly")
-        .description(String(process.env.FIREFLY_DESCRIPTION))
-        .version(String(process.env.FIREFLY_VERSION))
+        .description(RuntimeEnv.description)
+        .version(RuntimeEnv.version)
         .helpOption("-h, --help", "Display help information")
         .helpCommand("help", "Display help for command");
 
@@ -180,8 +182,7 @@ function executeWithOrchestrator(
     if (!parseResult.success) {
         const errors = formatZodErrors(parseResult.error);
 
-        const showRawError = Boolean(process.env.FIREFLY_DEBUG_SHOW_RAW_ERROR);
-        if (showRawError) {
+        if (DebugFlags.showRawError) {
             logger.error(parseResult.error);
         }
 
@@ -219,11 +220,11 @@ function createOrchestrator(config: RuntimeConfig, workspace: Workspace): Workfl
  * @param commandName - The name of the executed command
  */
 function logVersionInfo(commandName: string): void {
-    const fireflyVersion = colors.dim(`v${String(process.env.FIREFLY_VERSION)}`);
+    const fireflyVersion = colors.dim(`v${RuntimeEnv.version}`);
     const fireflyLabel = `${colors.magenta("firefly")} ${fireflyVersion}`;
 
     if (commandName === "release") {
-        const gitCliffVersion = colors.dim(`v${String(process.env.FIREFLY_GIT_CLIFF_VERSION)}`);
+        const gitCliffVersion = colors.dim(`v${RuntimeEnv.gitCliffVersion}`);
         logger.info(`${fireflyLabel} powered by git-cliff ${gitCliffVersion}`);
     } else {
         logger.info(fireflyLabel);

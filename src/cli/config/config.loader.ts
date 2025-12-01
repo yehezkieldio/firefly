@@ -1,6 +1,7 @@
 import { type ConfigLayerMeta, loadConfig, type ResolvedConfig } from "c12";
 import { colors } from "consola/utils";
 import type { RuntimeConfig } from "#/cli/options/options.types";
+import { DebugFlags } from "#/core/environment/debug-flags";
 import { FireflyOkAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult } from "#/core/result/result.types";
 import { wrapPromise } from "#/core/result/result.utilities";
@@ -71,8 +72,7 @@ export class ConfigLoader {
         ).andThen((result: ResolvedConfig<RuntimeConfig, ConfigLayerMeta>) => {
             this.logConfigFile(result.configFile);
 
-            const showFileConfig = Boolean(process.env.FIREFLY_DEBUG_SHOW_FILE_CONFIG);
-            if (showFileConfig) {
+            if (DebugFlags.showFileConfig) {
                 logger.verbose(JSON.stringify(result.config, null, 2));
             }
 

@@ -1,7 +1,7 @@
 import { ImmutableWorkflowContext, type WorkflowContext, type WorkflowData } from "#/core/context/workflow.context";
+import { Workspace } from "#/core/environment/workspace";
 import { resolveAllServices } from "#/core/service/service.proxy";
 import type { DefaultServices } from "#/core/service/service.registry";
-import { Workspace } from "#/core/workspace/workspace";
 
 /**
  * Fluent builder for constructing workflow contexts.

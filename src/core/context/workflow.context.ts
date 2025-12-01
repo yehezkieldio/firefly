@@ -1,7 +1,7 @@
+import { Workspace } from "#/core/environment/workspace";
 import { FireflyOk, validationErr } from "#/core/result/result.constructors";
 import type { FireflyResult } from "#/core/result/result.types";
 import type { DefaultServices } from "#/core/service/service.registry";
-import { Workspace } from "#/core/workspace/workspace";
 
 // Base constraint for workflow data - must be a record with string keys
 export type WorkflowData = Record<string, unknown>;

@@ -7,6 +7,7 @@ if (!process.versions.bun) {
     process.exit(1);
 }
 
+import { RuntimeEnv } from "#/core/environment/runtime-env";
 import { logger } from "#/infrastructure/logging";
 import pkg from "../../package.json" with { type: "json" };
 
@@ -19,9 +20,11 @@ async function main(): Promise<void> {
         process.argv.push("-h");
     }
 
-    process.env.FIREFLY_VERSION = pkg.version;
-    process.env.FIREFLY_DESCRIPTION = pkg.description;
-    process.env.FIREFLY_GIT_CLIFF_VERSION = pkg.dependencies["git-cliff"]?.replace("^", "") || "unknown";
+    RuntimeEnv.initialize({
+        version: pkg.version,
+        description: pkg.description,
+        gitCliffVersion: pkg.dependencies["git-cliff"]?.replace("^", "") || "unknown",
+    });
 
     const { createFireflyCLI } = await import("#/cli/program");
     createFireflyCLI()
