@@ -6,6 +6,21 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.8 (December 1, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`0489acf`](https://github.com/yehezkieldio/firefly/commit/0489acfe80496ae2fc1c7e83fa1e5022c5b4adf0) package: Add author metadata and project repository info
+
+### <!-- 16 -->🤖 CI/CD
+- [`cb60144`](https://github.com/yehezkieldio/firefly/commit/cb601445600fb7e3f928b0dd40bbd5b70fe64fbd) Add code quality workflow for linting and type checking
+- [`5b58e60`](https://github.com/yehezkieldio/firefly/commit/5b58e60fe0b825cb7a621ee31ca562f0d686baba) Add continuous delivery workflow for automated npm publishing
+
+### <!-- 3 -->🚀 New Features
+- [`7d42ceb`](https://github.com/yehezkieldio/firefly/commit/7d42cebcd21e86fea2c7c1725f8e61ef0eb62ffb) core/environment: Add debug and runtime env classes
+- [`a8fcf2d`](https://github.com/yehezkieldio/firefly/commit/a8fcf2dddcda2a7832d342cedd396867cb57d4dc) config: Add cwd to schema and postbuild step for json schema generation
+
+### <!-- 7 -->🚜 Refactor
+- [`f555b02`](https://github.com/yehezkieldio/firefly/commit/f555b02c2a1d8d8f89d8b4f9797f5bdf35e4ffd2) cli: Centralize camelToKebab utility and improve validation error formatting
 ## firefly@4.0.0-alpha.7 (December 1, 2025)
 
 ### <!-- 99 -->🌀 Other
