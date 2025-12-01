@@ -6,6 +6,37 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.0.11 (December 1, 2025)
+
+### <!-- 16 -->🤖 CI/CD
+- [`65e80b0`](https://github.com/yehezkieldio/firefly/commit/65e80b085f3fd626786960482ff19479616c7ced) Remove npm publish step for latest tag from cd workflow
+## firefly@3.0.10 (December 1, 2025)
+
+### <!-- 16 -->🤖 CI/CD
+- [`151a952`](https://github.com/yehezkieldio/firefly/commit/151a9529cd289e79b07b1a81755483cacbdf2e0c) Update npm publish tag from v3 to major-3 for clarity in versioning
+## firefly@3.0.9 (December 1, 2025)
+
+### <!-- 16 -->🤖 CI/CD
+- [`5828491`](https://github.com/yehezkieldio/firefly/commit/5828491f5f7d162a40bb5cdf5d4300280da0fa32) Add manual trigger for publish latest workflow and adjust branch condition
+## firefly@3.0.8 (December 1, 2025)
+### 📝 Release Notes
+This hotfix restores the missing TypeScript declaration files for Firefly.
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`2e13489`](https://github.com/yehezkieldio/firefly/commit/2e13489922769035d499ecc19d97d254c17e598d) config: Include type declarations in package distribution
+
+### <!-- 16 -->🤖 CI/CD
+- [`35000eb`](https://github.com/yehezkieldio/firefly/commit/35000eb103bad6391db1040be50fed7dcbd9a6f8) Simplify continuous delivery workflow and remove prerelease jobs
+- [`e381817`](https://github.com/yehezkieldio/firefly/commit/e3818172c63b4aa9cdb1a445c3b757fbb0a0b2d3) Update workflow trigger branch from master to v3
+## firefly@3.0.7 (December 1, 2025)
+### 📝 Release Notes
+This is a hotfix that should fix, missing typescript declarations for firefly.
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`2e13489`](https://github.com/yehezkieldio/firefly/commit/2e13489922769035d499ecc19d97d254c17e598d) config: Include type declarations in package distribution
+
+### <!-- 16 -->🤖 CI/CD
+- [`35000eb`](https://github.com/yehezkieldio/firefly/commit/35000eb103bad6391db1040be50fed7dcbd9a6f8) Simplify continuous delivery workflow and remove prerelease jobs
 ## firefly@3.0.7 (November 9, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
