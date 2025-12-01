@@ -4,6 +4,7 @@
   "description": " CLI orchestrator for automatic semantic versioning, changelog generation, and creating releases. Built for my own use cases.",
   "type": "module",
   "license": "MIT",
+  "author": "Yehezkiel Dio Sinolungan <yehezkieldio@proton.me>",
   "files": [
     "dist/**/*.js",
     "dist/**/*.d.ts",
@@ -66,5 +67,25 @@
     "tsdown": "^0.17.0-beta.1",
     "typescript": "^5.9.3",
     "ultracite": "6.3.7"
+  },
+  "keywords": [
+    "cli",
+    "changelog",
+    "git",
+    "github",
+    "gitlab",
+    "release",
+    "semver",
+    "versioning",
+    "automation",
+    "orchestrator"
+  ],
+  "homepage": "https://github.com/yehezkieldio/firefly#readme",
+  "bugs": {
+    "url": "https://github.com/yehezkieldio/firefly/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yehezkieldio/firefly.git"
   }
 }
