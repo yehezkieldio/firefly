@@ -190,7 +190,7 @@ function hydratePreReleaseIdFromPackageJson(
         }
 
         if (parsed.prerelease.length > 0 && typeof parsed.prerelease[0] === "string") {
-            const preReleaseId = parsed.prerelease[0];
+            const preReleaseId = extractPreReleaseId(packageJson.version);
             logger.verbose(`PrepareReleaseConfigTask: Prepared preReleaseId from package.json: ${preReleaseId}`);
             return FireflyOkAsync(preReleaseId);
         }
