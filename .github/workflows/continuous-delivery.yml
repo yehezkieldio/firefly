@@ -94,8 +94,5 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest
 
-      - name: Publish Package to NPM (latest tag)
-        run: npm publish --tag=latest
-
       - name: Publish Package to NPM (v3 tag)
         run: npm publish --tag=major-3
