@@ -104,7 +104,7 @@ export function ensureAsync(condition: boolean, errorOpts: ErrorResultOptions): 
  * ```
  */
 export function fromNullable<T>(value: T | null | undefined, errorOpts: ErrorResultOptions): FireflyResult<T> {
-    return value != null ? FireflyOk(value) : notFoundErr(errorOpts);
+    return value !== null ? FireflyOk(value) : notFoundErr(errorOpts);
 }
 
 /**
@@ -114,7 +114,7 @@ export function fromNullableAsync<T>(
     value: T | null | undefined,
     errorOpts: ErrorResultOptions
 ): FireflyAsyncResult<T> {
-    return value != null ? okAsync(value) : notFoundErrAsync(errorOpts);
+    return value !== null ? okAsync(value) : notFoundErrAsync(errorOpts);
 }
 
 /**
