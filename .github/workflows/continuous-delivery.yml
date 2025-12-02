@@ -16,11 +16,6 @@ permissions:
   contents: read
   packages: write
 
-env:
-  DEFAULT_BRANCH: master
-  VERSION_PATTERN: "[0-9]+\\.[0-9]+\\.[0-9]+"
-  PRERELEASE_PATTERN: "[0-9]+\\.[0-9]+\\.[0-9]+-[A-Za-z]+\\.[0-9]+"
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -96,13 +91,13 @@ jobs:
             echo "is_release=false" >> $GITHUB_OUTPUT
           fi
 
-          if echo "$MSG" | grep -Pq "firefly@${{ env.PRERELEASE_PATTERN }}"; then
+          if echo "$MSG" | grep -Pq 'firefly@[0-9]+\.[0-9]+\.[0-9]+-[A-Za-z]+\.[0-9]+'; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
           else
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
           fi
 
-          if echo "$MSG" | grep -Pq "firefly@${{ env.VERSION_PATTERN }}$"; then
+          if echo "$MSG" | grep -Pq 'firefly@[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "is_stable=true" >> $GITHUB_OUTPUT
           else
             echo "is_stable=false" >> $GITHUB_OUTPUT
@@ -120,7 +115,7 @@ jobs:
     needs: detect-changes
     if: |
       (github.event_name == 'push' &&
-       github.ref == format('refs/heads/{0}', vars.DEFAULT_BRANCH || 'master') &&
+       github.ref == 'refs/heads/master' &&
        needs.detect-changes.outputs.is_release == 'true' &&
        needs.detect-changes.outputs.is_stable == 'true') ||
       (github.event_name == 'workflow_dispatch' &&
@@ -156,7 +151,7 @@ jobs:
     needs: detect-changes
     if: |
       github.event_name == 'push' &&
-      github.ref == format('refs/heads/{0}', vars.DEFAULT_BRANCH || 'master') &&
+      github.ref == 'refs/heads/master' &&
       needs.detect-changes.outputs.is_release == 'false' &&
       needs.detect-changes.outputs.src_changed == 'true'
     runs-on: ubuntu-latest
@@ -201,7 +196,7 @@ jobs:
     needs: detect-changes
     if: |
       github.event_name == 'push' &&
-      github.ref == format('refs/heads/{0}', vars.DEFAULT_BRANCH || 'master') &&
+      github.ref == 'refs/heads/master' &&
       needs.detect-changes.outputs.is_release == 'true' &&
       needs.detect-changes.outputs.is_prerelease == 'true'
     runs-on: ubuntu-latest
