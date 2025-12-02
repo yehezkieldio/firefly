@@ -365,4 +365,14 @@ export interface IGitService {
      * @param options - Push options including remote, branch, and dry-run
      */
     push(options?: PushOptions): FireflyAsyncResult<void>;
+
+    /**
+     * Infers the repository URL using a fall-through strategy:
+     * 1. The remote configured as upstream for the current active branch.
+     * 2. The remote named 'origin'.
+     * 3. The first available remote found in the config.
+     *
+     * @returns The inferred repository URL, or null if no remotes are configured.
+     */
+    inferRepositoryUrl(): FireflyAsyncResult<string | null>;
 }

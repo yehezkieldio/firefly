@@ -377,6 +377,76 @@ export class DefaultGitService implements IGitService {
 
         return this.git(args).map(() => undefined);
     }
+
+    /**
+     * Gets the upstream remote name for the current branch.
+     * @returns The remote name or null if no upstream is configured.
+     */
+    private getUpstreamRemote(): FireflyAsyncResult<string | null> {
+        return this.git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"])
+            .map((output) => {
+                // Output format is "remote/branch", extract the remote name
+                const upstream = output.trim();
+                const slashIndex = upstream.indexOf("/");
+                if (slashIndex > 0) {
+                    return upstream.substring(0, slashIndex);
+                }
+                return null;
+            })
+            .orElse(() => FireflyOkAsync(null));
+    }
+
+    /**
+     * Lists all configured remotes.
+     * @returns Array of remote names.
+     */
+    private listRemotes(): FireflyAsyncResult<string[]> {
+        return this.git(["remote"]).map((output) =>
+            output
+                .split("\n")
+                .map((remote) => remote.trim())
+                .filter((remote) => remote.length > 0)
+        );
+    }
+
+    inferRepositoryUrl(): FireflyAsyncResult<string | null> {
+        // Strategy 1: Try upstream remote for current branch
+        return this.getUpstreamRemote().andThen((upstreamRemote) => {
+            if (upstreamRemote) {
+                logger.verbose(`GitService: Inferring repository URL from upstream remote: ${upstreamRemote}`);
+                return this.getRemoteUrl(upstreamRemote)
+                    .map((url) => url as string | null)
+                    .orElse(() => this.tryOriginOrFirstRemote());
+            }
+            return this.tryOriginOrFirstRemote();
+        });
+    }
+
+    /**
+     * Tries to get the repository URL from 'origin' or the first available remote.
+     */
+    private tryOriginOrFirstRemote(): FireflyAsyncResult<string | null> {
+        // Strategy 2: Try 'origin' remote
+        return this.getRemoteUrl("origin")
+            .map((url) => {
+                logger.verbose("GitService: Inferring repository URL from origin remote");
+                return url as string | null;
+            })
+            .orElse(() => {
+                // Strategy 3: Try first available remote
+                return this.listRemotes().andThen((remotes) => {
+                    if (remotes.length === 0) {
+                        logger.verbose("GitService: No remotes configured, cannot infer repository URL");
+                        return FireflyOkAsync(null);
+                    }
+                    const firstRemote = remotes[0];
+                    logger.verbose(`GitService: Inferring repository URL from first remote: ${firstRemote}`);
+                    return this.getRemoteUrl(firstRemote)
+                        .map((url) => url as string | null)
+                        .orElse(() => FireflyOkAsync(null));
+                });
+            });
+    }
 }
 
 /**

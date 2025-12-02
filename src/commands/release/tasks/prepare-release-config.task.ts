@@ -77,7 +77,9 @@ function extractPreReleaseId(version: string): string | undefined {
  *
  * Behavior:
  * - If not inside a git repository, resolves to undefined.
- * - If inside a repository, attempts to parse the remote URL and return "owner/repo" when possible.
+ * - If inside a repository, detect the repository URL
+ *   using a fall-through strategy (upstream remote → origin → first remote).
+ * - Parses the URL and returns "owner/repo" when possible.
  */
 function hydrateRepository(ctx: ReleaseContext): FireflyAsyncResult<string | undefined> {
     return ctx.services.git.isInsideRepository().andThen((isRepo) => {
@@ -86,8 +88,11 @@ function hydrateRepository(ctx: ReleaseContext): FireflyAsyncResult<string | und
         }
 
         return ctx.services.git
-            .getRemoteUrl()
+            .inferRepositoryUrl()
             .map((url) => {
+                if (!url) {
+                    return null;
+                }
                 const parsed = parseGitRemoteUrl(url);
                 if (parsed) {
                     const repo = `${parsed.owner}/${parsed.repo}`;
@@ -95,7 +100,6 @@ function hydrateRepository(ctx: ReleaseContext): FireflyAsyncResult<string | und
                 }
                 return null;
             })
-            .orElse(() => FireflyOkAsync(null))
             .map((val) => val ?? undefined)
             .andTee((repository) => logger.verbose(`PrepareReleaseConfigTask: Prepared repository: ${repository}`));
     });
