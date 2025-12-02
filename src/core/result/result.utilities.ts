@@ -1,4 +1,4 @@
-import { okAsync, ResultAsync } from "neverthrow";
+import { ResultAsync } from "neverthrow";
 import { createFireflyError, toFireflyError } from "#/core/result/error.factories";
 import type { ErrorResultOptions, FireflyError } from "#/core/result/error.types";
 import {
@@ -104,7 +104,7 @@ export function ensureAsync(condition: boolean, errorOpts: ErrorResultOptions): 
  * ```
  */
 export function fromNullable<T>(value: T | null | undefined, errorOpts: ErrorResultOptions): FireflyResult<T> {
-    return value !== null ? FireflyOk(value) : notFoundErr(errorOpts);
+    return value !== null && value !== undefined ? FireflyOk(value) : notFoundErr(errorOpts);
 }
 
 /**
@@ -114,7 +114,7 @@ export function fromNullableAsync<T>(
     value: T | null | undefined,
     errorOpts: ErrorResultOptions
 ): FireflyAsyncResult<T> {
-    return value !== null ? okAsync(value) : notFoundErrAsync(errorOpts);
+    return value !== null && value !== undefined ? FireflyOkAsync(value) : notFoundErrAsync(errorOpts);
 }
 
 /**
@@ -155,7 +155,7 @@ export function traverseResultsAsync<T, U>(
 ): FireflyAsyncResult<U[]> {
     return items.reduce<FireflyAsyncResult<U[]>>(
         (acc, item, index) => acc.andThen((results) => fn(item, index).map((value) => [...results, value])),
-        okAsync([])
+        FireflyOkAsync([])
     );
 }
 
