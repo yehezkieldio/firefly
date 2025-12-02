@@ -1,0 +1,5 @@
+#:schema ./assets/firefly.schema.json
+
+[release]
+name = "firefly"
+scope = ""
