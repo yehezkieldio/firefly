@@ -1,4 +1,6 @@
+import { colors } from "consola/utils";
 import type { WorkflowContext } from "#/core/context/workflow.context";
+import { RuntimeEnv } from "#/core/environment/runtime-env";
 import type { FireflyError } from "#/core/result/error.types";
 import {
     FireflyErr,
@@ -144,7 +146,21 @@ export class WorkflowExecutor {
         const skippedTaskIds: string[] = [];
 
         if (this.options.dryRun) {
-            logger.warn("Workflow executing in DRY RUN mode - no actual changes will be made");
+            logger.warn("Running in DRY-RUN mode: No changes will be made.");
+        }
+
+        const version = RuntimeEnv.version;
+        const dashIndex = version.indexOf("-");
+        if (dashIndex !== -1) {
+            if (dashIndex === version.length - 1 || version[dashIndex + 1] === "n") {
+                logger.warn(
+                    `You are running a DEVELOPMENT build of Firefly (${colors.dim(version)}). This is a 'next' build and may be unstable.`
+                );
+            } else {
+                logger.warn(
+                    `You are running a PRE-RELEASE version of Firefly (${colors.dim(version)}). Unexpected behavior or bugs may occur.`
+                );
+            }
         }
 
         logger.verbose(`WorkflowExecutor: Starting execution of ${tasks.length} tasks`);
