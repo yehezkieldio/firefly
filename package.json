@@ -31,8 +31,8 @@
     }
   },
   "bin": {
-    "firefly": "./dist/main.js",
-    "ff": "./dist/main.js"
+    "firefly": "dist/main.js",
+    "ff": "dist/main.js"
   },
   "publishConfig": {
     "access": "public",
