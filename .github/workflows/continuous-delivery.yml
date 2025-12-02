@@ -21,6 +21,10 @@ env:
   VERSION_PATTERN: "[0-9]+\\.[0-9]+\\.[0-9]+"
   PRERELEASE_PATTERN: "[0-9]+\\.[0-9]+\\.[0-9]+-[A-Za-z]+\\.[0-9]+"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   detect-changes:
     name: Detect Changes and Release Type
