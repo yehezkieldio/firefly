@@ -44,10 +44,8 @@ export function createInitializeReleaseVersion(): FireflyResult<Task> {
         .dependsOn("prepare-release-config")
         .execute((ctx) =>
             getVersionFromPackageJson(ctx).andThen((currentVersion) => {
-                logger.info(`InitializeReleaseVersionTask: Current version is ${currentVersion}`);
-                const updatedCtx = ctx.fork("currentVersion", currentVersion);
-
-                return FireflyOkAsync(updatedCtx);
+                logger.info(`Current version is ${currentVersion}`);
+                return FireflyOkAsync(ctx.fork("currentVersion", currentVersion));
             })
         )
         .build();
