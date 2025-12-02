@@ -6,6 +6,19 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.12 (December 2, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`53d1f70`](https://github.com/yehezkieldio/firefly/commit/53d1f702b95d4ea0b65e2a3106de4e149c082806) release: Initialize release version from package.json
+- [`644fea9`](https://github.com/yehezkieldio/firefly/commit/644fea97c907d756188158fa85fecf204d2c748c) services: Add verbose logger integration for filesystem, git, and package-json services
+
+### <!-- 5 -->📚 Documentation
+- [`1ffda94`](https://github.com/yehezkieldio/firefly/commit/1ffda9422900e9b21f32b45bd39851e88b0da00f) release: Clarify version extraction logic in comments
+
+### <!-- 7 -->🚜 Refactor
+- [`928dd95`](https://github.com/yehezkieldio/firefly/commit/928dd958ed7d09b16d6eafab754e6c2c5a9ea16c) release: Centralize HydratedConfig interface in release.data for reuse across tasks
+- [`43b01f8`](https://github.com/yehezkieldio/firefly/commit/43b01f8cd3000e3d9078b9849459359b9812d755) core: Simplify workflow data typings and improve type safety
+- [`72ee2f2`](https://github.com/yehezkieldio/firefly/commit/72ee2f2723ef3445a872e149fd2add7b196e8509) release: Simplify version initialization logging and context handling
 ## firefly@4.0.0-alpha.11 (December 2, 2025)
 ## fireflyy@4.0.0-alpha.10 (December 2, 2025)
 
