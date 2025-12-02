@@ -44,20 +44,45 @@ jobs:
         id: filter
         run: |
           BEFORE="${{ github.event.before }}"
-          # Handle first push or force push where before is all zeros
-          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
-            # Compare against the parent commit or check if src/ exists in current commit
-            if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -qE '^src/' || git ls-tree -r HEAD --name-only | grep -qE '^src/'; then
+          CURRENT="${{ github.sha }}"
+          SRC_PATTERN='^src/'
+
+          check_diff_for_src() {
+            BASE_COMMIT="$1"
+            HEAD_COMMIT="$2"
+
+            if [ -z "$BASE_COMMIT" ] || [ -z "$HEAD_COMMIT" ]; then
+              echo "src_changed=false" >> $GITHUB_OUTPUT
+              return
+            fi
+
+            if git diff --name-only "$BASE_COMMIT" "$HEAD_COMMIT" | grep -qE "$SRC_PATTERN"; then
               echo "src_changed=true" >> $GITHUB_OUTPUT
             else
               echo "src_changed=false" >> $GITHUB_OUTPUT
+            fi
+          }
+
+          commit_has_src_changes() {
+            TARGET_COMMIT="$1"
+
+            if git diff-tree --no-commit-id --name-only -r "$TARGET_COMMIT" | grep -qE "$SRC_PATTERN"; then
+              echo "src_changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "src_changed=false" >> $GITHUB_OUTPUT
+            fi
+          }
+
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+            PARENT_COMMIT="$(git rev-parse "${CURRENT}^" 2>/dev/null || true)"
+
+            if [ -n "$PARENT_COMMIT" ]; then
+              check_diff_for_src "$PARENT_COMMIT" "$CURRENT"
+            else
+              commit_has_src_changes "$CURRENT"
             fi
           else
-            if git diff --name-only "$BEFORE" ${{ github.sha }} | grep -qE '^src/'; then
-              echo "src_changed=true" >> $GITHUB_OUTPUT
-            else
-              echo "src_changed=false" >> $GITHUB_OUTPUT
-            fi
+            check_diff_for_src "$BEFORE" "$CURRENT"
           fi
 
       - name: Determine release type
@@ -82,6 +107,13 @@ jobs:
           else
             echo "is_stable=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Log detect-changes outputs
+        run: |
+          echo "src_changed=${{ steps.filter.outputs.src_changed }}"
+          echo "is_release=${{ steps.detect_release.outputs.is_release }}"
+          echo "is_prerelease=${{ steps.detect_release.outputs.is_prerelease }}"
+          echo "is_stable=${{ steps.detect_release.outputs.is_stable }}"
 
   publish-latest:
     name: Publish Latest
