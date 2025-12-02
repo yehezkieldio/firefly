@@ -103,13 +103,6 @@ jobs:
             echo "is_stable=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Log detect-changes outputs
-        run: |
-          echo "src_changed=${{ steps.filter.outputs.src_changed }}"
-          echo "is_release=${{ steps.detect_release.outputs.is_release }}"
-          echo "is_prerelease=${{ steps.detect_release.outputs.is_prerelease }}"
-          echo "is_stable=${{ steps.detect_release.outputs.is_stable }}"
-
   publish-latest:
     name: Publish Latest
     needs: detect-changes
