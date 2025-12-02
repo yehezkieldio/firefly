@@ -289,6 +289,7 @@ function hydrateBranch(ctx: ReleaseContext): FireflyAsyncResult<string | undefin
  * 1. Detects repository owner/repo from git remote URL
  * 2. Extracts name and scope from package.json
  * 3. Extracts preReleaseId from package.json version
+ * 4. Detects current git branch if not provided
  */
 export function createPrepareReleaseConfigTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("prepare-release-config")
