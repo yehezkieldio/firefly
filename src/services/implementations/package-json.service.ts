@@ -3,6 +3,7 @@ import { toFireflyError } from "#/core/result/error.factories";
 import { FireflyOkAsync, validationErr, validationErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 import { parseSchema } from "#/core/result/schema.utilities";
+import { logger } from "#/infrastructure/logging";
 import type { IFileSystemService } from "#/services/contracts/filesystem.interface";
 import {
     type IPackageJsonService,
@@ -44,6 +45,11 @@ export class DefaultPackageJsonService implements IPackageJsonService {
                     }
                     return FireflyOkAsync(undefined);
                 })
+            )
+            .andTee(() =>
+                logger.verbose(
+                    `DefaultPackageJsonService: Updated version in package.json at path: ${path} to ${newVersion}`
+                )
             );
     }
 

@@ -2,6 +2,7 @@ import { notFoundErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult } from "#/core/result/result.types";
 import { wrapPromise } from "#/core/result/result.utilities";
 import { withDryRun } from "#/infrastructure/dry-run";
+import { logger } from "#/infrastructure/logging";
 import type { IFileSystemService, WriteOptions } from "#/services/contracts/filesystem.interface";
 
 /**
@@ -35,7 +36,9 @@ export class DefaultFileSystemService implements IFileSystemService {
 
     exists(path: string): FireflyAsyncResult<boolean> {
         const resolved = this.resolvePath(path);
-        return wrapPromise(Bun.file(resolved).exists());
+        return wrapPromise(Bun.file(resolved).exists()).andTee(() =>
+            logger.verbose(`DefaultFileSystemService: Checked existence of file: ${resolved}`)
+        );
     }
 
     read(path: string): FireflyAsyncResult<string> {
@@ -46,16 +49,19 @@ export class DefaultFileSystemService implements IFileSystemService {
             if (!fileExists) {
                 return notFoundErrAsync({
                     message: `File not found: ${resolved}`,
-                    source: "FileSystemService.read",
                 });
             }
-            return wrapPromise(file.text());
+            return wrapPromise(file.text()).andTee(() =>
+                logger.verbose(`DefaultFileSystemService: Read file: ${resolved}`)
+            );
         });
     }
 
     write(path: string, content: string, options?: WriteOptions): FireflyAsyncResult<void> {
         return withDryRun(options, `Writing to ${this.resolvePath(path)}`, () =>
-            wrapPromise(Bun.write(this.resolvePath(path), content).then(() => {}))
+            wrapPromise(Bun.write(this.resolvePath(path), content).then(() => {})).andTee(() =>
+                logger.verbose(`DefaultFileSystemService: Wrote file: ${this.resolvePath(path)}`)
+            )
         );
     }
 }

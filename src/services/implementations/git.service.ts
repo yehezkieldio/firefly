@@ -58,7 +58,10 @@ export class DefaultGitService implements IGitService {
     }
 
     getRepositoryRoot(): FireflyAsyncResult<string> {
-        return this.git(["rev-parse", "--show-toplevel"]).map((output) => output.trim());
+        return this.git(["rev-parse", "--show-toplevel"]) // resolve root
+            .andTee(() => logger.verbose("DefaultGitService: Resolving repository root"))
+            .map((output) => output.trim())
+            .andTee(() => logger.verbose("DefaultGitService: Repository root resolved"));
     }
 
     getRemoteUrl(remote?: string): FireflyAsyncResult<string> {
@@ -89,12 +92,18 @@ export class DefaultGitService implements IGitService {
                 }
             }
 
-            return {
+            const status = {
                 hasStaged,
                 hasUnstaged,
                 hasUntracked,
                 isClean: lines.length === 0,
-            };
+            } satisfies GitStatus;
+
+            logger.verbose(
+                `DefaultGitService: Git status: staged=${status.hasStaged},unstaged=${status.hasUnstaged},untracked=${status.hasUntracked},clean=${status.isClean}`
+            );
+
+            return status;
         });
     }
 
@@ -127,7 +136,7 @@ export class DefaultGitService implements IGitService {
         return this.git(["status", "--porcelain"]).map((output) => {
             const files = this.parseStatusOutput(output);
 
-            return files.filter((file) => {
+            const filtered = files.filter((file) => {
                 const isStaged = file.indexStatus !== " " && file.indexStatus !== "?";
                 const isUnstaged = file.workTreeStatus !== " " && file.workTreeStatus !== "?";
 
@@ -142,6 +151,12 @@ export class DefaultGitService implements IGitService {
                 }
                 return false;
             });
+
+            logger.verbose(
+                `DefaultGitService: Found ${filtered.length} file(s) for filter staged=${includeStaged} unstaged=${includeUnstaged}`
+            );
+
+            return filtered;
         });
     }
 
@@ -171,11 +186,17 @@ export class DefaultGitService implements IGitService {
             branchName = branchName.replace(REMOTES_PREFIX_REGEX, "");
         }
 
-        return {
+        const branch = {
             name: branchName,
             isCurrent,
             isRemote,
-        };
+        } as BranchInformation;
+
+        logger.verbose(
+            `DefaultGitService: Parsed branch: ${branch.name} current=${branch.isCurrent} remote=${branch.isRemote}`
+        );
+
+        return branch;
     }
 
     listBranches(includeRemote?: boolean): FireflyAsyncResult<BranchInformation[]> {
@@ -192,7 +213,7 @@ export class DefaultGitService implements IGitService {
 
     createCommit(message: string, options?: CommitOptions): FireflyAsyncResult<CommitResult> {
         if (options?.dryRun) {
-            logger.verbose("GitService: Dry run, skipping commit");
+            logger.verbose("DefaultGitService: Dry run, skipping commit");
             return FireflyOkAsync({ sha: "dry-run-sha" });
         }
 
@@ -243,6 +264,7 @@ export class DefaultGitService implements IGitService {
             return this.git(["rev-list", "--count", `${upstream}..HEAD`])
                 .map((output) => {
                     const count = Number.parseInt(output.trim(), 10) || 0;
+                    logger.verbose(`DefaultGitService: Unpushed commits count for ${upstream}: ${count}`);
                     return { hasUnpushed: count > 0, count };
                 })
                 .orElse(() => {
@@ -250,6 +272,7 @@ export class DefaultGitService implements IGitService {
                     return this.git(["rev-list", "--count", "HEAD"])
                         .map((output) => {
                             const count = Number.parseInt(output.trim(), 10) || 0;
+                            logger.verbose(`DefaultGitService: Total commit count: ${count}`);
                             return { hasUnpushed: count > 0, count };
                         })
                         .orElse(() => FireflyOkAsync({ hasUnpushed: false, count: 0 }));
@@ -259,7 +282,7 @@ export class DefaultGitService implements IGitService {
 
     createTag(name: string, options?: CreateTagOptions): FireflyAsyncResult<void> {
         if (options?.dryRun) {
-            logger.verbose(`GitService: Dry run, skipping tag creation: ${name}`);
+            logger.verbose(`DefaultGitService: Dry run, skipping tag creation: ${name}`);
             return FireflyOkAsync(undefined);
         }
 
@@ -283,7 +306,7 @@ export class DefaultGitService implements IGitService {
         const remote = options?.remote ?? "origin";
 
         if (options?.dryRun) {
-            logger.verbose(`GitService: Dry run, skipping tag deletion (${scope}): ${name}`);
+            logger.verbose(`DefaultGitService: Dry run, skipping tag deletion (${scope}): ${name}`);
             return FireflyOkAsync(undefined);
         }
 
@@ -292,21 +315,32 @@ export class DefaultGitService implements IGitService {
         }
 
         if (scope === "remote") {
-            return this.git(["push", remote, `:refs/tags/${name}`]).map(() => undefined);
+            logger.verbose(`DefaultGitService: Deleting remote tag: ${name} on ${remote}`);
+            return this.git(["push", remote, `:refs/tags/${name}`])
+                .andTee(() => logger.verbose(`DefaultGitService: Remote tag deleted: ${name} on ${remote}`))
+                .map(() => undefined);
         }
 
         // scope === "both"
+        logger.verbose(`DefaultGitService: Deleting tag locally and remotely: ${name} on ${remote}`);
         return this.git(["tag", "-d", name])
             .andThen(() => this.git(["push", remote, `:refs/tags/${name}`]))
+            .andTee(() => logger.verbose(`DefaultGitService: Local and remote tag deleted: ${name} on ${remote}`))
             .map(() => undefined);
     }
 
     hasTag(name: string): FireflyAsyncResult<boolean> {
-        return this.git(["tag", "--list", name]).map((output) => output.trim() === name);
+        return this.git(["tag", "--list", name]).map((output) => {
+            const exists = output.trim() === name;
+            logger.verbose(`DefaultGitService: Tag ${name} exists=${exists}`);
+            return exists;
+        });
     }
 
     hasAnyTags(): FireflyAsyncResult<boolean> {
-        return this.getLatestTag().map((tag) => tag !== null);
+        return this.getLatestTag()
+            .andTee(() => logger.verbose("DefaultGitService: Checking if any tags exist"))
+            .map((tag) => tag !== null);
     }
 
     listTags(): FireflyAsyncResult<string[]> {
@@ -337,6 +371,7 @@ export class DefaultGitService implements IGitService {
         return this.git(["tag", "-l", "--format=%(contents)", name])
             .map((output) => {
                 const message = output.trim();
+                logger.verbose(`DefaultGitService: Tag message for ${name}: ${message?.substring(0, 60) ?? "(none)"}`);
                 return message || null;
             })
             .orElse(() => FireflyOkAsync(null));
@@ -344,17 +379,22 @@ export class DefaultGitService implements IGitService {
 
     stage(paths: string | string[]): FireflyAsyncResult<void> {
         const pathArray = Array.isArray(paths) ? paths : [paths];
-        return this.git(["add", ...pathArray]).map(() => undefined);
+        return this.git(["add", ...pathArray])
+            .andTee(() => logger.verbose(`DefaultGitService: Staged paths: ${pathArray.join(", ")}`))
+            .map(() => undefined);
     }
 
     unstage(paths: string | string[]): FireflyAsyncResult<void> {
         const pathArray = Array.isArray(paths) ? paths : [paths];
-        return this.git(["reset", "HEAD", "--", ...pathArray]).map(() => undefined);
+        logger.verbose(`DefaultGitService: Unstaging paths: ${pathArray.join(", ")}`);
+        return this.git(["reset", "HEAD", "--", ...pathArray])
+            .andTee(() => logger.verbose(`DefaultGitService: Unstaged paths: ${pathArray.join(", ")}`))
+            .map(() => undefined);
     }
 
     push(options?: PushOptions): FireflyAsyncResult<void> {
         if (options?.dryRun) {
-            logger.verbose("GitService: Dry run, skipping push");
+            logger.verbose("DefaultGitService: Dry run, skipping push");
             return FireflyOkAsync(undefined);
         }
 
@@ -413,11 +453,12 @@ export class DefaultGitService implements IGitService {
         // Strategy 1: Try upstream remote for current branch
         return this.getUpstreamRemote().andThen((upstreamRemote) => {
             if (upstreamRemote) {
-                logger.verbose(`GitService: Inferring repository URL from upstream remote: ${upstreamRemote}`);
+                logger.verbose(`DefaultGitService: Inferring repository URL from upstream remote: ${upstreamRemote}`);
                 return this.getRemoteUrl(upstreamRemote)
                     .map((url) => url as string | null)
                     .orElse(() => this.tryOriginOrFirstRemote());
             }
+            logger.verbose("DefaultGitService: No upstream remote; falling back to origin or first remote");
             return this.tryOriginOrFirstRemote();
         });
     }
@@ -429,18 +470,18 @@ export class DefaultGitService implements IGitService {
         // Strategy 2: Try 'origin' remote
         return this.getRemoteUrl("origin")
             .map((url) => {
-                logger.verbose("GitService: Inferring repository URL from origin remote");
+                logger.verbose("DefaultGitService: Inferring repository URL from origin remote");
                 return url as string | null;
             })
             .orElse(() => {
                 // Strategy 3: Try first available remote
                 return this.listRemotes().andThen((remotes) => {
                     if (remotes.length === 0) {
-                        logger.verbose("GitService: No remotes configured, cannot infer repository URL");
+                        logger.verbose("DefaultGitService: No remotes configured, cannot infer repository URL");
                         return FireflyOkAsync(null);
                     }
                     const firstRemote = remotes[0];
-                    logger.verbose(`GitService: Inferring repository URL from first remote: ${firstRemote}`);
+                    logger.verbose(`DefaultGitService: Inferring repository URL from first remote: ${firstRemote}`);
                     return this.getRemoteUrl(firstRemote)
                         .map((url) => url as string | null)
                         .orElse(() => FireflyOkAsync(null));
