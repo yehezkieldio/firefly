@@ -58,34 +58,66 @@ export interface Commit extends CommitBase {
 }
 
 /**
+
  * Results of analyzing commits for version impact.
+
  */
 export interface CommitAnalysis {
-    /** Number of commits with breaking changes */
+    /**
+     * Number of commits with breaking changes
+     */
     readonly breakingChanges: number;
-    /** Number of feature commits (feat) */
+
+    /**
+     * Number of feature commits (feat)
+     */
     readonly features: number;
-    /** Number of patch-level commits (fix, perf, etc.) */
+
+    /**
+     * Number of patch-level commits (fix, perf, etc.)
+     */
     readonly patches: number;
-    /** Scopes that indicate breaking changes */
+
+    /**
+     * Scopes that indicate breaking changes
+     */
     readonly scopedBreaking: string[];
-    /** Whether a pre-release to stable transition was detected */
+
+    /**
+     * Whether a pre-release to stable transition was detected
+     */
     readonly hasPreReleaseTransition: boolean;
-    /** Commits grouped by their type */
+
+    /**
+     * Commits grouped by their type
+     */
     readonly commitsByType: Record<string, Commit[]>;
 }
 
 /**
+
  * Configuration for which commit types map to version levels.
+
  */
 export interface CommitTypeConfiguration {
-    /** Commit types that trigger major version bumps */
+    /**
+     * Commit types that trigger major version bumps
+     */
     readonly major: readonly string[];
-    /** Commit types that trigger minor version bumps */
+
+    /**
+     * Commit types that trigger minor version bumps
+     */
     readonly minor: readonly string[];
-    /** Commit types that trigger patch version bumps */
+
+    /**
+     * Commit types that trigger patch version bumps
+     */
     readonly patch: readonly string[];
-    /** Scope-to-version-level rules */
+
+    /**
+     * Scope-to-version-level rules
+     */
     readonly scopeRules: Readonly<Record<string, "major" | "minor" | "patch">>;
 }
 
