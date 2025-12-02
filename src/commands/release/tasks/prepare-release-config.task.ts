@@ -1,5 +1,6 @@
 import { parse as parseVersion } from "semver";
 import type { ReleaseContext } from "#/commands/release/release.context";
+import type { HydratedConfig } from "#/commands/release/release.data";
 import { FireflyOkAsync, validationErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 import { zip3Async } from "#/core/result/result.utilities";
@@ -7,14 +8,6 @@ import { TaskBuilder } from "#/core/task/task.builder";
 import type { Task } from "#/core/task/task.types";
 import { logger } from "#/infrastructure/logging";
 import type { PackageJson } from "#/services/contracts/package-json.interface";
-
-interface HydratedConfig {
-    repository?: string;
-    name?: string;
-    scope?: string;
-    preReleaseId?: string;
-    branch?: string;
-}
 
 const HTTPS_REMOTE_REGEX = /https?:\/\/[^/]+\/([^/]+)\/([^/.]+)(?:\.git)?/;
 const SSH_REMOTE_REGEX = /git@[^:]+:([^/]+)\/([^/.]+)(?:\.git)?/;
