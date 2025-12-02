@@ -11,8 +11,8 @@ const PACKAGE_JSON_FILE = "package.json";
  * Reads package.json and extracts the version field.
  *
  * Behavior:
- * - Reads the configured package file using packageJson service.
- * - If the `version` property is missing, returns a validation error.
+ * - Reads the configured package.json file.
+ * - If the version property is missing, returns a validation error.
  * - Otherwise resolves with the version string.
  */
 function getVersionFromPackageJson(ctx: ReleaseContext): FireflyAsyncResult<string> {
