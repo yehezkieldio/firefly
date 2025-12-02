@@ -30,7 +30,8 @@
         }
       },
       "correctness": {
-        "noUnusedVariables": "off"
+        "noUnusedVariables": "off",
+        "noUndeclaredVariables": "off"
       },
       "suspicious": {
         "noConsole": "off",
