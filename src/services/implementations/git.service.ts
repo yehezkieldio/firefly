@@ -47,7 +47,7 @@ export class DefaultGitService implements IGitService {
         return executeGitCommand(args, {
             cwd: this.cwd,
             dryRun: options?.dryRun,
-            verbose: options?.verbose ?? false,
+            verbose: options?.verbose ?? true,
         });
     }
 

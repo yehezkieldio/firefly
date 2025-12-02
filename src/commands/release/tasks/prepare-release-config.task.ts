@@ -82,27 +82,21 @@ function extractPreReleaseId(version: string): string | undefined {
  * - Parses the URL and returns "owner/repo" when possible.
  */
 function hydrateRepository(ctx: ReleaseContext): FireflyAsyncResult<string | undefined> {
-    return ctx.services.git.isInsideRepository().andThen((isRepo) => {
-        if (!isRepo) {
-            return FireflyOkAsync(undefined);
-        }
-
-        return ctx.services.git
-            .inferRepositoryUrl()
-            .map((url) => {
-                if (!url) {
-                    return null;
-                }
-                const parsed = parseGitRemoteUrl(url);
-                if (parsed) {
-                    const repo = `${parsed.owner}/${parsed.repo}`;
-                    return repo;
-                }
+    return ctx.services.git
+        .inferRepositoryUrl()
+        .map((url) => {
+            if (!url) {
                 return null;
-            })
-            .map((val) => val ?? undefined)
-            .andTee((repository) => logger.verbose(`PrepareReleaseConfigTask: Prepared repository: ${repository}`));
-    });
+            }
+            const parsed = parseGitRemoteUrl(url);
+            if (parsed) {
+                const repo = `${parsed.owner}/${parsed.repo}`;
+                return repo;
+            }
+            return null;
+        })
+        .map((val) => val ?? undefined)
+        .andTee((repository) => logger.verbose(`PrepareReleaseConfigTask: Prepared repository: ${repository}`));
 }
 
 /**
