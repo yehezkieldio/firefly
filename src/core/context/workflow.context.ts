@@ -3,8 +3,10 @@ import { FireflyOk, validationErr } from "#/core/result/result.constructors";
 import type { FireflyResult } from "#/core/result/result.types";
 import type { DefaultServices } from "#/core/service/service.registry";
 
-// Base constraint for workflow data - must be a record with string keys
-export type WorkflowData = Record<string, unknown>;
+/**
+ * Base constraint for workflow data.
+ */
+export type WorkflowData = object;
 
 /**
  * Options for creating an immutable workflow context.

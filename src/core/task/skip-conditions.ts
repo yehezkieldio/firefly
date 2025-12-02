@@ -172,7 +172,7 @@ export function fromConfig<TContext extends GenericWorkflowContext = GenericWork
 export function fromData<TContext extends GenericWorkflowContext = GenericWorkflowContext, K extends string = string>(
     key: K
 ): SkipPredicate<TContext> {
-    return (ctx) => Boolean(ctx.data[key]);
+    return (ctx) => Boolean((ctx.data as Record<string, unknown>)[key]);
 }
 
 // Cached always-true and always-false predicates for reuse

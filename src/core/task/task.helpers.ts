@@ -281,9 +281,11 @@ export function createTransformTask<TContext extends GenericWorkflowContext = Ge
 
     builder = builder.execute((ctx) =>
         options.transform(ctx).map((result: unknown) => {
-            // Use type assertion since GenericWorkflowContext has Record<string, unknown> as data
-            type DataKey = keyof TContext["data"] & string;
-            return ctx.fork(options.outputKey as DataKey, result as TContext["data"][DataKey]) as TContext;
+            // Use string assertion for generic context data key access
+            return ctx.fork(
+                options.outputKey as keyof TContext["data"] & string,
+                result as TContext["data"][keyof TContext["data"] & string]
+            ) as TContext;
         })
     );
 

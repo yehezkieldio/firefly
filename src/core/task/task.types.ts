@@ -1,5 +1,5 @@
 import type z from "zod";
-import type { WorkflowContext, WorkflowData } from "#/core/context/workflow.context";
+import type { WorkflowContext } from "#/core/context/workflow.context";
 import { FireflyOk } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 
@@ -131,9 +131,8 @@ export interface SkipCondition {
 
 /**
  * Generic workflow context type for use in task definitions.
- * Allows tasks to work with any configuration, data, and service types.
  */
-export type GenericWorkflowContext = WorkflowContext<unknown, WorkflowData, unknown>;
+export type GenericWorkflowContext = WorkflowContext<unknown, Record<string, unknown>, unknown>;
 
 /**
  * Type for task skip condition functions.

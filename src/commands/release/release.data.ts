@@ -1,5 +1,5 @@
 /**
- * Configuration fields that can be hydrated from environment (package.json / git).
+ * Configuration fields that can be inferred and hydrated into the release config.
  */
 export interface HydratedConfig {
     repository?: string;
@@ -9,7 +9,7 @@ export interface HydratedConfig {
     branch?: string;
 }
 
-export interface ReleaseData extends Record<string, unknown> {
+export interface ReleaseData {
     /**
      * Current version read from package.json
      */
@@ -36,8 +36,7 @@ export interface ReleaseData extends Record<string, unknown> {
     selectedReleaseType?: string;
 
     /**
-     * Prepared configuration inferred from environment (package.json / git)
-     * Added by the `prepare-release-config` task and consumed by follow-up tasks.
+     * Inferred and hydrated configuration fields
      */
     hydratedConfig?: HydratedConfig;
 }
