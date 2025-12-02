@@ -107,6 +107,7 @@ export const ReleaseConfigSchema = z
         name: z.string().optional().describe("Unscoped project name. Auto-detected from package.json."),
         scope: z.string().optional().describe("Org/user scope without '@'. Auto-detected from package.json."),
         base: z.string().default("").describe("Relative path from repository root to project root."),
+        branch: z.string().optional().describe("Git branch to release from."),
         changelogPath: z.string().default("CHANGELOG.md").describe("Changelog file path, relative to project root."),
 
         bumpStrategy: BumpStrategySchema.describe('"auto" (from commits) or "manual" (user-specified).'),
