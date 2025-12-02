@@ -6,6 +6,34 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## fireflyy@4.0.0-alpha.9 (December 2, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`d3ede06`](https://github.com/yehezkieldio/firefly/commit/d3ede06fa5811f9895bc1027bdce9e8662050f83) config: Replace firefly config from ts to toml format for release definition
+- [`fd79cb3`](https://github.com/yehezkieldio/firefly/commit/fd79cb318a5b504a9a392de2c7a5c56858ade395) prepare-release-config.task: Detect current git branch when not provided
+- [`3f79464`](https://github.com/yehezkieldio/firefly/commit/3f79464ad7ee5c48f42300fd6734c303215a5c0f) Re-enable renovate
+- [`4721ae4`](https://github.com/yehezkieldio/firefly/commit/4721ae41fff120a08d1caae2b03cafaa7691db68) vscode: Remove obsolete tasks configuration file
+
+### <!-- 16 -->🤖 CI/CD
+- [`d7b4777`](https://github.com/yehezkieldio/firefly/commit/d7b477713a2d4087e421d4dadbb6816c01849645) Add concurrency control to prevent duplicate runs
+- [`a8f6ba0`](https://github.com/yehezkieldio/firefly/commit/a8f6ba031360f17a2faca825bc7ce9f7cd0a4d1d) Enhance src change detection logic in workflow for better commit handling and add logging of detect-changes outputs
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`7af3188`](https://github.com/yehezkieldio/firefly/commit/7af318845a2ec3b64806883b241a7971b0b571f2) deps: Update dependency @biomejs/biome to v2.3.8 by renovate[bot] ([#139](https://github.com/yehezkieldio/firefly/issues/139))
+- [`ab9a109`](https://github.com/yehezkieldio/firefly/commit/ab9a109bfdc585ad1b3e088dfdfd818eed85cc5a) deps: Update dependency tsdown to ^0.17.0-beta.5 by renovate[bot] ([#140](https://github.com/yehezkieldio/firefly/issues/140))
+- [`94e1060`](https://github.com/yehezkieldio/firefly/commit/94e10601a6c1efb567279cfd63a286960b4095e1) deps: Update dependency ultracite to v6.3.8 by renovate[bot] ([#141](https://github.com/yehezkieldio/firefly/issues/141))
+
+### <!-- 3 -->🚀 New Features
+- [`79c10d9`](https://github.com/yehezkieldio/firefly/commit/79c10d9d04c3dec1b13d365a6503af2f7f83442a) release: Add support for branch field hydration in config
+- [`03d6842`](https://github.com/yehezkieldio/firefly/commit/03d68428252f960af3e03f45d189c99e7274c76b) git: Add repository URL inference fallback strategy
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`f8302d5`](https://github.com/yehezkieldio/firefly/commit/f8302d528db2932c77903adaec3670b563ea5d8d) config: Remove leading dot from dist path in package bin definitions
+- [`352994a`](https://github.com/yehezkieldio/firefly/commit/352994a16fbc1e0456ac74bbb31b248fda549a14) result: Use strict null comparison in fromNullable helpers
+- [`8fe8422`](https://github.com/yehezkieldio/firefly/commit/8fe8422cc4818ca76e1d064b4882a6c5f0aa6663) result: Handle undefined values and replace okAsync with FireflyOkAsync
+
+### <!-- 7 -->🚜 Refactor
+- [`71d5146`](https://github.com/yehezkieldio/firefly/commit/71d51467d3ca3d7d1baa4b68cca6eee9733e65d8) release: Simplify repository hydration logic and set git verbose default to true
 ## firefly@4.0.0-alpha.8 (December 1, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
