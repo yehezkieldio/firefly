@@ -6,6 +6,30 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.14 (December 3, 2025)
+
+### <!-- 16 -->🤖 CI/CD
+- [`eb3541c`](https://github.com/yehezkieldio/firefly/commit/eb3541c3d55b9d2ee5acea34d7ac5f39185cb295) Add discord notifications after npm publish steps
+- [`b988545`](https://github.com/yehezkieldio/firefly/commit/b9885459a778e0f830b4eeaab57a950a1395dcab) cd: Strip quotes from package version output in workflow steps
+- [`6aed7d2`](https://github.com/yehezkieldio/firefly/commit/6aed7d23d7dd29432d21f1c0773730f3790e272f) Add embed color to release discord notifications
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`cb61ee8`](https://github.com/yehezkieldio/firefly/commit/cb61ee8b5d0feb9f78a58afa1b32beb7d87a1181) deps: Update dependency tsdown to ^0.17.0-beta.6 by renovate[bot] ([#142](https://github.com/yehezkieldio/firefly/issues/142))
+
+### <!-- 3 -->🚀 New Features
+- [`d9f50bd`](https://github.com/yehezkieldio/firefly/commit/d9f50bd79f204e9d7e1c7dce0861197e6b58daed) release: Add hydration logic for git data and release flags
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`167f9d3`](https://github.com/yehezkieldio/firefly/commit/167f9d38db9d2fb236630d3bd365b2cc13ae8ade) schema: Remove partial generation since its partial by default now
+- [`6b1dcb0`](https://github.com/yehezkieldio/firefly/commit/6b1dcb0dc9fecd9518de46bd90d072dc93e30376) config: Update dts entry to correct file name
+- [`5da9e52`](https://github.com/yehezkieldio/firefly/commit/5da9e52cb70f0295fb7a729870d1878951d11234) release: Improve repository hydration with async validation errors
+- [`c97b9c7`](https://github.com/yehezkieldio/firefly/commit/c97b9c70a84b8d5f85c6546ec4fd304d49d2c6f6) schema: Remove redundant default values from release fields in firefly schema
+- [`988c93c`](https://github.com/yehezkieldio/firefly/commit/988c93c134f4355c861a3d14f46b8a44d6b0db4c) core: Improve error logging and simplify task execution flow
+
+### <!-- 7 -->🚜 Refactor
+- [`9ce593c`](https://github.com/yehezkieldio/firefly/commit/9ce593c693490309ec2ad416d2be98eba0268e9c) config: Make schema fields optional and remove redundant example docs
+- [`3009d2e`](https://github.com/yehezkieldio/firefly/commit/3009d2e1cb63e9e4aa9ae35c5df5bb6d1b75853f) release: Reorder helper functions for readability and logical grouping
+- [`48865a5`](https://github.com/yehezkieldio/firefly/commit/48865a5a7d802f7aa0d017dc3ad590dd252cd6de) release: Simplify hydration logic and remove unused utilities for cleaner async flow
 ## fireflyy@4.0.0-alpha.13 (December 3, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
