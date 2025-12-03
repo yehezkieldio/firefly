@@ -150,6 +150,7 @@ jobs:
           webhook-url: ${{ secrets.WEBHOOK_URL }}
           embed-title: "[firefly] package published with tag `latest` v${{ steps.version.outputs.version }}"
           embed-description: "[View on NPM](https://www.npmjs.com/package/fireflyy)"
+          embed-color: 5763719
   publish-next:
     name: Publish Development
     needs: detect-changes
@@ -206,6 +207,7 @@ jobs:
           webhook-url: ${{ secrets.WEBHOOK_URL }}
           embed-title: "[firefly] package published with tag `next` v${{ steps.version.outputs.version }}"
           embed-description: "[View on NPM](https://www.npmjs.com/package/fireflyy)"
+          embed-color: 5793266
   publish-pre-release:
     name: Publish Pre-release
     needs: detect-changes
@@ -257,3 +259,4 @@ jobs:
           webhook-url: ${{ secrets.WEBHOOK_URL }}
           embed-title: "[firefly] package published with tag `${{ steps.prerelease.outputs.tag }}` v${{ steps.version.outputs.version }}"
           embed-description: "[View on NPM](https://www.npmjs.com/package/fireflyy)"
+          embed-color: 15844367
