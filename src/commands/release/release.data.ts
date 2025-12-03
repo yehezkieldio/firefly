@@ -1,3 +1,5 @@
+import type { BumpStrategy } from "#/domain/semver/semver.strategies";
+
 /**
  * Configuration fields that can be inferred and hydrated into the release config.
  */
@@ -28,7 +30,7 @@ export interface ReleaseData {
     /**
      * Selected bump strategy from user prompt (overrides config.bumpStrategy)
      */
-    selectedBumpStrategy?: "auto" | "manual";
+    selectedBumpStrategy?: BumpStrategy;
 
     /**
      * Selected release type from user prompt (overrides config.releaseType)
