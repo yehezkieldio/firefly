@@ -9,8 +9,9 @@ import { ReleaseConfigSchema } from "#/commands/release/release.config";
 export const FireflyConfigSchema = z
     .object({
         ...GlobalOptionsSchema.shape,
-        release: ReleaseConfigSchema.optional().describe("Release command configuration."),
+        release: ReleaseConfigSchema.partial().describe("Release command configuration."),
     })
+    .partial()
     .describe("Firefly CLI configuration.");
 
 /**
