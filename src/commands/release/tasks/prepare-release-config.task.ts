@@ -66,69 +66,6 @@ function extractPreReleaseId(version: string): string | undefined {
 }
 
 /**
- * Hydrates the repository field from git remote URL.
- *
- * Behavior:
- * - If not inside a git repository, resolves to undefined.
- * - If inside a repository, detect the repository URL
- *   using a fall-through strategy (upstream remote → origin → first remote).
- * - Parses the URL and returns "owner/repo" when possible.
- */
-function hydrateRepository(ctx: ReleaseContext): FireflyAsyncResult<string> {
-    return ctx.services.git
-        .inferRepositoryUrl()
-        .andThen((url) => {
-            if (!url) {
-                return validationErrAsync({
-                    message: "Could not determine git remote URL to infer repository information",
-                });
-            }
-
-            const parsed = parseGitRemoteUrl(url);
-            if (parsed) {
-                const repo = `${parsed.owner}/${parsed.repo}`;
-                return FireflyOkAsync(repo);
-            }
-
-            return validationErrAsync({
-                message: `Could not parse repository information from git remote URL: ${url}`,
-            });
-        })
-        .andTee((repository) => logger.verbose(`PrepareReleaseConfigTask: Prepared repository: ${repository}`));
-}
-
-/**
- * Hydrates name, scope, and preReleaseId from package.json.
- *
- * Behavior:
- * - If package.json does not exist, returns all values as undefined.
- * - If it exists, reads package.json and returns parsed results for name, scope and preReleaseId.
- */
-function hydrateFromPackageJson(
-    ctx: ReleaseContext
-): FireflyAsyncResult<{ name?: string; scope?: string; preReleaseId?: string }> {
-    return ctx.services.fs.exists("package.json").andThen((exists) => {
-        if (!exists) {
-            return FireflyOkAsync({ name: undefined, scope: undefined, preReleaseId: undefined });
-        }
-
-        return ctx.services.packageJson.read("package.json").andThen((pkg) =>
-            zip3Async(
-                hydrateNameFromPackageJson(ctx, pkg),
-                hydrateScopeFromPackageJson(ctx, pkg),
-                hydratePreReleaseIdFromPackageJson(ctx, pkg)
-            ).map(([name, scope, preReleaseId]) => {
-                const result: { name?: string; scope?: string; preReleaseId?: string } = {};
-                if (name) result.name = name;
-                if (scope) result.scope = scope;
-                if (preReleaseId) result.preReleaseId = preReleaseId;
-                return result;
-            })
-        );
-    });
-}
-
-/**
  * Hydrates the `name` field from package.json when not provided in config.
  *
  * Cases:
@@ -230,6 +167,69 @@ function hydratePreReleaseIdFromPackageJson(
 
     logger.verbose("PrepareReleaseConfigTask: No preReleaseId to prepare from package.json, defaulting to 'alpha'");
     return FireflyOkAsync("alpha");
+}
+
+/**
+ * Hydrates name, scope, and preReleaseId from package.json.
+ *
+ * Behavior:
+ * - If package.json does not exist, returns all values as undefined.
+ * - If it exists, reads package.json and returns parsed results for name, scope and preReleaseId.
+ */
+function hydrateFromPackageJson(
+    ctx: ReleaseContext
+): FireflyAsyncResult<{ name?: string; scope?: string; preReleaseId?: string }> {
+    return ctx.services.fs.exists("package.json").andThen((exists) => {
+        if (!exists) {
+            return FireflyOkAsync({ name: undefined, scope: undefined, preReleaseId: undefined });
+        }
+
+        return ctx.services.packageJson.read("package.json").andThen((pkg) =>
+            zip3Async(
+                hydrateNameFromPackageJson(ctx, pkg),
+                hydrateScopeFromPackageJson(ctx, pkg),
+                hydratePreReleaseIdFromPackageJson(ctx, pkg)
+            ).map(([name, scope, preReleaseId]) => {
+                const result: { name?: string; scope?: string; preReleaseId?: string } = {};
+                if (name) result.name = name;
+                if (scope) result.scope = scope;
+                if (preReleaseId) result.preReleaseId = preReleaseId;
+                return result;
+            })
+        );
+    });
+}
+
+/**
+ * Hydrates the repository field from git remote URL.
+ *
+ * Behavior:
+ * - If not inside a git repository, resolves to undefined.
+ * - If inside a repository, detect the repository URL
+ *   using a fall-through strategy (upstream remote → origin → first remote).
+ * - Parses the URL and returns "owner/repo" when possible.
+ */
+function hydrateRepository(ctx: ReleaseContext): FireflyAsyncResult<string> {
+    return ctx.services.git
+        .inferRepositoryUrl()
+        .andThen((url) => {
+            if (!url) {
+                return validationErrAsync({
+                    message: "Could not determine git remote URL to infer repository information",
+                });
+            }
+
+            const parsed = parseGitRemoteUrl(url);
+            if (parsed) {
+                const repo = `${parsed.owner}/${parsed.repo}`;
+                return FireflyOkAsync(repo);
+            }
+
+            return validationErrAsync({
+                message: `Could not parse repository information from git remote URL: ${url}`,
+            });
+        })
+        .andTee((repository) => logger.verbose(`PrepareReleaseConfigTask: Prepared repository: ${repository}`));
 }
 
 /**
