@@ -139,6 +139,17 @@ jobs:
 
       - name: Publish Package to NPM (Latest tag)
         run: npm publish --tag=latest
+
+      - name: Get Package Version
+        id: version
+        run: echo "version=$(bun pm pkg get version)" >> $GITHUB_OUTPUT
+
+      - name: Notify Discord
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+          webhook-url: ${{ secrets.WEBHOOK_URL }}
+          embed-title: "[firefly] package published with tag `latest` v${{ steps.version.outputs.version }}"
+          embed-description: "[View on NPM](https://www.npmjs.com/package/fireflyy)"
   publish-next:
     name: Publish Development
     needs: detect-changes
@@ -184,6 +195,17 @@ jobs:
 
       - name: Publish Package to NPM (next tag)
         run: npm publish --tag=next
+
+      - name: Get Package Version
+        id: version
+        run: echo "version=$(bun pm pkg get version)" >> $GITHUB_OUTPUT
+
+      - name: Notify Discord
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+          webhook-url: ${{ secrets.WEBHOOK_URL }}
+          embed-title: "[firefly] package published with tag `next` v${{ steps.version.outputs.version }}"
+          embed-description: "[View on NPM](https://www.npmjs.com/package/fireflyy)"
   publish-pre-release:
     name: Publish Pre-release
     needs: detect-changes
@@ -224,3 +246,14 @@ jobs:
 
       - name: Publish Package to NPM (prerelease tag)
         run: npm publish --tag=${{ steps.prerelease.outputs.tag }}
+
+      - name: Get Package Version
+        id: version
+        run: echo "version=$(bun pm pkg get version)" >> $GITHUB_OUTPUT
+
+      - name: Notify Discord
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+          webhook-url: ${{ secrets.WEBHOOK_URL }}
+          embed-title: "[firefly] package published with tag `${{ steps.prerelease.outputs.tag }}` v${{ steps.version.outputs.version }}"
+          embed-description: "[View on NPM](https://www.npmjs.com/package/fireflyy)"
