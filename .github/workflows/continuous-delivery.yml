@@ -142,7 +142,7 @@ jobs:
 
       - name: Get Package Version
         id: version
-        run: echo "version=$(bun pm pkg get version)" >> $GITHUB_OUTPUT
+        run: echo "version=$(bun pm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
 
       - name: Notify Discord
         uses: tsickert/discord-webhook@v7.0.0
@@ -198,7 +198,7 @@ jobs:
 
       - name: Get Package Version
         id: version
-        run: echo "version=$(bun pm pkg get version)" >> $GITHUB_OUTPUT
+        run: echo "version=$(bun pm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
 
       - name: Notify Discord
         uses: tsickert/discord-webhook@v7.0.0
@@ -249,7 +249,7 @@ jobs:
 
       - name: Get Package Version
         id: version
-        run: echo "version=$(bun pm pkg get version)" >> $GITHUB_OUTPUT
+        run: echo "version=$(bun pm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
 
       - name: Notify Discord
         uses: tsickert/discord-webhook@v7.0.0
