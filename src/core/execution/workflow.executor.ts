@@ -12,6 +12,7 @@ import {
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 import type { Task } from "#/core/task/task.types";
 import { logger } from "#/infrastructure/logging";
+import { DebugFlags } from "../environment/debug-flags";
 
 /**
  * Comprehensive result of a workflow execution.
@@ -208,6 +209,12 @@ export class WorkflowExecutor {
         const { error, startTime, executedTaskIds, skippedTaskIds, initialContext } = args;
         const endTime = new Date();
 
+        if (DebugFlags.showRawError) {
+            logger.error(error);
+        } else {
+            logger.error(error.message);
+        }
+
         // Attempt rollback if enabled
         if (this.options.enableRollback && this.executedTasks.length > 0) {
             logger.verbose(`WorkflowExecutor: Attempting rollback of ${this.executedTasks.length} tasks`);
@@ -323,23 +330,17 @@ export class WorkflowExecutor {
     ): FireflyAsyncResult<void> {
         logger.verbose(`WorkflowExecutor: Task '${currentTask.meta.id}': Executing...`);
 
-        return currentTask
-            .execute(context)
-            .andThen((updatedContext) => {
-                logger.verbose(`WorkflowExecutor: Task '${currentTask.meta.id}': Completed`);
-                executionLists.executedTaskIds.push(currentTask.meta.id);
-                this.executedTasks.push(currentTask);
-                return this.executeTasksSequentially(
-                    remainingTasks,
-                    updatedContext,
-                    executionLists.executedTaskIds,
-                    executionLists.skippedTaskIds
-                );
-            })
-            .mapErr((error) => {
-                logger.error(error.message);
-                return error;
-            });
+        return currentTask.execute(context).andThen((updatedContext) => {
+            logger.verbose(`WorkflowExecutor: Task '${currentTask.meta.id}': Completed`);
+            executionLists.executedTaskIds.push(currentTask.meta.id);
+            this.executedTasks.push(currentTask);
+            return this.executeTasksSequentially(
+                remainingTasks,
+                updatedContext,
+                executionLists.executedTaskIds,
+                executionLists.skippedTaskIds
+            );
+        });
     }
 
     private rollback(context: ExecutorContext): FireflyAsyncResult<boolean> {

@@ -66,27 +66,24 @@ function promptBumpStrategy(): FireflyAsyncResult<BumpStrategy> {
         initial: defaultStrategy.value,
         cancel: "undefined",
     });
-    if (logger.level !== LogLevels.verbose) logger.log("");
 
-    return wrapPromise(prompt)
-        .andTee(() => {
-            if (logger.level === LogLevels.verbose) logger.log("");
-        })
-        .andThen((selected) => {
-            if (!selected || selected === "") {
-                return failedErrAsync({
-                    message: "Operation cancelled by user",
-                });
-            }
+    return wrapPromise(prompt).andThen((selected) => {
+        if (!selected || selected === "") {
+            return failedErrAsync({
+                message: "Operation cancelled by user",
+            });
+        }
+        if (logger.level === LogLevels.verbose) logger.log("");
+        if (logger.level !== LogLevels.verbose) logger.log("");
 
-            const validationResult = validateStrategy(selected);
-            if (validationResult.isErr()) {
-                return FireflyErrAsync(validationResult.error);
-            }
+        const validationResult = validateStrategy(selected);
+        if (validationResult.isErr()) {
+            return FireflyErrAsync(validationResult.error);
+        }
 
-            logger.verbose(`PromptBumpStrategyTask: Selected version bump strategy: '${selected}'`);
-            return FireflyOkAsync(selected as BumpStrategy);
-        });
+        logger.verbose(`PromptBumpStrategyTask: Selected version bump strategy: '${selected}'`);
+        return FireflyOkAsync(selected as BumpStrategy);
+    });
 }
 
 export function createPromptBumpStrategyTask(): FireflyResult<Task> {
