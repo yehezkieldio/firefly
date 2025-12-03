@@ -35,6 +35,10 @@
           "default": "",
           "type": "string"
         },
+        "branch": {
+          "description": "Git branch to release from.",
+          "type": "string"
+        },
         "changelogPath": {
           "description": "Changelog file path, relative to project root.",
           "default": "CHANGELOG.md",
