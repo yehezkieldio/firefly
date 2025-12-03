@@ -34,7 +34,8 @@ interface CheckContext {
 
 function validateReleaseFlagExclusivity(ctx: CheckContext): void {
     const flagNames = ["releaseLatest", "releasePreRelease", "releaseDraft"] as const;
-    const setFlags = flagNames.filter((k) => ctx.value[k]);
+    // Only count flags that are explicitly set to true (not undefined)
+    const setFlags = flagNames.filter((k) => ctx.value[k] === true);
 
     if (setFlags.length > 1) {
         ctx.issues.push({
@@ -129,9 +130,9 @@ export const ReleaseConfigSchema = z
         skipPreflightCheck: z.coerce.boolean().default(false).describe("Skip preflight checks."),
 
         releaseTitle: z.string().default(RELEASE_TITLE_TEMPLATE).describe("GitHub release title with placeholders."),
-        releaseLatest: z.coerce.boolean().default(true).describe("Mark as latest release."),
-        releasePreRelease: z.coerce.boolean().default(false).describe("Mark as pre-release."),
-        releaseDraft: z.coerce.boolean().default(false).describe("Release as draft version."),
+        releaseLatest: z.coerce.boolean().optional().describe("Mark as latest release."),
+        releasePreRelease: z.coerce.boolean().optional().describe("Mark as pre-release."),
+        releaseDraft: z.coerce.boolean().optional().describe("Release as draft version."),
     })
     .check((ctx) => {
         validateReleaseFlagExclusivity(ctx as unknown as CheckContext);

@@ -400,6 +400,34 @@ export function zip3Async<A, B, C>(
 }
 
 /**
+ * Combines four results into a tuple.
+ */
+export function zip4<A, B, C, D>(
+    resultA: FireflyResult<A>,
+    resultB: FireflyResult<B>,
+    resultC: FireflyResult<C>,
+    resultD: FireflyResult<D>
+): FireflyResult<[A, B, C, D]> {
+    if (resultA.isErr()) return FireflyErr(resultA.error);
+    if (resultB.isErr()) return FireflyErr(resultB.error);
+    if (resultC.isErr()) return FireflyErr(resultC.error);
+    if (resultD.isErr()) return FireflyErr(resultD.error);
+    return FireflyOk([resultA.value, resultB.value, resultC.value, resultD.value]);
+}
+
+/**
+ * Async version of zip4.
+ */
+export function zip4Async<A, B, C, D>(
+    resultA: FireflyAsyncResult<A>,
+    resultB: FireflyAsyncResult<B>,
+    resultC: FireflyAsyncResult<C>,
+    resultD: FireflyAsyncResult<D>
+): FireflyAsyncResult<[A, B, C, D]> {
+    return ResultAsync.combine([resultA, resultB, resultC, resultD]) as FireflyAsyncResult<[A, B, C, D]>;
+}
+
+/**
  * Executes a side effect on the success value without modifying the result.
  *
  * @example

@@ -279,6 +279,75 @@ function hydrateBranch(ctx: ReleaseContext): FireflyAsyncResult<string | undefin
 }
 
 /**
+ * Hydrates repository and branch information from git.
+ *
+ * Behavior:
+ * - If not inside a git repository, resolves both values to undefined.
+ * - Otherwise it composes `hydrateRepository` and `hydrateBranch` and returns both values.
+ */
+function hydrateFromGit(ctx: ReleaseContext): FireflyAsyncResult<{ repository?: string; branch?: string }> {
+    return ctx.services.git.isInsideRepository().andThen((isRepo) => {
+        if (!isRepo) {
+            return FireflyOkAsync({ repository: undefined, branch: undefined });
+        }
+
+        return hydrateRepository(ctx)
+            .andThen((repository) =>
+                hydrateBranch(ctx).map((branch) => {
+                    const result: { repository?: string; branch?: string } = {};
+                    if (repository) result.repository = repository;
+                    if (branch) result.branch = branch;
+                    return result;
+                })
+            )
+            .andTee((gitData) =>
+                logger.verbose(`PrepareReleaseConfigTask: Prepared git data: ${JSON.stringify(gitData)}`)
+            );
+    });
+}
+
+/**
+ * Hydrates release flags (releaseLatest, releasePreRelease, releaseDraft).
+ *
+ * Behavior:
+ * - If exactly one flag is explicitly set to true, use that and set others to false.
+ * - If no flags are explicitly set, default to releaseLatest = true, others = false.
+ * - Validation of exclusivity is handled by the schema, so we only need to determine defaults.
+ */
+function hydrateReleaseFlags(
+    ctx: ReleaseContext
+): FireflyAsyncResult<{ releaseLatest: boolean; releasePreRelease: boolean; releaseDraft: boolean }> {
+    const { releaseLatest, releasePreRelease, releaseDraft } = ctx.config;
+
+    // Check which flags are explicitly set to true
+    const latestExplicit = releaseLatest === true;
+    const preReleaseExplicit = releasePreRelease === true;
+    const draftExplicit = releaseDraft === true;
+
+    // If releasePreRelease is explicitly true, use it
+    if (preReleaseExplicit) {
+        logger.verbose("PrepareReleaseConfigTask: Using releasePreRelease as it is explicitly set to true");
+        return FireflyOkAsync({ releaseLatest: false, releasePreRelease: true, releaseDraft: false });
+    }
+
+    // If releaseDraft is explicitly true, use it
+    if (draftExplicit) {
+        logger.verbose("PrepareReleaseConfigTask: Using releaseDraft as it is explicitly set to true");
+        return FireflyOkAsync({ releaseLatest: false, releasePreRelease: false, releaseDraft: true });
+    }
+
+    // If releaseLatest is explicitly true, use it
+    if (latestExplicit) {
+        logger.verbose("PrepareReleaseConfigTask: Using releaseLatest as it is explicitly set to true");
+        return FireflyOkAsync({ releaseLatest: true, releasePreRelease: false, releaseDraft: false });
+    }
+
+    // No flags explicitly set, default to releaseLatest
+    logger.verbose("PrepareReleaseConfigTask: No release flag explicitly set, defaulting to releaseLatest");
+    return FireflyOkAsync({ releaseLatest: true, releasePreRelease: false, releaseDraft: false });
+}
+
+/**
  * Creates the Prepare Release Config Task.
  *
  * This task determines and hydrates configuration settings, by inferring values from the environment.
@@ -288,21 +357,26 @@ function hydrateBranch(ctx: ReleaseContext): FireflyAsyncResult<string | undefin
  * 2. Extracts name and scope from package.json
  * 3. Extracts preReleaseId from package.json version
  * 4. Detects current git branch if not provided
+ * 5. Determines release flags (latest, preRelease, draft) with proper defaults
  */
 export function createPrepareReleaseConfigTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("prepare-release-config")
         .description("Hydrate and prepare the release configuration")
         .execute((ctx) => {
             const hydrated: HydratedConfig = {};
-            return zip3Async(hydrateRepository(ctx), hydrateFromPackageJson(ctx), hydrateBranch(ctx)).map(
-                ([repository, pkgData, branch]) => {
-                    if (repository) hydrated.repository = repository;
+            return zip3Async(hydrateFromGit(ctx), hydrateFromPackageJson(ctx), hydrateReleaseFlags(ctx)).map(
+                ([gitData, pkgData, releaseFlags]) => {
+                    if (gitData.repository) hydrated.repository = gitData.repository;
                     if (pkgData.name) hydrated.name = pkgData.name;
                     if (pkgData.scope) hydrated.scope = pkgData.scope;
                     if (pkgData.preReleaseId) hydrated.preReleaseId = pkgData.preReleaseId;
-                    if (branch) hydrated.branch = branch;
+                    if (gitData.branch) hydrated.branch = gitData.branch;
 
-                    logger.verbose(`PrepareReleaseConfigTask: Hydrated config: ${JSON.stringify(hydrated)}`);
+                    // Always set release flags from hydration
+                    hydrated.releaseLatest = releaseFlags.releaseLatest;
+                    hydrated.releasePreRelease = releaseFlags.releasePreRelease;
+                    hydrated.releaseDraft = releaseFlags.releaseDraft;
+
                     return ctx.fork("hydratedConfig", hydrated);
                 }
             );

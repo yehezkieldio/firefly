@@ -10,6 +10,9 @@ export interface HydratedConfig {
     scope?: string;
     preReleaseId?: string;
     branch?: string;
+    releaseLatest?: boolean;
+    releasePreRelease?: boolean;
+    releaseDraft?: boolean;
 }
 
 export interface ReleaseData {
