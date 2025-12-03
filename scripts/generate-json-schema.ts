@@ -8,8 +8,7 @@ if (!outputPath) {
     process.exit(1);
 }
 
-const _schema = FireflyConfigSchema.partial();
-const schema = z.toJSONSchema(_schema, {
+const schema = z.toJSONSchema(FireflyConfigSchema, {
     target: "draft-7",
     io: "input",
 });
