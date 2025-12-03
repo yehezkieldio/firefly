@@ -145,17 +145,14 @@
         },
         "releaseLatest": {
           "description": "Mark as latest release.",
-          "default": true,
           "type": "boolean"
         },
         "releasePreRelease": {
           "description": "Mark as pre-release.",
-          "default": false,
           "type": "boolean"
         },
         "releaseDraft": {
           "description": "Release as draft version.",
-          "default": false,
           "type": "boolean"
         }
       }
