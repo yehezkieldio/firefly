@@ -10,10 +10,10 @@ export function createDetermineAutomaticBump(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("determine-automatic-bump")
         .description("Automatically determines the version bump from commit messages")
         .dependsOn("delegate-bump-strategy")
-        .skipWhenWithReason(
-            (ctx) => ctx.config.skipBump || ctx.config.bumpStrategy !== BUMP_STRATEGY_AUTO,
-            "Skipped: skipBump enabled or bumpStrategy is not 'auto'"
-        )
+        .skipWhenWithReason((ctx) => {
+            const bumpStrategy = ctx.data.selectedBumpStrategy ?? ctx.config.bumpStrategy;
+            return ctx.config.skipBump || bumpStrategy !== BUMP_STRATEGY_AUTO;
+        }, "Skipped: skipBump enabled or bumpStrategy is not 'auto'")
         .execute((ctx) => {
             logger.info("determine-automatic-bump");
 
