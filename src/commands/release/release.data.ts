@@ -1,3 +1,4 @@
+import type { ReleaseType } from "#/domain/semver/semver.definitions";
 import type { BumpStrategy } from "#/domain/semver/semver.strategies";
 
 /**
@@ -35,7 +36,7 @@ export interface ReleaseData {
     /**
      * Selected release type from user prompt (overrides config.releaseType)
      */
-    selectedReleaseType?: string;
+    selectedReleaseType?: ReleaseType;
 
     /**
      * Inferred and hydrated configuration fields

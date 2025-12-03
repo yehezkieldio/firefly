@@ -15,15 +15,18 @@ import { logger } from "#/infrastructure/logging";
  */
 function shouldSkipBumpStrategy(ctx: ReleaseContext): boolean {
     const { skipBump, releaseType, bumpStrategy } = ctx.config;
+    const { selectedReleaseType, selectedBumpStrategy } = ctx.data;
 
-    // Skip if bump is disabled
+    // Skip if bump is disabled from config
     if (skipBump) return true;
 
-    // Skip if explicit releaseType is set (no need for strategy)
-    if (releaseType) return true;
+    // Skip if explicit releaseType is set in config or data (no strategy needed)
+    if (releaseType || selectedReleaseType) return true;
 
-    // Skip if no bump strategy is configured
-    if (!bumpStrategy) return true;
+    const hasBumpStrategy = Boolean(bumpStrategy || selectedBumpStrategy);
+
+    // Skip if no bump strategy is configured anywhere (config or data)
+    if (!hasBumpStrategy) return true;
 
     return false;
 }
@@ -33,10 +36,13 @@ function shouldSkipBumpStrategy(ctx: ReleaseContext): boolean {
  */
 function getSkipReason(ctx: ReleaseContext): string {
     const { skipBump, releaseType, bumpStrategy } = ctx.config;
+    const { selectedReleaseType, selectedBumpStrategy } = ctx.data;
 
     if (skipBump) return "skipBump is enabled";
-    if (releaseType) return `releaseType already set to '${releaseType}'`;
-    if (!bumpStrategy) return "no bumpStrategy configured";
+    if (releaseType) return `releaseType already set to '${releaseType}' (config)`;
+    if (selectedReleaseType) return `releaseType already set to '${selectedReleaseType}' (data)`;
+    const hasBumpStrategy = Boolean(bumpStrategy || selectedBumpStrategy);
+    if (!hasBumpStrategy) return "no bumpStrategy configured";
 
     return "unknown reason";
 }
