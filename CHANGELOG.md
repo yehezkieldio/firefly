@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## fireflyy@4.0.0-alpha.13 (December 3, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`c94480d`](https://github.com/yehezkieldio/firefly/commit/c94480d4f7e581230cd876207fd8646c02ad6035) biome: Disable noUndeclaredVariables
+- [`384f39a`](https://github.com/yehezkieldio/firefly/commit/384f39aaf465c6fd850e9e636dc5fb6e385a85ab) config: Enable tsgo experimental flag and add branch field to schema
+
+### <!-- 3 -->🚀 New Features
+- [`25c80f6`](https://github.com/yehezkieldio/firefly/commit/25c80f6fd7a2142f43c36fc88d303f95bb1c031e) workflow.executor: Add runtime environment warnings for dev and prerelease builds
+- [`8bd4659`](https://github.com/yehezkieldio/firefly/commit/8bd465901e17f629d8e3ba73d631593f4712a269) core: Add commit analysis and versioning services
+- [`58cfef2`](https://github.com/yehezkieldio/firefly/commit/58cfef2eda62aa119ae87b210b93f0438e68d6cf) release: Implement interactive bump strategy prompt and type integration
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`51f744d`](https://github.com/yehezkieldio/firefly/commit/51f744d74be5e8ddd0607b70140be2b5563b7977) release: Support selected release and bump strategy from data
+- [`df58d2b`](https://github.com/yehezkieldio/firefly/commit/df58d2b0821535cd1bda91d7da828cd3c4d6ce9f) release: Update bump tasks to use selected strategy from context for accurate skip conditions
+
+### <!-- 5 -->📚 Documentation
+- [`660b1f0`](https://github.com/yehezkieldio/firefly/commit/660b1f0371d3167693f19f9d226dab362028423d) domain: Expand JSDoc comments for clarity and consistency across semver and commit type models
 ## firefly@4.0.0-alpha.12 (December 2, 2025)
 
 ### <!-- 3 -->🚀 New Features
