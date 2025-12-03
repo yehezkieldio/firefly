@@ -23,21 +23,6 @@ export interface UpdateVersionOptions {
 
 /**
  * Service for package.json operations.
- *
- * @example
- * ```typescript
- * // In a task, access via context
- * const { packageJson } = ctx.services;
- *
- * // Read from workspace root
- * const pkg = await packageJson.read("package.json");
- *
- * // Read from a subdirectory
- * const subPkg = await packageJson.read("packages/core/package.json");
- *
- * // Update version
- * await packageJson.updateVersion("package.json", "2.0.0");
- * ```
  */
 export interface IPackageJsonService {
     /**

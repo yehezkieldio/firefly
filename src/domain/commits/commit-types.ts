@@ -34,19 +34,6 @@ export interface CommitBase {
 
 /**
  * A fully parsed conventional commit.
- *
- * @example
- * ```ts
- * const commit: Commit = {
- *   hash: "abc123",
- *   type: "feat",
- *   scope: "auth",
- *   subject: "add OAuth support",
- *   header: "feat(auth): add OAuth support",
- *   body: "Implements OAuth 2.0 flow",
- *   ...
- * };
- * ```
  */
 export interface Commit extends CommitBase {
     readonly hash?: string | null;
@@ -55,6 +42,17 @@ export interface Commit extends CommitBase {
     readonly type?: string | null;
     readonly scope?: string | null;
     readonly subject?: string | null;
+}
+
+/**
+ * Raw commit details extracted from git.
+ */
+export interface RawCommitDetails {
+    readonly subject: string;
+    readonly body: string;
+    readonly author: string;
+    readonly date: string;
+    readonly notes: string;
 }
 
 /**

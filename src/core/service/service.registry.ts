@@ -10,15 +10,21 @@
  */
 
 import type { BrandedServiceKey, ServiceDefinition, ServiceFactoryContext } from "#/core/service/service.types";
+import type { ICommitAnalysisService } from "#/services/contracts/commit-analysis.interface";
 import type { IFileSystemService } from "#/services/contracts/filesystem.interface";
 import type { IGitService } from "#/services/contracts/git.interface";
 import type { IPackageJsonService } from "#/services/contracts/package-json.interface";
+import type { IVersionBumperService } from "#/services/contracts/version-bumper.interface";
+import type { IVersionStrategyService } from "#/services/contracts/version-strategy.interface";
 
 // Forward declaration for ServiceRegistry type used in factory context
 type ServiceRegistryType = {
     readonly fs: IFileSystemService;
     readonly packageJson: IPackageJsonService;
     readonly git: IGitService;
+    readonly versionBumper: IVersionBumperService;
+    readonly versionStrategy: IVersionStrategyService;
+    readonly commitAnalysis: ICommitAnalysisService;
 };
 
 /**
@@ -52,6 +58,30 @@ export const SERVICE_DEFINITIONS = {
         factory: async ({ basePath }) => {
             const { createGitService } = await import("#/services/implementations/git.service");
             return createGitService(basePath);
+        },
+    }),
+    versionBumper: defineService<IVersionBumperService>({
+        factory: async () => {
+            const { createVersionBumperService } = await import("#/services/implementations/version-bumper.service");
+            return createVersionBumperService();
+        },
+    }),
+    versionStrategy: defineService<IVersionStrategyService>({
+        dependencies: ["versionBumper"],
+        factory: async ({ getService }) => {
+            const versionBumper = await getService("versionBumper");
+            const { createVersionStrategyService } = await import(
+                "#/services/implementations/version-strategy.service"
+            );
+            return createVersionStrategyService(versionBumper);
+        },
+    }),
+    commitAnalysis: defineService<ICommitAnalysisService>({
+        dependencies: ["git"],
+        factory: async ({ getService }) => {
+            const git = await getService("git");
+            const { createCommitAnalysisService } = await import("#/services/implementations/commit-analysis.service");
+            return createCommitAnalysisService(git);
         },
     }),
 } as const satisfies Record<string, ServiceDefinition<unknown, ServiceRegistryType>>;
