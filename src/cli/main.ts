@@ -8,7 +8,6 @@ if (!process.versions.bun) {
 }
 
 import { RuntimeEnv } from "#/core/environment/runtime-env";
-import { logger } from "#/infrastructure/logging";
 import pkg from "../../package.json" with { type: "json" };
 
 /**
@@ -29,10 +28,7 @@ async function main(): Promise<void> {
     const { createFireflyCLI } = await import("#/cli/program");
     createFireflyCLI()
         .parseAsync(process.argv)
-        .catch((error) => {
-            logger.error("Fatal error:", error);
-            process.exit(1);
-        });
+        .catch(() => process.exit(1));
 }
 
 main();

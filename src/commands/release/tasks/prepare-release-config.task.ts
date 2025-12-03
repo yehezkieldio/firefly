@@ -3,7 +3,6 @@ import type { ReleaseContext } from "#/commands/release/release.context";
 import type { HydratedConfig } from "#/commands/release/release.data";
 import { FireflyOkAsync, validationErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
-import { zip3Async } from "#/core/result/result.utilities";
 import { TaskBuilder } from "#/core/task/task.builder";
 import type { Task } from "#/core/task/task.types";
 import { logger } from "#/infrastructure/logging";
@@ -13,6 +12,13 @@ const HTTPS_REMOTE_REGEX = /https?:\/\/[^/]+\/([^/]+)\/([^/.]+)(?:\.git)?/;
 const SSH_REMOTE_REGEX = /git@[^:]+:([^/]+)\/([^/.]+)(?:\.git)?/;
 const SCOPED_PACKAGE_REGEX = /^@([^/]+)\/(.+)$/;
 const PRERELEASE_REGEX = /^\d+\.\d+\.\d+-([a-zA-Z]+)/;
+
+/**
+ * Terminologies:
+ *
+ * Prepared: The value has been determined and set in the context.
+ * Using: The value was explicitly provided in the config and is used as-is.
+ */
 
 /**
  * Parses a git remote URL to extract owner and repository name.
@@ -185,17 +191,17 @@ function hydrateFromPackageJson(
         }
 
         return ctx.services.packageJson.read("package.json").andThen((pkg) =>
-            zip3Async(
-                hydrateNameFromPackageJson(ctx, pkg),
-                hydrateScopeFromPackageJson(ctx, pkg),
-                hydratePreReleaseIdFromPackageJson(ctx, pkg)
-            ).map(([name, scope, preReleaseId]) => {
-                const result: { name?: string; scope?: string; preReleaseId?: string } = {};
-                if (name) result.name = name;
-                if (scope) result.scope = scope;
-                if (preReleaseId) result.preReleaseId = preReleaseId;
-                return result;
-            })
+            hydrateNameFromPackageJson(ctx, pkg).andThen((name) =>
+                hydrateScopeFromPackageJson(ctx, pkg).andThen((scope) =>
+                    hydratePreReleaseIdFromPackageJson(ctx, pkg).map((preReleaseId) => {
+                        const result: { name?: string; scope?: string; preReleaseId?: string } = {};
+                        if (name) result.name = name;
+                        if (scope) result.scope = scope;
+                        if (preReleaseId) result.preReleaseId = preReleaseId;
+                        return result;
+                    })
+                )
+            )
         );
     });
 }
@@ -291,18 +297,14 @@ function hydrateFromGit(ctx: ReleaseContext): FireflyAsyncResult<{ repository?: 
             return FireflyOkAsync({ repository: undefined, branch: undefined });
         }
 
-        return hydrateRepository(ctx)
-            .andThen((repository) =>
-                hydrateBranch(ctx).map((branch) => {
-                    const result: { repository?: string; branch?: string } = {};
-                    if (repository) result.repository = repository;
-                    if (branch) result.branch = branch;
-                    return result;
-                })
-            )
-            .andTee((gitData) =>
-                logger.verbose(`PrepareReleaseConfigTask: Prepared git data: ${JSON.stringify(gitData)}`)
-            );
+        return hydrateRepository(ctx).andThen((repository) =>
+            hydrateBranch(ctx).map((branch) => {
+                const result: { repository?: string; branch?: string } = {};
+                if (repository) result.repository = repository;
+                if (branch) result.branch = branch;
+                return result;
+            })
+        );
     });
 }
 
@@ -324,26 +326,26 @@ function hydrateReleaseFlags(
     const preReleaseExplicit = releasePreRelease === true;
     const draftExplicit = releaseDraft === true;
 
-    // If releasePreRelease is explicitly true, use it
+    // Case 1: releasePreRelease is explicitly set to true
     if (preReleaseExplicit) {
-        logger.verbose("PrepareReleaseConfigTask: Using releasePreRelease as it is explicitly set to true");
+        logger.verbose(`PrepareReleaseConfigTask: Using "releasePreRelease" as it is explicitly set`);
         return FireflyOkAsync({ releaseLatest: false, releasePreRelease: true, releaseDraft: false });
     }
 
-    // If releaseDraft is explicitly true, use it
+    // Case 2: releaseDraft is explicitly set to true
     if (draftExplicit) {
-        logger.verbose("PrepareReleaseConfigTask: Using releaseDraft as it is explicitly set to true");
+        logger.verbose(`PrepareReleaseConfigTask: Using "releaseDraft" as it is explicitly set`);
         return FireflyOkAsync({ releaseLatest: false, releasePreRelease: false, releaseDraft: true });
     }
 
-    // If releaseLatest is explicitly true, use it
+    // Case 3: releaseLatest is explicitly set to true
     if (latestExplicit) {
-        logger.verbose("PrepareReleaseConfigTask: Using releaseLatest as it is explicitly set to true");
+        logger.verbose(`PrepareReleaseConfigTask: Using "releaseLatest" as it is explicitly set`);
         return FireflyOkAsync({ releaseLatest: true, releasePreRelease: false, releaseDraft: false });
     }
 
-    // No flags explicitly set, default to releaseLatest
-    logger.verbose("PrepareReleaseConfigTask: No release flag explicitly set, defaulting to releaseLatest");
+    // Case 4: No flags explicitly set, default to releaseLatest
+    logger.verbose("PrepareReleaseConfigTask: Prepared releaseLatest as default since no flag was explicitly set");
     return FireflyOkAsync({ releaseLatest: true, releasePreRelease: false, releaseDraft: false });
 }
 
@@ -364,22 +366,28 @@ export function createPrepareReleaseConfigTask(): FireflyResult<Task> {
         .description("Hydrate and prepare the release configuration")
         .execute((ctx) => {
             const hydrated: HydratedConfig = {};
-            return zip3Async(hydrateFromGit(ctx), hydrateFromPackageJson(ctx), hydrateReleaseFlags(ctx)).map(
-                ([gitData, pkgData, releaseFlags]) => {
+
+            return hydrateFromGit(ctx)
+                .andThen((gitData) => {
                     if (gitData.repository) hydrated.repository = gitData.repository;
+                    if (gitData.branch) hydrated.branch = gitData.branch;
+
+                    return hydrateFromPackageJson(ctx);
+                })
+                .andThen((pkgData) => {
                     if (pkgData.name) hydrated.name = pkgData.name;
                     if (pkgData.scope) hydrated.scope = pkgData.scope;
                     if (pkgData.preReleaseId) hydrated.preReleaseId = pkgData.preReleaseId;
-                    if (gitData.branch) hydrated.branch = gitData.branch;
 
-                    // Always set release flags from hydration
+                    return hydrateReleaseFlags(ctx);
+                })
+                .map((releaseFlags) => {
                     hydrated.releaseLatest = releaseFlags.releaseLatest;
                     hydrated.releasePreRelease = releaseFlags.releasePreRelease;
                     hydrated.releaseDraft = releaseFlags.releaseDraft;
 
                     return ctx.fork("hydratedConfig", hydrated);
-                }
-            );
+                });
         })
         .build();
 }

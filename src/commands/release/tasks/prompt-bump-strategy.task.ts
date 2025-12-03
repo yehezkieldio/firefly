@@ -4,8 +4,8 @@ import {
     FireflyErrAsync,
     FireflyOk,
     FireflyOkAsync,
+    failedErrAsync,
     invalidErr,
-    invalidErrAsync,
     notFoundErrAsync,
 } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
@@ -64,7 +64,7 @@ function promptBumpStrategy(): FireflyAsyncResult<BumpStrategy> {
         type: "select",
         options: BUMP_STRATEGIES as unknown as string[],
         initial: defaultStrategy.value,
-        cancel: "reject",
+        cancel: "undefined",
     });
     if (logger.level !== LogLevels.verbose) logger.log("");
 
@@ -74,8 +74,8 @@ function promptBumpStrategy(): FireflyAsyncResult<BumpStrategy> {
         })
         .andThen((selected) => {
             if (!selected || selected === "") {
-                return invalidErrAsync({
-                    message: "No version bump strategy selected",
+                return failedErrAsync({
+                    message: "Operation cancelled by user",
                 });
             }
 
