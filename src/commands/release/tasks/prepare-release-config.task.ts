@@ -74,21 +74,26 @@ function extractPreReleaseId(version: string): string | undefined {
  *   using a fall-through strategy (upstream remote → origin → first remote).
  * - Parses the URL and returns "owner/repo" when possible.
  */
-function hydrateRepository(ctx: ReleaseContext): FireflyAsyncResult<string | undefined> {
+function hydrateRepository(ctx: ReleaseContext): FireflyAsyncResult<string> {
     return ctx.services.git
         .inferRepositoryUrl()
-        .map((url) => {
+        .andThen((url) => {
             if (!url) {
-                return null;
+                return validationErrAsync({
+                    message: "Could not determine git remote URL to infer repository information",
+                });
             }
+
             const parsed = parseGitRemoteUrl(url);
             if (parsed) {
                 const repo = `${parsed.owner}/${parsed.repo}`;
-                return repo;
+                return FireflyOkAsync(repo);
             }
-            return null;
+
+            return validationErrAsync({
+                message: `Could not parse repository information from git remote URL: ${url}`,
+            });
         })
-        .map((val) => val ?? undefined)
         .andTee((repository) => logger.verbose(`PrepareReleaseConfigTask: Prepared repository: ${repository}`));
 }
 
