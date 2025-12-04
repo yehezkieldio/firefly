@@ -86,6 +86,16 @@ function promptBumpStrategy(): FireflyAsyncResult<BumpStrategy> {
     });
 }
 
+/**
+ * Creates the Prompt Bump Strategy Task.
+ *
+ * This task prompts the user to select a version bump strategy (automatic or manual) and
+ * stores it in the release context. It depends on `initialize-release-version` and will be
+ * skipped when `skipBump` is enabled or a `bumpStrategy`/`releaseType` is already provided.
+ *
+ * This task:
+ * 1. Prompts the user to select a bump strategy
+ */
 export function createPromptBumpStrategyTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("prompt-bump-strategy")
         .description("Prompts the user for a version bump strategy")
