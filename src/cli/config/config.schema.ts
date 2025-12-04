@@ -1,6 +1,11 @@
 import z from "zod";
 import { GlobalOptionsSchema } from "#/cli/options/options.types";
-import { ReleaseConfigSchema } from "#/commands/release/release.config";
+import {
+    type ExclusiveReleaseFlags,
+    type ReleaseConfig,
+    ReleaseConfigSchema,
+    type ReleaseFlagKeys,
+} from "#/commands/release/release.config";
 
 /**
  * Complete Firefly configuration schema.
@@ -18,4 +23,6 @@ export const FireflyConfigSchema = z
  * TypeScript type for Firefly configuration.
  * Use this type when you need to reference the configuration shape without runtime validation.
  */
-export type FireflyConfig = z.infer<typeof FireflyConfigSchema>;
+export type FireflyConfig = z.infer<typeof FireflyConfigSchema> & {
+    release?: Partial<Omit<ReleaseConfig, ReleaseFlagKeys>> & ExclusiveReleaseFlags;
+};

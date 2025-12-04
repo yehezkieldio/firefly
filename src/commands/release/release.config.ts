@@ -141,4 +141,13 @@ export const ReleaseConfigSchema = z
         validateSkipFlagCombinations(ctx as unknown as CheckContext);
     });
 
-export type ReleaseConfig = z.infer<typeof ReleaseConfigSchema>;
+type BaseRelease = z.infer<typeof ReleaseConfigSchema>;
+export type ReleaseFlagKeys = "releaseLatest" | "releasePreRelease" | "releaseDraft";
+
+export type ExclusiveReleaseFlags =
+    | { releaseLatest: true; releasePreRelease?: false | undefined; releaseDraft?: false | undefined }
+    | { releasePreRelease: true; releaseLatest?: false | undefined; releaseDraft?: false | undefined }
+    | { releaseDraft: true; releaseLatest?: false | undefined; releasePreRelease?: false | undefined }
+    | { releaseLatest?: false | undefined; releasePreRelease?: false | undefined; releaseDraft?: false | undefined };
+
+export type ReleaseConfig = Omit<BaseRelease, ReleaseFlagKeys> & ExclusiveReleaseFlags;
