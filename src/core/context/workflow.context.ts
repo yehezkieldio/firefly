@@ -163,6 +163,23 @@ export interface WorkflowContext<
     forkMultiple(updates: Partial<TData>): WorkflowContext<TConfig, TData, TServices>;
 
     /**
+     * Creates a new context with merged configuration values.
+     * Only updates fields that are undefined in the current config.
+     * @param updates - Partial configuration to merge
+     * @returns New context with merged configuration
+     *
+     * @example
+     * ```typescript
+     * const ctx = createContext({ name: "app", version: undefined });
+     * const updated = ctx.forkConfig({ version: "1.0.0", name: "other" });
+     *
+     * // name remains "app" (was already set), version becomes "1.0.0"
+     * console.log(updated.config); // { name: "app", version: "1.0.0" }
+     * ```
+     */
+    forkConfig(updates: Partial<TConfig>): WorkflowContext<TConfig, TData, TServices>;
+
+    /**
      * Checks if a key exists in the context data.
      * @param key - The data key to check
      *
@@ -386,6 +403,36 @@ export class ImmutableWorkflowContext<
             workspace: this.workspace,
             config: this.config,
             data: updatedData,
+            services: this.services,
+        });
+    }
+
+    /**
+     * @example Merging hydrated config values
+     * ```typescript
+     * const updatedCtx = ctx.forkConfig({
+     *   repository: "owner/repo",
+     *   branch: "main"
+     * });
+     * ```
+     */
+    forkConfig(updates: Partial<TConfig>): WorkflowContext<TConfig, TData, TServices> {
+        const updateKeys = Object.keys(updates) as Array<keyof TConfig>;
+
+        // No updates means return self
+        if (updateKeys.length === 0) {
+            return this;
+        }
+
+        // Merge updates into config, spreading existing config first
+        const mergedConfig = { ...this.config, ...updates } as TConfig;
+        const frozenConfig = Object.freeze(mergedConfig) as Readonly<TConfig>;
+
+        return new ImmutableWorkflowContext<TConfig, TData, TServices>({
+            startTime: this.startTime,
+            workspace: this.workspace,
+            config: frozenConfig,
+            data: this.#data,
             services: this.services,
         });
     }
