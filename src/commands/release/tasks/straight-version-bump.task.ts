@@ -1,6 +1,7 @@
+import { colors } from "consola/utils";
 import type { ReleaseContext } from "#/commands/release/release.context";
 import { FireflyErrAsync, FireflyOkAsync, invalidErrAsync, validationErr } from "#/core/result/result.constructors";
-import type { FireflyResult } from "#/core/result/result.types";
+import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 import { TaskBuilder } from "#/core/task/task.builder";
 import type { Task } from "#/core/task/task.types";
 import { Version } from "#/domain/semver/version";
@@ -23,6 +24,45 @@ function parseCurrentVersion(currentVersionRaw: string | undefined): FireflyResu
     return Version.from(currentVersionRaw);
 }
 
+/**
+ * Builds the bump options from the release context.
+ */
+function buildBumpOptionsFromContext(ctx: ReleaseContext): FireflyAsyncResult<VersionBumpOptions> {
+    const currentVersionResult = parseCurrentVersion(ctx.data.currentVersion);
+    if (currentVersionResult.isErr()) return FireflyErrAsync(currentVersionResult.error);
+
+    const releaseType = ctx.config.releaseType;
+    if (releaseType === undefined) {
+        return invalidErrAsync({
+            message: "Release type is required for straight bump",
+        });
+    }
+
+    const currentVersion = currentVersionResult.value;
+
+    const bumpOptions: VersionBumpOptions = {
+        currentVersion,
+        releaseType,
+        prereleaseIdentifier: ctx.config.preReleaseId,
+        prereleaseBase: ctx.config.preReleaseBase,
+    };
+
+    return FireflyOkAsync(bumpOptions);
+}
+
+/**
+ * Performs the straight bump by delegating to the version bumper service.
+ */
+function executeStraightVersionBump(ctx: ReleaseContext): FireflyAsyncResult<ReleaseContext> {
+    return buildBumpOptionsFromContext(ctx)
+        .andThen((options) => ctx.services.versionBumper.bump(options))
+        .andThen((newVersion) => {
+            const from = ctx.data.currentVersion || "unknown";
+            logger.info(`Bumped version: ${colors.green(from)} -> ${colors.green(newVersion.raw)}`);
+            return FireflyOkAsync(ctx.fork("nextVersion", newVersion.toString()));
+        });
+}
+
 export function createStraightVersionBump(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("straight-version-bump")
         .description("Performs a direct version bump based on the configured release type")
@@ -31,34 +71,6 @@ export function createStraightVersionBump(): FireflyResult<Task> {
             (ctx) => ctx.config.skipBump || ctx.config.releaseType === undefined,
             "Skipped: skipBump is enabled or no release type specified"
         )
-        .execute((ctx) => {
-            const currentVersionResult = parseCurrentVersion(ctx.data.currentVersion);
-            if (currentVersionResult.isErr()) {
-                return FireflyErrAsync(currentVersionResult.error);
-            }
-
-            const releaseType = ctx.config.releaseType;
-            if (releaseType === undefined) {
-                return invalidErrAsync({
-                    message: "Release type is required for straight bump",
-                });
-            }
-
-            const currentVersion = currentVersionResult.value;
-
-            const bumpOptions: VersionBumpOptions = {
-                currentVersion,
-                releaseType,
-                prereleaseIdentifier: ctx.config.preReleaseId,
-                prereleaseBase: ctx.config.preReleaseBase,
-            };
-
-            return FireflyOkAsync(bumpOptions)
-                .andThen((options) => ctx.services.versionBumper.bump(options))
-                .andThen((newVersion) => {
-                    logger.info(`Bumped version: ${currentVersion.toString()} -> ${newVersion.toString()}`);
-                    return FireflyOkAsync(ctx.fork("nextVersion", newVersion.toString()));
-                });
-        })
+        .execute((ctx) => executeStraightVersionBump(ctx))
         .build();
 }
