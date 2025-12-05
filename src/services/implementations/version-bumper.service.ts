@@ -1,6 +1,13 @@
 import semver from "semver";
-import { FireflyErr, FireflyOk, invalidErr } from "#/core/result/result.constructors";
-import type { FireflyResult } from "#/core/result/result.types";
+import {
+    FireflyErr,
+    FireflyErrAsync,
+    FireflyOk,
+    FireflyOkAsync,
+    invalidErr,
+    invalidErrAsync,
+} from "#/core/result/result.constructors";
+import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 import type { PreReleaseBase } from "#/domain/semver/semver.definitions";
 import { Version } from "#/domain/semver/version";
 import type { IVersionBumperService, VersionBumpOptions } from "#/services/contracts/version-bumper.interface";
@@ -9,26 +16,30 @@ import type { IVersionBumperService, VersionBumpOptions } from "#/services/contr
  * Default implementation of the version bumper service.
  */
 export class DefaultVersionBumperService implements IVersionBumperService {
-    bump(options: VersionBumpOptions): FireflyResult<Version> {
+    bump(options: VersionBumpOptions): FireflyAsyncResult<Version> {
         const { currentVersion, releaseType, prereleaseIdentifier, prereleaseBase } = options;
 
         if (releaseType === "major" || releaseType === "minor" || releaseType === "patch") {
-            return this.bumpStandard(currentVersion, releaseType);
+            const result = this.bumpStandard(currentVersion, releaseType);
+            return result.isOk() ? FireflyOkAsync(result.value) : FireflyErrAsync(result.error);
         }
 
         if (releaseType === "premajor" || releaseType === "preminor" || releaseType === "prepatch") {
-            return this.bumpPreStandard(currentVersion, releaseType, prereleaseIdentifier, prereleaseBase);
+            const result = this.bumpPreStandard(currentVersion, releaseType, prereleaseIdentifier, prereleaseBase);
+            return result.isOk() ? FireflyOkAsync(result.value) : FireflyErrAsync(result.error);
         }
 
         if (releaseType === "prerelease") {
-            return this.bumpPrerelease(currentVersion, prereleaseIdentifier, prereleaseBase);
+            const result = this.bumpPrerelease(currentVersion, prereleaseIdentifier, prereleaseBase);
+            return result.isOk() ? FireflyOkAsync(result.value) : FireflyErrAsync(result.error);
         }
 
         if (releaseType === "graduate") {
-            return this.graduatePrerelease(currentVersion);
+            const result = this.graduatePrerelease(currentVersion);
+            return result.isOk() ? FireflyOkAsync(result.value) : FireflyErrAsync(result.error);
         }
 
-        return invalidErr({
+        return invalidErrAsync({
             message: `Unsupported release type: ${releaseType}`,
             source: "services/version-bumper",
         });

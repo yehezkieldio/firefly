@@ -1,4 +1,4 @@
-import type { FireflyResult } from "#/core/result/result.types";
+import type { FireflyAsyncResult } from "#/core/result/result.types";
 import type { PreReleaseBase, ReleaseType } from "#/domain/semver/semver.definitions";
 import type { Version } from "#/domain/semver/version";
 
@@ -37,5 +37,5 @@ export interface IVersionBumperService {
      * @param options - Version bump configuration
      * @returns The new version after applying the bump
      */
-    bump(options: VersionBumpOptions): FireflyResult<Version>;
+    bump(options: VersionBumpOptions): FireflyAsyncResult<Version>;
 }

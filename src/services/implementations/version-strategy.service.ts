@@ -1,7 +1,7 @@
-import { Result } from "neverthrow";
+import { ResultAsync } from "neverthrow";
 import { invalidError } from "#/core/result/error.factories";
-import { FireflyErr, FireflyOk } from "#/core/result/result.constructors";
-import type { FireflyResult } from "#/core/result/result.types";
+import { FireflyErrAsync, FireflyOkAsync } from "#/core/result/result.constructors";
+import type { FireflyAsyncResult } from "#/core/result/result.types";
 import type { PreReleaseBase, ReleaseType } from "#/domain/semver/semver.definitions";
 import type { Version } from "#/domain/semver/version";
 import { logger } from "#/infrastructure/logging";
@@ -93,7 +93,10 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
         this.bumper = bumper;
     }
 
-    resolveVersion(options: ResolveVersionOptions, recommendation?: VersionRecommendation): FireflyResult<Version> {
+    resolveVersion(
+        options: ResolveVersionOptions,
+        recommendation?: VersionRecommendation
+    ): FireflyAsyncResult<Version> {
         logger.verbose("DefaultVersionStrategyService: Deciding next version...");
 
         const preReleaseContext = this.analyzePreReleaseContext(options.currentVersion, recommendation);
@@ -127,14 +130,14 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
             });
         }
 
-        return FireflyErr(
+        return FireflyErrAsync(
             invalidError({
                 message: "Cannot determine next version: no release type or recommendation provided",
             })
         );
     }
 
-    generateChoices(options: GenerateChoicesOptions): FireflyResult<VersionChoice[]> {
+    generateChoices(options: GenerateChoicesOptions): FireflyAsyncResult<VersionChoice[]> {
         logger.verbose(
             `DefaultVersionStrategyService: Creating version choices for '${options.currentVersion.raw}'...`
         );
@@ -150,13 +153,10 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
             )
         );
 
-        const combinedResult = Result.combine(choicesResults);
-        if (combinedResult.isErr()) {
-            return FireflyErr(combinedResult.error);
-        }
-
-        logger.verbose(`DefaultVersionStrategyService: Created ${combinedResult.value.length} version choices.`);
-        return FireflyOk(combinedResult.value);
+        return ResultAsync.combine(choicesResults).map((choices) => {
+            logger.verbose(`DefaultVersionStrategyService: Created ${choices.length} version choices.`);
+            return choices;
+        });
     }
 
     /**
@@ -204,7 +204,7 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
     private handlePreReleaseRequest(
         options: ResolveVersionOptions,
         context: PreReleaseContext
-    ): FireflyResult<Version> {
+    ): FireflyAsyncResult<Version> {
         logger.verbose("DefaultVersionStrategyService: Bumping to prerelease version...");
 
         return this.bumper.bump({
@@ -225,9 +225,9 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
     private handlePreReleaseToStableTransition(
         options: ResolveVersionOptions,
         recommendation?: VersionRecommendation
-    ): FireflyResult<Version> {
+    ): FireflyAsyncResult<Version> {
         if (!recommendation) {
-            return FireflyErr(
+            return FireflyErrAsync(
                 invalidError({
                     message: "Cannot transition to stable version without recommendation",
                     source: "services/version-strategy",
@@ -236,29 +236,25 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
         }
 
         // Graduate the current prerelease to stable
-        const graduateResult = this.bumper.bump({
-            currentVersion: options.currentVersion,
-            releaseType: "graduate",
-        });
+        return this.bumper
+            .bump({
+                currentVersion: options.currentVersion,
+                releaseType: "graduate",
+            })
+            .andThen((stableVersion) => {
+                // If recommendation suggests further bumping after graduation
+                if (recommendation.level < 2) {
+                    logger.verbose("DefaultVersionStrategyService: Further bumping after graduation...");
+                    const releaseType = LEVEL_TO_RELEASE_TYPE[recommendation.level];
+                    return this.bumper.bump({
+                        currentVersion: stableVersion,
+                        releaseType,
+                    });
+                }
 
-        if (graduateResult.isErr()) {
-            return FireflyErr(graduateResult.error);
-        }
-
-        const stableVersion = graduateResult.value;
-
-        // If recommendation suggests further bumping after graduation
-        if (recommendation.level < 2) {
-            logger.verbose("DefaultVersionStrategyService: Further bumping after graduation...");
-            const releaseType = LEVEL_TO_RELEASE_TYPE[recommendation.level];
-            return this.bumper.bump({
-                currentVersion: stableVersion,
-                releaseType,
+                logger.verbose("DefaultVersionStrategyService: Graduated to stable version:", stableVersion.raw);
+                return FireflyOkAsync(stableVersion);
             });
-        }
-
-        logger.verbose("DefaultVersionStrategyService: Graduated to stable version:", stableVersion.raw);
-        return FireflyOk(stableVersion);
     }
 
     /**
@@ -273,7 +269,7 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
         options: ResolveVersionOptions,
         recommendation: VersionRecommendation,
         context: PreReleaseContext
-    ): FireflyResult<Version> {
+    ): FireflyAsyncResult<Version> {
         // If currently in prerelease and no explicit transition, continue prerelease
         if (context.isCurrentPreRelease && !context.hasStableTransition) {
             logger.verbose("DefaultVersionStrategyService: Continuing prerelease versioning...");
@@ -346,7 +342,7 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
         releaseType: ReleaseType,
         prereleaseIdentifier?: string,
         prereleaseBase?: PreReleaseBase
-    ): FireflyResult<VersionChoice> {
+    ): FireflyAsyncResult<VersionChoice> {
         const bumpOptions: VersionBumpOptions = {
             currentVersion,
             releaseType,
@@ -354,21 +350,11 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
             prereleaseBase,
         };
 
-        const newVersionResult = this.bumper.bump(bumpOptions);
-
-        if (newVersionResult.isErr()) {
-            return FireflyErr(newVersionResult.error);
-        }
-
-        const newVersion = newVersionResult.value;
-
-        const choice: VersionChoice = {
+        return this.bumper.bump(bumpOptions).map((newVersion) => ({
             label: `${releaseType} (${newVersion.raw})`,
             hint: this.getVersionDescription(releaseType),
             value: newVersion.raw,
-        };
-
-        return FireflyOk(choice);
+        }));
     }
 }
 

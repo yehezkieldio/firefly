@@ -1,4 +1,4 @@
-import type { FireflyResult } from "#/core/result/result.types";
+import type { FireflyAsyncResult } from "#/core/result/result.types";
 import type { CommitAnalysis } from "#/domain/commits/commit-types";
 import type { PreReleaseBase, ReleaseType } from "#/domain/semver/semver.definitions";
 import type { Version } from "#/domain/semver/version";
@@ -121,7 +121,7 @@ export interface IVersionStrategyService {
      * @param recommendation - Optional analysis recommendation
      * @returns The resolved next version
      */
-    resolveVersion(options: ResolveVersionOptions, recommendation?: VersionRecommendation): FireflyResult<Version>;
+    resolveVersion(options: ResolveVersionOptions, recommendation?: VersionRecommendation): FireflyAsyncResult<Version>;
 
     /**
      * Generates version choices for interactive prompts.
@@ -132,5 +132,5 @@ export interface IVersionStrategyService {
      * @param options - Choice generation options
      * @returns Array of version choices for selection
      */
-    generateChoices(options: GenerateChoicesOptions): FireflyResult<VersionChoice[]>;
+    generateChoices(options: GenerateChoicesOptions): FireflyAsyncResult<VersionChoice[]>;
 }
