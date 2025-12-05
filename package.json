@@ -1,6 +1,6 @@
 {
   "name": "fireflyy",
-  "version": "4.0.0-alpha.14",
+  "version": "4.0.0-alpha.15",
   "description": " CLI orchestrator for automatic semantic versioning, changelog generation, and creating releases. Built for my own use cases.",
   "type": "module",
   "license": "MIT",

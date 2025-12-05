@@ -6,6 +6,30 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.15 (December 5, 2025)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`091a323`](https://github.com/yehezkieldio/firefly/commit/091a323331beab28119e54f267718eb4b6e844d2) docs: Remove outdated copilot documentation files
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`a39e3a1`](https://github.com/yehezkieldio/firefly/commit/a39e3a145f821fd7d40fb5190680ca5ba076eecf) deps: Update dependency ultracite to v6.3.9 by renovate[bot] ([#143](https://github.com/yehezkieldio/firefly/issues/143))
+- [`e054d83`](https://github.com/yehezkieldio/firefly/commit/e054d83a9699781ff8df406d53368ee8f111878f) deps: Update dependency tsdown to ^0.17.0 by renovate[bot] ([#144](https://github.com/yehezkieldio/firefly/issues/144))
+
+### <!-- 3 -->🚀 New Features
+- [`a10ed44`](https://github.com/yehezkieldio/firefly/commit/a10ed4434381330495107abe5483e6735260687b) config: Extend release schema with exclusive flag types for validation consistency
+- [`7676e2e`](https://github.com/yehezkieldio/firefly/commit/7676e2ea8e0f3209aed1efe8df9617afcb03257d) release: Integrate version bumper and commit analysis services
+- [`8ca44e0`](https://github.com/yehezkieldio/firefly/commit/8ca44e0dc410242cf01b7b18f38e8058e5747999) workflow.context: Add forkConfig method to merge and freeze configs
+- [`8a57a1b`](https://github.com/yehezkieldio/firefly/commit/8a57a1bd10eb8623d6961181f28e01d924656a7c) release: Add repository and prerelease base support
+
+### <!-- 5 -->📚 Documentation
+- [`cce4903`](https://github.com/yehezkieldio/firefly/commit/cce49039d65777d9d8fcee80235ff35a8ede9175) release: Add jsdoc for prompt bump strategy task
+- [`61a08bb`](https://github.com/yehezkieldio/firefly/commit/61a08bbdd633ad879b899168a56e487c7dd10a76) core: Clarify async result behavior for service proxies and registry
+
+### <!-- 7 -->🚜 Refactor
+- [`46232ae`](https://github.com/yehezkieldio/firefly/commit/46232ae1dc4c8974be54d4432543a840925dfe95) versioning: Migrate version services to async result handling
+- [`59b4b39`](https://github.com/yehezkieldio/firefly/commit/59b4b39e5b851fa78a80a232cbb72375d4939254) release: Extract straight version bump logic into helper functions for clarity and reuse
+- [`aa245b9`](https://github.com/yehezkieldio/firefly/commit/aa245b9036fea3a186768796a4e4d9dc5c8750bf) cli: Move option parsing to dedicated validation module
+- [`3098d1f`](https://github.com/yehezkieldio/firefly/commit/3098d1f6b347d3c4be25eb7b819433ab7099bca9) release: Rename prereleaseIdentifier fields to preReleaseID for consistency across schema and services
 ## firefly@4.0.0-alpha.14 (December 3, 2025)
 
 ### <!-- 16 -->🤖 CI/CD
