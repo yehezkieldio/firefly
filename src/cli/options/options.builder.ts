@@ -1,12 +1,16 @@
 import type { Command } from "commander";
-import { err, ok, type Result } from "neverthrow";
 import type { ZodObject, ZodRawShape } from "zod";
 import z from "zod";
 import { camelToKebab } from "#/cli/options/options.utilities";
-import { parseSchema } from "#/core/result/schema.utilities";
-
-// Result type for option value parsing/validation. */
-type ValidationResult<T> = Result<T, string>;
+import {
+    createEnumValidator,
+    createGenericValidator,
+    createLiteralUnionValidator,
+    createNumberValidator,
+    createStringValidator,
+    extractEnumValues,
+    extractLiteralValues,
+} from "#/cli/options/options.validation";
 
 /**
  * Context object containing all information needed to register a single CLI option.
@@ -187,20 +191,14 @@ export class OptionsBuilder {
     }
 
     /**
-     * Registers a number option with numeric parsing.
+     * Registers a number option with numeric parsing and validation.
      *
      * @param ctx - The option context
      */
     private registerNumberOption(ctx: OptionContext): void {
         const { command, rawField, optionFlag, optionName, description, parsedDefault } = ctx;
-        const parser = this.createNumberParser(rawField, optionName);
-        const wrappedParser = this.wrapParser(parser);
-        command.option(
-            `${optionFlag} <${optionName}>`,
-            description,
-            wrappedParser,
-            parsedDefault as number | undefined
-        );
+        const validator = createNumberValidator(rawField, optionName);
+        command.option(`${optionFlag} <${optionName}>`, description, validator, parsedDefault as number | undefined);
     }
 
     /**
@@ -209,139 +207,60 @@ export class OptionsBuilder {
      * @param ctx - The option context
      */
     private registerEnumOption(ctx: OptionContext): void {
-        const { command, rawField, field, optionFlag, optionName, description, parsedDefault } = ctx;
-        const choices = this.getEnumChoices(field);
-        const parser = this.createEnumParser(rawField, optionName, choices);
-        const wrappedParser = this.wrapParser(parser);
+        const { command, rawField, optionFlag, optionName, description, parsedDefault } = ctx;
+        const choices = extractEnumValues(rawField) ?? [];
+        const validator = createEnumValidator(rawField, optionName, choices);
         const fullDescription = `${description}${choices.length ? ` (choices: ${choices.join(", ")})` : ""}`;
         command.option(
             `${optionFlag} <${optionName}>`,
             fullDescription,
-            wrappedParser,
+            validator,
             parsedDefault as string | undefined
         );
     }
 
     /**
-     *  Registers a string option with validation.
+     * Registers a string option with validation.
      *
      * @param ctx - The option context
      */
     private registerStringOption(ctx: OptionContext): void {
         const { command, rawField, optionFlag, optionName, description, parsedDefault } = ctx;
-        const parser = this.createStringParser(rawField);
-        const wrappedParser = this.wrapParser(parser);
-        command.option(
-            `${optionFlag} <${optionName}>`,
-            description,
-            wrappedParser,
-            parsedDefault as string | undefined
-        );
+        const validator = createStringValidator(rawField, optionName);
+        command.option(`${optionFlag} <${optionName}>`, description, validator, parsedDefault as string | undefined);
     }
 
     /**
      * Registers a generic option for other Zod types.
+     * Handles union types with literal values specially for better error messages.
      *
      * @param ctx - The option context
      */
     private registerGenericOption(ctx: OptionContext): void {
         const { command, rawField, optionFlag, optionName, description, parsedDefault } = ctx;
-        const parser = this.createGenericParser(rawField);
-        const wrappedParser = this.wrapParser(parser);
-        command.option(`${optionFlag} <${optionName}>`, description, wrappedParser, parsedDefault);
-    }
 
-    /**
-     * Wraps a Result-returning parser into a Commander-compatible parser.
-     *
-     * Commander expects parsers to return values directly or throw on error.
-     * This wrapper converts our Result-based parsers to that pattern.
-     *
-     * @param parser - The Result-based parser function
-     * @returns A Commander-compatible parser function
-     */
-    private wrapParser<T>(parser: (input: string) => ValidationResult<T>): (input: string) => T {
-        return (input: string) => {
-            const result = parser(input);
-            if (result.isErr()) {
-                // biome-ignore lint: This is a boundary where we convert from Result back to exceptions
-                throw new Error(result.error);
-            }
-            return result.value;
-        };
-    }
+        // Check if this is a union of literals (e.g., z.union([z.literal("0"), z.literal("1")]))
+        const literalValues = extractLiteralValues(rawField);
+        if (literalValues) {
+            const validator = createLiteralUnionValidator(rawField, optionName, literalValues);
+            const displayValues = literalValues.map((v) => (typeof v === "string" ? v : String(v)));
+            const fullDescription = `${description} (choices: ${displayValues.join(", ")})`;
+            command.option(`${optionFlag} <${optionName}>`, fullDescription, validator, parsedDefault);
+            return;
+        }
 
-    /**
-     * Creates a parser for number options.
-     *
-     * @template T - The expected return type
-     * @param rawField - The raw Zod field
-     * @param optionName - The option name for error messages
-     * @returns A parser function that converts strings to numbers with validation
-     */
-    private createNumberParser<T>(rawField: z.ZodType, optionName: string): (input: string) => ValidationResult<T> {
-        return (input: string) => {
-            const num = Number(input);
-            if (Number.isNaN(num)) {
-                return err(`Invalid number for --${optionName}: ${input}`);
-            }
+        // Check if this is an enum (possibly in a union like z.enum([...]).or(z.literal("")))
+        const enumValues = extractEnumValues(rawField);
+        if (enumValues) {
+            const validator = createEnumValidator(rawField, optionName, enumValues);
+            const fullDescription = `${description} (choices: ${enumValues.join(", ")})`;
+            command.option(`${optionFlag} <${optionName}>`, fullDescription, validator, parsedDefault);
+            return;
+        }
 
-            const result = parseSchema(rawField, num);
-            if (result.isErr()) return err(result.error.message);
-            return ok(result.value as T);
-        };
-    }
-
-    /**
-     * Creates a parser for enum options.
-     *
-     * @template T - The expected return type
-     * @param rawField - The raw Zod field
-     * @param optionName - The option name for error messages
-     * @param choices - The valid enum choices
-     * @returns A parser function that validates input against the enum choices
-     */
-    private createEnumParser<T>(
-        rawField: z.ZodType,
-        optionName: string,
-        choices: readonly string[]
-    ): (input: string) => ValidationResult<T> {
-        return (input: string) => {
-            const result = parseSchema(rawField, input);
-            if (result.isErr())
-                return err(`Invalid value for --${optionName}: ${input}. Allowed: ${choices.join(", ")}`);
-            return ok(result.value as T);
-        };
-    }
-
-    /**
-     * Creates a parser for string options.
-     *
-     * @template T - The expected return type
-     * @param rawField - The raw Zod field
-     * @returns A parser function that validates input against the schema
-     */
-    private createStringParser<T>(rawField: z.ZodType): (input: string) => ValidationResult<T> {
-        return (input: string) => {
-            const result = parseSchema(rawField, input);
-            if (result.isErr()) return err(result.error.message);
-            return ok(result.value as T);
-        };
-    }
-
-    /**
-     * Creates a generic parser using Zod validation.
-     *
-     * @template T - The expected return type
-     * @param rawField - The raw Zod field
-     * @returns A parser function that validates input against the schema
-     */
-    private createGenericParser<T>(rawField: z.ZodType): (input: string) => ValidationResult<T> {
-        return (input: string) => {
-            const result = parseSchema(rawField, input);
-            if (result.isErr()) return err(result.error.message);
-            return ok(result.value as T);
-        };
+        // Fall back to generic validation
+        const validator = createGenericValidator(rawField, optionName);
+        command.option(`${optionFlag} <${optionName}>`, description, validator, parsedDefault);
     }
 
     /**
@@ -400,16 +319,5 @@ export class OptionsBuilder {
         const def = this.getInternalDef(rawField);
         const inner = (def.innerType ?? def.schema) as z.ZodType | undefined;
         return inner instanceof z.ZodBoolean;
-    }
-
-    /**
-     * Extracts enum choices from a ZodEnum field.
-     *
-     * @param field - The ZodEnum field
-     * @returns The array of valid enum choices
-     */
-    private getEnumChoices(field: z.ZodType): readonly string[] {
-        const def = this.getInternalDef(field);
-        return def.values ?? [];
     }
 }
