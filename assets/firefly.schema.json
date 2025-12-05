@@ -31,9 +31,12 @@
           "description": "Org/user scope without '@'. Auto-detected from package.json.",
           "type": "string"
         },
+        "repository": {
+          "description": "GitHub repository in 'owner/repo' format.",
+          "type": "string"
+        },
         "base": {
           "description": "Relative path from repository root to project root.",
-          "default": "",
           "type": "string"
         },
         "branch": {
@@ -95,7 +98,6 @@
         },
         "releaseNotes": {
           "description": "Custom release notes for changelog.",
-          "default": "",
           "type": "string"
         },
         "commitMessage": {

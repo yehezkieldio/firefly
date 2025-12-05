@@ -107,7 +107,8 @@ export const ReleaseConfigSchema = z
     .object({
         name: z.string().optional().describe("Unscoped project name. Auto-detected from package.json."),
         scope: z.string().optional().describe("Org/user scope without '@'. Auto-detected from package.json."),
-        base: z.string().default("").describe("Relative path from repository root to project root."),
+        repository: z.string().optional().describe("GitHub repository in 'owner/repo' format."),
+        base: z.string().optional().describe("Relative path from repository root to project root."),
         branch: z.string().optional().describe("Git branch to release from."),
         changelogPath: z.string().default("CHANGELOG.md").describe("Changelog file path, relative to project root."),
 
@@ -117,7 +118,7 @@ export const ReleaseConfigSchema = z
         preReleaseId: z.string().optional().describe('Pre-release ID (e.g., "alpha", "beta").'),
         preReleaseBase: PreReleaseBaseSchema.describe("Starting version for pre-releases."),
 
-        releaseNotes: z.string().default("").describe("Custom release notes for changelog."),
+        releaseNotes: z.string().optional().describe("Custom release notes for changelog."),
 
         commitMessage: z.string().default(COMMIT_MSG_TEMPLATE).describe("Commit message template with placeholders."),
         tagName: z.string().default(TAG_NAME_TEMPLATE).describe("Tag name template with placeholders."),

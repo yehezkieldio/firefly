@@ -1,10 +1,11 @@
 import { parse as parseVersion } from "semver";
+import type { ReleaseConfig } from "#/commands/release/release.config";
 import type { ReleaseContext } from "#/commands/release/release.context";
-import type { HydratedConfig } from "#/commands/release/release.data";
 import { FireflyOkAsync, validationErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
 import { TaskBuilder } from "#/core/task/task.builder";
 import type { Task } from "#/core/task/task.types";
+import type { PreReleaseBase } from "#/domain/semver/semver.definitions";
 import { logger } from "#/infrastructure/logging";
 import type { PackageJson } from "#/services/contracts/package-json.interface";
 
@@ -69,6 +70,22 @@ function parsePackageName(packageName: string): { scope?: string; name: string }
 function extractPreReleaseId(version: string): string | undefined {
     const match = version.match(PRERELEASE_REGEX);
     return match?.[1];
+}
+
+/**
+ * Extracts the prerelease numeric base (if present) from a semver version string.
+ *
+ * @example
+ * extractPreReleaseBase("1.0.0-beta.1") // 1
+ * extractPreReleaseBase("1.0.0") // undefined
+ */
+function extractPreReleaseBase(version: string): number | undefined {
+    const parsed = parseVersion(version);
+    if (!parsed) return undefined;
+    if (parsed.prerelease.length > 1 && typeof parsed.prerelease[1] === "number") {
+        return parsed.prerelease[1] as number;
+    }
+    return undefined;
 }
 
 /**
@@ -144,11 +161,10 @@ function hydratePreReleaseIdFromPackageJson(
     ctx: ReleaseContext,
     packageJson: PackageJson
 ): FireflyAsyncResult<string | undefined> {
-    // Check if preReleaseId was explicitly provided in the original config (including empty string)
-    // We consider preReleaseId explicitly provided if:
-    // Case 1: The key exists AND the value is not undefined (covers empty string case)
-    const preReleaseProvided = ctx.config.preReleaseId !== undefined && ctx.config.preReleaseId.trim() !== "";
-    if (preReleaseProvided) {
+    // Check if preReleaseId was explicitly provided in the original config
+    const preReleaseExplicitlyProvided =
+        Object.hasOwn(ctx.config, "preReleaseId") && ctx.config.preReleaseId !== undefined;
+    if (preReleaseExplicitlyProvided) {
         logger.verbose(
             `PrepareReleaseConfigTask: Using provided preReleaseId: "${ctx.config.preReleaseId}" as it is explicitly set`
         );
@@ -176,30 +192,68 @@ function hydratePreReleaseIdFromPackageJson(
 }
 
 /**
+ * Hydrates the `preReleaseBase` field.
+ *
+ * Behavior:
+ * - If explicitly provided in config (key exists and value is not undefined) use as-is.
+ * - Otherwise default to 0.
+ *
+ * Note: we do NOT infer `preReleaseBase` from package.json anymore.
+ */
+function hydratePreReleaseBase(ctx: ReleaseContext): FireflyAsyncResult<number | "0" | "1"> {
+    const baseMaybe = ctx.config.preReleaseBase;
+    const baseExplicitlyProvided = Object.hasOwn(ctx.config, "preReleaseBase") && baseMaybe !== undefined;
+    if (baseExplicitlyProvided) {
+        logger.verbose(
+            `PrepareReleaseConfigTask: Using provided preReleaseBase: "${ctx.config.preReleaseBase}" as it is explicitly set`
+        );
+        const base: Exclude<PreReleaseBase, undefined> = baseMaybe as Exclude<PreReleaseBase, undefined>;
+        return FireflyOkAsync(base);
+    }
+
+    logger.verbose("PrepareReleaseConfigTask: No preReleaseBase explicitly provided, defaulting to 0");
+    return FireflyOkAsync(0);
+}
+
+/**
  * Hydrates name, scope, and preReleaseId from package.json.
  *
  * Behavior:
  * - If package.json does not exist, returns all values as undefined.
  * - If it exists, reads package.json and returns parsed results for name, scope and preReleaseId.
+ * - If preReleaseBase is explicitly provided in config, it is used as-is, if not, it defaults to 0.
  */
 function hydrateFromPackageJson(
     ctx: ReleaseContext
-): FireflyAsyncResult<{ name?: string; scope?: string; preReleaseId?: string }> {
+): FireflyAsyncResult<{ name?: string; scope?: string; preReleaseId?: string; preReleaseBase?: number | "0" | "1" }> {
     return ctx.services.fs.exists("package.json").andThen((exists) => {
         if (!exists) {
-            return FireflyOkAsync({ name: undefined, scope: undefined, preReleaseId: undefined });
+            return FireflyOkAsync({
+                name: undefined,
+                scope: undefined,
+                preReleaseId: undefined,
+                preReleaseBase: undefined,
+            });
         }
 
         return ctx.services.packageJson.read("package.json").andThen((pkg) =>
             hydrateNameFromPackageJson(ctx, pkg).andThen((name) =>
                 hydrateScopeFromPackageJson(ctx, pkg).andThen((scope) =>
-                    hydratePreReleaseIdFromPackageJson(ctx, pkg).map((preReleaseId) => {
-                        const result: { name?: string; scope?: string; preReleaseId?: string } = {};
-                        if (name) result.name = name;
-                        if (scope) result.scope = scope;
-                        if (preReleaseId) result.preReleaseId = preReleaseId;
-                        return result;
-                    })
+                    hydratePreReleaseIdFromPackageJson(ctx, pkg).andThen((preReleaseId) =>
+                        hydratePreReleaseBase(ctx).map((preReleaseBase: number | "0" | "1") => {
+                            const result: {
+                                name?: string;
+                                scope?: string;
+                                preReleaseId?: string;
+                                preReleaseBase?: number | "0" | "1";
+                            } = {};
+                            if (name) result.name = name;
+                            if (scope) result.scope = scope;
+                            if (preReleaseId) result.preReleaseId = preReleaseId;
+                            if (preReleaseBase !== undefined) result.preReleaseBase = preReleaseBase;
+                            return result;
+                        })
+                    )
                 )
             )
         );
@@ -365,7 +419,7 @@ export function createPrepareReleaseConfigTask(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("prepare-release-config")
         .description("Hydrate and prepare the release configuration")
         .execute((ctx) => {
-            const hydrated: HydratedConfig = {};
+            const hydrated: Partial<ReleaseConfig> = {};
 
             return hydrateFromGit(ctx)
                 .andThen((gitData) => {
@@ -378,6 +432,7 @@ export function createPrepareReleaseConfigTask(): FireflyResult<Task> {
                     if (pkgData.name) hydrated.name = pkgData.name;
                     if (pkgData.scope) hydrated.scope = pkgData.scope;
                     if (pkgData.preReleaseId) hydrated.preReleaseId = pkgData.preReleaseId;
+                    if (pkgData.preReleaseBase !== undefined) hydrated.preReleaseBase = pkgData.preReleaseBase;
 
                     return hydrateReleaseFlags(ctx);
                 })
@@ -386,7 +441,7 @@ export function createPrepareReleaseConfigTask(): FireflyResult<Task> {
                     hydrated.releasePreRelease = releaseFlags.releasePreRelease;
                     hydrated.releaseDraft = releaseFlags.releaseDraft;
 
-                    return ctx.fork("hydratedConfig", hydrated);
+                    return ctx.forkConfig(hydrated);
                 });
         })
         .build();

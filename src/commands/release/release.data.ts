@@ -1,20 +1,6 @@
 import type { ReleaseType } from "#/domain/semver/semver.definitions";
 import type { BumpStrategy } from "#/domain/semver/semver.strategies";
 
-/**
- * Configuration fields that can be inferred and hydrated into the release config.
- */
-export interface HydratedConfig {
-    repository?: string;
-    name?: string;
-    scope?: string;
-    preReleaseId?: string;
-    branch?: string;
-    releaseLatest?: boolean;
-    releasePreRelease?: boolean;
-    releaseDraft?: boolean;
-}
-
 export interface ReleaseData {
     /**
      * Current version read from package.json
@@ -40,9 +26,4 @@ export interface ReleaseData {
      * Selected release type from user prompt (overrides config.releaseType)
      */
     selectedReleaseType?: ReleaseType;
-
-    /**
-     * Inferred and hydrated configuration fields
-     */
-    hydratedConfig?: HydratedConfig;
 }
