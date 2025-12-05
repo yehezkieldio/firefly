@@ -17,7 +17,7 @@ import type { IVersionBumperService, VersionBumpOptions } from "#/services/contr
  */
 export class DefaultVersionBumperService implements IVersionBumperService {
     bump(options: VersionBumpOptions): FireflyAsyncResult<Version> {
-        const { currentVersion, releaseType, prereleaseIdentifier, prereleaseBase } = options;
+        const { currentVersion, releaseType, preReleaseID, preReleaseBase } = options;
 
         if (releaseType === "major" || releaseType === "minor" || releaseType === "patch") {
             const result = this.bumpStandard(currentVersion, releaseType);
@@ -25,12 +25,12 @@ export class DefaultVersionBumperService implements IVersionBumperService {
         }
 
         if (releaseType === "premajor" || releaseType === "preminor" || releaseType === "prepatch") {
-            const result = this.bumpPreStandard(currentVersion, releaseType, prereleaseIdentifier, prereleaseBase);
+            const result = this.bumpPreStandard(currentVersion, releaseType, preReleaseID, preReleaseBase);
             return result.isOk() ? FireflyOkAsync(result.value) : FireflyErrAsync(result.error);
         }
 
         if (releaseType === "prerelease") {
-            const result = this.bumpPrerelease(currentVersion, prereleaseIdentifier, prereleaseBase);
+            const result = this.bumpPrerelease(currentVersion, preReleaseID, preReleaseBase);
             return result.isOk() ? FireflyOkAsync(result.value) : FireflyErrAsync(result.error);
         }
 
@@ -65,7 +65,7 @@ export class DefaultVersionBumperService implements IVersionBumperService {
         }
 
         return invalidErr({
-            message: `Invalid prerelease base '${base}'. Must be "0", "1", 0, or 1.`,
+            message: `Invalid preReleaseBase '${base}'. Must be "0", "1", 0, or 1.`,
         });
     }
 
@@ -148,10 +148,10 @@ export class DefaultVersionBumperService implements IVersionBumperService {
     private bumpPreStandard(
         currentVersion: Version,
         releaseType: "premajor" | "preminor" | "prepatch",
-        identifier?: string,
-        base?: PreReleaseBase
+        preReleaseID?: string,
+        preReleaseBase?: PreReleaseBase
     ): FireflyResult<Version> {
-        const normalizedBaseResult = this.normalizeBase(base);
+        const normalizedBaseResult = this.normalizeBase(preReleaseBase);
         if (normalizedBaseResult.isErr()) {
             return FireflyErr(normalizedBaseResult.error);
         }
@@ -160,18 +160,18 @@ export class DefaultVersionBumperService implements IVersionBumperService {
         let newVersionString: string | null = null;
 
         if (normalizedBase !== undefined) {
-            newVersionString = identifier
-                ? semver.inc(currentVersion.raw, releaseType, identifier, normalizedBase)
+            newVersionString = preReleaseID
+                ? semver.inc(currentVersion.raw, releaseType, preReleaseID, normalizedBase)
                 : semver.inc(currentVersion.raw, releaseType, undefined, normalizedBase);
         } else {
-            newVersionString = identifier
-                ? semver.inc(currentVersion.raw, releaseType, identifier)
+            newVersionString = preReleaseID
+                ? semver.inc(currentVersion.raw, releaseType, preReleaseID)
                 : semver.inc(currentVersion.raw, releaseType);
         }
 
         if (!newVersionString) {
             return invalidErr({
-                message: `Failed to bump ${releaseType} version from '${currentVersion.raw}' with identifier '${identifier}' and base '${base}'.`,
+                message: `Failed to bump ${releaseType} version from '${currentVersion.raw}' with identifier '${preReleaseID}' and base '${preReleaseBase}'.`,
                 source: "services/version-bumper",
             });
         }
@@ -191,40 +191,40 @@ export class DefaultVersionBumperService implements IVersionBumperService {
      */
     private bumpPrerelease(
         currentVersion: Version,
-        identifier?: string,
-        base?: PreReleaseBase
+        preReleaseID?: string,
+        preReleaseBase?: PreReleaseBase
     ): FireflyResult<Version> {
         let newVersionString: string | null = null;
 
         // Case 1: Complex identifier with dots (e.g., "canary.abc123")
-        if (this.isComplexIdentifier(identifier)) {
-            newVersionString = this.bumpWithComplexIdentifier(currentVersion, identifier);
+        if (this.isComplexIdentifier(preReleaseID)) {
+            newVersionString = this.bumpWithComplexIdentifier(currentVersion, preReleaseID);
         }
         // Case 2: Explicit base provided
-        else if (base !== undefined && base !== null) {
-            const normalizedBaseResult = this.normalizeBase(base);
+        else if (preReleaseBase !== undefined && preReleaseBase !== null) {
+            const normalizedBaseResult = this.normalizeBase(preReleaseBase);
             if (normalizedBaseResult.isErr()) {
                 return FireflyErr(normalizedBaseResult.error);
             }
 
             const normalizedBase = normalizedBaseResult.value;
-            newVersionString = identifier
-                ? semver.inc(currentVersion.raw, "prerelease", identifier, normalizedBase)
+            newVersionString = preReleaseID
+                ? semver.inc(currentVersion.raw, "prerelease", preReleaseID, normalizedBase)
                 : semver.inc(currentVersion.raw, "prerelease", undefined, normalizedBase);
         }
         // Case 3: Continuing existing prerelease
         else if (currentVersion.isPrerelease) {
-            newVersionString = this.bumpExistingPrerelease(currentVersion, identifier);
+            newVersionString = this.bumpExistingPrerelease(currentVersion, preReleaseID);
         }
         // Case 4: Starting new prerelease from stable
         else {
-            const defaultIdentifier = identifier || "alpha";
+            const defaultIdentifier = preReleaseID || "alpha";
             newVersionString = semver.inc(currentVersion.raw, "prerelease", defaultIdentifier);
         }
 
         if (!newVersionString) {
             return invalidErr({
-                message: `Failed to bump prerelease version from '${currentVersion.raw}' with identifier '${identifier}' and base '${base}'.`,
+                message: `Failed to bump prerelease version from '${currentVersion.raw}' with identifier '${preReleaseID}' and base '${preReleaseBase}'.`,
                 source: "services/version-bumper",
             });
         }

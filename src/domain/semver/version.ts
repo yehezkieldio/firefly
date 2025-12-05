@@ -104,7 +104,7 @@ export class Version {
     /**
      * The prerelease identifier (e.g., "alpha" from "1.0.0-alpha.1").
      */
-    get prereleaseIdentifier(): string | null {
+    get preReleaseID(): string | null {
         if (!this.isPrerelease) return null;
         const first = this._parsed.prerelease[0];
         return typeof first === "string" ? first : null;

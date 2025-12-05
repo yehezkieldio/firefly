@@ -115,7 +115,7 @@ export const ReleaseConfigSchema = z
         bumpStrategy: BumpStrategySchema.describe('"auto" (from commits) or "manual" (user-specified).'),
         releaseType: ReleaseTypeSchema.optional().describe("The release type to bump."),
 
-        preReleaseId: z.string().optional().describe('Pre-release ID (e.g., "alpha", "beta").'),
+        preReleaseID: z.string().optional().describe('Pre-release ID (e.g., "alpha", "beta").'),
         preReleaseBase: PreReleaseBaseSchema.describe("Starting version for pre-releases."),
 
         releaseNotes: z.string().optional().describe("Custom release notes for changelog."),

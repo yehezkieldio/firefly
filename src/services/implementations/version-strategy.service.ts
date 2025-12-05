@@ -78,7 +78,7 @@ interface PreReleaseContext {
     /**
      * The identifier used for the current pre-release version.
      */
-    readonly prereleaseIdentifier: string | null;
+    readonly preReleaseID: string | null;
 
     /**
      * Indicates if there is a transition to a stable version recommended.
@@ -128,8 +128,8 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
             return this.bumper.bump({
                 currentVersion: options.currentVersion,
                 releaseType: options.releaseType,
-                prereleaseIdentifier: options.prereleaseIdentifier,
-                prereleaseBase: options.prereleaseBase,
+                preReleaseID: options.preReleaseID,
+                preReleaseBase: options.preReleaseBase,
             });
         }
 
@@ -148,12 +148,7 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
         const availableTypes = this.determineAvailableVersionTypes(options.currentVersion, options.releaseType);
 
         const choicesResults = availableTypes.map((releaseType) =>
-            this.createSingleChoice(
-                options.currentVersion,
-                releaseType,
-                options.prereleaseIdentifier,
-                options.prereleaseBase
-            )
+            this.createSingleChoice(options.currentVersion, releaseType, options.preReleaseID, options.preReleaseBase)
         );
 
         return ResultAsync.combine(choicesResults).map((choices) => {
@@ -174,12 +169,12 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
         recommendation?: VersionRecommendation
     ): PreReleaseContext {
         const isCurrentPreRelease = currentVersion.isPrerelease;
-        const prereleaseIdentifier = currentVersion.prereleaseIdentifier;
+        const preReleaseID = currentVersion.preReleaseID;
         const hasStableTransition = this.detectStableTransition(recommendation);
 
         return {
             isCurrentPreRelease,
-            prereleaseIdentifier,
+            preReleaseID,
             hasStableTransition,
         };
     }
@@ -213,8 +208,8 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
         return this.bumper.bump({
             currentVersion: options.currentVersion,
             releaseType: "prerelease",
-            prereleaseIdentifier: options.prereleaseIdentifier ?? context.prereleaseIdentifier ?? "alpha",
-            prereleaseBase: options.prereleaseBase,
+            preReleaseID: options.preReleaseID ?? context.preReleaseID ?? "alpha",
+            preReleaseBase: options.preReleaseBase,
         });
     }
 
@@ -279,8 +274,8 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
             return this.bumper.bump({
                 currentVersion: options.currentVersion,
                 releaseType: "prerelease",
-                prereleaseIdentifier: options.prereleaseIdentifier ?? context.prereleaseIdentifier ?? "alpha",
-                prereleaseBase: options.prereleaseBase,
+                preReleaseID: options.preReleaseID ?? context.preReleaseID ?? "alpha",
+                preReleaseBase: options.preReleaseBase,
             });
         }
 
@@ -290,8 +285,8 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
         return this.bumper.bump({
             currentVersion: options.currentVersion,
             releaseType,
-            prereleaseIdentifier: options.prereleaseIdentifier,
-            prereleaseBase: options.prereleaseBase,
+            preReleaseID: options.preReleaseID,
+            preReleaseBase: options.preReleaseBase,
         });
     }
 
@@ -336,21 +331,21 @@ export class DefaultVersionStrategyService implements IVersionStrategyService {
      *
      * @param currentVersion - The current version
      * @param releaseType - The type of release to create
-     * @param prereleaseIdentifier - Optional pre-release identifier
-     * @param prereleaseBase - Optional base for pre-release
+     * @param preReleaseID - Optional pre-release identifier
+     * @param preReleaseBase - Optional base for pre-release
      * @returns A result containing the version choice or an error
      */
     private createSingleChoice(
         currentVersion: Version,
         releaseType: ReleaseType,
-        prereleaseIdentifier?: string,
-        prereleaseBase?: PreReleaseBase
+        preReleaseID?: string,
+        preReleaseBase?: PreReleaseBase
     ): FireflyAsyncResult<VersionChoice> {
         const bumpOptions: VersionBumpOptions = {
             currentVersion,
             releaseType,
-            prereleaseIdentifier,
-            prereleaseBase,
+            preReleaseID,
+            preReleaseBase,
         };
 
         return this.bumper.bump(bumpOptions).map((newVersion) => ({
