@@ -86,6 +86,9 @@ interface PreReleaseContext {
     readonly hasStableTransition: boolean;
 }
 
+/**
+ * Default implementation of the version strategy service.
+ */
 export class DefaultVersionStrategyService implements IVersionStrategyService {
     private readonly bumper: IVersionBumperService;
 

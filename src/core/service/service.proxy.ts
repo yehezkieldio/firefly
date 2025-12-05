@@ -74,6 +74,18 @@ async function resolveServiceWithContext<K extends ServiceKey>(
 /**
  * Creates a lazy proxy that defers async service instantiation until first access.
  *
+ * IMPORTANT:
+ * This proxy always defers instantiation and wraps calls in a ResultAsync chain
+ * in order to safely await the real service instance before invoking the method.
+ *
+ * At runtime the proxy therefore returns ResultAsync even if the concrete service
+ * method returns a synchronous Result.
+ *
+ * Because of this behavior, service interfaces should return FireflyAsyncResult<T>
+ * from their public methods to avoid type mismatches and confusion. Implementations
+ * that have purely synchronous behavior should return FireflyOkAsync / FireflyErrAsync
+ * so they still conform to the async contract expected by the proxy.
+ *
  * @template T - The service interface type
  * @param factory - Async function that creates the actual service instance
  * @returns A proxy that behaves like the service but instantiates lazily

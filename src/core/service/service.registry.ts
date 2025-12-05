@@ -2,6 +2,15 @@
  * Provides the service locator pattern for dependency injection across the workflow system.
  * Services are lazily instantiated on first access via Proxy.
  *
+ * Important note on service method return types:
+ * The lazy proxy wraps service calls in a `ResultAsync` chain.
+ * For runtime and typing consistency, public service APIs should
+ * return `FireflyAsyncResult<T>` rather than `FireflyResult<T>`.
+ *
+ * If an implementation is synchronous, wrap the response using `FireflyOkAsync` / `FireflyErrAsync`.
+ * This avoids confusing type mismatches where TypeScript signatures say "synchronous"
+ * but the proxy returns `ResultAsync` at runtime.
+ *
  * Adding a new service:
  * 1. Create the service interface in `./src/services/contracts/`
  * 2. Create the service implementation in its own file in `./src/services/implementations/`
