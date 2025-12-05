@@ -1,3 +1,4 @@
+import { colors } from "consola/utils";
 import type { ReleaseContext } from "#/commands/release/release.context";
 import { FireflyOkAsync, validationErrAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult, FireflyResult } from "#/core/result/result.types";
@@ -44,7 +45,7 @@ export function createInitializeReleaseVersion(): FireflyResult<Task> {
         .dependsOn("prepare-release-config")
         .execute((ctx) =>
             getVersionFromPackageJson(ctx).andThen((currentVersion) => {
-                logger.info(`Current version is ${currentVersion}`);
+                logger.info(`Current version is ${colors.green(currentVersion)}`);
                 return FireflyOkAsync(ctx.fork("currentVersion", currentVersion));
             })
         )

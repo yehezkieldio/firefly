@@ -1,9 +1,27 @@
 import type { ReleaseContext } from "#/commands/release/release.context";
-import { FireflyOkAsync } from "#/core/result/result.constructors";
+import { FireflyErrAsync, FireflyOkAsync, invalidErrAsync, validationErr } from "#/core/result/result.constructors";
 import type { FireflyResult } from "#/core/result/result.types";
 import { TaskBuilder } from "#/core/task/task.builder";
 import type { Task } from "#/core/task/task.types";
+import { Version } from "#/domain/semver/version";
 import { logger } from "#/infrastructure/logging";
+import type { VersionBumpOptions } from "#/services/contracts/version-bumper.interface";
+
+/**
+ * Parses the current version from a raw string.
+ *
+ * @param currentVersionRaw - The raw string representing the current version
+ * @returns A FireflyResult containing the parsed Version or a validation error
+ */
+function parseCurrentVersion(currentVersionRaw: string | undefined): FireflyResult<Version> {
+    if (!currentVersionRaw) {
+        return validationErr({
+            message: "Current version is undefined",
+        });
+    }
+
+    return Version.from(currentVersionRaw);
+}
 
 export function createStraightVersionBump(): FireflyResult<Task> {
     return TaskBuilder.create<ReleaseContext>("straight-version-bump")
@@ -14,9 +32,33 @@ export function createStraightVersionBump(): FireflyResult<Task> {
             "Skipped: skipBump is enabled or no release type specified"
         )
         .execute((ctx) => {
-            logger.info("straight-version-bump");
+            const currentVersionResult = parseCurrentVersion(ctx.data.currentVersion);
+            if (currentVersionResult.isErr()) {
+                return FireflyErrAsync(currentVersionResult.error);
+            }
 
-            return FireflyOkAsync(ctx);
+            const releaseType = ctx.config.releaseType;
+            if (releaseType === undefined) {
+                return invalidErrAsync({
+                    message: "Release type is required for straight bump",
+                });
+            }
+
+            const currentVersion = currentVersionResult.value;
+
+            const bumpOptions: VersionBumpOptions = {
+                currentVersion,
+                releaseType,
+                prereleaseIdentifier: ctx.config.preReleaseId,
+                prereleaseBase: ctx.config.preReleaseBase,
+            };
+
+            return FireflyOkAsync(bumpOptions)
+                .andThen((options) => ctx.services.versionBumper.bump(options))
+                .andThen((newVersion) => {
+                    logger.info(`Bumped version: ${currentVersion.toString()} -> ${newVersion.toString()}`);
+                    return FireflyOkAsync(ctx.fork("nextVersion", newVersion.toString()));
+                });
         })
         .build();
 }
