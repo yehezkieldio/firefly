@@ -1,3 +1,4 @@
+import { DebugFlags } from "#/core/environment/debug-flags";
 import { FireflyOkAsync } from "#/core/result/result.constructors";
 import type { FireflyAsyncResult } from "#/core/result/result.types";
 import { executeGitCommand } from "#/infrastructure/executors/git-command.executor";
@@ -254,7 +255,9 @@ export class DefaultGitService implements IGitService {
     getCommitDetails(hash: string): FireflyAsyncResult<string> {
         const format = ["hash:%H", "date:%ci", "author:%an <%ae>", "subject:%s", "body:%b", "notes:%N"].join("%n");
 
-        return this.git(["show", "--no-patch", `--format=${format}`, hash]);
+        return this.git(["show", "--no-patch", `--format=${format}`, hash], {
+            verbose: DebugFlags.showVerboseGitCommitDetails,
+        });
     }
 
     getUnpushedCommits(): FireflyAsyncResult<UnpushedCommitsResult> {

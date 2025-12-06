@@ -63,4 +63,14 @@ export class DebugFlags {
     static get dontRedactGithubCliArgs(): boolean {
         return Boolean(process.env.FIREFLY_DEBUG_DONT_REDACT_GITHUB_CLI_ARGS?.trim());
     }
+
+    /**
+     * When enabled, logs verbose details for git commit operations.
+     *
+     * By default, the verbose log of the git show command is disabled to reduce noise, if commits are many.
+     * Enable this flag to see detailed commit information during debugging.
+     */
+    static get showVerboseGitCommitDetails(): boolean {
+        return Boolean(process.env.FIREFLY_DEBUG_SHOW_VERBOSE_GIT_COMMIT_DETAILS?.trim());
+    }
 }
