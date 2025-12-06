@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.16 (December 6, 2025)
+
+### <!-- 3 -->🚀 New Features
+- [`5005a45`](https://github.com/yehezkieldio/firefly/commit/5005a459041aefdfe4cd77af89eefb3f9e32524e) git: Add debug flag for verbose git commit details
+- [`3e89718`](https://github.com/yehezkieldio/firefly/commit/3e897180730319635e4352d4b05f430db67dd89f) release: Implement automatic version bump with commit analysis
+- [`a98f857`](https://github.com/yehezkieldio/firefly/commit/a98f857eb2813c70cbfb4630385ae13c130d471f) release: Add interactive manual version selection
+
+### <!-- 7 -->🚜 Refactor
+- [`4faca40`](https://github.com/yehezkieldio/firefly/commit/4faca40dfe689ab8c9ffa2652625e4ca551850f9) release: Remove unnecessary logger call from delegate-bump-strategy task
+- [`fc28987`](https://github.com/yehezkieldio/firefly/commit/fc28987962fc1e998bb4bbb0a87b5972661edb3a) release: Rename preReleaseID to preReleaseId
 ## firefly@4.0.0-alpha.15 (December 5, 2025)
 
 ### <!-- 11 -->🛠️ Miscellaneous
