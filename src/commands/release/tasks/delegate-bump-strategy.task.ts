@@ -3,7 +3,6 @@ import { FireflyOk, FireflyOkAsync } from "#/core/result/result.constructors";
 import type { FireflyResult } from "#/core/result/result.types";
 import { TaskBuilder } from "#/core/task/task.builder";
 import type { Task } from "#/core/task/task.types";
-import { logger } from "#/infrastructure/logging";
 
 /**
  * Determines if the execute-bump-strategy task should be skipped.
@@ -57,10 +56,6 @@ export function createDelegateBumpStrategyTask(): FireflyResult<Task> {
 
             return FireflyOk({ shouldSkip, reason });
         })
-        .execute((ctx) => {
-            logger.info("delegate-bump-strategy");
-
-            return FireflyOkAsync(ctx);
-        })
+        .execute((ctx) => FireflyOkAsync(ctx))
         .build();
 }
