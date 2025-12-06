@@ -1,3 +1,4 @@
+import { colors } from "consola/utils";
 import type { ReleaseContext } from "#/commands/release/release.context";
 import { FireflyOkAsync } from "#/core/result/result.constructors";
 import type { FireflyResult } from "#/core/result/result.types";
@@ -16,7 +17,7 @@ export function createBumpReleaseVersion(): FireflyResult<Task> {
         )
         .skipWhenWithReason((ctx) => ctx.config.skipBump, "Skipped: skipBump is enabled")
         .execute((ctx) => {
-            logger.info("bump-release-version");
+            logger.info(`Next version to be released: ${colors.green(ctx.data.nextVersion as string)}`);
 
             return FireflyOkAsync(ctx);
         })
