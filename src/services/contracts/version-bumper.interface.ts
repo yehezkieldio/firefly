@@ -19,7 +19,7 @@ export interface VersionBumpOptions {
     /**
      * Optional pre-release identifier (e.g., "alpha", "beta")
      */
-    readonly preReleaseID?: string;
+    readonly preReleaseId?: string;
 
     /**
      * Optional base number for pre-release versions

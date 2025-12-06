@@ -58,7 +58,7 @@ function executeAutomaticBump(ctx: ReleaseContext): FireflyAsyncResult<ReleaseCo
 
             const options: ResolveVersionOptions = {
                 currentVersion,
-                preReleaseID: ctx.config.preReleaseID,
+                preReleaseId: ctx.config.preReleaseId,
                 preReleaseBase: ctx.config.preReleaseBase,
             };
 

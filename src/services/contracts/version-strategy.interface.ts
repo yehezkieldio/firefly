@@ -71,7 +71,7 @@ export interface ResolveVersionOptions {
     /**
      * Pre-release identifier (e.g., "alpha", "beta")
      */
-    readonly preReleaseID?: string;
+    readonly preReleaseId?: string;
 
     /**
      * Base number for pre-release versions
@@ -96,7 +96,7 @@ export interface GenerateChoicesOptions {
     /**
      * Pre-release identifier for pre-release choices
      */
-    readonly preReleaseID?: string;
+    readonly preReleaseId?: string;
 
     /**
      * Base number for pre-release versions

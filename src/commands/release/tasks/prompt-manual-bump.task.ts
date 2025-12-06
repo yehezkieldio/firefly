@@ -46,7 +46,7 @@ function promptForManualVersion(ctx: ReleaseContext): FireflyAsyncResult<string>
     return ctx.services.versionStrategy
         .generateChoices({
             currentVersion,
-            preReleaseID: ctx.config.preReleaseID,
+            preReleaseId: ctx.config.preReleaseId,
             preReleaseBase: ctx.config.preReleaseBase,
         })
         .andThen((choices) => {

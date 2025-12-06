@@ -76,7 +76,7 @@
             "graduate"
           ]
         },
-        "preReleaseID": {
+        "preReleaseId": {
           "description": "Pre-release ID (e.g., \"alpha\", \"beta\").",
           "type": "string"
         },

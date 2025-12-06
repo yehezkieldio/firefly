@@ -43,7 +43,7 @@ function buildBumpOptionsFromContext(ctx: ReleaseContext): FireflyAsyncResult<Ve
     const bumpOptions: VersionBumpOptions = {
         currentVersion,
         releaseType,
-        preReleaseID: ctx.config.preReleaseID,
+        preReleaseId: ctx.config.preReleaseId,
         preReleaseBase: ctx.config.preReleaseBase,
     };
 
