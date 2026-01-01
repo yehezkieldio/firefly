@@ -103,44 +103,53 @@ function validateSkipFlagCombinations(ctx: CheckContext): void {
     }
 }
 
-export const ReleaseConfigSchema = z
-    .object({
-        name: z.string().optional().describe("Unscoped project name. Auto-detected from package.json."),
-        scope: z.string().optional().describe("Org/user scope without '@'. Auto-detected from package.json."),
-        repository: z.string().optional().describe("GitHub repository in 'owner/repo' format."),
-        base: z.string().optional().describe("Relative path from repository root to project root."),
-        branch: z.string().optional().describe("Git branch to release from."),
-        changelogPath: z.string().default("CHANGELOG.md").describe("Changelog file path, relative to project root."),
+/**
+ * Base release configuration schema without refinements.
+ * Use this schema for JSON schema generation and `.partial()` operations.
+ * Zod v4 does not allow `.partial()` on schemas with refinements.
+ */
+export const ReleaseConfigBaseSchema = z.object({
+    name: z.string().optional().describe("Unscoped project name. Auto-detected from package.json."),
+    scope: z.string().optional().describe("Org/user scope without '@'. Auto-detected from package.json."),
+    repository: z.string().optional().describe("GitHub repository in 'owner/repo' format."),
+    base: z.string().optional().describe("Relative path from repository root to project root."),
+    branch: z.string().optional().describe("Git branch to release from."),
+    changelogPath: z.string().default("CHANGELOG.md").describe("Changelog file path, relative to project root."),
 
-        bumpStrategy: BumpStrategySchema.describe('"auto" (from commits) or "manual" (user-specified).'),
-        releaseType: ReleaseTypeSchema.optional().describe("The release type to bump."),
+    bumpStrategy: BumpStrategySchema.describe('"auto" (from commits) or "manual" (user-specified).'),
+    releaseType: ReleaseTypeSchema.optional().describe("The release type to bump."),
 
-        preReleaseId: z.string().optional().describe('Pre-release ID (e.g., "alpha", "beta").'),
-        preReleaseBase: PreReleaseBaseSchema.describe("Starting version for pre-releases."),
+    preReleaseId: z.string().optional().describe('Pre-release ID (e.g., "alpha", "beta").'),
+    preReleaseBase: PreReleaseBaseSchema.describe("Starting version for pre-releases."),
 
-        releaseNotes: z.string().optional().describe("Custom release notes for changelog."),
+    releaseNotes: z.string().optional().describe("Custom release notes for changelog."),
 
-        commitMessage: z.string().default(COMMIT_MSG_TEMPLATE).describe("Commit message template with placeholders."),
-        tagName: z.string().default(TAG_NAME_TEMPLATE).describe("Tag name template with placeholders."),
+    commitMessage: z.string().default(COMMIT_MSG_TEMPLATE).describe("Commit message template with placeholders."),
+    tagName: z.string().default(TAG_NAME_TEMPLATE).describe("Tag name template with placeholders."),
 
-        skipBump: z.coerce.boolean().default(false).describe("Skip version bump step."),
-        skipChangelog: z.coerce.boolean().default(false).describe("Skip changelog generation step."),
-        skipPush: z.coerce.boolean().default(false).describe("Skip push step."),
-        skipGitHubRelease: z.coerce.boolean().default(false).describe("Skip GitHub release step."),
-        skipGit: z.coerce.boolean().default(false).describe("Skip all git-related steps."),
-        skipPreflightCheck: z.coerce.boolean().default(false).describe("Skip preflight checks."),
+    skipBump: z.coerce.boolean().default(false).describe("Skip version bump step."),
+    skipChangelog: z.coerce.boolean().default(false).describe("Skip changelog generation step."),
+    skipPush: z.coerce.boolean().default(false).describe("Skip push step."),
+    skipGitHubRelease: z.coerce.boolean().default(false).describe("Skip GitHub release step."),
+    skipGit: z.coerce.boolean().default(false).describe("Skip all git-related steps."),
+    skipPreflightCheck: z.coerce.boolean().default(false).describe("Skip preflight checks."),
 
-        releaseTitle: z.string().default(RELEASE_TITLE_TEMPLATE).describe("GitHub release title with placeholders."),
-        releaseLatest: z.coerce.boolean().optional().describe("Mark as latest release."),
-        releasePreRelease: z.coerce.boolean().optional().describe("Mark as pre-release."),
-        releaseDraft: z.coerce.boolean().optional().describe("Release as draft version."),
-    })
-    .check((ctx) => {
-        validateReleaseFlagExclusivity(ctx as unknown as CheckContext);
-        validateSkipGitRedundancy(ctx as unknown as CheckContext);
-        validateBumpStrategyCompatibility(ctx as unknown as CheckContext);
-        validateSkipFlagCombinations(ctx as unknown as CheckContext);
-    });
+    releaseTitle: z.string().default(RELEASE_TITLE_TEMPLATE).describe("GitHub release title with placeholders."),
+    releaseLatest: z.coerce.boolean().optional().describe("Mark as latest release."),
+    releasePreRelease: z.coerce.boolean().optional().describe("Mark as pre-release."),
+    releaseDraft: z.coerce.boolean().optional().describe("Release as draft version."),
+});
+
+/**
+ * Release configuration schema with runtime validation refinements.
+ * Use this schema for parsing and validating user input.
+ */
+export const ReleaseConfigSchema = ReleaseConfigBaseSchema.check((ctx) => {
+    validateReleaseFlagExclusivity(ctx as unknown as CheckContext);
+    validateSkipGitRedundancy(ctx as unknown as CheckContext);
+    validateBumpStrategyCompatibility(ctx as unknown as CheckContext);
+    validateSkipFlagCombinations(ctx as unknown as CheckContext);
+});
 
 type BaseRelease = z.infer<typeof ReleaseConfigSchema>;
 export type ReleaseFlagKeys = "releaseLatest" | "releasePreRelease" | "releaseDraft";

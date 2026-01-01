@@ -3,7 +3,7 @@ import { GlobalOptionsSchema } from "#/cli/options/options.types";
 import {
     type ExclusiveReleaseFlags,
     type ReleaseConfig,
-    ReleaseConfigSchema,
+    ReleaseConfigBaseSchema,
     type ReleaseFlagKeys,
 } from "#/commands/release/release.config";
 
@@ -14,7 +14,7 @@ import {
 export const FireflyConfigSchema = z
     .object({
         ...GlobalOptionsSchema.shape,
-        release: ReleaseConfigSchema.partial().describe("Release command configuration."),
+        release: ReleaseConfigBaseSchema.partial().describe("Release command configuration."),
     })
     .partial()
     .describe("Firefly CLI configuration.");
