@@ -6,6 +6,39 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.17 (January 1, 2026)
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`b65184f`](https://github.com/yehezkieldio/firefly/commit/b65184feda4266cb1dd3776661fef7dccbffd6ca) deps: Update dependency @types/bun to ^1.3.4 by renovate[bot] ([#145](https://github.com/yehezkieldio/firefly/issues/145))
+- [`ca5b0b3`](https://github.com/yehezkieldio/firefly/commit/ca5b0b32265acaa673cb23d9ac4547051d874475) deps: Update dependency ultracite to v6.3.10 by renovate[bot] ([#146](https://github.com/yehezkieldio/firefly/issues/146))
+- [`33f567e`](https://github.com/yehezkieldio/firefly/commit/33f567ef6572ecb10f9aa00759b70a15ab5ab035) deps: Update dependency tsdown to ^0.17.1 by renovate[bot] ([#147](https://github.com/yehezkieldio/firefly/issues/147))
+- [`63f9f36`](https://github.com/yehezkieldio/firefly/commit/63f9f36201f8a0e116573bcba6e16af50e4ff9f0) deps: Update dependency tsdown to ^0.17.2 by renovate[bot] ([#148](https://github.com/yehezkieldio/firefly/issues/148))
+- [`599f341`](https://github.com/yehezkieldio/firefly/commit/599f341c9478155c18fe7147e3f93f1a326ce253) deps: Update dependency tsdown to ^0.17.3 by renovate[bot] ([#149](https://github.com/yehezkieldio/firefly/issues/149))
+- [`a406484`](https://github.com/yehezkieldio/firefly/commit/a4064842dbdadc8bb97c96ea1cc3279dd7256b0b) deps: Update dependency ultracite to v6.4.0 by renovate[bot] ([#150](https://github.com/yehezkieldio/firefly/issues/150))
+- [`f871200`](https://github.com/yehezkieldio/firefly/commit/f871200b54269f4ff2d80da83addd1a80ba764ab) deps: Update dependency tsdown to ^0.17.4 by renovate[bot] ([#151](https://github.com/yehezkieldio/firefly/issues/151))
+- [`1731cae`](https://github.com/yehezkieldio/firefly/commit/1731cae20bd14156dfff9e55da65a63e6c8b0591) deps: Update dependency git-cliff to ^2.11.0 by renovate[bot] ([#152](https://github.com/yehezkieldio/firefly/issues/152))
+- [`d114a79`](https://github.com/yehezkieldio/firefly/commit/d114a791abf08d84aecdce9fb74d9b34d837fe87) deps: Update dependency ultracite to v6.4.1 by renovate[bot] ([#153](https://github.com/yehezkieldio/firefly/issues/153))
+- [`392d1be`](https://github.com/yehezkieldio/firefly/commit/392d1be0f6e3227662a0999670f91a52de472042) deps: Update dependency zod to ^4.2.0 by renovate[bot] ([#154](https://github.com/yehezkieldio/firefly/issues/154))
+- [`975f50b`](https://github.com/yehezkieldio/firefly/commit/975f50b3ff9967ffa7e593f80948e2fd725c12bc) deps: Update dependency tsdown to ^0.18.0 by renovate[bot] ([#155](https://github.com/yehezkieldio/firefly/issues/155))
+- [`70e2ae9`](https://github.com/yehezkieldio/firefly/commit/70e2ae9620fffbcee842403a974ec76b38651fc3) deps: Update dependency @biomejs/biome to v2.3.9 by renovate[bot] ([#156](https://github.com/yehezkieldio/firefly/issues/156))
+- [`eda05e1`](https://github.com/yehezkieldio/firefly/commit/eda05e1a4b09887feec3d6aaac32cb9ed9e1396b) deps: Update dependency zod to ^4.2.1 by renovate[bot] ([#157](https://github.com/yehezkieldio/firefly/issues/157))
+- [`154f0b0`](https://github.com/yehezkieldio/firefly/commit/154f0b0506a5753f4f63b42b1a148a48a79f4081) deps: Update dependency c12 to ^3.3.3 by renovate[bot] ([#158](https://github.com/yehezkieldio/firefly/issues/158))
+- [`cbaeca9`](https://github.com/yehezkieldio/firefly/commit/cbaeca9ab7ab26f9d0520d6039ee37ead26eed4d) deps: Update dependency @biomejs/biome to v2.3.10 by renovate[bot] ([#159](https://github.com/yehezkieldio/firefly/issues/159))
+- [`629efe2`](https://github.com/yehezkieldio/firefly/commit/629efe22636a4ca8ecedc122cb0472c91150eebe) deps: Update dependency tsdown to ^0.18.1 by renovate[bot] ([#160](https://github.com/yehezkieldio/firefly/issues/160))
+- [`6d67d52`](https://github.com/yehezkieldio/firefly/commit/6d67d5236b76b7868941ef4c6c2474ff136a4822) deps: Update dependency ultracite to v6.4.2 by renovate[bot] ([#161](https://github.com/yehezkieldio/firefly/issues/161))
+- [`bb18a8d`](https://github.com/yehezkieldio/firefly/commit/bb18a8dba0793d52174d56b0f46e8e733257dd7f) deps: Update dependency @types/bun to ^1.3.5 by renovate[bot] ([#162](https://github.com/yehezkieldio/firefly/issues/162))
+- [`336c53a`](https://github.com/yehezkieldio/firefly/commit/336c53a1e7a0e95081180d6603f540a7648d78f6) deps: Update dependency ultracite to v6.4.3 by renovate[bot] ([#163](https://github.com/yehezkieldio/firefly/issues/163))
+- [`5a2ba63`](https://github.com/yehezkieldio/firefly/commit/5a2ba63447cc5d8a29dd340bc6196eacf100eee8) deps: Update dependency tsdown to ^0.18.2 by renovate[bot] ([#164](https://github.com/yehezkieldio/firefly/issues/164))
+- [`f67fe73`](https://github.com/yehezkieldio/firefly/commit/f67fe7374aa7961120fca110182576cc732a5789) deps: Update dependency ultracite to v6.5.0 by renovate[bot] ([#165](https://github.com/yehezkieldio/firefly/issues/165))
+- [`2de330c`](https://github.com/yehezkieldio/firefly/commit/2de330c298da5673f5a715f0a81b5e81e8fb8031) deps: Update dependency tsdown to ^0.18.3 by renovate[bot] ([#166](https://github.com/yehezkieldio/firefly/issues/166))
+- [`f74a17a`](https://github.com/yehezkieldio/firefly/commit/f74a17ae5cd067166df296624df11f31533ee0af) deps: Update dependency tsdown to ^0.18.4 by renovate[bot] ([#167](https://github.com/yehezkieldio/firefly/issues/167))
+- [`530d8e7`](https://github.com/yehezkieldio/firefly/commit/530d8e799ad722db3b102f247068c8a3f8cb142c) deps: Update dependency zod to ^4.3.2 by renovate[bot] ([#168](https://github.com/yehezkieldio/firefly/issues/168))
+- [`8233b7d`](https://github.com/yehezkieldio/firefly/commit/8233b7da7dd451e1dee1c93ee864ca49af718ecb) deps: Update dependency ultracite to v6.5.1 by renovate[bot] ([#169](https://github.com/yehezkieldio/firefly/issues/169))
+- [`7022298`](https://github.com/yehezkieldio/firefly/commit/70222982baa8eaddbbf94111588c672ef0baa277) deps: Update dependency zod to ^4.3.3 by renovate[bot] ([#170](https://github.com/yehezkieldio/firefly/issues/170))
+- [`fd3dcdd`](https://github.com/yehezkieldio/firefly/commit/fd3dcdd360f6bfbf16bd91d8adf878c3cd970cf2) deps: Update dependency zod to ^4.3.4 by renovate[bot] ([#171](https://github.com/yehezkieldio/firefly/issues/171))
+
+### <!-- 3 -->🚀 New Features
+- [`5022ada`](https://github.com/yehezkieldio/firefly/commit/5022adaadccd4b191a0fbc912c37f4783432c82e) release: Add version bump and undo logic for package.json
 ## firefly@4.0.0-alpha.16 (December 6, 2025)
 
 ### <!-- 3 -->🚀 New Features
