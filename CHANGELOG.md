@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@4.0.0-alpha.18 (January 1, 2026)
+
+### <!-- 7 -->🚜 Refactor
+- [`a8aacbe`](https://github.com/yehezkieldio/firefly/commit/a8aacbea7f74cfee4fa21c0381d1b489936dded1) cli: Split release config schema into base and refined versions
 ## firefly@4.0.0-alpha.17 (January 1, 2026)
 
 ### <!-- 2 -->🧩 Dependencies Updates
