@@ -1,6 +1,5 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "description": "Firefly CLI configuration.",
   "type": "object",
   "properties": {
     "cwd": {
@@ -20,7 +19,6 @@
       "type": "boolean"
     },
     "release": {
-      "description": "Release command configuration.",
       "type": "object",
       "properties": {
         "name": {
@@ -44,13 +42,13 @@
           "type": "string"
         },
         "changelogPath": {
-          "description": "Changelog file path, relative to project root.",
           "default": "CHANGELOG.md",
+          "description": "Changelog file path, relative to project root.",
           "type": "string"
         },
         "bumpStrategy": {
-          "description": "\"auto\" (from commits) or \"manual\" (user-specified).",
           "default": "",
+          "description": "\"auto\" (from commits) or \"manual\" (user-specified).",
           "anyOf": [
             {
               "type": "string",
@@ -101,48 +99,48 @@
           "type": "string"
         },
         "commitMessage": {
-          "description": "Commit message template with placeholders.",
           "default": "chore(release): release {{name}}@{{version}}",
+          "description": "Commit message template with placeholders.",
           "type": "string"
         },
         "tagName": {
-          "description": "Tag name template with placeholders.",
           "default": "{{name}}@{{version}}",
+          "description": "Tag name template with placeholders.",
           "type": "string"
         },
         "skipBump": {
-          "description": "Skip version bump step.",
           "default": false,
+          "description": "Skip version bump step.",
           "type": "boolean"
         },
         "skipChangelog": {
-          "description": "Skip changelog generation step.",
           "default": false,
+          "description": "Skip changelog generation step.",
           "type": "boolean"
         },
         "skipPush": {
-          "description": "Skip push step.",
           "default": false,
+          "description": "Skip push step.",
           "type": "boolean"
         },
         "skipGitHubRelease": {
-          "description": "Skip GitHub release step.",
           "default": false,
+          "description": "Skip GitHub release step.",
           "type": "boolean"
         },
         "skipGit": {
-          "description": "Skip all git-related steps.",
           "default": false,
+          "description": "Skip all git-related steps.",
           "type": "boolean"
         },
         "skipPreflightCheck": {
-          "description": "Skip preflight checks.",
           "default": false,
+          "description": "Skip preflight checks.",
           "type": "boolean"
         },
         "releaseTitle": {
-          "description": "GitHub release title with placeholders.",
           "default": "{{name}}@{{version}}",
+          "description": "GitHub release title with placeholders.",
           "type": "string"
         },
         "releaseLatest": {
@@ -157,7 +155,9 @@
           "description": "Release as draft version.",
           "type": "boolean"
         }
-      }
+      },
+      "description": "Release command configuration."
     }
-  }
+  },
+  "description": "Firefly CLI configuration."
 }
