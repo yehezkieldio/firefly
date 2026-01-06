@@ -9,6 +9,7 @@ export const BaseContextDataSchema = z.object({
 });
 
 export type BaseContextData = z.infer<typeof BaseContextDataSchema>;
-export type ContextDataFor<T extends CommandName> = (typeof ContextDataSchemas)[T] extends z.ZodType<infer O>
-    ? O & Record<string, unknown>
-    : BaseContextData & Record<string, unknown>;
+export type ContextDataFor<T extends CommandName> =
+    (typeof ContextDataSchemas)[T] extends z.ZodType<infer O>
+        ? O & Record<string, unknown>
+        : BaseContextData & Record<string, unknown>;

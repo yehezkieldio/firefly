@@ -27,7 +27,6 @@
  */
 
 export declare class TomlDate extends Date {
-    #private;
     constructor(date: string | Date);
     isDateTime(): boolean;
     isLocal(): boolean;
