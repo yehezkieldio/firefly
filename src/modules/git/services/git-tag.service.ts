@@ -27,7 +27,7 @@ export class GitTagService {
             args.push("-m", message);
         }
 
-        const createTagResult = await executeGitCommand(args, { dryRun });
+        const createTagResult = await executeGitCommand(args, { dryRun, interactive: true });
         if (createTagResult.isErr()) return err(createTagResult.error);
 
         logger.verbose(`GitTagService: Tag ${tagName} created successfully`);

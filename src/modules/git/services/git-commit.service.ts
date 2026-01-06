@@ -19,7 +19,7 @@ export class GitCommitService {
             args.push("-S");
         }
 
-        const commitResult = await executeGitCommand(args, { dryRun });
+        const commitResult = await executeGitCommand(args, { dryRun, interactive: true });
         if (commitResult.isErr()) return err(commitResult.error);
 
         logger.verbose("GitCommitService: Commit created successfully.");

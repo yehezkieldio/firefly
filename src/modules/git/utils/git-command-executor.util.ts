@@ -49,6 +49,7 @@ export interface GitCommandOptions {
     cwd?: string;
     forceBuffered?: boolean;
     verbose?: boolean;
+    interactive?: boolean;
 }
 
 export function executeGitCommand(args: string[], options: GitCommandOptions = {}): ResultAsync<string, FireflyError> {
@@ -69,7 +70,7 @@ export function executeGitCommand(args: string[], options: GitCommandOptions = {
     const commandStr = `git ${validatedArgs.join(" ")}`;
 
     const useStreaming = shouldUseStreaming(validatedArgs) && !options.forceBuffered;
-    const executionMode = useStreaming ? "streaming" : "buffered";
+    const executionMode = options.interactive ? "interactive" : useStreaming ? "streaming" : "buffered";
 
     if (options.verbose) {
         logger.verbose(`GitCommandExecutor: Executing git command (${executionMode}): ${commandStr}`);
@@ -83,6 +84,10 @@ export function executeGitCommand(args: string[], options: GitCommandOptions = {
         return okAsync(dryRunMessage);
     }
 
+    if (options.interactive) {
+        return executeGitCommandInteractive(validatedArgs, options.cwd ?? process.cwd(), commandStr);
+    }
+
     const spawnOptions = {
         cwd: options.cwd ?? process.cwd(),
         stdout: "pipe" as const,
@@ -94,6 +99,34 @@ export function executeGitCommand(args: string[], options: GitCommandOptions = {
     }
 
     return executeGitCommandBuffered(validatedArgs, spawnOptions, commandStr);
+}
+
+function executeGitCommandInteractive(
+    args: string[],
+    cwd: string,
+    commandStr: string,
+): ResultAsync<string, FireflyError> {
+    const proc = Bun.spawn(["git", ...args], {
+        cwd,
+        stdin: "inherit",
+        stdout: "inherit",
+        stderr: "inherit",
+    });
+
+    return ResultAsync.fromPromise(
+        proc.exited.then(() => {
+            if (proc.exitCode !== 0) {
+                return Promise.reject(new Error(`Git process exited with code ${proc.exitCode}`));
+            }
+            return "";
+        }),
+        (error) =>
+            createFireflyError({
+                code: "FAILED",
+                message: `Git command failed (interactive): ${commandStr}`,
+                details: error,
+            }),
+    );
 }
 
 function executeGitCommandBuffered(

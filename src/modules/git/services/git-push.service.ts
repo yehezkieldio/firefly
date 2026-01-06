@@ -16,7 +16,7 @@ export class GitPushService {
             args.push(branch);
         }
 
-        const pushResult = await executeGitCommand(args, { dryRun });
+        const pushResult = await executeGitCommand(args, { dryRun, interactive: true });
         if (pushResult.isErr()) return err(pushResult.error);
 
         logger.verbose("GitPushService: Push completed successfully.");
@@ -26,7 +26,7 @@ export class GitPushService {
     async pushTags(remote = "origin", dryRun?: boolean): Promise<FireflyResult<void>> {
         logger.verbose(`GitPushService: Pushing tags to remote "${remote}"${dryRun ? " (dry run)" : ""}...`);
 
-        const pushResult = await executeGitCommand(["push", remote, "--tags"], { dryRun });
+        const pushResult = await executeGitCommand(["push", remote, "--tags"], { dryRun, interactive: true });
         if (pushResult.isErr()) return err(pushResult.error);
 
         logger.verbose("GitPushService: Tags push completed successfully.");
@@ -46,7 +46,7 @@ export class GitPushService {
             args.push(branch);
         }
 
-        const pushResult = await executeGitCommand(args, { dryRun });
+        const pushResult = await executeGitCommand(args, { dryRun, interactive: true });
         if (pushResult.isErr()) return err(pushResult.error);
 
         logger.verbose("GitPushService: Push with --follow-tags completed successfully.");
@@ -58,7 +58,7 @@ export class GitPushService {
             `GitPushService: Pushing tag "${tagName}" to remote "${remote}"${dryRun ? " (dry run)" : ""}...`,
         );
 
-        const pushResult = await executeGitCommand(["push", remote, tagName], { dryRun });
+        const pushResult = await executeGitCommand(["push", remote, tagName], { dryRun, interactive: true });
         if (pushResult.isErr()) return err(pushResult.error);
 
         logger.verbose("GitPushService: Tag push completed successfully.");
@@ -70,7 +70,10 @@ export class GitPushService {
             `GitPushService: Deleting remote tag "${tagName}" from remote "${remote}"${dryRun ? " (dry run)" : ""}...`,
         );
 
-        const pushResult = await executeGitCommand(["push", remote, "--delete", tagName], { dryRun });
+        const pushResult = await executeGitCommand(["push", remote, "--delete", tagName], {
+            dryRun,
+            interactive: true,
+        });
         if (pushResult.isErr()) return err(pushResult.error);
 
         logger.verbose("GitPushService: Remote tag deleted successfully.");
@@ -90,7 +93,7 @@ export class GitPushService {
             args.push(branch);
         }
 
-        const pushResult = await executeGitCommand(args, { dryRun });
+        const pushResult = await executeGitCommand(args, { dryRun, interactive: true });
         if (pushResult.isErr()) return err(pushResult.error);
 
         logger.verbose("GitPushService: Push completed successfully.");
