@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.1.0 (January 6, 2026)
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`dce8028`](https://github.com/yehezkieldio/firefly/commit/dce8028d97912f5216eb7049c8af8a1f194e984e) config: Enable renovate configuration
+
+### <!-- 3 -->🚀 New Features
+- [`fa0a234`](https://github.com/yehezkieldio/firefly/commit/fa0a234fa0db081aadb67fb48771496d3fb6a19d) git: Add interactive mode for git commands
+
+This should resolve the issue where the release process could become malformed if the user was distracted; the process will now visibly wait in the terminal for any necessary input and only proceed once the Git process successfully completes.
+
 ## firefly@3.0.11 (December 1, 2025)
 
 ### <!-- 16 -->🤖 CI/CD
