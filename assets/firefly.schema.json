@@ -3,8 +3,8 @@
     "type": "object",
     "properties": {
         "repository": {
-            "description": "Repo in 'owner/repo' format, auto-detected if omitted.",
             "default": "",
+            "description": "Repo in 'owner/repo' format, auto-detected if omitted.",
             "anyOf": [
                 {
                     "type": "string",
@@ -17,13 +17,13 @@
             ]
         },
         "verbose": {
-            "description": "Enable verbose logging.",
             "default": false,
+            "description": "Enable verbose logging.",
             "type": "boolean"
         },
         "dryRun": {
-            "description": "Simulate execution without changes.",
             "default": false,
+            "description": "Simulate execution without changes.",
             "type": "boolean"
         },
         "branch": {
@@ -39,18 +39,18 @@
             "type": "string"
         },
         "base": {
-            "description": "Relative path from repository root to project root. Useful for monorepos.",
             "default": "",
+            "description": "Relative path from repository root to project root. Useful for monorepos.",
             "type": "string"
         },
         "changelogPath": {
-            "description": "Changelog file path, relative to project root.",
             "default": "CHANGELOG.md",
+            "description": "Changelog file path, relative to project root.",
             "type": "string"
         },
         "bumpStrategy": {
-            "description": "\"auto\" (from commits) or \"manual\" (user-specified).",
             "default": "",
+            "description": "\"auto\" (from commits) or \"manual\" (user-specified).",
             "anyOf": [
                 {
                     "type": "string",
@@ -68,8 +68,8 @@
             "enum": ["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch", "graduate"]
         },
         "preReleaseId": {
-            "description": "Pre-release ID (e.g., \"alpha\", \"beta\").",
             "default": "alpha",
+            "description": "Pre-release ID (e.g., \"alpha\", \"beta\").",
             "type": "string"
         },
         "preReleaseBase": {
@@ -89,68 +89,68 @@
             ]
         },
         "releaseNotes": {
-            "description": "Custom release notes for changelog.",
             "default": "",
+            "description": "Custom release notes for changelog.",
             "type": "string"
         },
         "commitMessage": {
-            "description": "Commit message template with placeholders.",
             "default": "chore(release): release {{name}}@{{version}}",
+            "description": "Commit message template with placeholders.",
             "type": "string"
         },
         "tagName": {
-            "description": "Tag name template with placeholders.",
             "default": "{{name}}@{{version}}",
+            "description": "Tag name template with placeholders.",
             "type": "string"
         },
         "skipBump": {
-            "description": "Skip version bump step.",
             "default": false,
+            "description": "Skip version bump step.",
             "type": "boolean"
         },
         "skipChangelog": {
-            "description": "Skip changelog generation step.",
             "default": false,
+            "description": "Skip changelog generation step.",
             "type": "boolean"
         },
         "skipPush": {
-            "description": "Skip push step.",
             "default": false,
+            "description": "Skip push step.",
             "type": "boolean"
         },
         "skipGitHubRelease": {
-            "description": "Skip GitHub release step.",
             "default": false,
+            "description": "Skip GitHub release step.",
             "type": "boolean"
         },
         "skipGit": {
-            "description": "Skip all git-related steps.",
             "default": false,
+            "description": "Skip all git-related steps.",
             "type": "boolean"
         },
         "skipPreflightCheck": {
-            "description": "Skip preflight checks.",
             "default": false,
+            "description": "Skip preflight checks.",
             "type": "boolean"
         },
         "releaseTitle": {
-            "description": "GitHub release title with placeholders.",
             "default": "{{name}}@{{version}}",
+            "description": "GitHub release title with placeholders.",
             "type": "string"
         },
         "releaseLatest": {
-            "description": "Mark as latest release.",
             "default": true,
+            "description": "Mark as latest release.",
             "type": "boolean"
         },
         "releasePreRelease": {
-            "description": "Mark as pre-release.",
             "default": false,
+            "description": "Mark as pre-release.",
             "type": "boolean"
         },
         "releaseDraft": {
-            "description": "Release as draft version.",
             "default": false,
+            "description": "Release as draft version.",
             "type": "boolean"
         }
     }
