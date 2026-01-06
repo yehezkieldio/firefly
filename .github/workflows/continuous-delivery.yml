@@ -94,5 +94,10 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest
 
-      - name: Publish Package to NPM (v3 tag)
-        run: npm publish --tag=major-3
+      - name: Publish Package to NPM (Latest Tag)
+        run: npm publish --tag=latest
+
+      - name: Add 'major-3' tag to the version just published
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          npm dist-tag add firefly@$VERSION major-3
