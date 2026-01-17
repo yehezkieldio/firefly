@@ -6,6 +6,21 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.1.1 (January 17, 2026)
+
+### <!-- 16 -->🤖 CI/CD
+- [`20ec307`](https://github.com/yehezkieldio/firefly/commit/20ec307042046c010a51517a466b78bed301fe45) Update npm publish to use latest tag and add major-3 dist-tag
+
+### <!-- 2 -->🧩 Dependencies Updates
+- [`0f07a3a`](https://github.com/yehezkieldio/firefly/commit/0f07a3a067c4fef2b97c25d90ace207fdefbd03a) deps: Upgrade dependencies and fix json formatting in firefly schema
+- [`4099a04`](https://github.com/yehezkieldio/firefly/commit/4099a041b65165961ba4e3ff78cde60005dddbca) deps: Update dependency tsdown to ^0.19.0-beta.4 by renovate[bot] ([#177](https://github.com/yehezkieldio/firefly/issues/177))
+- [`c458985`](https://github.com/yehezkieldio/firefly/commit/c458985b910274dc9a42ab0f542cfd4244d8d7c0) deps: Update dependency tsdown to ^0.19.0-beta.5 by renovate[bot] ([#178](https://github.com/yehezkieldio/firefly/issues/178))
+- [`3c814ab`](https://github.com/yehezkieldio/firefly/commit/3c814ab1fc3586872db1b1bffbcb3f383ce60d6b) deps: Update dependency tsdown to ^0.19.0 by renovate[bot] ([#179](https://github.com/yehezkieldio/firefly/issues/179))
+- [`7580d46`](https://github.com/yehezkieldio/firefly/commit/7580d463bde9fc2aaa7bd221b211858fb8201a32) deps: Update dependency @types/bun to ^1.3.6 by renovate[bot] ([#180](https://github.com/yehezkieldio/firefly/issues/180))
+- [`1771d00`](https://github.com/yehezkieldio/firefly/commit/1771d009d72fcdd14a84f8bc1576b464cb72bb2c) deps: Update dependency node to v22.22.0 by renovate[bot] ([#181](https://github.com/yehezkieldio/firefly/issues/181))
+
+### <!-- 7 -->🚜 Refactor
+- [`1e5b2f9`](https://github.com/yehezkieldio/firefly/commit/1e5b2f96ea0e1c3fde9197afec615507ba1d4b51) types: Update formatting and upgrade biome schema version
 ## firefly@3.1.0 (January 6, 2026)
 
 ### <!-- 11 -->🛠️ Miscellaneous
