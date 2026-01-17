@@ -16,18 +16,6 @@ permissions:
   contents: read
   packages: write
 
-# Note on Runtime Dependencies:
-# This workflow currently uses both Bun and Node.js runtimes, which may seem redundant.
-# However, this dual-runtime approach is necessary because `bun publish` does not currently
-# support npm's trusted publishing feature (provenance and OIDC-based authentication) or
-# my current attempts to configure it to do so have been unsuccessful.
-#
-# So we are falling back to `npm publish` for the actual publishing step to leverage trusted publishing.
-#
-# TODO: Investigate whether Bun has added support for npm trusted publishing in newer versions.
-#       If support is available, we should consolidate to use only Bun runtime across the entire
-#       workflow to simplify the setup and reduce maintenance overhead.
-
 jobs:
   detect-changes:
     name: Detect Changes and Release Type
@@ -96,8 +84,3 @@ jobs:
 
       - name: Publish Package to NPM (Latest Tag)
         run: npm publish --tag=latest
-
-      - name: Add 'major-3' tag to the version just published
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          npm dist-tag add firefly@$VERSION major-3
