@@ -42,11 +42,6 @@ body = """
 {%- endif -%}
 {%- set commit_url = "https://github.com/" ~ remote.github.owner ~ "/" ~ remote.github.repo ~ "/commit/" ~ commit.id -%}
 - [`{{ commit.id | truncate(length=7, end="") }}`]({{ commit_url }}){% if commit.scope %} {{ commit.scope }}:{% endif %} {{ normalized_title | upper_first }}{% if author_segment != "" %}{{ author_segment }}{% endif %}{% if pr_markup != "" %} {{ pr_markup }}{% endif %}
-{%- if commit.body %}
-{% for line in commit.body | split(pat="\n") %}
-  {{ line }}
-{% endfor %}
-{%- endif %}
 {%- if commit.breaking %}
 {% if commit.footers | length > 0 %}
   {% for breakingChange in commit.footers %}
