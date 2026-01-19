@@ -73,7 +73,36 @@ export class CargoTomlService {
     }
 
     private replaceVersionInContent(content: string, version: string): string {
-        return content.replace(CargoTomlService.VERSION_REGEX, `$1"${version}"$2`);
+        const lines = content.split("\n");
+        let insidePackage = false;
+        let replaced = false;
+
+        const newLines = lines.map((line) => {
+            const trimmed = line.trim();
+
+            if (trimmed === "[package]") {
+                insidePackage = true;
+                return line;
+            }
+
+            if (insidePackage) {
+                // If we encounter another section header, we are no longer in [package]
+                if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                    insidePackage = false;
+                    return line;
+                }
+
+                // If we haven't replaced yet and found the version line
+                if (!replaced && CargoTomlService.VERSION_REGEX.test(line)) {
+                    replaced = true;
+                    return line.replace(CargoTomlService.VERSION_REGEX, `$1"${version}"$2`);
+                }
+            }
+
+            return line;
+        });
+
+        return newLines.join("\n");
     }
 
     private async verifyVersionUpdate(expectedVersion: string, dryRun?: boolean): Promise<FireflyAsyncResult<void>> {
