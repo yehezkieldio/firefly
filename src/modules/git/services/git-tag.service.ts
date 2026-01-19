@@ -70,6 +70,21 @@ export class GitTagService {
         return ok(tagExists);
     }
 
+    async existsOnRemote(tagName: string, remote = "origin"): Promise<FireflyResult<boolean>> {
+        logger.verbose(`GitTagService: Checking if tag ${tagName} exists on remote ${remote}`);
+
+        const lsRemoteResult = await executeGitCommand(["ls-remote", remote, `refs/tags/${tagName}`]);
+        if (lsRemoteResult.isErr()) {
+            return err(lsRemoteResult.error);
+        }
+
+        const output = lsRemoteResult.value.trim();
+        const exists = output.length > 0;
+
+        logger.verbose(`GitTagService: Tag ${tagName} exists on remote: ${exists}`);
+        return ok(exists);
+    }
+
     async listTags(): Promise<FireflyResult<string[]>> {
         logger.verbose("GitTagService: Listing all tags");
 

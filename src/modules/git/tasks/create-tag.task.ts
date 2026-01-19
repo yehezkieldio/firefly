@@ -1,5 +1,5 @@
 import { colors } from "consola/utils";
-import { ok } from "neverthrow";
+import { ok, errAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { ReleaseTemplateResolverService } from "#/modules/configuration/services/release-template-resolver.service";
 import { GitProvider } from "#/modules/git/git.provider";
@@ -8,6 +8,7 @@ import { PushCommitTask } from "#/modules/git/tasks/push-commit.task";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { taskRef } from "#/modules/orchestration/utils/task-ref.util";
 import { logger } from "#/shared/logger";
+import { createFireflyError } from "#/shared/utils/error.util";
 import { type FireflyAsyncResult, type FireflyResult, wrapPromise } from "#/shared/utils/result.util";
 
 export class CreateTagTask implements ConditionalTask<ReleaseTaskContext> {
@@ -42,10 +43,25 @@ export class CreateTagTask implements ConditionalTask<ReleaseTaskContext> {
         const tagName = releaseTemplateResolverService.tagName(context.getConfig().tagName);
         const releaseTitle = releaseTemplateResolverService.commitMessage(context.getConfig().releaseTitle);
 
-        return wrapPromise(gitProvider.tag.createTag(tagName, releaseTitle, context.getConfig().dryRun)).map(() => {
-            logger.info(`Created tag: ${colors.gray(tagName)}`);
-        });
+        return wrapPromise(gitProvider.tag.existsOnRemote(tagName))
+            .andThen((existsOnRemote) => {
+                if (existsOnRemote) {
+                    return errAsync(
+                        createFireflyError({
+                            code: "ALREADY_EXISTS",
+                            message: `Tag "${tagName}" already exists on remote!`,
+                            source: "git/create-tag-task",
+                        }),
+                    );
+                }
+
+                return wrapPromise(gitProvider.tag.createTag(tagName, releaseTitle, context.getConfig().dryRun));
+            })
+            .map(() => {
+                logger.info(`Created tag: ${colors.gray(tagName)}`);
+            });
     }
+
 
     canUndo(): boolean {
         return true;
