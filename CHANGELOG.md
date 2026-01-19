@@ -6,6 +6,50 @@ All notable changes to this project will be documented in this file.
 
 > This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
+## firefly@3.2.0 (January 19, 2026)
+### 📝 Release Notes
+This release marks a significant expansion of the ecosystem with the introduction of first-class support for Rust projects.
+Firefly can now seamlessly detect, read, and manage versions directly within `Cargo.toml` files, bringing the same automated release capabilities enjoyed by TypeScript/JavaScript projects to Rust projects.
+
+Beyond language support, we have focused on hardening the core workflow engine to ensure stability across different environments.
+This includes improved handling of git history, specifically addressing edge cases with shallow clones in CI/CD pipelines and the implementation of stricter configuration validation to catch potential setup errors before the release process begins.
+
+#### What's New
+
+##### For Users
+- **Rust Integration:** Native support for `Cargo.toml`, allowing automatic version bumping for Rust applications.
+- **Shallow Clone Support:** Enhanced logic to handle git repositories with limited history, preventing failures in optimized CI environments.
+- **Tag Collision Prevention:** New checks to ensure release tags do not overlap with existing references.
+- **Config Validation:** Improved error messages when `firefly.config.ts` contains invalid options.
+
+##### For Developers
+- **FileSystem Abstraction:** Refactored the file system service to allow easier implementation of additional language manifest files in the future.
+- **Workflow State Management:** Updates to the Context object for better type safety and data persistence between workflow steps.
+- **Cliff Configuration:** Added specialized parsers for `cliff.toml` to support custom changelog generation rules.
+
+### <!-- 11 -->🛠️ Miscellaneous
+- [`e6085ff`](https://github.com/yehezkieldio/firefly/commit/e6085ff78c41f0050d58097233773567d0f137e7) LICENSE: Update copyright year
+- [`2bf66fb`](https://github.com/yehezkieldio/firefly/commit/2bf66fbc0d3f8d3c53d17485a33a82133edd540c) Initial coding agent plan
+- [`d6e50ed`](https://github.com/yehezkieldio/firefly/commit/d6e50ed6c223fa829d192b724be7b75de8876063) config: Remove commit body from cliff template
+
+### <!-- 16 -->🤖 CI/CD
+- [`7dfbc63`](https://github.com/yehezkieldio/firefly/commit/7dfbc63d0927848b83663c9bde81c98496cfc0a4) ci: Clean up continuous delivery workflow comments and steps
+
+### <!-- 3 -->🚀 New Features
+- [`2fc7b81`](https://github.com/yehezkieldio/firefly/commit/2fc7b81a442102e215cc7c8e3fa9a810fbf57bd2) bump-version: Add Cargo.toml support
+- [`d3accca`](https://github.com/yehezkieldio/firefly/commit/d3accca6a1d3443212d51ca30963961d26ed9783) Feat(bump-version): add Cargo.toml support by yehezkieldio ([#182](https://github.com/yehezkieldio/firefly/issues/182))
+- [`c16d83e`](https://github.com/yehezkieldio/firefly/commit/c16d83ea687b6a8353effafa3165ceb271f034f3) config: Implement Cargo.toml hydration integration
+
+### <!-- 4 -->🐛 Bug Fixes
+- [`06799c3`](https://github.com/yehezkieldio/firefly/commit/06799c3c7595db942c37701b95f43b6f180a4e8e) filesystem: Prevent cargo dependency version update
+- [`97382a3`](https://github.com/yehezkieldio/firefly/commit/97382a3bdb39fc0426fe01cc984eea76b32e4679) preflight: Ensure full git history for shallow clones
+- [`58a2d28`](https://github.com/yehezkieldio/firefly/commit/58a2d28c94f88434ff5c3df48fb3f5be1b9e1234) git: Prevent collision with existing remote tags
+- [`44e962f`](https://github.com/yehezkieldio/firefly/commit/44e962fee886f6e8f553df1dff5d35f08a122558) configuration: Enforce strict semver validation for package.json
+- [`482999c`](https://github.com/yehezkieldio/firefly/commit/482999c77dfd37522a90be7e5297e5792e94f603) git: Use valid error code for tag collision
+
+### <!-- 7 -->🚜 Refactor
+- [`48f3dcc`](https://github.com/yehezkieldio/firefly/commit/48f3dcc1bbacc07879d7f81bf0ffcd701df84a65) publish-github-release: Skip release task when skipGit is true
+- [`254c5b0`](https://github.com/yehezkieldio/firefly/commit/254c5b0660a8d6e676cdd3072282e4152808cf03) config: Refine hydration precedence and defaulting
 ## firefly@3.1.1 (January 17, 2026)
 
 ### <!-- 16 -->🤖 CI/CD
