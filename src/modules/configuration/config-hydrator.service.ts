@@ -35,6 +35,7 @@ export class ConfigHydratorService {
         }
         hydratedConfig = branchResult.value;
 
+        // Language-specific metadata hydration (priority: npm > cargo)
         const packageJsonResult = await this.hydrateFromPackageJson(hydratedConfig);
         if (packageJsonResult.isErr()) {
             return err(packageJsonResult.error);
@@ -46,6 +47,20 @@ export class ConfigHydratorService {
             return err(cargoTomlResult.error);
         }
         hydratedConfig = cargoTomlResult.value;
+
+        if (!hydratedConfig.preReleaseId || hydratedConfig.preReleaseId.trim() === "") {
+            logger.verbose("ConfigHydratorService: No preReleaseId found, defaulting to 'alpha'");
+            hydratedConfig.preReleaseId = "alpha";
+        }
+
+        if (!hydratedConfig.name) {
+            return err(
+                createFireflyError({
+                    code: "NOT_FOUND",
+                    message: "Could not determine project name from config, package.json, or Cargo.toml",
+                }),
+            );
+        }
 
         return ok(hydratedConfig as FireflyConfig);
     }
@@ -79,9 +94,7 @@ export class ConfigHydratorService {
         return ok(hydrateResult.value);
     }
 
-    private async hydrateFromCargoToml(
-        config: Partial<FireflyConfig>,
-    ): Promise<FireflyResult<Partial<FireflyConfig>>> {
+    private async hydrateFromCargoToml(config: Partial<FireflyConfig>): Promise<FireflyResult<Partial<FireflyConfig>>> {
         if (!this.cargoTomlService) {
             return ok(config);
         }
@@ -239,7 +252,7 @@ export class ConfigHydratorService {
         }
 
         // hydrate preReleaseId from Cargo.toml if not explicitly provided
-        // Note: We skip scope hydration for Cargo.toml as per requirements
+        // Cargo.toml has no native concept of package scope; intentionally skipped
         const preReleaseHydrationResult = this.hydratePreReleaseIdFromVersion(config, cargoToml.package?.version);
         if (preReleaseHydrationResult.isErr()) {
             return err(preReleaseHydrationResult.error);
@@ -287,113 +300,8 @@ export class ConfigHydratorService {
             }
         }
 
-        // Only default to "alpha" if we actually found a version?
-        // Or should we default to "alpha" if NO preReleaseId is found anywhere?
-        // The original code returned { preReleaseId: "alpha" } at the end.
-        // If I move this to a helper, and call it for PackageJson, if PackageJson has no version, it returns "alpha".
-        // Then I call it for CargoToml. If CargoToml has no version, it returns "alpha".
-        // If both called, the last one wins?
-        // If PackageJson returns "alpha", config has "alpha".
-        // Then CargoToml sees "alpha" is set (wait, "alpha" is not empty string).
-        // `originalConfig.preReleaseId` check:
-        // `originalConfig.preReleaseId !== undefined && originalConfig.preReleaseId.trim() !== ""`
-        // If I update `hydratedConfig` with "alpha" after PackageJson, then `originalConfig` (passed to CargoToml) has "alpha".
-        // So CargoToml will skip.
-        // This preserves the behavior: "Default to alpha if nothing found".
-        // But if PackageJson has NO version, we set "alpha".
-        // If CargoToml HAS version with "beta", we might skip it because "alpha" was already set.
-        // This is a subtle change.
-        // Original code: hydratePreReleaseIdFromPackageJson
-        // If package.json has version -> try parse -> if prerelease -> return preId.
-        // If NO version or NO prerelease -> return { preReleaseId: "alpha" }.
-        
-        // If I want to support "Try PackageJson, if no info, try CargoToml, if no info, default to alpha",
-        // I need to change the logic.
-        // `hydratePreReleaseIdFromVersion` should return `Ok({})` (empty) if it doesn't find a prerelease ID, instead of defaulting to "alpha".
-        // And then at the very end of hydration (or in a separate step), default to "alpha".
-        
-        // HOWEVER, `ConfigHydratorService` logic seems to be: "Hydrate what you can".
-        // If I set "alpha" early, I block later sources.
-        // But `hydrateConfig` calls `hydrateFromPackageJson` then `hydrateFromCargoToml`.
-        // If `hydrateFromPackageData` sets "alpha", `hydrateFromCargoData` receives it.
-        
-        // Let's modify `hydratePreReleaseIdFromVersion` to NOT return default "alpha".
-        // And handle default "alpha" in `hydrateConfig` at the end?
-        // Or keep it in `hydratePreReleaseIdFromVersion` but only if it's the LAST step?
-        // But I don't know if it's the last step.
-        
-        // Better:
-        // `hydratePreReleaseIdFromVersion` returns `ok({ preReleaseId: ... })` if found.
-        // Returns `ok({})` if not found.
-        
-        // Then `hydrateConfig` can set default if still missing.
-        
-        // But wait, the original code:
-        /*
-        if (packageJson.version) { ... return ok({ preReleaseId: preId }); }
-        return ok({ preReleaseId: "alpha" });
-        */
-        // This implies that if package.json exists, we ALWAYS set preReleaseId (either from version or default alpha).
-        // This means `preReleaseId` becomes defined.
-        
-        // If I want to integrate Cargo.toml:
-        // If package.json exists, we respect it.
-        // If package.json does NOT exist (or skipped), we check Cargo.toml.
-        // If Cargo.toml exists, we respect it.
-        // If neither, we default to "alpha".
-        
-        // So I should only return default "alpha" if I *fail* to find it in the current source?
-        // No, if I return "alpha", I set it.
-        
-        // Let's change `hydratePreReleaseIdFromVersion` to `hydratePreReleaseIdFromVersion(config, version, allowDefault = false)`.
-        // Or just `hydratePreReleaseIdFromVersion` returns what it finds.
-        
-        // But I need to preserve existing behavior for package.json users.
-        // If I have package.json with version "1.0.0", original code returns "alpha".
-        // If I have package.json with version "1.0.0-beta.1", original code returns "beta".
-        
-        // So I will make `hydratePreReleaseIdFromVersion` behave like original:
-        // Return detected ID OR "alpha".
-        
-        // BUT, if `hydrateFromPackageJson` returns "alpha", and I have `Cargo.toml` with "beta",
-        // `hydrateFromCargoData` sees "alpha" and says "Oh, it's already provided".
-        // This effectively ignores `Cargo.toml` prerelease if `package.json` was processed (even if it yielded default).
-        
-        // This seems acceptable if we prioritize `package.json`.
-        // If `package.json` is missing, `hydrateFromPackageJson` is skipped.
-        // Then `hydrateFromCargoToml` runs. It checks version. If "1.0.0", returns "alpha". If "1.0.0-rc.1", returns "rc".
-        
-        // So simply copying the logic (including default alpha) works fine for the priority chain.
-        // The first one to run (PackageJson) gets to decide (or default).
-        // If PackageJson is missing, CargoToml gets to decide (or default).
-        // If both missing, neither runs?
-        // Wait, `hydrateConfig` calls both.
-        // If `hydrateFromPackageJson` returns OK(config) (because file missing), config is unchanged.
-        // Then `hydrateFromCargoToml` runs.
-        
-        // What if BOTH are missing?
-        // Then `preReleaseId` remains undefined?
-        // The original code would return "alpha" if package.json was found (even if empty? No, `read` ensured it exists).
-        // But if `package.json` was NOT found, original code returned `NOT_FOUND`.
-        
-        // Now that we support NO package.json and NO Cargo.toml (conceptually, though unlikely for a project),
-        // we might end up with `preReleaseId` undefined.
-        // I should probably set a default at the end of `hydrateConfig` if still undefined.
-        // `if (!hydratedConfig.preReleaseId) hydratedConfig.preReleaseId = "alpha";`
-        
-        // And remove the default "alpha" from the individual hydrators?
-        // No, `hydratePreReleaseIdFromVersion` logic:
-        // If version is prerelease, use it.
-        // Else, return "alpha".
-        
-        // This means "If you have a version, we infer prerelease ID. If you don't have a prerelease version (e.g. stable 1.0.0), we assume next bump is alpha".
-        
-        // So, I should keep the logic:
-        // `hydratePreReleaseIdFromVersion` returns `ok({ preReleaseId: extracted || "alpha" })`.
-        
-        return ok({
-            preReleaseId: "alpha",
-        });
+        // Return empty if no preReleaseId found, to allow defaulting later
+        return ok({});
     }
 
     private hydrateNameFromPackageJson(
@@ -402,13 +310,7 @@ export class ConfigHydratorService {
     ): FireflyResult<FireflyConfig> {
         // Case 1: If config.name is undefined (not provided) and package.json.name is also missing
         if (hydratedConfig.name === undefined && !packageJson.name) {
-            // We don't error here anymore? Original code error'd.
-            // "Could not find a valid package name in package.json"
-            // If we are relaxed, we should just return OK and let Cargo try?
-            // But if Cargo also fails?
-            // If I return Error here, I stop hydration.
-            
-            // I'll return ok({}) and let Cargo try.
+            // Return ok to allow other hydrators (like Cargo) to attempt filling the name
             return ok({});
         }
 

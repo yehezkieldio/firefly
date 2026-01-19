@@ -1,5 +1,5 @@
 import { colors } from "consola/utils";
-import { ok, errAsync } from "neverthrow";
+import { errAsync, ok } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
 import { ReleaseTemplateResolverService } from "#/modules/configuration/services/release-template-resolver.service";
 import { GitProvider } from "#/modules/git/git.provider";
@@ -61,7 +61,6 @@ export class CreateTagTask implements ConditionalTask<ReleaseTaskContext> {
                 logger.info(`Created tag: ${colors.gray(tagName)}`);
             });
     }
-
 
     canUndo(): boolean {
         return true;
