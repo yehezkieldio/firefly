@@ -48,7 +48,7 @@ export class CreateTagTask implements ConditionalTask<ReleaseTaskContext> {
                 if (existsOnRemote) {
                     return errAsync(
                         createFireflyError({
-                            code: "ALREADY_EXISTS",
+                            code: "CONFLICT",
                             message: `Tag "${tagName}" already exists on remote!`,
                             source: "git/create-tag-task",
                         }),
