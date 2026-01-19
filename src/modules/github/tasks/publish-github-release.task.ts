@@ -20,6 +20,10 @@ export class PublishGitHubReleaseTask implements ConditionalTask<ReleaseTaskCont
     }
 
     shouldExecute(context: ReleaseTaskContext): FireflyResult<boolean> {
+        if (context.getConfig().skipGit) {
+            return ok(false);
+        }
+
         if (context.getConfig().skipGitHubRelease) {
             return ok(false);
         }
