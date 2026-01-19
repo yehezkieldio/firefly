@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { errAsync, okAsync } from "neverthrow";
+import semver from "semver";
 import z from "zod";
 import { FileSystemService } from "#/modules/filesystem/file-system.service";
 import { logger } from "#/shared/logger";
@@ -11,7 +12,12 @@ export const PackageJsonSchema = z
     // Minimal structure of package.json as we don't need the full schema
     .object({
         name: z.string().optional(),
-        version: z.string().optional(),
+        version: z
+            .string()
+            .refine((val) => semver.valid(val) !== null, {
+                message: "Invalid semantic version in package.json",
+            })
+            .optional(),
     })
     .catchall(z.unknown());
 
