@@ -40,6 +40,7 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
         const basePath = context.getBasePath();
         return this.checkGitCliffConfig(basePath)
             .andThen(this.cleanWorkingDirectory)
+            .andThen(this.ensureFullHistory)
             .andThen(this.ensureNoUnpushedCommits)
             .map(() => logger.verbose("ReleasePreflightCheckTask: All preflight checks passed."));
     }
@@ -85,6 +86,29 @@ export class ReleasePreflightCheckTask implements ConditionalTask<ReleaseTaskCon
                 }
 
                 logger.verbose("ReleasePreflightCheckTask: Working directory is clean");
+                return ok(gitProvider);
+            },
+        );
+    }
+
+    private ensureFullHistory(gitProvider: GitProvider): FireflyAsyncResult<GitProvider> {
+        logger.verbose("ReleasePreflightCheckTask: Checking if repository is shallow...");
+
+        return ResultAsync.fromPromise(gitProvider.repository.isShallow(), toFireflyError).andThen(
+            (isShallowResult) => {
+                if (isShallowResult.isErr()) {
+                    return err(isShallowResult.error);
+                }
+
+                if (isShallowResult.value) {
+                    logger.warn("ReleasePreflightCheckTask: Repository is shallow, attempting to unshallow...");
+                    return ResultAsync.fromPromise(gitProvider.repository.unshallow(), toFireflyError).map(() => {
+                        logger.verbose("ReleasePreflightCheckTask: Repository unshallowed successfully");
+                        return gitProvider;
+                    });
+                }
+
+                logger.verbose("ReleasePreflightCheckTask: Repository has full history");
                 return ok(gitProvider);
             },
         );

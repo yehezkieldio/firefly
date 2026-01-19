@@ -91,6 +91,18 @@ export class GitRepositoryService {
         return ok(isShallow);
     }
 
+    async unshallow(): Promise<FireflyResult<void>> {
+        logger.verbose("GitRepositoryService: Unshallowing repository");
+
+        const unshallowResult = await executeGitCommand(["fetch", "--unshallow"]);
+        if (unshallowResult.isErr()) {
+            return err(unshallowResult.error);
+        }
+
+        logger.verbose("GitRepositoryService: Repository unshallowed successfully");
+        return ok(undefined);
+    }
+
     async isBare(): Promise<FireflyResult<boolean>> {
         logger.verbose("GitRepositoryService: Checking if repository is bare");
 
