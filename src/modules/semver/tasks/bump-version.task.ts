@@ -1,6 +1,8 @@
 import { colors } from "consola/utils";
-import { ResultAsync, errAsync, ok, okAsync } from "neverthrow";
+import { ResultAsync, errAsync, ok } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
+import { CargoTomlService } from "#/modules/filesystem/cargo-toml.service";
+import { FileSystemService } from "#/modules/filesystem/file-system.service";
 import { PackageJsonService } from "#/modules/filesystem/package-json.service";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { ChangelogFlowControllerTask } from "#/modules/orchestration/tasks";
@@ -11,7 +13,7 @@ import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.ut
 
 export class BumpVersionTask implements ConditionalTask<ReleaseTaskContext> {
     readonly id = "bump-version";
-    readonly description = "Writes the new version to package.json.";
+    readonly description = "Writes the new version to package.json and/or Cargo.toml.";
     private previousVersion?: string = "";
 
     isEntryPoint(): boolean {
@@ -42,13 +44,47 @@ export class BumpVersionTask implements ConditionalTask<ReleaseTaskContext> {
         const nextVersion = context.getNextVersion();
         const dryRun = context.getConfig().dryRun;
 
-        const packageJsonService = PackageJsonService.getInstance(basePath);
-        const updateVersionResult = packageJsonService.updateVersion(nextVersion, dryRun);
-
         logger.info("Updating version...");
-        return ResultAsync.fromPromise(updateVersionResult, toFireflyError)
-            .andThen(() => okAsync())
-            .andTee(() => [logger.success(`Version updated to ${colors.cyanBright(nextVersion)}`)]);
+
+        return this.updateVersionFiles(basePath, nextVersion, dryRun).andTee(() => [
+            logger.success(`Version updated to ${colors.cyanBright(nextVersion)}`),
+        ]);
+    }
+
+    private updateVersionFiles(basePath: string, version: string, dryRun?: boolean): FireflyAsyncResult<void> {
+        const packageJsonPath = `${basePath}/package.json`;
+        const cargoTomlPath = `${basePath}/Cargo.toml`;
+
+        return FileSystemService.exists(packageJsonPath).andThen((packageJsonExists) =>
+            FileSystemService.exists(cargoTomlPath).andThen((cargoTomlExists) => {
+                if (!(packageJsonExists || cargoTomlExists)) {
+                    return errAsync(
+                        createFireflyError({
+                            code: "NOT_FOUND",
+                            message: "No package.json or Cargo.toml found in the base path.",
+                        }),
+                    );
+                }
+
+                const updates: Promise<FireflyResult<void>>[] = [];
+
+                if (packageJsonExists) {
+                    const packageJsonService = PackageJsonService.getInstance(basePath);
+                    updates.push(packageJsonService.updateVersion(version, dryRun));
+                    logger.verbose("BumpVersionTask: Updating package.json");
+                }
+
+                if (cargoTomlExists) {
+                    const cargoTomlService = CargoTomlService.getInstance(basePath);
+                    updates.push(cargoTomlService.updateVersion(version, dryRun));
+                    logger.verbose("BumpVersionTask: Updating Cargo.toml");
+                }
+
+                return ResultAsync.combine(updates.map((p) => ResultAsync.fromPromise(p, toFireflyError))).map(
+                    () => {},
+                );
+            }),
+        );
     }
 
     canUndo(): boolean {
@@ -68,9 +104,6 @@ export class BumpVersionTask implements ConditionalTask<ReleaseTaskContext> {
         const basePath = context.getBasePath();
         const dryRun = context.getConfig().dryRun;
 
-        const packageJsonService = PackageJsonService.getInstance(basePath);
-        const updateVersionResult = packageJsonService.updateVersion(this.previousVersion, dryRun);
-
-        return ResultAsync.fromPromise(updateVersionResult, toFireflyError).andThen(() => okAsync());
+        return this.updateVersionFiles(basePath, this.previousVersion, dryRun);
     }
 }
