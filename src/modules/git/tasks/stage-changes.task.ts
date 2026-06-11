@@ -44,15 +44,19 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
         const changelogPath = config.changelogPath || "CHANGELOG.md";
 
         const packageJsonPath = resolve(context.getBasePath(), "package.json");
+        const cargoTomlPath = resolve(context.getBasePath(), "Cargo.toml");
         const fullChangelogPath = resolve(context.getBasePath(), changelogPath);
 
         const gitProvider = GitProvider.getInstance();
 
         logger.info(
-            `Staging changes for ${colors.underline(basename(packageJsonPath))} and ${colors.underline(basename(fullChangelogPath))}`,
+            `Staging changes for ${colors.underline(basename(packageJsonPath))}, ${colors.underline(basename(cargoTomlPath))} and ${colors.underline(basename(fullChangelogPath))}`,
         );
         return wrapPromise(
-            gitProvider.status.getUnstagedFilesByNames([fullChangelogPath, packageJsonPath], config.dryRun),
+            gitProvider.status.getUnstagedFilesByNames(
+                [fullChangelogPath, packageJsonPath, cargoTomlPath],
+                config.dryRun,
+            ),
         ).andThen((filesResult) => {
             if (filesResult.isErr()) {
                 return errAsync(filesResult.error);
@@ -88,19 +92,22 @@ export class StageChangesTask implements ConditionalTask<ReleaseTaskContext> {
         const changelogPath = config.changelogPath || "CHANGELOG.md";
 
         const packageJsonPath = resolve(context.getBasePath(), "package.json");
+        const cargoTomlPath = resolve(context.getBasePath(), "Cargo.toml");
         const fullChangelogPath = resolve(context.getBasePath(), changelogPath);
 
         const gitProvider = GitProvider.getInstance();
 
-        return wrapPromise(gitProvider.staging.unstageFiles([fullChangelogPath, packageJsonPath], config.dryRun))
+        return wrapPromise(
+            gitProvider.staging.unstageFiles([fullChangelogPath, packageJsonPath, cargoTomlPath], config.dryRun),
+        )
             .andTee((result) => {
                 if (result.isErr()) {
                     logger.error(
-                        `Failed to unstage files: ${[fullChangelogPath, packageJsonPath].join(", ")}. Error: ${result.error.message}`,
+                        `Failed to unstage files: ${[fullChangelogPath, packageJsonPath, cargoTomlPath].join(", ")}. Error: ${result.error.message}`,
                     );
                 } else {
                     logger.verbose(
-                        `StageChangesTask: Unstaged files: ${[fullChangelogPath, packageJsonPath].join(", ")}`,
+                        `StageChangesTask: Unstaged files: ${[fullChangelogPath, packageJsonPath, cargoTomlPath].join(", ")}`,
                     );
                 }
             })

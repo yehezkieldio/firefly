@@ -24,7 +24,6 @@ export const PackageJsonSchema = z
 export type PackageJson = z.infer<typeof PackageJsonSchema>;
 
 export class PackageJsonService {
-    private static instance: PackageJsonService | null = null;
     private static readonly VERSION_REGEX = /^(\s*"version"\s*:\s*)"[^"]*"(.*)$/m;
     private readonly pathToPackageJson: string;
 
@@ -33,10 +32,7 @@ export class PackageJsonService {
     }
 
     static getInstance(basePath: string): PackageJsonService {
-        if (!PackageJsonService.instance) {
-            PackageJsonService.instance = new PackageJsonService(join(basePath, "package.json"));
-        }
-        return PackageJsonService.instance;
+        return new PackageJsonService(join(basePath, "package.json"));
     }
 
     async read(): Promise<FireflyResult<PackageJson>> {

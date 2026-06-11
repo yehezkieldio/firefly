@@ -21,7 +21,6 @@ export const CargoTomlSchema = z
 export type CargoToml = z.infer<typeof CargoTomlSchema>;
 
 export class CargoTomlService {
-    private static instance: CargoTomlService | null = null;
     private static readonly VERSION_REGEX = /^(\s*version\s*=\s*)"[^"]*"(.*)$/m;
     private readonly pathToCargoToml: string;
 
@@ -30,10 +29,7 @@ export class CargoTomlService {
     }
 
     static getInstance(basePath: string): CargoTomlService {
-        if (!CargoTomlService.instance) {
-            CargoTomlService.instance = new CargoTomlService(join(basePath, "Cargo.toml"));
-        }
-        return CargoTomlService.instance;
+        return new CargoTomlService(join(basePath, "Cargo.toml"));
     }
 
     async read(): Promise<FireflyResult<CargoToml>> {

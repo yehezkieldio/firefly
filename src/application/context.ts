@@ -9,6 +9,7 @@ export const ReleaseContextDataSchema = z.object({
     basePath: z.string().default(process.cwd()),
     nextVersion: z.string().optional(),
     changelogContent: z.string().optional(),
+    changelogFileExisted: z.boolean().optional(),
     config: ConfigSchemaProvider.get("release").optional(),
 });
 

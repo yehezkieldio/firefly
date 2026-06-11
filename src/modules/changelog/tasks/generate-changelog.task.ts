@@ -47,6 +47,8 @@ export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext
                 return errAsync(exists.error);
             }
 
+            context.set("changelogFileExisted", exists.value);
+
             if (!exists.value) {
                 return FileSystemService.write(changelogPath, "");
             }
@@ -77,19 +79,17 @@ export class GenerateChangelogTask implements ConditionalTask<ReleaseTaskContext
     }
 
     undo(context: ReleaseTaskContext): FireflyAsyncResult<void> {
-        const changelogPath = join(process.cwd(), context.getConfig().changelogPath || "CHANGELOG.md");
-        const changelogContent = context.get("changelogContent");
-        if (!changelogContent) {
-            return errAsync(
-                toFireflyError({
-                    code: "NOT_FOUND",
-                    message: "Changelog content not found in context, cannot undo changelog generation.",
-                }),
-            );
+        const config = context.getConfig();
+        const changelogPath = join(process.cwd(), config.changelogPath || "CHANGELOG.md");
+        const changelogFileExisted = context.get("changelogFileExisted").unwrapOr(false);
+
+        if (changelogFileExisted === false) {
+            logger.verbose(`GenerateChangelogTask: Changelog file did not exist, deleting ${changelogPath}`);
+            return FileSystemService.delete(changelogPath, config.dryRun);
         }
 
         return ResultAsync.fromPromise(
-            GitProvider.getInstance().commit.restoreFileToHead(changelogPath),
+            GitProvider.getInstance().commit.restoreFileToHead(changelogPath, config.dryRun),
             toFireflyError,
         ).andThen(() => okAsync());
     }

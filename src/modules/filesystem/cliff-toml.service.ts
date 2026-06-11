@@ -8,7 +8,6 @@ import { createFireflyError } from "#/shared/utils/error.util";
 import type { FireflyResult } from "#/shared/utils/result.util";
 
 export class CliffTomlService {
-    private static instance: CliffTomlService | null = null;
     private readonly pathToCliffToml: string;
 
     private constructor(pathToCliffToml: string) {
@@ -16,10 +15,7 @@ export class CliffTomlService {
     }
 
     static getInstance(basePath: string): CliffTomlService {
-        if (!CliffTomlService.instance) {
-            CliffTomlService.instance = new CliffTomlService(join(basePath, "cliff.toml"));
-        }
-        return CliffTomlService.instance;
+        return new CliffTomlService(join(basePath, "cliff.toml"));
     }
 
     async parse(): Promise<FireflyResult<CliffToml>> {

@@ -1,6 +1,8 @@
 import { colors } from "consola/utils";
 import { ResultAsync, ok, okAsync } from "neverthrow";
 import type { ReleaseTaskContext } from "#/application/context";
+import { CargoTomlService } from "#/modules/filesystem/cargo-toml.service";
+import { FileSystemService } from "#/modules/filesystem/file-system.service";
 import { PackageJsonService } from "#/modules/filesystem/package-json.service";
 import type { ConditionalTask } from "#/modules/orchestration/contracts/task.interface";
 import { VersionFlowControllerTask } from "#/modules/orchestration/tasks";
@@ -11,7 +13,7 @@ import type { FireflyAsyncResult, FireflyResult } from "#/shared/utils/result.ut
 
 export class InitializeCurrentVersionTask implements ConditionalTask<ReleaseTaskContext> {
     readonly id = "initialize-current-version";
-    readonly description = "Loads the current version from package.json or initializes it to 0.0.0.";
+    readonly description = "Loads the current version from package.json, Cargo.toml, or initializes it to 0.0.0.";
 
     getDependencies(): string[] {
         return [];
@@ -33,16 +35,44 @@ export class InitializeCurrentVersionTask implements ConditionalTask<ReleaseTask
         logger.verbose("InitializeCurrentVersionTask: Initializing current version...");
 
         const basePath = context.getBasePath();
-        const packageJsonService = PackageJsonService.getInstance(basePath);
+        const packageJsonPath = `${basePath}/package.json`;
+        const cargoTomlPath = `${basePath}/Cargo.toml`;
 
-        return ResultAsync.fromPromise(packageJsonService.read(), toFireflyError).andThen((pkg) => {
-            const version = pkg.isErr() || !pkg.value.version ? "0.0.0" : pkg.value.version;
-            logger.verbose(`InitializeCurrentVersionTask: Current version is "${version}"`);
-            logger.info(`Current version is ${colors.cyanBright(version)}`);
+        return FileSystemService.exists(packageJsonPath).andThen((packageJsonExists) => {
+            if (packageJsonExists) {
+                const packageJsonService = PackageJsonService.getInstance(basePath);
+                return ResultAsync.fromPromise(packageJsonService.read(), toFireflyError).andThen((pkg) => {
+                    let version = "0.0.0";
+                    if (pkg.isOk() && pkg.value.version) {
+                        version = pkg.value.version;
+                    }
+                    return this.setVersion(context, version);
+                });
+            }
 
-            context.set("currentVersion", version);
+            return FileSystemService.exists(cargoTomlPath).andThen((cargoTomlExists) => {
+                if (cargoTomlExists) {
+                    const cargoTomlService = CargoTomlService.getInstance(basePath);
+                    return ResultAsync.fromPromise(cargoTomlService.read(), toFireflyError).andThen((cargo) => {
+                        let version = "0.0.0";
+                        if (cargo.isOk() && cargo.value.package.version) {
+                            version = cargo.value.package.version;
+                        }
+                        return this.setVersion(context, version);
+                    });
+                }
 
-            return okAsync();
+                return this.setVersion(context, "0.0.0");
+            });
         });
+    }
+
+    private setVersion(context: ReleaseTaskContext, version: string): FireflyAsyncResult<void> {
+        logger.verbose(`InitializeCurrentVersionTask: Current version is "${version}"`);
+        logger.info(`Current version is ${colors.cyanBright(version)}`);
+
+        context.set("currentVersion", version);
+
+        return okAsync();
     }
 }

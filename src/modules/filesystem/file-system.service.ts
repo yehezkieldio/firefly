@@ -1,3 +1,4 @@
+import { unlink } from "node:fs/promises";
 import { ResultAsync, okAsync } from "neverthrow";
 import { logger } from "#/shared/logger";
 import { createFireflyError } from "#/shared/utils/error.util";
@@ -19,6 +20,17 @@ export class FileSystemService {
         return FileSystemService.exec(Bun.write(path, content), "Failed to write file")
             .map(() => {})
             .andTee(() => logger.verbose(`FileSystemService: Wrote file at ${path}`));
+    }
+
+    static delete(path: string, dryRun?: boolean): FireflyAsyncResult<void> {
+        if (dryRun) {
+            logger.verbose("FileSystemService: Dry run mode enabled, not deleting file.");
+            return okAsync(undefined);
+        }
+
+        return FileSystemService.exec(unlink(path), "Failed to delete file")
+            .map(() => {})
+            .andTee(() => logger.verbose(`FileSystemService: Deleted file at ${path}`));
     }
 
     static exists(path: string): FireflyAsyncResult<boolean> {
