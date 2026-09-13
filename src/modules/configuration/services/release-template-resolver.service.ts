@@ -41,7 +41,7 @@ export class ReleaseTemplateResolverService {
         template: string,
         variables: { version?: string; name: string; unscopedName: string },
     ): string {
-        if (!template?.trim()) return template;
+        if (!template.trim()) return template;
 
         let resolved = template;
         if (variables.version) {

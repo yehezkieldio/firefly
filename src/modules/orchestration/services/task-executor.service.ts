@@ -104,7 +104,7 @@ export class TaskExecutorService {
             }
         }
 
-        const execution = context ? task.execute?.(context) : task.execute?.({} as TaskContext);
+        const execution = context ? task.execute(context) : task.execute({} as TaskContext);
         return execution;
     }
 

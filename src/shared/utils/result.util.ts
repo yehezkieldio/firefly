@@ -57,7 +57,7 @@ export function composeShape<TBase extends z.ZodObject<z.ZodRawShape>>(
 }
 
 function toSchema<TSchema extends z.ZodType<unknown>>(input: SchemaInput<TSchema>): z.ZodType<unknown> {
-    if (typeof (input as { _def?: unknown })?._def !== "undefined") {
+    if (typeof (input as { _def?: unknown })._def !== "undefined") {
         return input as z.ZodType<unknown>;
     }
     const desc = input as EffectsDescriptor | ShapeDescriptor<z.ZodObject<z.ZodRawShape>>;

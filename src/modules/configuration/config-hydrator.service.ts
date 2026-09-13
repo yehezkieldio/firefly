@@ -364,7 +364,7 @@ export class ConfigHydratorService {
     }
 
     private extractPackageName(packageName: string): FireflyResult<string> {
-        if (!packageName?.trim()) {
+        if (!packageName.trim()) {
             return err(
                 createFireflyError({
                     code: "INVALID",
@@ -403,7 +403,7 @@ export class ConfigHydratorService {
             );
         }
 
-        return ok(scopePart.substring(1));
+        return ok(scopePart.slice(1));
     }
 
     private isScopedPackage(packageName: string): boolean {

@@ -1,5 +1,5 @@
 {
-    "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+    "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
     "files": {
         "ignoreUnknown": true,
         "includes": ["**", "!dist", "!node_modules", "!bun.lock"]
@@ -210,7 +210,16 @@
                 "useWhile": "error",
                 /** ------------------------ CSS Rules ------------------------ **/
                 // Disallow the use of the !important style.
-                "noImportantStyles": "off"
+                "noImportantStyles": "off",
+                // Disallow the use of useless undefined.
+                "noUselessUndefined": "error",
+                // Enforce a maximum number of parameters in function definitions.
+                "useMaxParams": {
+                    "level": "error",
+                    "options": {
+                        "max": 5
+                    }
+                }
             },
             "correctness": {
                 /** ------------------------ JavaScript Rules ------------------------ **/
@@ -342,34 +351,23 @@
                 // Disallow unknown CSS units.
                 "noUnknownUnit": "error",
                 // Disallow unmatchable An+B selectors.
-                "noUnmatchableAnbSelector": "error"
-            },
-            "nursery": {
-                // Disallow Promises to be used in places where they are almost certainly a mistake.
-                "noMisusedPromises": "error",
+                "noUnmatchableAnbSelector": "error",
                 // Prevent client components from being async functions.
                 "noNextAsyncClientComponent": "error",
-                // Disallow variable declarations from shadowing variables declared in the outer scope.
-                "noShadow": "off",
-                // Disallow unnecessary type-based conditions that can be statically determined as redundant.
-                "noUnnecessaryConditions": "error",
-                // Disallow the use of useless undefined.
-                "noUselessUndefined": "error",
                 // Enforce that Vue component data options are declared as functions.
                 "noVueDataObjectDeclaration": "error",
                 // Disallow reserved keys in Vue component data and computed properties.
                 "noVueReservedKeys": "error",
                 // Disallow reserved names to be used as props.
                 "noVueReservedProps": "error",
+                // Warn when importing non-existing exports.
+                "noUnresolvedImports": "off"
+            },
+            "nursery": {
+                // Disallow Promises to be used in places where they are almost certainly a mistake.
+                "noMisusedPromises": "error",
                 // Require switch-case statements to be exhaustive.
                 "useExhaustiveSwitchCases": "error",
-                // Enforce a maximum number of parameters in function definitions.
-                "useMaxParams": {
-                    "level": "error",
-                    "options": {
-                        "max": 5
-                    }
-                },
                 // Enforce types in functions, methods, variables, and parameters.
                 "useExplicitType": "off",
                 // Enforce the sorting of CSS utility classes.
@@ -383,11 +381,7 @@
                 },
                 /** ------ These rules should be enabled but Scanner makes them too slow ------ **/
                 // Require Promise-like statements to be handled appropriately.
-                "noFloatingPromises": "off",
-                // Warn when importing non-existing exports.
-                "noUnresolvedImports": "off",
-                // Prevent import cycles.
-                "noImportCycles": "off"
+                "noFloatingPromises": "off"
             },
             "performance": {
                 /** ------------------------ JavaScript Rules ------------------------ **/
@@ -757,7 +751,13 @@
                 // Disallow shorthand properties that override related longhand properties.
                 "noShorthandPropertyOverrides": "error",
                 // Disallow unknown at-rules.
-                "noUnknownAtRules": "off"
+                "noUnknownAtRules": "off",
+                // Disallow variable declarations from shadowing variables declared in the outer scope.
+                "noShadow": "off",
+                // Disallow unnecessary type-based conditions that can be statically determined as redundant.
+                "noUnnecessaryConditions": "error",
+                // Prevent import cycles.
+                "noImportCycles": "off"
             }
         }
     },

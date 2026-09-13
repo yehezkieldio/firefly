@@ -238,13 +238,13 @@ function streamToString(
                     }
 
                     proc.exited.then(() => {
-                        if (proc.exitCode !== 0) {
+                        if (proc.exitCode === 0) {
+                            resolve(chunks.join(""));
+                        } else {
                             new Response(proc.stderr).text().then((stderrText) => {
                                 const errorMessage = `GitHub CLI process exited with code ${proc.exitCode}: ${stderrText}`;
                                 reject(new Error(errorMessage));
                             });
-                        } else {
-                            resolve(chunks.join(""));
                         }
                     });
                 } else {

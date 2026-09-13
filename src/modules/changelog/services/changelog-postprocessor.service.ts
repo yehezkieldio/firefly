@@ -33,8 +33,8 @@ export class ChangelogPostProcessorService {
     }
 
     private extractChangesSection(rawChangelog: string, config: CliffToml): FireflyResult<string> {
-        const header = config.changelog?.header;
-        const bodyTemplate = config.changelog?.body;
+        const header = config.changelog.header;
+        const bodyTemplate = config.changelog.body;
 
         if (!(header && bodyTemplate)) {
             logger.verbose(

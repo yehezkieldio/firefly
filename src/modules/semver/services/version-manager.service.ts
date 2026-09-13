@@ -88,14 +88,14 @@ export class VersionManagerService {
         const normalizedBase = normalizedBaseResult.value;
         let newVersionString: string | null = null;
 
-        if (normalizedBase !== undefined) {
-            newVersionString = identifier
-                ? semver.inc(currentVersion.raw, releaseType, identifier, normalizedBase)
-                : semver.inc(currentVersion.raw, releaseType, undefined, normalizedBase);
-        } else {
+        if (normalizedBase === undefined) {
             newVersionString = identifier
                 ? semver.inc(currentVersion.raw, releaseType, identifier)
                 : semver.inc(currentVersion.raw, releaseType);
+        } else {
+            newVersionString = identifier
+                ? semver.inc(currentVersion.raw, releaseType, identifier, normalizedBase)
+                : semver.inc(currentVersion.raw, releaseType, undefined, normalizedBase);
         }
 
         if (!newVersionString) {
